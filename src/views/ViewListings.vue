@@ -1,4 +1,6 @@
 <script setup>
+import PropertyList from "@/components/AgentPersonalListingsView.vue";
+
 // import { computed } from "vue";
 // import { useRoute } from "vue-router";
 
@@ -12,15 +14,17 @@
   <div class="manage-listings">
     <!-- Tab Navigation -->
     <div class="tab-navigation">
-      <div class="tab-item">
-        <router-link to="/add-listing" class="special">
+        <router-link to="/add-listing">
           <i class="fas fa-plus-circle"></i> Add Listing
+        </router-link>
+
+      <div class="tab-item">
+        <router-link to="/view-listings" class="special">
+          <i class="fas fa-home"  id="special"></i> View Listings
         </router-link>
         <div class="special-underline"></div>
       </div>
-      <router-link to="/view-listings">
-  <i class="fas fa-home"></i> View Listings
-</router-link>
+
 
       <router-link to="/pending-approvals" class="pend">
         <i class="fas fa-clock"></i> Pending Approvals
@@ -36,7 +40,8 @@
     <!-- Add Property & Search -->
     <div class="add-property-container">
       <div class="add-property">
-        <h2>Add a property</h2>
+        <h2>Your Properties </h2>
+        <p> A list of all properties on your profile </p>
       </div>
       <!-- Search Bar -->
       <div class="search-bar">
@@ -47,33 +52,7 @@
       <input type="text" placeholder="Search..." />
     </div>
     </div>
-
-    <div class='propertystatus'>
-      <p>You currently have no properties on your profile.</p>
-      </div>
-
-    <!-- Property Options -->
-    <div class="property-options">
-      <!-- Create Listing -->
-      <div class="property-card create-listing">
-        <i class="fas fa-cloud-upload-alt"></i>
-        <p>Create listing</p>
-        <span>Take the first step to your success</span>
-      </div>
-
-      <!-- Saved Draft -->
-    <!-- Saved Draft -->
-<div class="property-card saved-draft">
-  <img src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png" alt="Saved Draft" />
-  <div class="draft-overlay">
-    <div class="edit-icon">
-      <i class="fas fa-pen"></i>
-    </div>
-    <p>Saved Draft</p>
-  </div>
-</div>
-
-    </div>
+    <PropertyList />
   </div>
 </template>
 
@@ -86,7 +65,16 @@
 
 .tab-navigation .special{
   background:#F0EFEF;
+  color:#0A397B;
+  font-weight:500;
+  border: 1px solid rgba(0, 102, 255, 0.3);
 }
+.tab-navigation #special{
+
+  color:#0A397B;
+
+}
+
 
 .tab-navigation .pend{
   padding-left:15px;
@@ -149,7 +137,7 @@
   top:125%;
   width: 60%;
   height: 0.4px;
-  background: linear-gradient(90deg, #0A397B 0%, #074F90 40%);
+  background: #074F90; /* Removed gradient */
   transform: translateX(-50%);
   border-radius: 2px;
 }
@@ -158,7 +146,7 @@
 .second-special-underline {
   width: 100%;
   height: 1px;
-  background: linear-gradient(90deg, rgba(10, 57, 123, 0.1), rgba(7, 79, 144, 0.1)); /* Lighter gradient */
+  background: rgba(7, 79, 144, 0.1); /* Removed gradient */
   border-radius: 1px;
   margin-bottom:10px;
   box-shadow: 0px 1px 3px rgba(10, 57, 123, 0.1);
@@ -168,7 +156,7 @@
 .styled-line {
   width: 100%;
   height: 2px;
-  background: linear-gradient(90deg, #0A397B 0%, #074F90 100%);
+  background: #074F90; /* Removed gradient */
   margin-top: 10px;
   border-radius: 2px;
 }
@@ -192,11 +180,17 @@
 
 .add-property h2 {
   font-size:22px;
-  color: rgba(0, 0, 0, 0.6);
-  font-weight:550;
+  color: rgb(57, 57, 57);
+  font-weight:600;
+  margin-bottom:-10px;
   letter-spacing: -0.9px;
 }
 
+.add-property p {
+  font-size:14.6px;
+  color: black;
+  font-weight:500;
+}
 
 .search-bar {
   display: flex;
@@ -333,25 +327,10 @@ br {
   text-align: center;
 }
 
-/* Edit Icon */
-.edit-icon {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 35px;
-  height: 35px;
-  color: #074F90;
-  background: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 
-.edit-icon i {
-  color: #074F90;
-  font-size: 16px;
-  margin: auto;
+.property-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px 100px; /* Increase the row gap */
 }
-
 </style>

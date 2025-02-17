@@ -1,4 +1,6 @@
 <script setup>
+import PropertyList from "@/components/AgentPersonalListingsView.vue";
+
 // import { computed } from "vue";
 // import { useRoute } from "vue-router";
 
@@ -12,19 +14,22 @@
   <div class="manage-listings">
     <!-- Tab Navigation -->
     <div class="tab-navigation">
-      <div class="tab-item">
-        <router-link to="/add-listing" class="special">
+        <router-link to="/add-listing">
           <i class="fas fa-plus-circle"></i> Add Listing
+        </router-link>
+
+
+        <router-link to="/view-listings" >
+          <i class="fas fa-home" ></i> View Listings
+        </router-link>
+
+      <div class="tab-item">
+        <router-link to="/pending-approvals" class="special pend">
+          <i class="fas fa-clock" id="special"></i> Pending Approvals
         </router-link>
         <div class="special-underline"></div>
       </div>
-      <router-link to="/view-listings">
-  <i class="fas fa-home"></i> View Listings
-</router-link>
 
-      <router-link to="/pending-approvals" class="pend">
-        <i class="fas fa-clock"></i> Pending Approvals
-      </router-link>
       <router-link to="/drafts" class="drafts">
         <i class="fas fa-file-alt"></i> Drafts
       </router-link>
@@ -36,7 +41,8 @@
     <!-- Add Property & Search -->
     <div class="add-property-container">
       <div class="add-property">
-        <h2>Add a property</h2>
+        <h2>Pending approval</h2>
+        <p> You will receive a notification when your listing is aprroved. Goodluck.</p>
       </div>
       <!-- Search Bar -->
       <div class="search-bar">
@@ -48,32 +54,31 @@
     </div>
     </div>
 
-    <div class='propertystatus'>
-      <p>You currently have no properties on your profile.</p>
-      </div>
-
-    <!-- Property Options -->
-    <div class="property-options">
-      <!-- Create Listing -->
-      <div class="property-card create-listing">
-        <i class="fas fa-cloud-upload-alt"></i>
-        <p>Create listing</p>
-        <span>Take the first step to your success</span>
-      </div>
-
-      <!-- Saved Draft -->
+<!-- Saved Draft -->
     <!-- Saved Draft -->
+     <div class="property-options">
+    <div class="property-card saved-draft">
+  <img src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png" alt="Saved Draft" />
+  <div class="draft-overlay">
+    <div class="edit-icon">
+      <i class="fas fa-pen"></i>
+    </div>
+    <p>Awaiting <br> Approval</p>
+  </div>
+</div>
+
 <div class="property-card saved-draft">
   <img src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png" alt="Saved Draft" />
   <div class="draft-overlay">
     <div class="edit-icon">
       <i class="fas fa-pen"></i>
     </div>
-    <p>Saved Draft</p>
+    <p>Awaiting <br> Approval</p>
   </div>
 </div>
+</div>
 
-    </div>
+
   </div>
 </template>
 
@@ -86,7 +91,16 @@
 
 .tab-navigation .special{
   background:#F0EFEF;
+  color:#0A397B;
+  font-weight:500;
+  border: 1px solid rgba(0, 102, 255, 0.3);
 }
+.tab-navigation #special{
+
+  color:#0A397B;
+
+}
+
 
 .tab-navigation .pend{
   padding-left:15px;
@@ -111,6 +125,13 @@
   flex-direction: column;
   align-items: center;
   position: relative;
+}
+
+.property-options{
+    display: flex
+;
+    gap: 15px;
+    margin-top: 30px;
 }
 
 .tab-navigation a {
@@ -149,7 +170,7 @@
   top:125%;
   width: 60%;
   height: 0.4px;
-  background: linear-gradient(90deg, #0A397B 0%, #074F90 40%);
+  background: #074F90; /* Removed gradient */
   transform: translateX(-50%);
   border-radius: 2px;
 }
@@ -158,7 +179,7 @@
 .second-special-underline {
   width: 100%;
   height: 1px;
-  background: linear-gradient(90deg, rgba(10, 57, 123, 0.1), rgba(7, 79, 144, 0.1)); /* Lighter gradient */
+  background: rgba(7, 79, 144, 0.1); /* Removed gradient */
   border-radius: 1px;
   margin-bottom:10px;
   box-shadow: 0px 1px 3px rgba(10, 57, 123, 0.1);
@@ -168,7 +189,7 @@
 .styled-line {
   width: 100%;
   height: 2px;
-  background: linear-gradient(90deg, #0A397B 0%, #074F90 100%);
+  background: #074F90; /* Removed gradient */
   margin-top: 10px;
   border-radius: 2px;
 }
@@ -192,11 +213,17 @@
 
 .add-property h2 {
   font-size:22px;
-  color: rgba(0, 0, 0, 0.6);
-  font-weight:550;
+  color: rgb(57, 57, 57);
+  font-weight:600;
+  margin-bottom:-10px;
   letter-spacing: -0.9px;
 }
 
+.add-property p {
+  font-size:13px;
+  color: black;
+  font-weight:500;
+}
 
 .search-bar {
   display: flex;
@@ -261,7 +288,7 @@ br {
 }
 
 .propertystatus p{
-  font-weight:500;
+  font-weight:600;
   font-size:15px;
   color: rgba(0, 0, 0, 0.8);
 }
@@ -271,7 +298,6 @@ br {
   width: 170px;
   height: 160px;
   border-radius: 10px;
-  border: 2px dashed #c3c3c3;
   display: flex;
   margin-right: 20px;
   flex-direction: column;
@@ -284,9 +310,9 @@ br {
 }
 
 .property-card i {
-  font-size: 24px;
-  color: #0A397B;
-  margin-bottom: 8px;
+  font-size: 18px;
+    margin: auto;
+    color: #0A397B;
 }
 
 .property-card p {
@@ -333,25 +359,28 @@ br {
   text-align: center;
 }
 
+
+.property-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px 100px; /* Increase the row gap */
+}
+
 /* Edit Icon */
 .edit-icon {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 12px;
+  right: 12px;
   width: 35px;
   height: 35px;
-  color: #074F90;
   background: white;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.edit-icon i {
+  border:1px solid #074F90;
   color: #074F90;
-  font-size: 16px;
-  margin: auto;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 </style>

@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import PropertyList from "@/components/PropertyList.vue";
+import Loader from "@/components/Loader.vue";
 
 // Metrics Data
 const metrics = ref([
@@ -21,16 +22,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <!-- <div class="dashboard">
-    <div class="greetings" >
-      <h1>Hi, Alex!</h1>
-      <p>Here’s an overview of your account</p>
-    </div> -->
-
   <div class="dashboard">
     <!-- Greetings Section -->
     <div class="greetings" :class="{ 'animate-metric': isLoaded }">
-      <div v-if="!isLoaded" class="greetings-skeleton"></div>
+      <Loader v-if="!isLoaded" />
       <div v-else>
         <div class="greetings-data">
           <h1>Hi, Alex!</h1>
@@ -38,80 +33,44 @@ onMounted(() => {
         </div>
       </div>
     </div>
+    <br/>
 
-
+    <div class="metricsloader"  :class="{ 'animate-metric': isLoaded }"  :style="{ animationDelay: `${index * 0.2}s` }">
     <div class="metrics">
       <div v-for="(metric, index) in metrics" :key="metric.label" class="metric-card"
-        :class="{ 'animate-metric': isLoaded }" :style="{ animationDelay: `${index * 0.2}s` }">
-        <!-- Skeleton Loader -->
-        <div v-if="!isLoaded" class="metric-skeleton"></div>
-
-        <!-- Actual Content -->
+       >
+        <Loader v-if="!isLoaded" />
         <div v-else>
           <div class="metric-header">
             <div class="metric-content">
-              <!-- Metric-stas, metric-title,  -->
               <div class="metrics-title">
                 <h3>{{ metric.label }}</h3>
                 <br />
                 <p>{{ metric.value }}</p>
                 <a href="#">view</a>
               </div>
-
-              <div class="metrics-circle" :style="{ background: metric.color }">
-              </div>
+              <div class="metrics-circle" :style="{ background: metric.color }"></div>
             </div>
-
-
           </div>
-
         </div>
       </div>
     </div>
   </div>
 
-  <PropertyList />
+    <div class="property-list-section">
+      <Loader v-if="!isLoaded" />
+      <div v-else>
+        <PropertyList />
+      </div>
+    </div>
+  </div>
 </template>
 
 <style scoped>
-/* Skeleton Loader */
-
-/* Skeleton Loader for Greetings */
-.greetings-skeleton {
-  width: 100%;
-  height: 80px;
-  background: linear-gradient(90deg, #e0e0e0 20%, #f0f0f0 30%, #e0e0e0 40%);
-  background-size: 200% 100%;
-  animation: skeleton-loading 2s infinite;
-  opacity: 0.8;
-  border-radius: 10px;
-}
-
-.metric-skeleton {
-  width: 100%;
-  height: 80px;
-  background: linear-gradient(90deg, #e0e0e0 20%, #f0f0f0 30%, #e0e0e0 40%);
-  background-size: 200% 100%;
-  animation: skeleton-loading 2s infinite;
-  opacity: 0.8;
-  border-radius: 10px;
-}
-
-/* Skeleton Animation */
-@keyframes skeleton-loading {
-  0% {
-    background-position: 200% 0;
-  }
-
-  100% {
-    background-position: -200% 0;
-  }
-}
-
-/* Metric Animation */
 /* Metric Animation - Smooth Left to Right Reveal */
 .animate-metric {
   opacity: 0;
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
   transform: translateX(-20px);
   animation: fade-slide-left 0.5s ease-in-out forwards;
 }
@@ -121,23 +80,25 @@ onMounted(() => {
     opacity: 0;
     transform: translateX(-1px);
   }
-
   100% {
     opacity: 1;
     transform: translateX(0);
   }
 }
 
-
 /* Original UI Styles */
 .greetings {
-
+  margin-top:10px;
   background-color: white;
-  box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.01);
+  box-shadow: 0px 2px 5px rgba(99, 98, 98, 0.1);
+}
+
+.greetings:hover {
+  transform: scale(1.02);
 }
 
 .greetings-data {
-  padding-left: 40px;
+  padding: 10px 40px;
 }
 
 .greetings h1 {
@@ -156,24 +117,28 @@ onMounted(() => {
 }
 
 .metrics {
+
   display: flex;
   gap: 20px;
   margin-top: 15px;
 }
 
 .metric-card {
-  padding: 10px 20px;
+  flex: 1;
+  padding: 8px 14px;
   background: white;
   border-radius: 5px;
   overflow: hidden;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.metric-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+}
 
 .metric-content {
-  /* padding: 15px; */
   display: flex;
-  padding: 0;
-  padding-bottom: 0;
   justify-content: space-between;
 }
 
@@ -201,14 +166,10 @@ onMounted(() => {
 .metrics-circle {
   width: 4vw;
   margin-left: 10px;
-  /* Responsive width */
   height: 4vw;
-  /* Keep it a perfect circle */
   max-width: 100px;
-  /* Prevent it from being too large */
   max-height: 100px;
   min-width: 50px;
-  /* Prevent it from being too small */
   min-height: 50px;
   border-radius: 50%;
   display: flex;
@@ -217,6 +178,9 @@ onMounted(() => {
   text-align: center;
   color: white;
   box-shadow: 0 4px 12px rgba(74, 74, 74, 0.05);
-  /* Optional shadow */
+}
+
+.property-list-section {
+  margin-top: 20px;
 }
 </style>

@@ -4,6 +4,9 @@ import { useHeaderStore } from "@/stores/headerStore";
 import { watch } from "vue";
 import Sidebar from "./components/SidebarView.vue";
 import Header from "./components/HeaderView.vue";
+import "@fontsource/poppins"; // Defaults to 400 weight
+import "@fontsource/poppins/700.css"; // If you need bold
+
 
 const route = useRoute();
 const headerStore = useHeaderStore();
@@ -46,7 +49,7 @@ body {
   /* Full height */
   width: 100vw;
   /* Full width */
-  background: #f5f7fa;
+  background: #F4F4F4;
   overflow: hidden;
 }
 
