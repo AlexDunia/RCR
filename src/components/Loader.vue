@@ -1,9 +1,15 @@
 <template>
-  <div class="loader"></div>
+  <div class="app-loader"></div>
 </template>
 
+<script>
+export default {
+  name: 'AppLoader'
+}
+</script>
+
 <style scoped>
-.loader {
+.app-loader {
   width: 100%;
   height: 80px;
   background: linear-gradient(90deg, #e0e0e0 20%, #f0f0f0 30%, #e0e0e0 40%);

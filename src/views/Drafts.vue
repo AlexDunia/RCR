@@ -1,5 +1,6 @@
-<script setup>
-import PropertyList from "@/components/AgentPersonalListingsView.vue";
+<!-- eslint-disable vue/multi-word-component-names -->
+// eslint-disable-next-line vue/multi-word-component-names
+<script setup name="DraftsView">
 
 // import { computed } from "vue";
 // import { useRoute } from "vue-router";
@@ -81,7 +82,15 @@ import PropertyList from "@/components/AgentPersonalListingsView.vue";
       </div>
     </div>
   </div>
+
+  <div class="drafts">
+    <h1>Drafts</h1>
+    <p>This is the Drafts page.</p>
+  </div>
 </template>
+
+<script setup>
+</script>
 
 <style scoped>
 .manage-listings {
@@ -335,5 +344,9 @@ br {
   border: 1px solid #074F90;
   color: #074F90;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.drafts {
+  padding: 20px;
 }
 </style>

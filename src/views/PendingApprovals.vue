@@ -1,5 +1,4 @@
 <script setup>
-import PropertyList from "@/components/AgentPersonalListingsView.vue";
 
 // import { computed } from "vue";
 // import { useRoute } from "vue-router";

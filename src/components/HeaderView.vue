@@ -67,12 +67,14 @@ const title = computed(() => headerStore.title);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
+  padding: 30px 20px;
   background: white;
   border-bottom: 1px solid #ddd;
   position: sticky;
   top: 0;
+  border:none;
   z-index: 1000;
+  box-shadow: 0px 2px 5px rgba(99, 98, 98, 0.1);
   /* Ensure it stays on top */
 }
 
@@ -87,14 +89,14 @@ h1 {
   /* No background */
   border-radius: 6px;
   /* Rounded corners */
-  padding: 10px 16px;
-  width: 320px;
+  padding: 15px 16px;
+  width:500px;
   transition: border 0.2s ease-in-out;
 }
 
 /* Apply stroke to the search bar container when focused */
 .search-bar:focus-within {
-  border: 1.5px solid rgba(0, 102, 255, 0.3);
+  border: 0.1px solid rgba(0, 102, 255, 0.3);
   /* Soft, light blue */
 }
 
@@ -104,6 +106,7 @@ input {
   outline: none;
   background: transparent;
   flex: 1;
+  color:red;
   /* Take remaining space */
   font-size: 14px;
 }
@@ -125,8 +128,7 @@ input {
 .icon-wrapper {
   display: flex;
   align-items: center;
-  gap: 6px;
-  /* Adjust this value to bring them closer */
+  gap: 40px;
 }
 
 .icon-container {
@@ -134,21 +136,21 @@ input {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
+  width: 40px;
   /* Adjust for better spacing */
-  height: 36px;
+  height: 40px;
   background: #f0f0f0;
   /* Light grey background */
   border-radius: 50%;
 }
 
 .icon-container svg {
-  width: 24px;
+  width: 27px;
   /* Adjust size */
-  height: 24px;
-  stroke: rgb(51, 51, 51);
+  height: 27px;
+  stroke: rgb(40, 40, 40);
   fill: none;
-  stroke-width: 1;
+  stroke-width: 1.12;
 }
 
 .notification-badge {
@@ -175,6 +177,7 @@ input {
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-right:30px;
   cursor: pointer;
 }
 

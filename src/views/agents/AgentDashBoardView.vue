@@ -1,3 +1,5 @@
+<!-- eslint-disable vue/no-unused-vars -->
+<!-- eslint-disable vue/no-unused-vars -->
 <script setup>
 import { ref, onMounted } from 'vue';
 import PropertyList from "@/components/PropertyList.vue";
@@ -37,7 +39,7 @@ onMounted(() => {
 
     <div class="metricsloader"  :class="{ 'animate-metric': isLoaded }"  :style="{ animationDelay: `${index * 0.2}s` }">
     <div class="metrics">
-      <div v-for="(metric, index) in metrics" :key="metric.label" class="metric-card"
+      <div v-for="(metric) in metrics" :key="metric.label" class="metric-card"
        >
         <Loader v-if="!isLoaded" />
         <div v-else>
