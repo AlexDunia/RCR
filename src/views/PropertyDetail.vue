@@ -14,6 +14,7 @@ const property = computed(() => {
 });
 
 // Set active page on mount
+
 onMounted(() => {
   navigationStore.setActivePage("Manage Listings");
   loadLovedImages();

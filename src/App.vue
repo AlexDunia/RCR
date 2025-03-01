@@ -1,15 +1,19 @@
 <script setup>
 import { useRoute } from "vue-router";
 import { useHeaderStore } from "@/stores/headerStore";
-import { watch } from "vue";
+import { computed, watch } from "vue";
 import Sidebar from "./components/SidebarView.vue";
 import Header from "./components/HeaderView.vue";
 import "@fontsource/poppins"; // Defaults to 400 weight
 import "@fontsource/poppins/700.css"; // If you need bold
 
-
 const route = useRoute();
 const headerStore = useHeaderStore();
+
+// Compute whether to show sidebar based on route
+const showSidebar = computed(() => {
+  return route.name !== 'TaskCreate';
+});
 
 // Watch route changes and update the header title dynamically
 watch(route, () => {
@@ -22,11 +26,11 @@ watch(route, () => {
 </script>
 
 <template>
-  <div class="app-container">
-    <Sidebar />
+  <div class="app-container" :class="{ 'no-sidebar': !showSidebar }">
+    <Sidebar v-if="showSidebar" />
     <div class="main-content">
       <Header />
-      <router-view />
+      <router-view></router-view>
     </div>
   </div>
 </template>
@@ -46,13 +50,15 @@ body {
 .app-container {
   display: flex;
   height: 100vh;
-  /* Full height */
   width: 100vw;
-  /* Full width */
   background: #F4F4F4;
   overflow: hidden;
 }
 
+.app-container.no-sidebar .main-content {
+  margin-left: 0;
+  width: 100%;
+}
 
 .main-content {
   flex: 1;
