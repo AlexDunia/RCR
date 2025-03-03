@@ -13,6 +13,9 @@ import TaskList from '../../components/task/TaskList.vue'
 </script>
 
 <style scoped>
+body{
+  background: red;
+}
 .task-home{
   padding:20px;
 }</style>

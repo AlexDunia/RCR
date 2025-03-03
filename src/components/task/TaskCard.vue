@@ -1,3 +1,4 @@
+<!-- TaskCard.vue -->
 <template>
   <div
     v-if="task"
@@ -17,7 +18,7 @@
         </div>
         <div v-else-if="task.status === 'in_progress'" class="task-status">
           <span class="task-status__badge task-status__badge--progress">In Progress</span>
-          <span class="task-date">Started: {{ formatDate(task.startedAt || task.createdAt) }}</span>
+          <span class="task-date">Started: {{ formatDate(task.startedAt) }}</span>
         </div>
       </div>
     </div>
@@ -28,32 +29,22 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { defineProps, defineEmits } from 'vue';
+import { useRouter } from 'vue-router';
 
-const router = useRouter()
+const router = useRouter();
+
 const props = defineProps({
-  taskId: {
-    type: [String, Number],
+  task: {
+    type: Object,
     required: true
   }
-})
+});
 
-const task = ref(null)
-
-onMounted(() => {
-  loadTaskData()
-})
-
-const loadTaskData = () => {
-  const tasks = JSON.parse(localStorage.getItem('tasks') || '[]')
-  task.value = tasks.find(t => t.id === props.taskId)
-}
-
-defineEmits(['click'])
+defineEmits(['click']);
 
 const formatDate = (date) => {
-  if (!date) return ''
+  if (!date) return '';
   return new Date(date).toLocaleString('en-US', {
     month: 'short',
     day: 'numeric',
@@ -61,20 +52,20 @@ const formatDate = (date) => {
     hour: 'numeric',
     minute: 'numeric',
     hour12: true
-  })
-}
+  });
+};
 
 const handleTaskClick = () => {
-  if (task.value?.status === 'draft') {
-    router.push({ name: 'TaskCreate', query: { draftId: task.value.id }})
+  if (props.task?.status === 'draft') {
+    router.push({ name: 'TaskCreate', query: { draftId: props.task.id } });
   } else {
-    router.push({ name: 'TaskDetail', params: { id: task.value.id }})
+    router.push({ name: 'TaskDetail', params: { id: props.task.id } });
   }
-}
+};
 
 const handleContinueEdit = () => {
-  router.push(`/tasks/create?draftId=${task.value.id}`)
-}
+  router.push(`/tasks/create?draftId=${props.task.id}`);
+};
 </script>
 
 <style scoped>

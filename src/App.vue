@@ -1,35 +1,32 @@
 <script setup>
-import { useRoute } from "vue-router";
-import { useHeaderStore } from "@/stores/headerStore";
-import { computed, watch } from "vue";
-import Sidebar from "./components/SidebarView.vue";
-import Header from "./components/HeaderView.vue";
-import "@fontsource/poppins"; // Defaults to 400 weight
-import "@fontsource/poppins/700.css"; // If you need bold
+import { useRoute } from 'vue-router';
+import { useHeaderStore } from '@/stores/headerStore';
+import { useLayoutStore } from '@/stores/layout'; // Add this import
+import { watch } from 'vue';
+import Sidebar from './components/SidebarView.vue';
+import Header from './components/HeaderView.vue';
+import '@fontsource/poppins'; // Defaults to 400 weight
+import '@fontsource/poppins/700.css'; // If you need bold
 
 const route = useRoute();
 const headerStore = useHeaderStore();
-
-// Compute whether to show sidebar based on route
-const showSidebar = computed(() => {
-  return route.name !== 'TaskCreate';
-});
+const layoutStore = useLayoutStore(); // Use the layout store
 
 // Watch route changes and update the header title dynamically
 watch(route, () => {
   if (route.meta && route.meta.title) {
     headerStore.setTitle(route.meta.title);
   } else {
-    headerStore.setTitle("Dashboard");
+    headerStore.setTitle('Dashboard');
   }
 }, { immediate: true });
 </script>
 
 <template>
-  <div class="app-container" :class="{ 'no-sidebar': !showSidebar }">
-    <Sidebar v-if="showSidebar" />
+  <div class="app-container" :style="{ background: layoutStore.background }">
+    <Sidebar v-if="!layoutStore.hideSidebar" />
     <div class="main-content">
-      <Header />
+      <Header v-if="!layoutStore.hideHeader" />
       <router-view></router-view>
     </div>
   </div>
@@ -51,7 +48,7 @@ body {
   display: flex;
   height: 100vh;
   width: 100vw;
-  background: #F4F4F4;
+  background: #F4F4F4; /* Fallback if layoutStore fails */
   overflow: hidden;
 }
 

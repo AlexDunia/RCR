@@ -5,7 +5,9 @@
     <header class="task-detail__header">
       <div class="task-detail__nav">
         <button class="task-detail__back" @click="handleBack" aria-label="Back to tasks">
-          <span class="task-detail__back-arrow">&lt;</span>
+          <svg class="task-detail__back-arrow" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
           Task management
         </button>
         <div class="task-detail__subtitle">
@@ -42,52 +44,58 @@
     <div class="task-detail__content">
       <!-- Task Header -->
       <div class="task-detail__task-header">
-        <div class="task-detail__title-group">
-          <h1 class="task-detail__title">{{ taskData.name }}</h1>
-          <span class="task-detail__status" :class="'task-detail__status--' + taskData.status">{{ taskData.status }}</span>
+        <div class="task-detail__header-content">
+          <div class="task-detail__title-group">
+            <h1 class="task-detail__title">{{ taskData.name }}</h1>
+            <span class="task-detail__status" :class="'task-detail__status--' + taskData.status">{{ taskData.status }}</span>
+          </div>
+          <div class="task-detail__date">Scheduled: {{ taskData.date }}</div>
         </div>
-        <div class="task-detail__date">Scheduled: {{ taskData.date }}</div>
+
+        <div class="task-detail__header-actions">
+          <template v-if="taskData.status === 'in_progress'">
+            <button
+              v-if="!taskData.isPaused"
+              class="task-detail__header-btn task-detail__header-btn--pause"
+              @click="handlePauseTask"
+            >
+              Pause task
+            </button>
+            <button
+              v-else
+              class="task-detail__header-btn task-detail__header-btn--resume"
+              @click="handleResumeTask"
+            >
+              Resume task
+            </button>
+            <button
+              class="task-detail__header-btn task-detail__header-btn--end"
+              @click="handleEndTask"
+            >
+              End task
+            </button>
+          </template>
+          <template v-else-if="taskData.status !== 'completed'">
+            <button
+              class="task-detail__header-btn task-detail__header-btn--start"
+              @click="handleStartTask"
+            >
+              Start task
+            </button>
+          </template>
+        </div>
       </div>
 
       <!-- Timer Display -->
-      <div v-if="taskData.status !== 'draft' && taskData.status !== 'completed'" class="task-detail__timer">
+      <div
+        v-if="taskData.status === 'in_progress'"
+        class="task-detail__timer"
+        :class="{ 'task-detail__timer--paused': taskData.isPaused }"
+      >
+        <div class="task-detail__timer-label">
+          {{ taskData.isPaused ? 'Timer paused at:' : 'Time elapsed:' }}
+        </div>
         <div class="task-detail__timer-display">{{ formattedElapsedTime }}</div>
-      </div>
-
-      <!-- Action Buttons -->
-      <div class="task-detail__actions" v-if="taskData.status !== 'completed'">
-        <button
-          v-if="taskData.status === 'draft'"
-          class="task-detail__action-btn task-detail__action-btn--start"
-          @click="handleStartTask"
-          aria-label="Start task"
-        >
-          Start task
-        </button>
-        <button
-          v-if="taskData.status === 'in-progress'"
-          class="task-detail__action-btn task-detail__action-btn--pause"
-          @click="handlePauseTask"
-          aria-label="Pause task"
-        >
-          Pause task
-        </button>
-        <button
-          v-if="taskData.status === 'paused'"
-          class="task-detail__action-btn task-detail__action-btn--resume"
-          @click="handleResumeTask"
-          aria-label="Resume task"
-        >
-          Resume task
-        </button>
-        <button
-          v-if="taskData.status === 'in-progress' || taskData.status === 'paused'"
-          class="task-detail__action-btn task-detail__action-btn--end"
-          @click="handleEndTask"
-          aria-label="End task"
-        >
-          End task
-        </button>
       </div>
 
       <!-- Main Grid Layout -->
@@ -168,7 +176,7 @@
                 <span class="task-detail__timeline-label">Due date</span>
                 <span class="task-detail__timeline-time">{{ formatDate(taskData.endDate) }}</span>
               </div>
-              <div v-if="taskData.status === 'in-progress'" class="task-detail__timeline-item">
+              <div v-if="taskData.status === 'in_progress'" class="task-detail__timeline-item">
                 <span class="task-detail__timeline-label">Time elapsed</span>
                 <span class="task-detail__timeline-time">{{ formattedElapsedTime }}</span>
               </div>
@@ -202,15 +210,12 @@
       @close="closeAgentModal"
       @select="handleAgentSelect"
     />
-
     <ClientModal
       :is-open="isClientModalOpen"
       :initial-selected-clients="taskData.clientDetails"
       @close="closeClientModal"
       @select="handleClientSelect"
     />
-
-    <!-- Add ReminderModal -->
     <ReminderModal
       :is-open="isReminderModalOpen"
       :recipient="selectedRecipient"
@@ -222,22 +227,22 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onUnmounted, computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { useRoleGuard } from '@/composables/useRoleGuard'
-import AgentModal from './AgentModal.vue'
-import ClientModal from './ClientModal.vue'
-import ReminderModal from './ReminderModal.vue'
+import { ref, reactive, onMounted, onUnmounted, computed } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { useRoleGuard } from '@/composables/useRoleGuard';
+import AgentModal from './AgentModal.vue';
+import ClientModal from './ClientModal.vue';
+import ReminderModal from './ReminderModal.vue';
 
-const router = useRouter()
-const route = useRoute()
-const { checkAccess } = useRoleGuard()
+const router = useRouter();
+const route = useRoute();
+const { checkAccess } = useRoleGuard();
 
 // Modal states
-const isAgentModalOpen = ref(false)
-const isClientModalOpen = ref(false)
-const isReminderModalOpen = ref(false)
-const selectedRecipient = ref(null)
+const isAgentModalOpen = ref(false);
+const isClientModalOpen = ref(false);
+const isReminderModalOpen = ref(false);
+const selectedRecipient = ref(null);
 
 // Task data with reactive state
 const taskData = reactive({
@@ -255,187 +260,167 @@ const taskData = reactive({
   createdAt: '',
   updatedAt: '',
   startedAt: '',
-  lastEditedAt: ''
-})
+  lastEditedAt: '',
+  isPaused: false
+});
 
 // Timer state
-const elapsedTime = ref(0)
-const timerInterval = ref(null)
-const startTime = ref(null)
-const pausedTime = ref(null)
-const totalPausedTime = ref(0)
+const elapsedTime = ref(0);
+const timerInterval = ref(null);
+const startTime = ref(null);
+const pausedTime = ref(null);
+const totalPausedTime = ref(0);
 
 // Computed property for formatted time
 const formattedElapsedTime = computed(() => {
-  const totalSeconds = Math.floor(elapsedTime.value / 1000)
-  const hours = Math.floor(totalSeconds / 3600)
-  const minutes = Math.floor((totalSeconds % 3600) / 60)
-  const seconds = totalSeconds % 60
-  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-})
+  const totalSeconds = Math.floor(elapsedTime.value / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+});
 
 // Methods
 const handleAvatarError = (e) => {
-  e.target.src = '/default-avatar.jpg'
-}
+  e.target.src = '/default-avatar.jpg';
+};
 
 const handleBack = () => {
-  router.push('/tasks')
-}
+  router.push('/tasks');
+};
 
 const openAgentModal = () => {
-  isAgentModalOpen.value = true
-}
+  isAgentModalOpen.value = true;
+};
 
 const closeAgentModal = () => {
-  isAgentModalOpen.value = false
-}
+  isAgentModalOpen.value = false;
+};
 
 const handleAgentSelect = async (agents) => {
   try {
-    taskData.agentDetails = agents
-
-    // Get all tasks
-    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]')
-    const taskIndex = tasks.findIndex(t => t.id === taskData.id)
-
+    taskData.agentDetails = agents;
+    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+    const taskIndex = tasks.findIndex(t => t.id === taskData.id);
     if (taskIndex !== -1) {
       tasks[taskIndex] = {
         ...tasks[taskIndex],
         agentDetails: agents,
         updatedAt: new Date().toISOString()
-      }
-      localStorage.setItem('tasks', JSON.stringify(tasks))
+      };
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+      console.log('Updated agents in localStorage:', tasks[taskIndex]);
     }
-
-    // TODO: API call to update task agents
-    // await api.updateTaskAgents(taskData.id, agents)
   } catch (error) {
-    console.error('Failed to update agents:', error)
-    alert('Failed to update agents. Please try again.')
+    console.error('Failed to update agents:', error);
+    alert('Failed to update agents. Please try again.');
   }
-}
+};
 
 const openClientModal = () => {
-  isClientModalOpen.value = true
-}
+  isClientModalOpen.value = true;
+};
 
 const closeClientModal = () => {
-  isClientModalOpen.value = false
-}
+  isClientModalOpen.value = false;
+};
 
 const handleClientSelect = async (clients) => {
   try {
-    // Update the local state
-    taskData.clientDetails = clients
-
-    // Get all tasks from localStorage
-    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]')
-    const taskIndex = tasks.findIndex(t => t.id === taskData.id)
-
+    taskData.clientDetails = clients;
+    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+    const taskIndex = tasks.findIndex(t => t.id === taskData.id);
     if (taskIndex !== -1) {
-      // Update the task in localStorage
       tasks[taskIndex] = {
         ...tasks[taskIndex],
         clientDetails: clients,
         updatedAt: new Date().toISOString()
-      }
-      localStorage.setItem('tasks', JSON.stringify(tasks))
-
-      // Show success message
-      alert('Clients updated successfully')
+      };
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+      console.log('Updated clients in localStorage:', tasks[taskIndex]);
+      alert('Clients updated successfully');
     }
   } catch (error) {
-    console.error('Failed to update clients:', error)
-    alert('Failed to update clients. Please try again.')
+    console.error('Failed to update clients:', error);
+    alert('Failed to update clients. Please try again.');
   }
-}
+};
 
 const openReminderModal = (recipient) => {
-  selectedRecipient.value = recipient
-  isReminderModalOpen.value = true
-}
+  selectedRecipient.value = recipient;
+  isReminderModalOpen.value = true;
+};
 
 const closeReminderModal = () => {
-  isReminderModalOpen.value = false
-  selectedRecipient.value = null
-}
+  isReminderModalOpen.value = false;
+  selectedRecipient.value = null;
+};
 
 const handleReminderSend = async (reminderData) => {
   try {
-    // TODO: API integration for sending reminder
-    // await api.sendReminder({
-    //   taskId: taskData.id,
-    //   recipientId: selectedRecipient.value.id,
-    //   ...reminderData
-    // })
-
-    // For now, just show success message
-    alert(`Reminder sent to ${reminderData.recipient}`)
+    alert(`Reminder sent to ${reminderData.recipient}`);
   } catch (error) {
-    console.error('Failed to send reminder:', error)
-    alert('Failed to send reminder. Please try again.')
+    console.error('Failed to send reminder:', error);
+    alert('Failed to send reminder. Please try again.');
   }
-}
+};
 
 const handlePauseTask = async () => {
   try {
-    taskData.status = 'paused'
-    pauseTimer()
-
-    // Update localStorage
-    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]')
-    const taskIndex = tasks.findIndex(t => t.id === taskData.id)
+    taskData.isPaused = true;
+    pauseTimer();
+    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+    const taskIndex = tasks.findIndex(t => t.id === taskData.id);
     if (taskIndex !== -1) {
       tasks[taskIndex] = {
         ...tasks[taskIndex],
-        status: 'paused',
-        pausedAt: new Date().toISOString()
-      }
-      localStorage.setItem('tasks', JSON.stringify(tasks))
+        isPaused: true,
+        pausedAt: new Date().toISOString(),
+        elapsedTime: elapsedTime.value,
+        totalPausedTime: totalPausedTime.value
+      };
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+      console.log('Paused task in localStorage:', tasks[taskIndex]);
     }
   } catch (error) {
-    console.error('Failed to pause task:', error)
-    alert('Failed to pause task. Please try again.')
+    console.error('Failed to pause task:', error);
+    alert('Failed to pause task. Please try again.');
   }
-}
+};
 
 const handleResumeTask = async () => {
   try {
-    taskData.status = 'in-progress'
-    resumeTimer()
-
-    // Update localStorage
-    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]')
-    const taskIndex = tasks.findIndex(t => t.id === taskData.id)
+    taskData.isPaused = false;
+    resumeTimer();
+    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+    const taskIndex = tasks.findIndex(t => t.id === taskData.id);
     if (taskIndex !== -1) {
       tasks[taskIndex] = {
         ...tasks[taskIndex],
-        status: 'in-progress',
-        resumedAt: new Date().toISOString()
-      }
-      localStorage.setItem('tasks', JSON.stringify(tasks))
+        isPaused: false,
+        elapsedTime: elapsedTime.value,
+        totalPausedTime: totalPausedTime.value
+      };
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+      console.log('Resumed task in localStorage:', tasks[taskIndex]);
     }
   } catch (error) {
-    console.error('Failed to resume task:', error)
-    alert('Failed to resume task. Please try again.')
+    console.error('Failed to resume task:', error);
+    alert('Failed to resume task. Please try again.');
   }
-}
+};
 
 const handleEndTask = async () => {
   try {
     if (!confirm('Are you sure you want to end this task?')) {
-      return
+      return;
     }
-
-    stopTimer()
-    taskData.status = 'completed'
-    taskData.completedAt = new Date().toISOString()
-    taskData.totalTime = elapsedTime.value
-
-    // Update localStorage
-    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]')
-    const taskIndex = tasks.findIndex(t => t.id === taskData.id)
+    stopTimer();
+    taskData.status = 'completed';
+    taskData.completedAt = new Date().toISOString();
+    taskData.totalTime = elapsedTime.value;
+    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+    const taskIndex = tasks.findIndex(t => t.id === taskData.id);
     if (taskIndex !== -1) {
       tasks[taskIndex] = {
         ...tasks[taskIndex],
@@ -443,56 +428,54 @@ const handleEndTask = async () => {
         completedAt: taskData.completedAt,
         totalTime: taskData.totalTime,
         elapsedTimeFormatted: formattedElapsedTime.value
-      }
-      localStorage.setItem('tasks', JSON.stringify(tasks))
+      };
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+      console.log('Ended task in localStorage:', tasks[taskIndex]);
     }
-
-    // Navigate to completed tasks
-    router.push('/tasks/completed')
+    router.push('/tasks/completed');
   } catch (error) {
-    console.error('Failed to end task:', error)
-    alert('Failed to end task. Please try again.')
+    console.error('Failed to end task:', error);
+    alert('Failed to end task. Please try again.');
   }
-}
+};
 
-// Start timer
 const startTimer = () => {
-  if (timerInterval.value) return
-
-  startTime.value = startTime.value || Date.now()
+  if (timerInterval.value) return;
+  startTime.value = startTime.value || Date.now();
   timerInterval.value = setInterval(() => {
-    const now = Date.now()
-    elapsedTime.value = now - startTime.value - totalPausedTime.value
-  }, 1000)
-}
+    if (taskData.isPaused) return;
+    const now = Date.now();
+    elapsedTime.value = now - startTime.value - totalPausedTime.value;
+  }, 1000);
+};
 
 const pauseTimer = () => {
   if (timerInterval.value) {
-    clearInterval(timerInterval.value)
-    timerInterval.value = null
-    pausedTime.value = Date.now()
+    clearInterval(timerInterval.value);
+    timerInterval.value = null;
+    pausedTime.value = Date.now();
   }
-}
+};
 
 const resumeTimer = () => {
   if (pausedTime.value) {
-    totalPausedTime.value += Date.now() - pausedTime.value
-    pausedTime.value = null
+    totalPausedTime.value += Date.now() - pausedTime.value;
+    pausedTime.value = null;
   }
-  startTimer()
-}
+  startTimer();
+};
 
 const stopTimer = () => {
   if (timerInterval.value) {
-    clearInterval(timerInterval.value)
-    timerInterval.value = null
+    clearInterval(timerInterval.value);
+    timerInterval.value = null;
   }
-}
+  taskData.totalTime = elapsedTime.value;
+};
 
-// Helper function to format dates
 const formatDate = (dateString) => {
-  if (!dateString) return ''
-  const date = new Date(dateString)
+  if (!dateString) return '';
+  const date = new Date(dateString);
   return date.toLocaleString('en-US', {
     weekday: 'short',
     day: 'numeric',
@@ -500,94 +483,107 @@ const formatDate = (dateString) => {
     hour: 'numeric',
     minute: 'numeric',
     hour12: true
-  })
-}
+  });
+};
 
-// Add method to start task
 const handleStartTask = async () => {
   try {
-    taskData.status = 'in-progress'
-    taskData.startedAt = new Date().toISOString()
-    startTime.value = Date.now()
-    startTimer()
-
-    // Update localStorage
-    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]')
-    const taskIndex = tasks.findIndex(t => t.id === taskData.id)
+    if (!isTaskComplete()) {
+      router.push(`/tasks/${taskData.id}/edit`);
+      return;
+    }
+    taskData.status = 'in_progress';
+    taskData.isPaused = false;
+    taskData.startedAt = new Date().toISOString();
+    startTime.value = Date.now();
+    startTimer();
+    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+    const taskIndex = tasks.findIndex(t => t.id === taskData.id);
     if (taskIndex !== -1) {
       tasks[taskIndex] = {
         ...tasks[taskIndex],
-        status: 'in-progress',
+        status: 'in_progress',
+        isPaused: false,
         startedAt: taskData.startedAt
-      }
-      localStorage.setItem('tasks', JSON.stringify(tasks))
+      };
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+      console.log('Started task in localStorage:', tasks[taskIndex]);
     }
   } catch (error) {
-    console.error('Failed to start task:', error)
-    alert('Failed to start task. Please try again.')
+    console.error('Failed to start task:', error);
+    alert('Failed to start task. Please try again.');
   }
-}
+};
 
-// Load task data on mount
+const isTaskComplete = () => {
+  return (
+    taskData.name &&
+    taskData.description?.length > 0 &&
+    taskData.agentDetails?.length > 0 &&
+    taskData.clientDetails?.length > 0
+  );
+};
+
 onMounted(async () => {
   try {
-    const hasAccess = await checkAccess(['agent', 'admin'])
+    const hasAccess = await checkAccess(['agent', 'admin']);
     if (!hasAccess) {
-      router.push('/unauthorized')
-      return
+      router.push('/unauthorized');
+      return;
     }
 
-    const taskId = parseInt(route.params.id)
-    console.log('Task ID from route:', taskId) // Debug log
+    const taskId = parseInt(route.params.id);
+    console.log('Task ID from route:', taskId);
 
-    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]')
-    console.log('All tasks from localStorage:', tasks) // Debug log
-
-    const task = tasks.find(t => t.id === taskId)
-    console.log('Found task:', task) // Debug log
+    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+    console.log('All tasks in localStorage:', tasks);
+    const task = tasks.find(t => t.id === taskId);
 
     if (!task) {
-      alert('Task not found')
-      router.push('/tasks')
-      return
+      alert('Task not found');
+      router.push('/tasks');
+      return;
     }
 
-    // Update reactive state with task data
+    console.log('Loading task with status:', task.status);
     Object.assign(taskData, {
       ...task,
       description: task.description || [],
       agentDetails: task.agentDetails || [],
       clientDetails: task.clientDetails || [],
-      attachments: task.attachments || []
-    })
+      attachments: task.attachments || [],
+      isPaused: task.isPaused || false
+    });
 
-    console.log('Updated taskData:', taskData) // Debug log
-
-    // Initialize timer if task is in progress
-    if (task.status === 'in-progress' && task.startedAt) {
-      startTime.value = new Date(task.startedAt).getTime()
-      totalPausedTime.value = task.totalPausedTime || 0
-      startTimer()
+    if (task.status === 'in_progress' && task.startedAt) {
+      console.log('Initializing timer for in-progress task');
+      startTime.value = new Date(task.startedAt).getTime();
+      totalPausedTime.value = task.totalPausedTime || 0;
+      if (!taskData.isPaused) startTimer();
     }
-  } catch (error) {
-    console.error('Failed to load task:', error)
-    alert('Failed to load task. Please try again.')
-  }
-})
 
-// Cleanup timer on component unmount
+    console.log('Task data loaded:', {
+      status: taskData.status,
+      startedAt: taskData.startedAt,
+      elapsedTime: elapsedTime.value
+    });
+  } catch (error) {
+    console.error('Failed to load task:', error);
+    alert('Failed to load task. Please try again.');
+  }
+});
+
 onUnmounted(() => {
   if (timerInterval.value) {
-    clearInterval(timerInterval.value)
+    clearInterval(timerInterval.value);
   }
-})
+});
 </script>
 
 <style scoped>
 .task-detail {
   margin: 0 auto;
   padding: 20px;
-  background: #FFFFFF;
 }
 
 .task-detail__header {
@@ -621,8 +617,9 @@ onUnmounted(() => {
 }
 
 .task-detail__back-arrow {
-  font-size: 20px;
-  line-height: 1;
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
 }
 
 .task-detail__subtitle {
@@ -689,14 +686,23 @@ onUnmounted(() => {
 }
 
 .task-detail__task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   margin-bottom: 24px;
+  width: 100%;
+}
+
+.task-detail__header-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .task-detail__title-group {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 8px;
+  gap: 12px;
 }
 
 .task-detail__title {
@@ -707,30 +713,32 @@ onUnmounted(() => {
 }
 
 .task-detail__status {
-  padding: 5px 10px;
+  padding: 4px 8px;
   border-radius: 4px;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
+  background: #E6F4EA;
+  color: #137333;
+}
+
+.task-detail__status--in_progress {
+  background: #E6F4EA;
+  color: #137333;
 }
 
 .task-detail__status--draft {
-  background: #6B7280;
-  color: #FFFFFF;
-}
-
-.task-detail__status--in-progress {
-  background: #28A745;
-  color: #FFFFFF;
+  background: #F1F3F4;
+  color: #5F6368;
 }
 
 .task-detail__status--paused {
-  background: #FFA500;
-  color: #FFFFFF;
+  background: #FEF7E0;
+  color: #B95000;
 }
 
 .task-detail__status--completed {
-  background: #2563EB;
-  color: #FFFFFF;
+  background: #E8F0FE;
+  color: #1A73E8;
 }
 
 .task-detail__date {
@@ -738,42 +746,36 @@ onUnmounted(() => {
   font-size: 14px;
 }
 
-.task-detail__actions {
+.task-detail__header-actions {
   display: flex;
-  justify-content: flex-end;
   gap: 12px;
-  margin-bottom: 32px;
+  margin-left: auto;
 }
 
-.task-detail__action-btn {
-  padding: 10px 20px;
-  border-radius: 6px;
+.task-detail__header-btn {
+  padding: 8px 24px;
+  border: none;
+  border-radius: 4px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  border: none;
   color: #FFFFFF;
-  transition: opacity 0.2s;
 }
 
-.task-detail__action-btn:hover {
-  opacity: 0.8;
+.task-detail__header-btn--pause {
+  background: #FF6B00;
 }
 
-.task-detail__action-btn--pause {
-  background: #FFA500;
+.task-detail__header-btn--resume {
+  background: #2563EB;
 }
 
-.task-detail__action-btn--end {
-  background: #DC3545;
+.task-detail__header-btn--end {
+  background: #FF0000;
 }
 
-.task-detail__action-btn--start {
-  background: #28A745;
-}
-
-.task-detail__action-btn--resume {
-  background: #28A745;
+.task-detail__header-btn--start {
+  background: #137333;
 }
 
 .task-detail__grid {
@@ -997,10 +999,22 @@ onUnmounted(() => {
 
 .task-detail__timer {
   text-align: center;
-  margin: 20px 0;
+  margin: 20px 0 32px;
   padding: 16px;
   background: #F3F4F6;
   border-radius: 8px;
+  border: 1px solid #E5E7EB;
+}
+
+.task-detail__timer--paused {
+  background: #FEF7E0;
+  border-color: #FDE68A;
+}
+
+.task-detail__timer-label {
+  font-size: 14px;
+  color: #666666;
+  margin-bottom: 8px;
 }
 
 .task-detail__timer-display {
@@ -1010,7 +1024,10 @@ onUnmounted(() => {
   font-family: monospace;
 }
 
-/* Responsive Design */
+.task-detail__timer--paused .task-detail__timer-display {
+  color: #B95000;
+}
+
 @media (max-width: 1200px) {
   .task-detail__content {
     margin: 0 20px;
@@ -1028,35 +1045,33 @@ onUnmounted(() => {
   .task-detail {
     padding: 16px;
   }
-
   .task-detail__header {
     padding: 0 16px;
     flex-direction: column;
     gap: 16px;
   }
-
   .task-detail__profile {
     width: 100%;
     justify-content: flex-end;
   }
-
   .task-detail__content {
     padding: 20px;
     margin: 0 16px;
   }
-
-  .task-detail__title-group {
+  .task-detail__header-content {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
   }
-
-  .task-detail__actions {
-    flex-direction: column;
-  }
-
-  .task-detail__action-btn {
+  .task-detail__header-actions {
     width: 100%;
+    justify-content: flex-end;
+  }
+  .task-detail__header-btn {
+    flex: 1;
+  }
+  .task-detail__timer {
+    margin: 16px 0 24px;
   }
 }
 </style>

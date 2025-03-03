@@ -8,7 +8,7 @@ const router = useRouter();
 const propertyListRef = ref(null);
 
 // Reactive properties list
-const properties = computed(() => propertyStore.visibleProperties);
+const visibleProperties = computed(() => propertyStore.visibleProperties);
 
 // Function to navigate to property details
 const viewProperty = (propertyId) => {
@@ -32,6 +32,7 @@ const scrollPrev = () => {
     propertyStore.prevSlide();
   }
 };
+
 </script>
 
 <template>
@@ -40,7 +41,7 @@ const scrollPrev = () => {
     <div class="property-container">
       <button class="prev-arrow" @click="scrollPrev">⬅</button>
       <div ref="propertyListRef" class="property-list">
-        <div v-for="property in properties" :key="property.id" class="property-card">
+        <div v-for="property in visibleProperties" :key="property.id" class="property-card">
           <img :src="property.image" alt="Property Image" />
           <h3>{{ property.name }}</h3>
           <p>{{ property.location }}</p>
@@ -49,6 +50,13 @@ const scrollPrev = () => {
         </div>
       </div>
       <button class="next-arrow" @click="scrollNext">➜</button>
+    </div>
+  </div>
+  <div class="property-list">
+    <div v-for="property in visibleProperties" :key="property.id" class="property">
+      <h3>{{ property.name }}</h3>
+      <p>{{ property.location }}</p>
+      <p>{{ property.price }}</p>
     </div>
   </div>
 </template>
@@ -71,7 +79,7 @@ const scrollPrev = () => {
   justify-content: left;
   overflow-y: hidden;
   padding: 5px;
-
+  flex-direction: column;
 }
 
 .property-card {
@@ -173,5 +181,11 @@ button {
 .next-arrow:hover,
 .prev-arrow:hover {
   background: rgba(0, 0, 255, 1);
+}
+
+.property {
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
 }
 </style>

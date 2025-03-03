@@ -30,7 +30,7 @@ const navigateToCreateTask = () => {
 .task-header {
   margin-bottom: 2rem;
   margin-top: 10px;
-  padding: 40px 40px;
+  padding: 30px 40px;
   background-color: white;
   box-shadow: 0px 2px 5px rgba(99, 98, 98, 0.1);
   border: 1px solid rgba(67, 67, 67, 0.1);

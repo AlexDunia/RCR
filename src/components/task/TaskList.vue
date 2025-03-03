@@ -17,8 +17,8 @@
         <div class="task-title">{{ task.title }}</div>
 
         <!-- In Progress -->
-        <div v-if="task.status === 'in-progress'" class="status-text">
-          <span class="status-label">Started:</span> {{ formatDate(task.startDate) }}
+        <div v-if="task.status === 'in_progress'" class="status-text">
+          <span class="status-label">Started:</span> {{ formatDate(task.startedAt) }}
         </div>
 
         <!-- Drafts -->
@@ -41,7 +41,7 @@
           <svg class="check-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
           </svg>
-          <span class="status-label">Completed:</span> {{ formatDate(task.completedDate) }}
+          <span class="status-label">Completed:</span> {{ formatDate(task.completedAt) }}
         </div>
       </div>
     </div>
@@ -81,83 +81,89 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { ref, computed, onMounted, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 
-const router = useRouter()
-const route = useRoute()
+const router = useRouter();
+const route = useRoute();
 
-const tasks = ref([])
-const showDeleteConfirm = ref(false)
-const showClearAllConfirm = ref(false)
-const taskToDelete = ref(null)
+const tasks = ref([]);
+const showDeleteConfirm = ref(false);
+const showClearAllConfirm = ref(false);
+const taskToDelete = ref(null);
 
 onMounted(() => {
-  loadTasks()
-})
+  loadTasks();
+});
 
 const loadTasks = () => {
-  const storedTasks = JSON.parse(localStorage.getItem('tasks') || '[]')
-  tasks.value = storedTasks
-}
+  const storedTasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+  tasks.value = storedTasks;
+  console.log('Loaded tasks:', storedTasks); // Debug to verify dates
+};
+
+// Watch route to reload tasks dynamically
+watch(() => route.path, () => {
+  loadTasks(); // Reload tasks when route changes
+});
 
 const confirmDelete = (task) => {
-  taskToDelete.value = task
-  showDeleteConfirm.value = true
-}
+  taskToDelete.value = task;
+  showDeleteConfirm.value = true;
+};
 
 const handleDelete = () => {
   if (taskToDelete.value) {
-    const updatedTasks = tasks.value.filter(t => t.id !== taskToDelete.value.id)
-    localStorage.setItem('tasks', JSON.stringify(updatedTasks))
-    tasks.value = updatedTasks
-    showDeleteConfirm.value = false
-    taskToDelete.value = null
+    const updatedTasks = tasks.value.filter(t => t.id !== taskToDelete.value.id);
+    localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+    tasks.value = updatedTasks;
+    showDeleteConfirm.value = false;
+    taskToDelete.value = null;
   }
-}
+};
 
 const handleClearAll = () => {
-  localStorage.clear() // This will clear all localStorage
-  tasks.value = []
-  showClearAllConfirm.value = false
-}
+  localStorage.clear(); // This will clear all localStorage
+  tasks.value = [];
+  showClearAllConfirm.value = false;
+};
 
 const filteredTasks = computed(() => {
-  const status = route.path.split('/').pop()
+  const status = route.path.split('/').pop();
   return tasks.value.filter(task => {
     switch(status) {
       case 'in-progress':
-        return task.status === 'in_progress'
+        return task.status === 'in_progress';
       case 'drafts':
-        return task.status === 'draft'
+        return task.status === 'draft';
       case 'completed':
-        return task.status === 'completed'
+        return task.status === 'completed';
       default:
-        return true
+        return true;
     }
-  })
-})
+  });
+});
 
 const handleTaskClick = (task) => {
-  router.push(`/tasks/${task.id}`)
-}
+  router.push(`/tasks/${task.id}`);
+};
 
 const handleEditClick = (task) => {
-  // Prevent the card click when clicking the button
-  event.stopPropagation()
-  router.push(`/tasks/create?draftId=${task.id}`)
-}
+  event.stopPropagation();
+  router.push(`/tasks/create?draftId=${task.id}`);
+};
 
 const formatDate = (date) => {
-  return date?.toLocaleString('en-US', {
+  if (!date) return '';
+  return new Date(date).toLocaleString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
     hour12: true
-  })
-}
+  });
+};
 </script>
 
 <style scoped>
@@ -170,8 +176,8 @@ const formatDate = (date) => {
 .task-card {
   background: white;
   border-radius: 12px;
-  padding: 16px 20px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  padding: 25.5px 20px;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(0, 0, 0, 0.05);
   cursor: pointer;
   position: relative;
@@ -205,6 +211,10 @@ const formatDate = (date) => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.status-label{
+  color:red;
 }
 
 .status-text {
@@ -387,4 +397,6 @@ const formatDate = (date) => {
   border-color: #6B7280;
   color: #374151;
 }
+
+
 </style>
