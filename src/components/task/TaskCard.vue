@@ -69,7 +69,7 @@ const handleContinueEdit = () => {
 </script>
 
 <style scoped>
-.task-card {
+/* .task-card {
   background-color: #FFFFFF;
   padding: 1.25rem;
   border-radius: 8px;
@@ -80,7 +80,7 @@ const handleContinueEdit = () => {
   transition: all 0.2s ease;
   border: 1px solid transparent;
   margin-bottom: 1rem;
-}
+} */
 
 .task-card:hover {
   border-color: #2563EB;

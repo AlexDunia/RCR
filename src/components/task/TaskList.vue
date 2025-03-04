@@ -178,7 +178,7 @@ const formatDate = (date) => {
   border-radius: 12px;
   padding: 25.5px 20px;
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   cursor: pointer;
   position: relative;
 }
@@ -186,12 +186,12 @@ const formatDate = (date) => {
 .task-card::before {
   content: '';
   position: absolute;
-  left: -1px;
+  left: 0; /* Align flush with border edge */
   top: 0;
   bottom: 0;
-  width: 4px;
+  width: 7px; /* Keep your desired width */
   background-color: #2563EB;
-  border-radius: 0 4px 4px 0;
+  border-radius: 12px 0 0 12px; /* Flip radius to match card’s left side */
   opacity: 0.2;
 }
 
@@ -203,7 +203,8 @@ const formatDate = (date) => {
 }
 
 .task-title {
-  font-size: 14px;
+  font-size: 16px;
+  padding-left:20px;
   color: #111827;
   line-height: 20px;
   flex: 1;
@@ -213,12 +214,8 @@ const formatDate = (date) => {
   white-space: nowrap;
 }
 
-.status-label{
-  color:red;
-}
-
 .status-text {
-  font-size: 14px;
+  font-size: 13px;
   color: #6B7280;
   white-space: nowrap;
   display: flex;
@@ -227,8 +224,8 @@ const formatDate = (date) => {
 }
 
 .status-label {
-  color: #374151;
-  font-weight: 500;
+  color: #2563EB; /* Blue color */
+  font-weight: 600;
 }
 
 .button-container {
@@ -397,6 +394,4 @@ const formatDate = (date) => {
   border-color: #6B7280;
   color: #374151;
 }
-
-
 </style>
