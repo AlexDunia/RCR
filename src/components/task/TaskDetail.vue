@@ -15,16 +15,18 @@
         </div>
       </div>
       <div class="task-detail__profile">
-        <button class="task-detail__icon-btn" aria-label="Messages">
+        <div class="icon-container">
           <svg class="task-detail__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
           </svg>
-        </button>
-        <button class="task-detail__icon-btn" aria-label="Notifications">
+          <div class="notification-badge" data-value="50">50</div>
+        </div>
+        <div class="icon-container">
           <svg class="task-detail__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
           </svg>
-        </button>
+          <div class="notification-badge" data-value="99+">99+</div>
+        </div>
         <div class="task-detail__user">
           <img
             src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1739408381/Screenshot_2025-02-13_015617_mhjgby.png"
@@ -633,22 +635,40 @@ onUnmounted(() => {
   gap: 16px;
 }
 
-.task-detail__icon-btn {
-  background: none;
-  border: none;
-  padding: 8px;
-  cursor: pointer;
-  color: #666666;
-  transition: color 0.2s;
-}
-
-.task-detail__icon-btn:hover {
-  color: #2563EB;
+.icon-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: #f0f0f0; /* Light grey background */
+  border-radius: 50%;
 }
 
 .task-detail__icon {
-  width: 20px;
-  height: 20px;
+  width: 24px; /* Slightly larger */
+  height: 24px;
+  stroke-width: 1; /* Thinner lines */
+}
+
+.notification-badge {
+  position: absolute;
+  top: -6px; /* Adjusted for better positioning */
+  right: -6px; /* Adjusted for better positioning */
+  width: 28px; /* Same size for both badges */
+  height: 28px; /* Same size for both badges */
+  background: red;
+  color: white;
+  font-size: 12px; /* Larger font for better fit in 28px circle */
+  font-weight: bold;
+  text-align: center;
+  line-height: 28px; /* Match height for perfect centering */
+  border-radius: 50%; /* Ensures perfect circle */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden; /* Prevents text from distorting circle */
 }
 
 .task-detail__user {
