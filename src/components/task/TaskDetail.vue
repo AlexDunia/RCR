@@ -1,208 +1,170 @@
-<!-- TaskDetail.vue -->
 <template>
-  <main class="task-detail" role="main">
-    <!-- Header Section -->
-    <header class="task-detail__header">
-      <div class="task-detail__nav">
-        <button class="task-detail__back" @click="handleBack" aria-label="Back to tasks">
-          <svg class="task-detail__back-arrow" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-          </svg>
-          Task management
-        </button>
-        <div class="task-detail__subtitle">
-          Here, you can add, remove, edit task on your profile
+  <main class="task-detail" role="main" aria-label="Task management details">
+    <div class="task-detail__grid">
+      <!-- Left Column: Agents and Clients (now wrapped in a single container) -->
+      <div class="task-detail__left-column">
+        <!-- Agents Section -->
+        <section class="task-detail__section" aria-label="Agents involved in this task">
+          <div class="addflexbox"> 
+            <div class="agentinvolved">
+          <h2 class="task-detail__section-title">Agents involved in this task</h2>
+          <p class="task-detail__section-subtitle">Add agents from your contacts</p>
         </div>
-      </div>
-      <div class="task-detail__profile">
-        <div class="icon-container">
-          <svg class="task-detail__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-          </svg>
-          <div class="notification-badge" data-value="50">50</div>
+    
+          <div class="addbutton">
+          <button class="task-detail__add-btn" @click="openAgentModal" aria-label="Add agent">+ Add agent</button>
         </div>
-        <div class="icon-container">
-          <svg class="task-detail__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-          </svg>
-          <div class="notification-badge" data-value="99+">99+</div>
         </div>
-        <div class="task-detail__user">
-          <img
-            src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1739408381/Screenshot_2025-02-13_015617_mhjgby.png"
-            alt="Profile"
-            class="task-detail__avatar"
-            @error="handleAvatarError"
-          >
-          <span class="task-detail__username">Alex Dunia</span>
-          <svg class="task-detail__dropdown-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-          </svg>
-        </div>
-      </div>
-    </header>
+          
 
-    <!-- Main Content -->
-    <div class="task-detail__content">
-      <!-- Task Header -->
-      <div class="task-detail__task-header">
-        <div class="task-detail__header-content">
-          <div class="task-detail__title-group">
-            <h1 class="task-detail__title">{{ taskData.name }}</h1>
-            <span class="task-detail__status" :class="'task-detail__status--' + taskData.status">{{ taskData.status }}</span>
+          <div class="task-detail__agent-list">
+            <div v-for="agent in taskData.agentDetails" :key="agent.id" class="task-detail__agent-card" role="listitem">
+              <img :src="agent.avatar" :alt="agent.name" class="task-detail__agent-avatar" @error="handleAvatarError">
+              <div class="task-detail__agent-info">
+                <span class="task-detail__agent-name">{{ agent.name }}</span>
+                <span class="task-detail__agent-email">{{ agent.email }}</span>
+              </div>
+              <button
+                class="task-detail__reminder-btn"
+                @click="openReminderModal(agent)"
+                :aria-label="'Send reminder to ' + agent.name"
+              >
+                Send reminder
+              </button>
+            </div>
           </div>
-          <div class="task-detail__date">Scheduled: {{ taskData.date }}</div>
-        </div>
+        </section>
 
-        <div class="task-detail__header-actions">
-          <template v-if="taskData.status === 'in_progress'">
-            <button
-              v-if="!taskData.isPaused"
-              class="task-detail__header-btn task-detail__header-btn--pause"
-              @click="handlePauseTask"
-            >
-              Pause task
-            </button>
-            <button
-              v-else
-              class="task-detail__header-btn task-detail__header-btn--resume"
-              @click="handleResumeTask"
-            >
-              Resume task
-            </button>
-            <button
-              class="task-detail__header-btn task-detail__header-btn--end"
-              @click="handleEndTask"
-            >
-              End task
-            </button>
-          </template>
-          <template v-else-if="taskData.status !== 'completed'">
-            <button
-              class="task-detail__header-btn task-detail__header-btn--start"
-              @click="handleStartTask"
-            >
-              Start task
-            </button>
-          </template>
-        </div>
+        <!-- Clients Section -->
+        <section class="task-detail__section" aria-label="Clients involved in this task">
+          <h2 class="task-detail__section-title">Clients involved in this task</h2>
+          <p class="task-detail__section-subtitle">Add clients from your contacts</p>
+          <button class="task-detail__add-btn" @click="openClientModal" aria-label="Add client">+ Add client</button>
+
+          <div class="task-detail__client-list">
+            <div v-for="client in taskData.clientDetails" :key="client.id" class="task-detail__client-card" role="listitem">
+              <img :src="client.avatar" :alt="client.name" class="task-detail__client-avatar" @error="handleAvatarError">
+              <div class="task-detail__client-info">
+                <span class="task-detail__client-name">{{ client.name }}</span>
+                <span class="task-detail__client-email">{{ client.email }}</span>
+              </div>
+              <button
+                class="task-detail__reminder-btn"
+                @click="openReminderModal(client)"
+                :aria-label="'Send reminder to ' + client.name"
+              >
+                Send reminder
+              </button>
+            </div>
+          </div>
+        </section>
       </div>
 
-      <!-- Timer Display -->
-      <div
-        v-if="taskData.status === 'in_progress'"
-        class="task-detail__timer"
-        :class="{ 'task-detail__timer--paused': taskData.isPaused }"
-      >
-        <div class="task-detail__timer-label">
-          {{ taskData.isPaused ? 'Timer paused at:' : 'Time elapsed:' }}
-        </div>
-        <div class="task-detail__timer-display">{{ formattedElapsedTime }}</div>
-      </div>
+      <!-- Right Column: Task Description -->
+       <div class="task-desc__right-column"> 
+      <div class="task-detail__column description">
+        <!-- Task Description Section -->
+        <section  aria-label="Task description">
+          <div class="task-detail__description-header taskdetails">
+            <h2 class="task-detail__section-title">Task description</h2>
+            <span class="task-detail__priority task-detail__priority--medium">Medium</span>
+          </div>
 
-      <!-- Main Grid Layout -->
-      <div class="task-detail__grid">
-        <!-- Left Column -->
-        <div class="task-detail__column">
-          <!-- Agents Section -->
-          <section class="task-detail__section task-detail__section--agents">
-            <h2 class="task-detail__section-title">Agents involved in this task</h2>
-            <p class="task-detail__section-subtitle">Add agents from your contacts</p>
-            <button class="task-detail__add-btn" @click="openAgentModal">+ Add agent</button>
+          <ul class="task-detail__description-list">
+            <li v-for="(item, index) in taskData.description" :key="index">{{ item }}</li>
+          </ul>
+        </section>
 
-            <div class="task-detail__agent-list">
-              <div v-for="agent in taskData.agentDetails" :key="agent.id" class="task-detail__agent-card">
-                <img :src="agent.avatar" :alt="agent.name" class="task-detail__agent-avatar" @error="handleAvatarError">
-                <div class="task-detail__agent-info">
-                  <span class="task-detail__agent-name">{{ agent.name }}</span>
-                  <span class="task-detail__agent-email">{{ agent.email }}</span>
-                </div>
-                <button
-                  class="task-detail__reminder-btn"
-                  @click="openReminderModal(agent)"
-                  :aria-label="'Send reminder to ' + agent.name"
-                >
-                  Send reminder
-                </button>
-              </div>
-            </div>
-          </section>
-
-          <!-- Clients Section -->
-          <section class="task-detail__section task-detail__section--clients">
-            <h2 class="task-detail__section-title">Clients involved in this task</h2>
-            <p class="task-detail__section-subtitle">Add clients from your contacts</p>
-            <button class="task-detail__add-btn" @click="openClientModal">+ Add client</button>
-
-            <div class="task-detail__client-list">
-              <div v-for="client in taskData.clientDetails" :key="client.id" class="task-detail__client-card">
-                <img :src="client.avatar" :alt="client.name" class="task-detail__client-avatar" @error="handleAvatarError">
-                <div class="task-detail__client-info">
-                  <span class="task-detail__client-name">{{ client.name }}</span>
-                  <span class="task-detail__client-email">{{ client.email }}</span>
-                </div>
-                <button
-                  class="task-detail__reminder-btn"
-                  @click="openReminderModal(client)"
-                  :aria-label="'Send reminder to ' + client.name"
-                >
-                  Send reminder
-                </button>
-              </div>
-            </div>
-          </section>
-        </div>
-
-        <!-- Right Column -->
-        <div class="task-detail__column">
-          <!-- Task Description -->
-          <section class="task-detail__section task-detail__section--description">
-            <div class="task-detail__description-header">
-              <h2 class="task-detail__section-title">Task description</h2>
-              <span class="task-detail__priority task-detail__priority--medium">Medium</span>
-            </div>
-
-            <ul class="task-detail__description-list">
-              <li v-for="(item, index) in taskData.description" :key="index">{{ item }}</li>
-            </ul>
-          </section>
-
-          <!-- Timeline -->
-          <section class="task-detail__section task-detail__section--timeline">
-            <div class="task-detail__timeline">
-              <div class="task-detail__timeline-item">
-                <span class="task-detail__timeline-label">Started</span>
+        <!-- Task Timeline -->
+        <section class="task-detail__section task-detail__section--timeline" aria-label="Task timeline">
+          <div class="task-detail__timeline">
+            <div class="task-detail__timeline-item">
+              <span class="task-detail__timeline-label">Started</span>
+              <div class="task-detail__timeline-checkbox">
+                <svg class="task-detail__checkbox-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="1.5">
+                  <rect x="2" y="2" width="20" height="20" rx="4" stroke-dasharray="2 2" />
+                </svg>
                 <span class="task-detail__timeline-time">{{ formatDate(taskData.startedAt) }}</span>
               </div>
-              <div class="task-detail__timeline-item">
-                <span class="task-detail__timeline-label">Due date</span>
+            </div>
+            <div class="task-detail__timeline-item">
+              <span class="task-detail__timeline-label">Due date</span>
+              <div class="task-detail__timeline-checkbox">
+                <svg class="task-detail__checkbox-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="1.5">
+                  <rect x="2" y="2" width="20" height="20" rx="4" stroke-dasharray="2 2" />
+                </svg>
                 <span class="task-detail__timeline-time">{{ formatDate(taskData.endDate) }}</span>
               </div>
-              <div v-if="taskData.status === 'in_progress'" class="task-detail__timeline-item">
-                <span class="task-detail__timeline-label">Time elapsed</span>
-                <span class="task-detail__timeline-time">{{ formattedElapsedTime }}</span>
-              </div>
             </div>
-          </section>
+          </div>
+        </section>
 
-          <!-- Attachments -->
-          <section class="task-detail__section task-detail__section--attachments">
-            <h2 class="task-detail__section-title">Attachments</h2>
-            <div v-if="taskData.attachments && taskData.attachments.length > 0" class="task-detail__attachments-list">
-              <div class="task-detail__attachment" v-for="attachment in taskData.attachments" :key="attachment.id">
-                <svg class="task-detail__attachment-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd" />
+        <!-- Attachments -->
+        <section class="task-detail__section task-detail__section--attachments" aria-label="Task attachments">
+          <h2 class="task-detail__section-title">Attachments</h2>
+          <div v-if="taskData.attachments && taskData.attachments.length > 0" class="task-detail__attachments-list">
+            <div class="task-detail__attachment" v-for="attachment in taskData.attachments" :key="attachment.id" role="listitem">
+              <svg class="task-detail__attachment-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="#999999">
+                <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd" />
+              </svg>
+              <span class="task-detail__attachment-name">{{ attachment.name }}</span>
+              <div class="task-detail__attachment-actions">
+                <svg class="task-detail__action-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="#999999">
+                  <path fill-rule="evenodd" d="M13.586 3.586a2 2 0 112.828 2.828L10.828 10l5.586 5.586a2 2 0 11-2.828 2.828L8 12.828l-5.586 5.586a2 2 0 11-2.828-2.828L5.172 10 0.586 4.414a2 2 0 112.828-2.828L8 7.172l5.586-5.586z" clip-rule="evenodd" />
                 </svg>
-                <span class="task-detail__attachment-name">{{ attachment.name }}</span>
-                <span class="task-detail__attachment-type">{{ attachment.type }}</span>
+                <svg class="task-detail__action-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="#999999">
+                  <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                </svg>
+                <svg class="task-detail__action-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="#999999">
+                  <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 111.414 1.414L7.414 5H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 11-1.414 1.414l-3-3z" clip-rule="evenodd" />
+                </svg>
               </div>
             </div>
-            <div v-else class="task-detail__no-attachments">
-              No attachments have been uploaded for this task yet.
-            </div>
-          </section>
-        </div>
+          </div>
+          <div v-else class="task-detail__no-attachments">
+            No attachments have been uploaded for this task yet.
+          </div>
+        </section>
       </div>
+    </div>
+    </div>
+
+    <!-- Action Buttons (Right-Aligned on Desktop, Stacked on Mobile) -->
+    <div class="task-detail__actions">
+      <template v-if="taskData.status === 'in_progress'">
+        <button
+          v-if="!taskData.isPaused"
+          class="task-detail__action-btn task-detail__action-btn--pause"
+          @click="handlePauseTask"
+          aria-label="Pause task"
+        >
+          Pause task
+        </button>
+        <button
+          v-else
+          class="task-detail__action-btn task-detail__action-btn--resume"
+          @click="handleResumeTask"
+          aria-label="Resume task"
+        >
+          Resume task
+        </button>
+        <button
+          class="task-detail__action-btn task-detail__action-btn--end"
+          @click="handleEndTask"
+          aria-label="End task"
+        >
+          End task
+        </button>
+      </template>
+      <template v-else-if="taskData.status === 'draft'">
+        <button
+          class="task-detail__action-btn task-detail__action-btn--start"
+          @click="handleStartTask"
+          aria-label="Start task"
+        >
+          Start task
+        </button>
+      </template>
     </div>
 
     <!-- Modals -->
@@ -229,7 +191,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onUnmounted, computed } from 'vue';
+import { ref, reactive, onMounted, onUnmounted, computed, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useRoleGuard } from '@/composables/useRoleGuard';
 import AgentModal from './AgentModal.vue';
@@ -249,21 +211,34 @@ const selectedRecipient = ref(null);
 // Task data with reactive state
 const taskData = reactive({
   id: null,
-  name: '',
-  status: '',
-  date: '',
-  startTime: '',
-  endTime: '',
-  priority: '',
-  description: [],
-  agentDetails: [],
-  clientDetails: [],
-  attachments: [],
+  name: 'Agent meeting with Christian',
+  status: 'in_progress', // Default to match screenshot, but dynamically loaded
+  date: '2024-12-10',
+  startTime: 'Fri, 16 May 02:00-3:00pm',
+  endTime: 'Fri, 16 May 02:00-3:00pm',
+  priority: 'Medium',
+  description: [
+    'Coordinate with the photographer for availability.',
+    'Ensure the property is cleaned and staged before the photoshoot.',
+    'Confirm the client’s approval for the timing.'
+  ],
+  agentDetails: [
+    { id: 1, name: 'Priscilla Candra', email: 'pristina@unpixel.com', avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739408381/Screenshot_2025-02-13_015617_mhjgby.png' },
+    { id: 2, name: 'Priscilla Candra', email: 'pristina@unpixel.com', avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739408381/Screenshot_2025-02-13_015617_mhjgby.png' }
+  ],
+  clientDetails: [
+    { id: 3, name: 'Priscilla Candra', email: 'pristina@unpixel.com', avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739408381/Screenshot_2025-02-13_015617_mhjgby.png' },
+    { id: 4, name: 'Priscilla Candra', email: 'pristina@unpixel.com', avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739408381/Screenshot_2025-02-13_015617_mhjgby.png' }
+  ],
+  attachments: [
+    { id: 1, name: 'Strategy-Pitch-Final.pptx', type: 'pptx' }
+  ],
   createdAt: '',
   updatedAt: '',
-  startedAt: '',
+  startedAt: new Date().toISOString(),
   lastEditedAt: '',
-  isPaused: false
+  isPaused: false,
+  totalTime: 0
 });
 
 // Timer state
@@ -313,6 +288,7 @@ const handleAgentSelect = async (agents) => {
       localStorage.setItem('tasks', JSON.stringify(tasks));
       console.log('Updated agents in localStorage:', tasks[taskIndex]);
     }
+    // Comment: Future API call to sync with backend for persistence.
   } catch (error) {
     console.error('Failed to update agents:', error);
     alert('Failed to update agents. Please try again.');
@@ -342,6 +318,7 @@ const handleClientSelect = async (clients) => {
       console.log('Updated clients in localStorage:', tasks[taskIndex]);
       alert('Clients updated successfully');
     }
+    // Comment: Future API call to sync with backend for persistence.
   } catch (error) {
     console.error('Failed to update clients:', error);
     alert('Failed to update clients. Please try again.');
@@ -361,6 +338,7 @@ const closeReminderModal = () => {
 const handleReminderSend = async (reminderData) => {
   try {
     alert(`Reminder sent to ${reminderData.recipient}`);
+    // Comment: Future API call to send reminder via backend, WebSocket for real-time updates.
   } catch (error) {
     console.error('Failed to send reminder:', error);
     alert('Failed to send reminder. Please try again.');
@@ -369,6 +347,7 @@ const handleReminderSend = async (reminderData) => {
 
 const handlePauseTask = async () => {
   try {
+    if (!confirm('Are you sure you want to pause this task?')) return;
     taskData.isPaused = true;
     pauseTimer();
     const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
@@ -384,6 +363,7 @@ const handlePauseTask = async () => {
       localStorage.setItem('tasks', JSON.stringify(tasks));
       console.log('Paused task in localStorage:', tasks[taskIndex]);
     }
+    // Comment: Future API call to update task status on backend, WebSocket for real-time updates.
   } catch (error) {
     console.error('Failed to pause task:', error);
     alert('Failed to pause task. Please try again.');
@@ -406,6 +386,7 @@ const handleResumeTask = async () => {
       localStorage.setItem('tasks', JSON.stringify(tasks));
       console.log('Resumed task in localStorage:', tasks[taskIndex]);
     }
+    // Comment: Future API call to update task status on backend, WebSocket for real-time updates.
   } catch (error) {
     console.error('Failed to resume task:', error);
     alert('Failed to resume task. Please try again.');
@@ -414,9 +395,7 @@ const handleResumeTask = async () => {
 
 const handleEndTask = async () => {
   try {
-    if (!confirm('Are you sure you want to end this task?')) {
-      return;
-    }
+    if (!confirm('Are you sure you want to end this task?')) return;
     stopTimer();
     taskData.status = 'completed';
     taskData.completedAt = new Date().toISOString();
@@ -435,9 +414,40 @@ const handleEndTask = async () => {
       console.log('Ended task in localStorage:', tasks[taskIndex]);
     }
     router.push('/tasks/completed');
+    // Comment: Future API call to update task status on backend, WebSocket for real-time updates, route guard for role-based access.
   } catch (error) {
     console.error('Failed to end task:', error);
     alert('Failed to end task. Please try again.');
+  }
+};
+
+const handleStartTask = async () => {
+  try {
+    if (!isTaskComplete()) {
+      router.push(`/tasks/${taskData.id}/edit`);
+      return;
+    }
+    taskData.status = 'in_progress';
+    taskData.isPaused = false;
+    taskData.startedAt = new Date().toISOString();
+    startTime.value = Date.now();
+    startTimer();
+    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+    const taskIndex = tasks.findIndex(t => t.id === taskData.id);
+    if (taskIndex !== -1) {
+      tasks[taskIndex] = {
+        ...tasks[taskIndex],
+        status: 'in_progress',
+        isPaused: false,
+        startedAt: taskData.startedAt
+      };
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+      console.log('Started task in localStorage:', tasks[taskIndex]);
+    }
+    // Comment: Future API call to update task status on backend, WebSocket for real-time updates.
+  } catch (error) {
+    console.error('Failed to start task:', error);
+    alert('Failed to start task. Please try again.');
   }
 };
 
@@ -475,6 +485,15 @@ const stopTimer = () => {
   taskData.totalTime = elapsedTime.value;
 };
 
+const isTaskComplete = () => {
+  return (
+    taskData.name &&
+    taskData.description?.length > 0 &&
+    taskData.agentDetails?.length > 0 &&
+    taskData.clientDetails?.length > 0
+  );
+};
+
 const formatDate = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
@@ -488,57 +507,15 @@ const formatDate = (dateString) => {
   });
 };
 
-const handleStartTask = async () => {
+// Watch for route changes to reload task data
+watch(() => route.params.id, () => {
+  loadTaskData();
+});
+
+const loadTaskData = async () => {
   try {
-    if (!isTaskComplete()) {
-      router.push(`/tasks/${taskData.id}/edit`);
-      return;
-    }
-    taskData.status = 'in_progress';
-    taskData.isPaused = false;
-    taskData.startedAt = new Date().toISOString();
-    startTime.value = Date.now();
-    startTimer();
-    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-    const taskIndex = tasks.findIndex(t => t.id === taskData.id);
-    if (taskIndex !== -1) {
-      tasks[taskIndex] = {
-        ...tasks[taskIndex],
-        status: 'in_progress',
-        isPaused: false,
-        startedAt: taskData.startedAt
-      };
-      localStorage.setItem('tasks', JSON.stringify(tasks));
-      console.log('Started task in localStorage:', tasks[taskIndex]);
-    }
-  } catch (error) {
-    console.error('Failed to start task:', error);
-    alert('Failed to start task. Please try again.');
-  }
-};
-
-const isTaskComplete = () => {
-  return (
-    taskData.name &&
-    taskData.description?.length > 0 &&
-    taskData.agentDetails?.length > 0 &&
-    taskData.clientDetails?.length > 0
-  );
-};
-
-onMounted(async () => {
-  try {
-    const hasAccess = await checkAccess(['agent', 'admin']);
-    if (!hasAccess) {
-      router.push('/unauthorized');
-      return;
-    }
-
     const taskId = parseInt(route.params.id);
-    console.log('Task ID from route:', taskId);
-
     const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-    console.log('All tasks in localStorage:', tasks);
     const task = tasks.find(t => t.id === taskId);
 
     if (!task) {
@@ -547,7 +524,6 @@ onMounted(async () => {
       return;
     }
 
-    console.log('Loading task with status:', task.status);
     Object.assign(taskData, {
       ...task,
       description: task.description || [],
@@ -558,20 +534,29 @@ onMounted(async () => {
     });
 
     if (task.status === 'in_progress' && task.startedAt) {
-      console.log('Initializing timer for in-progress task');
       startTime.value = new Date(task.startedAt).getTime();
       totalPausedTime.value = task.totalPausedTime || 0;
       if (!taskData.isPaused) startTimer();
     }
-
-    console.log('Task data loaded:', {
-      status: taskData.status,
-      startedAt: taskData.startedAt,
-      elapsedTime: elapsedTime.value
-    });
+    // Comment: Future API call to fetch task data from backend, WebSocket for real-time updates.
   } catch (error) {
     console.error('Failed to load task:', error);
     alert('Failed to load task. Please try again.');
+  }
+};
+
+onMounted(async () => {
+  try {
+    const hasAccess = await checkAccess(['agent', 'admin']);
+    if (!hasAccess) {
+      router.push('/unauthorized');
+      return;
+    }
+    loadTaskData();
+    // Comment: RoleGuard checks for Agent/Admin roles, restricts User access (read-only or redirect).
+  } catch (error) {
+    console.error('Failed to initialize task:', error);
+    alert('Failed to initialize task. Please try again.');
   }
 });
 
@@ -585,269 +570,95 @@ onUnmounted(() => {
 <style scoped>
 .task-detail {
   margin: 0 auto;
-  padding: 20px;
-}
-
-.task-detail__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 40px;
-  max-width: 1100px;
-  margin-left: auto;
-  margin-right: auto;
-  padding: 0 20px;
-}
-
-.task-detail__nav {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.task-detail__back {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #2563EB;
-  background: none;
-  border: none;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  padding: 0;
-}
-
-.task-detail__back-arrow {
-  width: 20px;
-  height: 20px;
-  vertical-align: middle;
-}
-
-.task-detail__subtitle {
-  color: #666666;
-  font-size: 14px;
-}
-
-.task-detail__profile {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.icon-container {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: #f0f0f0; /* Light grey background */
-  border-radius: 50%;
-}
-
-.task-detail__icon {
-  width: 24px; /* Slightly larger */
-  height: 24px;
-  stroke-width: 1; /* Thinner lines */
-}
-
-.notification-badge {
-  position: absolute;
-  top: -6px; /* Adjusted for better positioning */
-  right: -6px; /* Adjusted for better positioning */
-  width: 28px; /* Same size for both badges */
-  height: 28px; /* Same size for both badges */
-  background: red;
-  color: white;
-  font-size: 12px; /* Larger font for better fit in 28px circle */
-  font-weight: bold;
-  text-align: center;
-  line-height: 28px; /* Match height for perfect centering */
-  border-radius: 50%; /* Ensures perfect circle */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden; /* Prevents text from distorting circle */
-}
-
-.task-detail__user {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-}
-
-.task-detail__avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.task-detail__username {
-  color: #666666;
-  font-size: 14px;
-}
-
-.task-detail__dropdown-icon {
-  width: 16px;
-  height: 16px;
-  color: #666666;
-}
-
-.task-detail__content {
-  background: #FFFFFF;
-  padding: 45px 70px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  max-width: 980px;
-  margin: 0 auto;
   box-sizing: border-box;
-}
-
-.task-detail__task-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 24px;
-  width: 100%;
-}
-
-.task-detail__header-content {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.task-detail__title-group {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.task-detail__title {
-  font-size: 24px;
-  font-weight: 600;
-  color: #2563EB;
-  margin: 0;
-}
-
-.task-detail__status {
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  background: #E6F4EA;
-  color: #137333;
-}
-
-.task-detail__status--in_progress {
-  background: #E6F4EA;
-  color: #137333;
-}
-
-.task-detail__status--draft {
-  background: #F1F3F4;
-  color: #5F6368;
-}
-
-.task-detail__status--paused {
-  background: #FEF7E0;
-  color: #B95000;
-}
-
-.task-detail__status--completed {
-  background: #E8F0FE;
-  color: #1A73E8;
-}
-
-.task-detail__date {
-  color: #666666;
-  font-size: 14px;
-}
-
-.task-detail__header-actions {
-  display: flex;
-  gap: 12px;
-  margin-left: auto;
-}
-
-.task-detail__header-btn {
-  padding: 8px 24px;
-  border: none;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  color: #FFFFFF;
-}
-
-.task-detail__header-btn--pause {
-  background: #FF6B00;
-}
-
-.task-detail__header-btn--resume {
-  background: #2563EB;
-}
-
-.task-detail__header-btn--end {
-  background: #FF0000;
-}
-
-.task-detail__header-btn--start {
-  background: #137333;
 }
 
 .task-detail__grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 32px;
+  grid-template-columns: 1fr 1fr; /* Two equal columns */
+  gap: 32px; /* Gap between columns */
+}
+
+.task-detail__left-column {
+  background-color: #E6F0FF; 
+  border-radius: 8px; 
+  padding: 50px 90px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px; 
 }
 
 .task-detail__section {
-  background: #FFFFFF;
+  background: #ffffff; 
   border-radius: 8px;
-  padding: 24px;
-  margin-bottom: 24px;
+  padding: 35px;
+  border: 1px solid #E6E6E6;
 }
 
-.task-detail__section--agents,
-.task-detail__section--clients {
-  background: #E6F0FF;
+.taskdetails{
+  background: #ffffff; 
+  border-radius: 8px;
+  padding: 15px 20px;
+  border: 1px solid #E6E6E6;
 }
 
-.task-detail__section--description {
-  background: #F5F5F5;
+.addflexbox{
+  display: flex;
+  margin:auto;
+  align-items:center;
+  margin-bottom:8px;
+  justify-content: space-between;
+}
+
+.task-desc__right-column {
+  background-color: white; 
+  border-radius: 8px;
+  padding: 10px; 
+  display: flex;
+  flex-direction: column;
+  gap: 20px; 
+}
+
+.task-detail__column.description {
+  border: 1px solid #E6E6E6;
+  border-radius: 8px;
+  padding: 35px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .task-detail__section-title {
-  font-size: 18px;
+  /* font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; */
+  font-size: 14px;
   font-weight: 600;
-  color: #666666;
-  margin: 0 0 12px;
+  color: rgba(52, 51, 51, 0.8);
+  margin-bottom:-1px;
+  padding:0;
 }
 
 .task-detail__section-subtitle {
-  color: #999999;
-  font-size: 14px;
-  margin: 0 0 16px;
+  /* font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; */
+  color: #868585;
+  font-weight: 400;
+  font-size: 13px;
+  margin: 1px 0 18px;
 }
 
 .task-detail__add-btn {
-  background: #2563EB;
+  background: #007BFF;
   color: #FFFFFF;
   border: none;
   border-radius: 6px;
-  padding: 10px 20px;
+  padding: 7px 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   margin-bottom: 20px;
-  transition: background-color 0.2s;
+  transition: opacity 0.2s ease;
 }
 
 .task-detail__add-btn:hover {
-  background: #1D4ED8;
+  opacity: 0.8;
 }
 
 .task-detail__agent-list,
@@ -862,10 +673,23 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: #FFFFFF;
+  margin-top:5px;
   padding: 12px;
   border-radius: 6px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(7, 79, 144, 0.35);
+  transition: box-shadow 0.2s ease;
+}
+
+.task-detail__agent-card:hover,
+.task-detail__client-card:hover {
+  border: 1px solid rgba(7, 79, 144, 0.6);
+  transition: box-shadow 0.2s ease;
+  cursor:pointer;
+}
+
+.task-detail__agent-card:hover,
+.task-detail__client-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .task-detail__agent-avatar,
@@ -886,6 +710,7 @@ onUnmounted(() => {
 
 .task-detail__agent-name,
 .task-detail__client-name {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
   font-weight: 500;
   color: #111827;
@@ -893,24 +718,27 @@ onUnmounted(() => {
 
 .task-detail__agent-email,
 .task-detail__client-email {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 12px;
   color: #666666;
 }
 
 .task-detail__reminder-btn {
-  background: #E6F0FF;
-  color: #007BFF;
+  background: #EAE8E8;
+  color: rgb(20, 20, 20);
   border: none;
   border-radius: 8px;
-  padding: 15px;
+  padding: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 400;
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: opacity 0.2s ease;
 }
 
 .task-detail__reminder-btn:hover {
-  opacity: 0.8;
+  background: #007BFF;
+  color:white;
 }
 
 .task-detail__description-header {
@@ -921,23 +749,22 @@ onUnmounted(() => {
 }
 
 .task-detail__priority {
-  padding: 5px 10px;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.task-detail__priority--medium {
   background: #FFC107;
   color: #FFFFFF;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .task-detail__description-list {
   list-style-type: disc;
   margin: 0;
   padding-left: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: #374151;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.5;
 }
 
@@ -949,59 +776,85 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  border-top: 1px solid #E6E6E6;
-  padding-top: 16px;
 }
 
 .task-detail__timeline-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 10px 0;
 }
 
 .task-detail__timeline-label {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: #666666;
   font-size: 14px;
   font-weight: 500;
 }
 
+.task-detail__timeline-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.task-detail__checkbox-icon {
+  width: 20px;
+  height: 20px;
+}
+
 .task-detail__timeline-time {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: #111827;
   font-size: 14px;
+}
+
+.task-detail__attachments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .task-detail__attachment {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px;
-  border: 1px solid #E6E6E6;
-  border-radius: 6px;
-  margin-top: 16px;
+  padding: 10px;
+  border-top: 1px solid #E6E6E6;
 }
 
 .task-detail__attachment-icon {
-  width: 24px;
-  height: 24px;
-  color: #666666;
+  width: 20px;
+  height: 20px;
+  fill: #999999;
 }
 
 .task-detail__attachment-name {
   flex: 1;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
   color: #666666;
 }
 
-.task-detail__attachment-type {
-  font-size: 12px;
-  color: #6B7280;
-  padding: 2px 6px;
-  background: #E5E7EB;
-  border-radius: 4px;
-  margin-left: auto;
+.task-detail__attachment-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.task-detail__action-icon {
+  width: 20px;
+  height: 20px;
+  fill: #999999;
+  cursor: pointer;
+  transition: fill 0.2s ease;
+}
+
+.task-detail__action-icon:hover {
+  fill: #007BFF;
 }
 
 .task-detail__no-attachments {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: #666666;
   font-size: 14px;
   text-align: center;
@@ -1011,87 +864,85 @@ onUnmounted(() => {
   margin-top: 8px;
 }
 
-.task-detail__attachments-list {
+.task-detail__actions {
   display: flex;
-  flex-direction: column;
+  justify-content: flex-end;
   gap: 12px;
+  margin-top: 20px;
+  padding: 0 20px;
 }
 
-.task-detail__timer {
-  text-align: center;
-  margin: 20px 0 32px;
-  padding: 16px;
-  background: #F3F4F6;
-  border-radius: 8px;
-  border: 1px solid #E5E7EB;
+.task-detail__action-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
 }
 
-.task-detail__timer--paused {
-  background: #FEF7E0;
-  border-color: #FDE68A;
+.task-detail__action-btn--pause {
+  background: #FFA500;
+  color: #FFFFFF;
 }
 
-.task-detail__timer-label {
-  font-size: 14px;
-  color: #666666;
-  margin-bottom: 8px;
+.task-detail__action-btn--resume {
+  background: #28A745;
+  color: #FFFFFF;
 }
 
-.task-detail__timer-display {
-  font-size: 32px;
-  font-weight: 600;
-  color: #2563EB;
-  font-family: monospace;
+.task-detail__action-btn--end {
+  background: #DC3545;
+  color: #FFFFFF;
 }
 
-.task-detail__timer--paused .task-detail__timer-display {
-  color: #B95000;
+.task-detail__action-btn--start {
+  background: #28A745;
+  color: #FFFFFF;
 }
 
-@media (max-width: 1200px) {
-  .task-detail__content {
-    margin: 0 20px;
-    padding: 30px;
-  }
-}
-
-@media (max-width: 1023px) {
-  .task-detail__grid {
-    grid-template-columns: 1fr;
-  }
+.task-detail__action-btn:hover {
+  opacity: 0.8;
 }
 
 @media (max-width: 767px) {
   .task-detail {
-    padding: 16px;
+    padding: 10px;
   }
-  .task-detail__header {
-    padding: 0 16px;
+  .task-detail__grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 10px;
+  }
+  .task-detail__actions {
     flex-direction: column;
-    gap: 16px;
+    align-items: flex-end;
+    gap: 10px;
+    padding: 0 10px;
   }
-  .task-detail__profile {
+  .task-detail__action-btn {
     width: 100%;
-    justify-content: flex-end;
+    text-align: center;
   }
-  .task-detail__content {
-    padding: 20px;
-    margin: 0 16px;
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .task-detail__grid {
+    gap: 24px;
   }
-  .task-detail__header-content {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
+  .task-detail__actions {
+    padding: 0 15px;
   }
-  .task-detail__header-actions {
-    width: 100%;
-    justify-content: flex-end;
+}
+
+@media (min-width: 1024px) {
+  .task-detail__grid {
+    gap: 32px;
   }
-  .task-detail__header-btn {
-    flex: 1;
-  }
-  .task-detail__timer {
-    margin: 16px 0 24px;
+  .task-detail__actions {
+    padding: 0 20px;
   }
 }
 </style>
