@@ -1,11 +1,10 @@
-<!-- TaskCreate.vue -->
 <template>
   <main class="task-create" role="main">
     <!-- Header Section -->
     <header class="task-create__header">
       <div class="task-create__nav">
         <button class="task-create__back" @click="handleBack" aria-label="Back to tasks">
-          <span class="task-create__back-arrow">&lt;</span>
+          <span class="task-create__back-arrow"><</span>
           Create new task
         </button>
         <div class="task-create__subtitle">
@@ -26,7 +25,7 @@
         <div class="task-create__user">
           <img
            src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1739408381/Screenshot_2025-02-13_015617_mhjgby.png"
-        alt="Profile"
+           alt="Profile"
             class="task-create__avatar"
             @error="handleAvatarError"
           >
@@ -51,7 +50,7 @@
             id="taskName"
             v-model="taskData.name"
             class="task-create__input"
-            placeholder="Visit offshore islan"
+            placeholder="Visit offshore island"
             required
             aria-required="true"
           >
@@ -126,6 +125,18 @@
           </select>
         </div>
 
+        <!-- Description Input -->
+        <div class="task-create__form-group">
+          <label for="description" class="task-create__label">Description (use ## to separate points)</label>
+          <textarea
+            id="description"
+            v-model="taskDescription"
+            class="task-create__textarea"
+            placeholder="Plan the visit ## Confirm travel arrangements"
+            rows="4"
+          ></textarea>
+        </div>
+
         <!-- Agent Selection -->
         <div class="task-create__form-group">
           <label for="agent" class="task-create__label">Add an agent</label>
@@ -148,7 +159,7 @@
                 @click.stop="removeAgent(agent)"
                 aria-label="Remove agent"
               >
-                &times;
+                ×
               </button>
             </div>
           </div>
@@ -176,7 +187,7 @@
                 @click.stop="removeClient(client)"
                 aria-label="Remove client"
               >
-                &times;
+                ×
               </button>
             </div>
           </div>
@@ -208,7 +219,7 @@
               <span class="task-create__file-name">{{ file.name }}</span>
               <span class="task-detail__file-type">{{ file.type }}</span>
               <button class="task-create__file-remove" @click="removeFile(index)" aria-label="Remove file">
-                &times;
+                ×
               </button>
             </div>
           </div>
@@ -272,6 +283,7 @@ const route = useRoute()
 const { checkAccess } = useRoleGuard()
 
 const fileInput = ref(null)
+const taskDescription = ref('') // New ref for textarea input
 
 const taskData = reactive({
   name: '',
@@ -284,8 +296,9 @@ const taskData = reactive({
   agentDetails: [],
   clients: [],
   clientDetails: [],
-  status: 'in_progress', // Default status for new tasks
-  attachments: []
+  status: 'in_progress',
+  attachments: [],
+  description: [] // Add description as an array
 })
 
 // Modal states
@@ -322,7 +335,6 @@ const removeAgent = (agent) => {
   taskData.agentDetails = taskData.agentDetails.filter(a => a.id !== agent.id)
 }
 
-// Methods for client modal
 const openClientModal = () => {
   isClientModalOpen.value = true
 }
@@ -343,16 +355,12 @@ const removeClient = (client) => {
   taskData.clientDetails = taskData.clientDetails.filter(c => c.id !== client.id)
 }
 
-// Navigation handling
 const handleBack = () => {
-  // If we're editing an existing draft, save changes automatically and go back
   if (route.query.draftId) {
     saveDraftChanges()
     router.push('/tasks/drafts')
     return
   }
-
-  // For new tasks, show confirmation only if there's unsaved data
   if (!route.query.draftId && hasFormData()) {
     showDraftConfirm.value = true
   } else {
@@ -364,9 +372,10 @@ const saveDraftChanges = () => {
   const tasks = JSON.parse(localStorage.getItem('tasks') || '[]')
   const draftId = parseInt(route.query.draftId)
   const draftIndex = tasks.findIndex(t => t.id === draftId)
-
   if (draftIndex !== -1) {
-    // Update the existing draft with current form data
+    const descriptionArray = taskDescription.value
+      ? taskDescription.value.split('##').map(item => `- ${item.trim()}`).filter(item => item !== '- ')
+      : tasks[draftIndex].description || [];
     const updatedDraft = {
       ...tasks[draftIndex],
       ...taskData,
@@ -376,16 +385,15 @@ const saveDraftChanges = () => {
       agentDetails: selectedAgents.value,
       clientDetails: selectedClients.value,
       status: 'draft',
-      attachments: taskData.attachments
+      attachments: taskData.attachments,
+      description: descriptionArray
     }
-
     tasks[draftIndex] = updatedDraft
     localStorage.setItem('tasks', JSON.stringify(tasks))
   }
 }
 
-// Add auto-save on form changes
-watch([taskData, selectedAgents, selectedClients], () => {
+watch([taskData, selectedAgents, selectedClients, taskDescription], () => {
   if (route.query.draftId) {
     saveDraftChanges()
   }
@@ -397,30 +405,32 @@ const hasFormData = () => {
     taskData.endDate ||
     taskData.agents.length > 0 ||
     taskData.clients.length > 0 ||
-    taskData.attachments.length > 0
+    taskData.attachments.length > 0 ||
+    taskDescription.value
 }
 
 const handleDraftSave = async () => {
   try {
+    const descriptionArray = taskDescription.value
+      ? taskDescription.value.split('##').map(item => `- ${item.trim()}`).filter(item => item !== '- ')
+      : [];
     const draftData = {
       ...taskData,
       id: Date.now(),
-      title: taskData.name || 'Untitled Task', // Ensure we have a title
+      title: taskData.name || 'Untitled Task',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       status: 'draft',
       agentDetails: selectedAgents.value,
       clientDetails: selectedClients.value,
-      lastEditedAt: new Date().toISOString(), // Add last edited timestamp
-      isPartiallyComplete: true, // Flag to indicate it's a draft
-      attachments: taskData.attachments
+      lastEditedAt: new Date().toISOString(),
+      isPartiallyComplete: true,
+      attachments: taskData.attachments,
+      description: descriptionArray
     }
-
-    // Store in localStorage with more metadata
     const tasks = JSON.parse(localStorage.getItem('tasks') || '[]')
     tasks.push(draftData)
     localStorage.setItem('tasks', JSON.stringify(tasks))
-
     router.push('/tasks')
   } catch (error) {
     console.error('Failed to save draft:', error)
@@ -433,62 +443,43 @@ const handleDraftCancel = () => {
   router.push('/tasks')
 }
 
-// Update handleSubmit to include proper metadata
 const handleSubmit = async () => {
   try {
-    // Validate dates
     const startDateTime = new Date(`${taskData.startDate} ${taskData.startTime}`)
     const endDateTime = new Date(`${taskData.endDate} ${taskData.endTime}`)
-
     if (endDateTime <= startDateTime) {
       alert('End date/time must be after start date/time')
       return
     }
-
-    // Validate agents and clients
     if (taskData.agents.length === 0) {
       alert('Please select at least one agent')
       return
     }
-
     if (taskData.clients.length === 0) {
       alert('Please select at least one client')
       return
     }
-
-    // Get current timestamp
     const now = new Date()
-
-    // If we're editing a draft, we'll use its ID, otherwise generate new one
     const taskId = route.query.draftId ? parseInt(route.query.draftId) : Date.now()
-
-    // Prepare task data with complete information
+    const descriptionArray = taskDescription.value
+      ? taskDescription.value.split('##').map(item => `- ${item.trim()}`).filter(item => item !== '- ')
+      : [];
     const completeTaskData = {
       ...taskData,
       id: taskId,
-      title: taskData.name, // Store the actual title
+      title: taskData.name,
       createdAt: now.toISOString(),
       updatedAt: now.toISOString(),
-      startedAt: now.toISOString(), // Add when the task started
+      startedAt: now.toISOString(),
       status: 'in_progress',
       agentDetails: selectedAgents.value,
       clientDetails: selectedClients.value,
-      formattedStartDate: startDateTime.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      }),
-      formattedStartTime: startDateTime.toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit'
-      }),
-      attachments: taskData.attachments
+      formattedStartDate: startDateTime.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+      formattedStartTime: startDateTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+      attachments: taskData.attachments,
+      description: descriptionArray
     }
-
-    // Get existing tasks
     const tasks = JSON.parse(localStorage.getItem('tasks') || '[]')
-
-    // If we're editing a draft, remove it
     if (route.query.draftId) {
       const draftId = parseInt(route.query.draftId)
       const taskIndex = tasks.findIndex(t => t.id === draftId)
@@ -496,11 +487,8 @@ const handleSubmit = async () => {
         tasks.splice(taskIndex, 1)
       }
     }
-
-    // Add the new in-progress task
     tasks.push(completeTaskData)
     localStorage.setItem('tasks', JSON.stringify(tasks))
-
     router.push('/tasks/in-progress')
   } catch (error) {
     console.error('Failed to create task:', error)
@@ -508,13 +496,10 @@ const handleSubmit = async () => {
   }
 }
 
-// Add method to load draft data when continuing editing
 const loadDraftData = (draftId) => {
   const tasks = JSON.parse(localStorage.getItem('tasks') || '[]')
   const draft = tasks.find(task => task.id === draftId)
-
   if (draft) {
-    // Populate form with draft data
     taskData.name = draft.title
     taskData.startDate = draft.startDate
     taskData.startTime = draft.startTime
@@ -526,8 +511,8 @@ const loadDraftData = (draftId) => {
     taskData.clients = draft.clients
     taskData.clientDetails = draft.clientDetails
     taskData.attachments = draft.attachments
-
-    // Update selected agents and clients
+    taskData.description = draft.description || []
+    taskDescription.value = draft.description ? draft.description.map(item => item.replace('- ', '')).join(' ## ') : ''
     selectedAgents.value = draft.agentDetails
     selectedClients.value = draft.clientDetails
   }
@@ -540,7 +525,6 @@ const triggerFileInput = () => {
 const handleFileUpload = (event) => {
   const files = Array.from(event.target.files)
   files.forEach(file => {
-    // Create a unique ID for each file
     const fileData = {
       id: Date.now() + Math.random().toString(36).substr(2, 9),
       name: file.name,
@@ -550,7 +534,6 @@ const handleFileUpload = (event) => {
     }
     taskData.attachments.push(fileData)
   })
-  // Reset file input
   event.target.value = ''
 }
 
@@ -562,15 +545,12 @@ const getFileExtension = (filename) => {
   return filename.slice((filename.lastIndexOf(".") - 1 >>> 0) + 2).toUpperCase()
 }
 
-// Check if we're editing a draft on component mount
 onMounted(async () => {
   const hasAccess = await checkAccess(['agent', 'admin'])
   if (!hasAccess) {
     router.push('/unauthorized')
     return
   }
-
-  // Check if we're editing a draft
   const draftId = route.query.draftId
   if (draftId) {
     loadDraftData(parseInt(draftId))
