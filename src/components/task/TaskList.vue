@@ -14,7 +14,7 @@
       @click="handleTaskClick(task)"
     >
       <div class="task-content">
-        <div class="task-title">{{ task.title }}</div>
+        <div class="task-title">{{ truncateTitle(task.title) }}</div>
 
         <!-- In Progress -->
         <div v-if="task.status === 'in_progress'" class="status-text">
@@ -130,18 +130,25 @@ const handleClearAll = () => {
 
 const filteredTasks = computed(() => {
   const status = route.path.split('/').pop();
-  return tasks.value.filter(task => {
-    switch(status) {
-      case 'in-progress':
-        return task.status === 'in_progress';
-      case 'drafts':
-        return task.status === 'draft';
-      case 'completed':
-        return task.status === 'completed';
-      default:
-        return true;
-    }
-  });
+  return tasks.value
+    .filter(task => {
+      switch(status) {
+        case 'in-progress':
+          return task.status === 'in_progress';
+        case 'drafts':
+          return task.status === 'draft';
+        case 'completed':
+          return task.status === 'completed';
+        default:
+          return true;
+      }
+    })
+    .sort((a, b) => {
+      // Sort by updatedAt (edited) or createdAt (created), newest first
+      const dateA = new Date(a.updatedAt || a.createdAt || a.id).getTime();
+      const dateB = new Date(b.updatedAt || b.createdAt || b.id).getTime();
+      return dateB - dateA; // Newest (most recently created/edited) first
+    });
 });
 
 const handleTaskClick = (task) => {
@@ -163,6 +170,12 @@ const formatDate = (date) => {
     minute: '2-digit',
     hour12: true
   });
+};
+
+// Truncate title to 25 characters with ellipsis
+const truncateTitle = (title) => {
+  if (!title) return '';
+  return title.length > 25 ? title.substring(0, 25) + '...' : title;
 };
 </script>
 
@@ -204,7 +217,7 @@ const formatDate = (date) => {
 
 .task-title {
   font-size: 16px;
-  padding-left:20px;
+  padding-left: 20px;
   color: #111827;
   line-height: 20px;
   flex: 1;

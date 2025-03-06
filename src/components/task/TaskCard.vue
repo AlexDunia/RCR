@@ -7,7 +7,6 @@
       'task-card--draft': task.status === 'draft',
       'task-card--progress': task.status === 'in_progress'
     }"
-    @click="handleTaskClick"
   >
     <div class="task-card__content">
       <h3 class="task-title">{{ task.title || task.name }}</h3>
@@ -16,7 +15,7 @@
           <span class="task-status__badge task-status__badge--draft">Draft</span>
           <span class="task-date">Last edited: {{ formatDate(task.lastEditedAt || task.updatedAt) }}</span>
         </div>
-        <div v-else-if="task.status === 'in_progress'" class="task-status">
+        <div v-else-if="task.status === 'in_progress'" class="task-status" @click="handleTaskClick">
           <span class="task-status__badge task-status__badge--progress">In Progress</span>
           <span class="task-date">Started: {{ formatDate(task.startedAt) }}</span>
         </div>
@@ -56,31 +55,27 @@ const formatDate = (date) => {
 };
 
 const handleTaskClick = () => {
-  if (props.task?.status === 'draft') {
-    router.push({ name: 'TaskCreate', query: { draftId: props.task.id } });
-  } else {
-    router.push({ name: 'TaskDetail', params: { id: props.task.id } });
-  }
+  if (!props.task || props.task.status === 'draft') return;
+  router.push({ name: 'TaskDetail', params: { id: props.task.id } });
 };
 
 const handleContinueEdit = () => {
-  router.push(`/tasks/create?draftId=${props.task.id}`);
+  router.push({ name: 'TaskCreate', query: { draftId: props.task.id } });
 };
 </script>
 
 <style scoped>
-/* .task-card {
+.task-card {
   background-color: #FFFFFF;
   padding: 1.25rem;
   border-radius: 8px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  cursor: pointer;
   transition: all 0.2s ease;
   border: 1px solid transparent;
   margin-bottom: 1rem;
-} */
+}
 
 .task-card:hover {
   border-color: #2563EB;
@@ -90,11 +85,13 @@ const handleContinueEdit = () => {
 .task-card--draft {
   background-color: #F9FAFB;
   border: 1px dashed #D1D5DB;
+  cursor: default;
 }
 
 .task-card--progress {
   background-color: #F0F9FF;
   border: 1px solid #E5E7EB;
+  cursor: pointer;
 }
 
 .task-card--draft:hover {

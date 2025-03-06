@@ -68,7 +68,10 @@ const routes = [
     component: TaskCreate,
     meta: {
       requiresAuth: true,
-      allowedRoles: ['agent', 'admin'] // Already correct
+      allowedRoles: ['agent', 'admin'],
+      hideSidebar: true,
+      hideHeader: true,
+      background: '#FFFFFF'
     }
   },
   {
@@ -77,7 +80,7 @@ const routes = [
     component: TaskDetail,
     meta: {
       requiresAuth: true,
-      allowedRoles: ['agent', 'admin'], // Changed 'roles' to 'allowedRoles'
+      allowedRoles: ['agent', 'admin'],
       hideSidebar: true,
       hideHeader: true,
       background: '#FFFFFF'

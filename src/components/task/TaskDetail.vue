@@ -1,62 +1,77 @@
 <template>
   <!-- Header Section -->
-  <header class="task-detail__header">
-    <div class="taskdetailflex">
-      <div class="task-detail__header-left">
-        <h1 class="task-detail__title">{{ taskData.name }}</h1>
-        <div class="task-detail__status-group">
-          <div class="task-detail__date">Scheduled: <span class="task-detail__color">{{ taskData.startDate }}</span></div>
+  <header class="task-detail__headerbg">
+    <div class="task-detail__header">
+      <div class="task-detail__flex-container">
+        <div class="task-detail__header-left">
+          <h1 class="task-detail__title" @mouseover="showTitleTooltip" @mouseleave="hideTitleTooltip" @mousemove="updateTitleTooltipPosition($event)">{{ taskData.name }}</h1>
+          <div v-if="isTitleTooltipVisible" class="task-detail__title-tooltip" :style="{ left: titleTooltipX + 'px', top: titleTooltipY + 'px' }">
+            {{ taskData.name }}
+          </div>
+          <div class="task-detail__status-group">
+            <div class="task-detail__date">Scheduled: <span class="task-detail__color">{{ taskData.startDate }}</span></div>
+          </div>
+        </div>
+        <div class="task-detail__status-container">
+          <span class="task-detail__status" :class="'task-detail__status--' + taskData.status.toLowerCase()">
+            {{ taskData.status }}
+          </span>
         </div>
       </div>
-      <div class="taskstatusdiv">
-        <span class="task-detail__status" :class="'task-detail__status--' + taskData.status.toLowerCase()">{{ taskData.status }}</span>
+      <div
+        v-if="taskData.status === 'in_progress'"
+        class="task-detail__timer"
+        :class="{ 'task-detail__timer--paused': taskData.isPaused }"
+      >
+        <div class="task-detail__timer-label">
+          {{ taskData.isPaused ? 'Timer paused at:' : 'Time elapsed:' }}
+        </div>
+        <div class="task-detail__timer-display">{{ formattedElapsedTime }}</div>
       </div>
-    </div>
-    <div
-      v-if="taskData.status === 'in_progress'"
-      class="task-detail__timer"
-      :class="{ 'task-detail__timer--paused': taskData.isPaused }"
-    >
-      <div class="task-detail__timer-label">
-        {{ taskData.isPaused ? 'Timer paused at:' : 'Time elapsed:' }}
+      <div class="task-detail__header-actions">
+        <template v-if="taskData.status === 'in_progress'">
+          <button
+            v-if="!taskData.isPaused"
+            class="task-detail__action-btn task-detail__action-btn--pause"
+            @click="showTaskConfirmation('pause')"
+            aria-label="Pause task"
+          >
+            Pause task
+          </button>
+          <button
+            v-else
+            class="task-detail__action-btn task-detail__action-btn--resume"
+            @click="showTaskConfirmation('resume')"
+            aria-label="Resume task"
+          >
+            Resume task
+          </button>
+          <button
+            class="task-detail__action-btn task-detail__action-btn--end"
+            @click="showTaskConfirmation('end')"
+            aria-label="End task"
+          >
+            End task
+          </button>
+          <button
+            :class="['task-detail__action-btn', 'task-detail__action-btn--save', { 'task-detail__action-btn--active': isSaveActive }]"
+            @click="showTaskConfirmation('save')"
+            :aria-label="isSaveActive ? 'Save changes' : 'No changes to save'"
+            :disabled="!isSaveActive"
+          >
+            Save
+          </button>
+        </template>
+        <template v-else-if="taskData.status === 'draft'">
+          <button
+            class="task-detail__action-btn task-detail__action-btn--start"
+            @click="handleStartTask"
+            aria-label="Start task"
+          >
+            Start task
+          </button>
+        </template>
       </div>
-      <div class="task-detail__timer-display">{{ formattedElapsedTime }}</div>
-    </div>
-    <div class="task-detail__header-actions">
-      <template v-if="taskData.status === 'in_progress'">
-        <button
-          v-if="!taskData.isPaused"
-          class="task-detail__action-btn task-detail__action-btn--pause"
-          @click="showConfirmation('pause')"
-          aria-label="Pause task"
-        >
-          Pause task
-        </button>
-        <button
-          v-else
-          class="task-detail__action-btn task-detail__action-btn--resume"
-          @click="showConfirmation('resume')"
-          aria-label="Resume task"
-        >
-          Resume task
-        </button>
-        <button
-          class="task-detail__action-btn task-detail__action-btn--end"
-          @click="showConfirmation('end')"
-          aria-label="End task"
-        >
-          End task
-        </button>
-      </template>
-      <template v-else-if="taskData.status === 'draft'">
-        <button
-          class="task-detail__action-btn task-detail__action-btn--start"
-          @click="handleStartTask"
-          aria-label="Start task"
-        >
-          Start task
-        </button>
-      </template>
     </div>
   </header>
 
@@ -66,17 +81,24 @@
       <div class="task-detail__left-column">
         <!-- Agents Section -->
         <section class="task-detail__section" aria-label="Agents involved in this task">
-          <div class="addflexbox">
-            <div class="agentinvolved">
+          <div class="task-detail__add-flex">
+            <div class="task-detail__agent-info-header">
               <h2 class="task-detail__section-title">Agents involved in this task</h2>
               <p class="task-detail__section-subtitle">Add agents from your contacts</p>
             </div>
-            <div class="addbutton">
+            <div class="task-detail__add-button-container">
               <button class="task-detail__add-btn" @click="openAgentModal" aria-label="Add agent">+ Add agent</button>
             </div>
           </div>
           <div class="task-detail__agent-list">
-            <div v-for="agent in taskData.agentDetails" :key="agent.id" class="task-detail__agent-card" role="listitem">
+            <div
+              v-for="agent in taskData.agentDetails"
+              :key="agent.id"
+              class="task-detail__agent-card"
+              role="listitem"
+              @mouseover="showAgentAnimation(agent.id)"
+              @mouseleave="hideAgentAnimation(agent.id)"
+            >
               <img :src="agent.avatar" :alt="agent.name" class="task-detail__agent-avatar" @error="handleAvatarError">
               <div class="task-detail__agent-info">
                 <span class="task-detail__agent-name">{{ agent.name }}</span>
@@ -89,23 +111,42 @@
               >
                 Send reminder
               </button>
+              <button
+                class="task-detail__delete-btn"
+                @click="showAgentDeleteConfirmation(agent)"
+                :aria-label="'Delete ' + agent.name"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  <line x1="10" y1="11" x2="10" y2="17"></line>
+                  <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>
+              </button>
             </div>
           </div>
         </section>
 
         <!-- Clients Section -->
         <section class="task-detail__section" aria-label="Clients involved in this task">
-          <div class="addflexbox">
-            <div class="agentinvolved">
+          <div class="task-detail__add-flex">
+            <div class="task-detail__agent-info-header">
               <h2 class="task-detail__section-title">Clients involved in this task</h2>
               <p class="task-detail__section-subtitle">Add clients from your contacts</p>
             </div>
-            <div class="addbutton">
+            <div class="task-detail__add-button-container">
               <button class="task-detail__add-btn" @click="openClientModal" aria-label="Add client">+ Add client</button>
             </div>
           </div>
           <div class="task-detail__agent-list">
-            <div v-for="client in taskData.clientDetails" :key="client.id" class="task-detail__agent-card" role="listitem">
+            <div
+              v-for="client in taskData.clientDetails"
+              :key="client.id"
+              class="task-detail__agent-card"
+              role="listitem"
+              @mouseover="showClientAnimation(client.id)"
+              @mouseleave="hideClientAnimation(client.id)"
+            >
               <img :src="client.avatar" :alt="client.name" class="task-detail__agent-avatar" @error="handleAvatarError">
               <div class="task-detail__agent-info">
                 <span class="task-detail__agent-name">{{ client.name }}</span>
@@ -118,22 +159,38 @@
               >
                 Send reminder
               </button>
+              <button
+                class="task-detail__delete-btn"
+                @click="showClientDeleteConfirmation(client)"
+                :aria-label="'Delete ' + client.name"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  <line x1="10" y1="11" x2="10" y2="17"></line>
+                  <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>
+              </button>
             </div>
           </div>
         </section>
       </div>
 
       <!-- Right Column: Task Description -->
-      <div class="task-desc__right-column">
+      <div class="task-detail__right-column">
         <div class="task-detail__column description">
           <!-- Task Description Section -->
           <section aria-label="Task description">
             <div class="task-detail__description-header taskdetails">
               <h2 class="task-detail__section-title">Task description</h2>
-              <span :class="['task-detail__priority', `task-detail__priority--${taskData.priority.toLowerCase()}`]">{{ taskData.priority }}</span>
+              <span :class="['task-detail__priority', `task-detail__priority--${taskData.priority.toLowerCase()}`]">
+                {{ taskData.priority }}
+              </span>
             </div>
             <ul class="task-detail__description-list">
-              <p v-for="(item, index) in taskData.description" :key="index">{{ item }}</p>
+              <li v-for="(item, index) in taskData.description" :key="index" class="task-detail__description-item">
+                {{ item }}
+              </li>
             </ul>
           </section>
 
@@ -165,21 +222,84 @@
           <section class="task-detail__section task-detail__section--attachments" aria-label="Task attachments">
             <h2 class="task-detail__section-title">Attachments</h2>
             <div v-if="taskData.attachments && taskData.attachments.length > 0" class="task-detail__attachments-list">
-              <div class="task-detail__attachment" v-for="attachment in taskData.attachments" :key="attachment.id" role="listitem">
-                <svg class="task-detail__attachment-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="#999999">
-                  <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd" />
+              <div v-for="attachment in taskData.attachments" :key="attachment.id" class="task-detail__attachment" role="listitem">
+                <svg class="task-detail__attachment-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#A1A1A1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10 9 9 9 8 9"></polyline>
                 </svg>
                 <span class="task-detail__attachment-name">{{ attachment.name }}</span>
                 <div class="task-detail__attachment-actions">
-                  <svg class="task-detail__action-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="#999999">
-                    <path fill-rule="evenodd" d="M13.586 3.586a2 2 0 112.828 2.828L10.828 10l5.586 5.586a2 2 0 11-2.828 2.828L8 12.828l-5.586 5.586a2 2 0 11-2.828-2.828L5.172 10 0.586 4.414a2 2 0 112.828-2.828L8 7.172l5.586-5.586z" clip-rule="evenodd" />
+                  <!-- Edit Icon (Purple Pencil) -->
+                  <svg
+                    @click="showAttachmentConfirmation('edit', attachment)"
+                    class="task-detail__action-icon task-detail__action-icon--edit"
+                    @mouseover="updateMousePosition($event, 'attachment'); showAttachmentTooltip('edit', attachment.name)"
+                    @mouseleave="hideAttachmentTooltip"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#A78BFA"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                   </svg>
-                  <svg class="task-detail__action-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="#999999">
-                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                  <div v-if="isAttachmentTooltipVisible && attachmentTooltipAction === 'edit'" class="task-detail__attachment-tooltip" :style="{ left: attachmentTooltipX + 'px', top: attachmentTooltipY + 'px' }">
+                    Edit {{ attachmentTooltipName }}
+                  </div>
+                  <!-- Delete Icon (Red Trash Bin) -->
+                  <svg
+                    @click="showAttachmentConfirmation('delete', attachment)"
+                    class="task-detail__action-icon task-detail__action-icon--delete"
+                    @mouseover="updateMousePosition($event, 'attachment'); showAttachmentTooltip('delete', attachment.name)"
+                    @mouseleave="hideAttachmentTooltip"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#F87171"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
                   </svg>
-                  <svg class="task-detail__action-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="#999999">
-                    <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 111.414 1.414L7.414 5H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 11-1.414 1.414l-3-3z" clip-rule="evenodd" />
+                  <div v-if="isAttachmentTooltipVisible && attachmentTooltipAction === 'delete'" class="task-detail__attachment-tooltip" :style="{ left: attachmentTooltipX + 'px', top: attachmentTooltipY + 'px' }">
+                    Delete {{ attachmentTooltipName }}
+                  </div>
+                  <!-- View Icon (Blue Eye) -->
+                  <svg
+                    @click="navigateToViewAttachment(attachment)"
+                    class="task-detail__action-icon task-detail__action-icon--view"
+                    @mouseover="updateMousePosition($event, 'attachment'); showAttachmentTooltip('view', attachment.name)"
+                    @mouseleave="hideAttachmentTooltip"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#60A5FA"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
                   </svg>
+                  <div v-if="isAttachmentTooltipVisible && attachmentTooltipAction === 'view'" class="task-detail__attachment-tooltip" :style="{ left: attachmentTooltipX + 'px', top: attachmentTooltipY + 'px' }">
+                    View {{ attachmentTooltipName }}
+                  </div>
                 </div>
               </div>
             </div>
@@ -196,30 +316,66 @@
       :is-open="isAgentModalOpen"
       :initial-selected-agents="taskData.agentDetails"
       @close="closeAgentModal"
-      @select="handleAgentSelect"
+      @select="updateAgentSelection"
     />
     <ClientModal
       :is-open="isClientModalOpen"
       :initial-selected-clients="taskData.clientDetails"
       @close="closeClientModal"
-      @select="handleClientSelect"
+      @select="updateClientSelection"
     />
     <ReminderModal
       :is-open="isReminderModalOpen"
       :recipient="selectedRecipient"
       :task-data="taskData"
       @close="closeReminderModal"
-      @select="handleReminderSend"
+      @select="sendReminder"
     />
 
-    <!-- Confirmation Pop-up -->
-    <div v-if="isConfirmationVisible" class="confirmation-overlay">
+    <!-- Task Confirmation Pop-up -->
+    <div v-if="isTaskConfirmationVisible" class="confirmation-overlay">
       <div class="confirmation-card">
-        <h2 class="confirmation-title">{{ confirmationMessage }}</h2>
-        <p class="confirmation-text">Do you wish to {{ confirmationAction }} this task?</p>
+        <h2 class="confirmation-title">{{ taskConfirmationMessage }}</h2>
+        <p class="confirmation-text">Do you wish to {{ taskAction }} this task?</p>
         <div class="confirmation-actions">
-          <button class="confirmation-btn confirmation-btn--no" @click="closeConfirmation">No</button>
-          <button class="confirmation-btn confirmation-btn--yes" @click="confirmAction">Yes</button>
+          <button class="confirmation-btn confirmation-btn--no" @click="closeTaskConfirmation">No</button>
+          <button class="confirmation-btn confirmation-btn--yes" @click="confirmTaskAction">Yes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Attachment Action Confirmation Pop-up -->
+    <div v-if="isAttachmentConfirmationVisible" class="confirmation-overlay">
+      <div class="confirmation-card">
+        <h2 class="confirmation-title">{{ attachmentConfirmationMessage }}</h2>
+        <p v-if="attachmentAction === 'delete'" class="confirmation-text">
+          Do you wish to {{ attachmentAction }} this file? This action is permanent and cannot be reversed by Real City. However, you can re-add it if you have it locally.
+        </p>
+        <p v-else class="confirmation-text">Do you wish to {{ attachmentAction }} this file?</p>
+        <div v-if="attachmentAction === 'edit' && showFileInput" class="file-input-container">
+          <input
+            type="file"
+            ref="fileInputRef"
+            @change="handleFileUpload"
+            class="task-detail__file-input"
+            accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png"
+          />
+        </div>
+        <div class="confirmation-actions">
+          <button class="confirmation-btn confirmation-btn--no" @click="closeAttachmentConfirmation">No</button>
+          <button class="confirmation-btn confirmation-btn--yes" @click="confirmAttachmentAction">Yes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Agent/Client Delete Confirmation Pop-up -->
+    <div v-if="isAgentDeleteVisible || isClientDeleteVisible" class="confirmation-overlay">
+      <div class="confirmation-card">
+        <h2 class="confirmation-title">Confirm Deletion</h2>
+        <p class="confirmation-text">Do you wish to delete {{ selectedPerson?.name }} from docs?</p>
+        <div class="confirmation-actions">
+          <button class="confirmation-btn confirmation-btn--no" @click="closePersonDeleteConfirmation">No</button>
+          <button class="confirmation-btn confirmation-btn--yes" @click="confirmPersonDeletion">Yes</button>
         </div>
       </div>
     </div>
@@ -227,29 +383,54 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onUnmounted, computed, watch } from 'vue';
+import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useRoleGuard } from '@/composables/useRoleGuard';
 import AgentModal from './AgentModal.vue';
 import ClientModal from './ClientModal.vue';
 import ReminderModal from './ReminderModal.vue';
 
+// Router and Route Setup
 const router = useRouter();
 const route = useRoute();
 const { checkAccess } = useRoleGuard();
 
-// Modal states
+// Modal, Tooltip, and Animation State Management
 const isAgentModalOpen = ref(false);
 const isClientModalOpen = ref(false);
 const isReminderModalOpen = ref(false);
 const selectedRecipient = ref(null);
+const isTitleTooltipVisible = ref(false);
+const titleTooltipX = ref(0);
+const titleTooltipY = ref(0);
+const isAttachmentTooltipVisible = ref(false);
+const attachmentTooltipAction = ref('');
+const attachmentTooltipName = ref('');
+const attachmentTooltipX = ref(0);
+const attachmentTooltipY = ref(0);
+const animatedCards = ref(new Set());
 
-// Confirmation pop-up state
-const isConfirmationVisible = ref(false);
-const confirmationAction = ref('');
-const confirmationMessage = ref('');
+// Task Confirmation State
+const isTaskConfirmationVisible = ref(false);
+const taskAction = ref('');
+const taskConfirmationMessage = ref('');
+const isSaveActive = ref(false); // Tracks if save button should be active
 
-// Task data with reactive state
+// Attachment Confirmation State
+const isAttachmentConfirmationVisible = ref(false);
+const attachmentAction = ref('');
+const attachmentConfirmationMessage = ref('');
+const selectedAttachment = ref(null);
+const showFileInput = ref(false);
+const fileInputRef = ref(null);
+const uploadedFile = ref(null);
+
+// Agent/Client Delete Confirmation State
+const isAgentDeleteVisible = ref(false);
+const isClientDeleteVisible = ref(false);
+const selectedPerson = ref(null);
+
+// Task Data with Reactive State
 const taskData = reactive({
   id: null,
   name: '',
@@ -262,7 +443,9 @@ const taskData = reactive({
   description: [],
   agentDetails: [],
   clientDetails: [],
-  attachments: [],
+  attachments: [
+    { id: 1, name: 'Strategy-Pitch-Final.pptx', url: '/path/to/Strategy-Pitch-Final.pptx' }
+  ],
   createdAt: '',
   updatedAt: '',
   startedAt: '',
@@ -271,25 +454,25 @@ const taskData = reactive({
   totalTime: 0
 });
 
-// Timer state
+// Timer State Management
 const elapsedTime = ref(0);
 const timerInterval = ref(null);
 const startTime = ref(null);
 const pausedTime = ref(null);
 const totalPausedTime = ref(0);
 
-// Computed property for formatted time
+// Computed Property for Formatted Time
 const formattedElapsedTime = computed(() => {
   const totalSeconds = Math.floor(elapsedTime.value / 1000);
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
-  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 });
 
-// Methods
-const handleAvatarError = (e) => {
-  e.target.src = '/default-avatar.jpg';
+// Helper Methods
+const handleAvatarError = (event) => {
+  event.target.src = '/default-avatar.jpg'; // Fallback image for broken avatars
 };
 
 const openAgentModal = () => {
@@ -300,20 +483,12 @@ const closeAgentModal = () => {
   isAgentModalOpen.value = false;
 };
 
-const handleAgentSelect = async (agents) => {
+const updateAgentSelection = async (agents) => {
   try {
     taskData.agentDetails = agents;
-    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-    const taskIndex = tasks.findIndex(t => t.id === taskData.id);
-    if (taskIndex !== -1) {
-      tasks[taskIndex] = {
-        ...tasks[taskIndex],
-        agentDetails: agents,
-        updatedAt: new Date().toISOString()
-      };
-      localStorage.setItem('tasks', JSON.stringify(tasks));
-      console.log('Updated agents in localStorage:', tasks[taskIndex]);
-    }
+    await persistTaskData({ agentDetails: agents });
+    console.log('Agents updated successfully:', taskData.agentDetails);
+    isSaveActive.value = true; // Activate save button on change
   } catch (error) {
     console.error('Failed to update agents:', error);
     alert('Failed to update agents. Please try again.');
@@ -328,21 +503,13 @@ const closeClientModal = () => {
   isClientModalOpen.value = false;
 };
 
-const handleClientSelect = async (clients) => {
+const updateClientSelection = async (clients) => {
   try {
     taskData.clientDetails = clients;
-    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-    const taskIndex = tasks.findIndex(t => t.id === taskData.id);
-    if (taskIndex !== -1) {
-      tasks[taskIndex] = {
-        ...tasks[taskIndex],
-        clientDetails: clients,
-        updatedAt: new Date().toISOString()
-      };
-      localStorage.setItem('tasks', JSON.stringify(tasks));
-      console.log('Updated clients in localStorage:', tasks[taskIndex]);
-      alert('Clients updated successfully');
-    }
+    await persistTaskData({ clientDetails: clients });
+    console.log('Clients updated successfully:', taskData.clientDetails);
+    alert('Clients updated successfully');
+    isSaveActive.value = true; // Activate save button on change
   } catch (error) {
     console.error('Failed to update clients:', error);
     alert('Failed to update clients. Please try again.');
@@ -359,7 +526,7 @@ const closeReminderModal = () => {
   selectedRecipient.value = null;
 };
 
-const handleReminderSend = async (reminderData) => {
+const sendReminder = async (reminderData) => {
   try {
     alert(`Reminder sent to ${reminderData.recipient}`);
   } catch (error) {
@@ -368,25 +535,18 @@ const handleReminderSend = async (reminderData) => {
   }
 };
 
+// Task Management Methods
 const handlePauseTask = async () => {
   try {
     taskData.isPaused = true;
     pauseTimer();
-    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-    const taskIndex = tasks.findIndex(t => t.id === taskData.id);
-    if (taskIndex !== -1) {
-      tasks[taskIndex] = {
-        ...tasks[taskIndex],
-        isPaused: true,
-        pausedAt: new Date().toISOString(),
-        elapsedTime: elapsedTime.value,
-        totalPausedTime: totalPausedTime.value
-      };
-      localStorage.setItem('tasks', JSON.stringify(tasks));
-      localStorage.setItem(`task_${taskData.id}_elapsedTime`, elapsedTime.value);
-      localStorage.setItem(`task_${taskData.id}_totalPausedTime`, totalPausedTime.value);
-      console.log('Paused task in localStorage:', tasks[taskIndex]);
-    }
+    await persistTaskData({
+      isPaused: true,
+      pausedAt: new Date().toISOString(),
+      elapsedTime: elapsedTime.value,
+      totalPausedTime: totalPausedTime.value
+    });
+    console.log('Task paused successfully:', taskData);
   } catch (error) {
     console.error('Failed to pause task:', error);
     alert('Failed to pause task. Please try again.');
@@ -397,20 +557,12 @@ const handleResumeTask = async () => {
   try {
     taskData.isPaused = false;
     resumeTimer();
-    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-    const taskIndex = tasks.findIndex(t => t.id === taskData.id);
-    if (taskIndex !== -1) {
-      tasks[taskIndex] = {
-        ...tasks[taskIndex],
-        isPaused: false,
-        elapsedTime: elapsedTime.value,
-        totalPausedTime: totalPausedTime.value
-      };
-      localStorage.setItem('tasks', JSON.stringify(tasks));
-      localStorage.removeItem(`task_${taskData.id}_elapsedTime`);
-      localStorage.removeItem(`task_${taskData.id}_totalPausedTime`);
-      console.log('Resumed task in localStorage:', tasks[taskIndex]);
-    }
+    await persistTaskData({
+      isPaused: false,
+      elapsedTime: elapsedTime.value,
+      totalPausedTime: totalPausedTime.value
+    });
+    console.log('Task resumed successfully:', taskData);
   } catch (error) {
     console.error('Failed to resume task:', error);
     alert('Failed to resume task. Please try again.');
@@ -423,21 +575,12 @@ const handleEndTask = async () => {
     taskData.status = 'completed';
     taskData.completedAt = new Date().toISOString();
     taskData.totalTime = elapsedTime.value;
-    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-    const taskIndex = tasks.findIndex(t => t.id === taskData.id);
-    if (taskIndex !== -1) {
-      tasks[taskIndex] = {
-        ...tasks[taskIndex],
-        status: 'completed',
-        completedAt: taskData.completedAt,
-        totalTime: taskData.totalTime,
-        elapsedTimeFormatted: formattedElapsedTime.value
-      };
-      localStorage.setItem('tasks', JSON.stringify(tasks));
-      localStorage.removeItem(`task_${taskData.id}_elapsedTime`);
-      localStorage.removeItem(`task_${taskData.id}_totalPausedTime`);
-      console.log('Ended task in localStorage:', tasks[taskIndex]);
-    }
+    await persistTaskData({
+      status: 'completed',
+      completedAt: taskData.completedAt,
+      totalTime: taskData.totalTime,
+      elapsedTimeFormatted: formattedElapsedTime.value
+    });
     router.push('/tasks/completed');
   } catch (error) {
     console.error('Failed to end task:', error);
@@ -456,37 +599,47 @@ const handleStartTask = async () => {
     taskData.startedAt = new Date().toISOString();
     startTime.value = Date.now();
     startTimer();
-    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-    const taskIndex = tasks.findIndex(t => t.id === taskData.id);
-    if (taskIndex !== -1) {
-      tasks[taskIndex] = {
-        ...tasks[taskIndex],
-        status: 'in_progress',
-        isPaused: false,
-        startedAt: taskData.startedAt
-      };
-      localStorage.setItem('tasks', JSON.stringify(tasks));
-      console.log('Started task in localStorage:', tasks[taskIndex]);
-    }
+    await persistTaskData({
+      status: 'in_progress',
+      isPaused: false,
+      startedAt: taskData.startedAt
+    });
+    console.log('Task started successfully:', taskData);
   } catch (error) {
     console.error('Failed to start task:', error);
     alert('Failed to start task. Please try again.');
   }
 };
 
+const handleSaveTask = async () => {
+  try {
+    await persistTaskData({
+      agentDetails: taskData.agentDetails,
+      clientDetails: taskData.clientDetails,
+      attachments: taskData.attachments,
+      updatedAt: new Date().toISOString()
+    });
+    console.log('Task saved successfully:', taskData);
+    router.push('/tasks'); // Route back to task home page
+    isSaveActive.value = false; // Reset save button after save
+  } catch (error) {
+    console.error('Failed to save task:', error);
+    alert('Failed to save task. Please try again.');
+  }
+};
+
+// Timer Control Methods
 const startTimer = () => {
   if (timerInterval.value) return;
   startTime.value = startTime.value || Date.now();
   timerInterval.value = setInterval(() => {
-    if (taskData.isPaused) return;
-    const now = Date.now();
-    elapsedTime.value = now - startTime.value - totalPausedTime.value;
-    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-    const taskIndex = tasks.findIndex(t => t.id === taskData.id);
-    if (taskIndex !== -1) {
-      tasks[taskIndex].elapsedTime = elapsedTime.value;
-      localStorage.setItem('tasks', JSON.stringify(tasks));
+    if (taskData.isPaused || isDueDateReached()) {
+      stopTimer();
+      return;
     }
+    const currentTime = Date.now();
+    elapsedTime.value = currentTime - startTime.value - totalPausedTime.value;
+    persistTimerState();
   }, 1000);
 };
 
@@ -512,21 +665,25 @@ const stopTimer = () => {
     timerInterval.value = null;
   }
   taskData.totalTime = elapsedTime.value;
+  persistTaskData({ totalTime: taskData.totalTime });
 };
 
+// Due Date Check
+const isDueDateReached = () => {
+  if (!taskData.endDate || !taskData.endTime) return false;
+  const dueDateTime = new Date(`${taskData.endDate} ${taskData.endTime}`);
+  return new Date() >= dueDateTime;
+};
+
+// Validation Method
 const isTaskComplete = () => {
-  return (
-    taskData.name &&
-    taskData.description?.length > 0 &&
-    taskData.agentDetails?.length > 0 &&
-    taskData.clientDetails?.length > 0
-  );
+  return taskData.name && taskData.description.length > 0 && taskData.agentDetails.length > 0 && taskData.clientDetails.length > 0;
 };
 
+// Date Formatting
 const formatDate = (dateString) => {
   if (!dateString) return '';
-  const date = new Date(dateString);
-  return date.toLocaleString('en-US', {
+  return new Date(dateString).toLocaleString('en-US', {
     weekday: 'short',
     day: 'numeric',
     month: 'short',
@@ -536,20 +693,21 @@ const formatDate = (dateString) => {
   });
 };
 
-const showConfirmation = (action) => {
-  confirmationAction.value = action;
-  confirmationMessage.value = `${action.charAt(0).toUpperCase() + action.slice(1)} Task?`;
-  isConfirmationVisible.value = true;
+// Task Confirmation Methods
+const showTaskConfirmation = (action) => {
+  taskAction.value = action;
+  taskConfirmationMessage.value = action === 'save' ? 'Do you wish to save new changes to this task?' : `${action.charAt(0).toUpperCase() + action.slice(1)} this task?`;
+  isTaskConfirmationVisible.value = true;
 };
 
-const closeConfirmation = () => {
-  isConfirmationVisible.value = false;
-  confirmationAction.value = '';
-  confirmationMessage.value = '';
+const closeTaskConfirmation = () => {
+  isTaskConfirmationVisible.value = false;
+  taskAction.value = '';
+  taskConfirmationMessage.value = '';
 };
 
-const confirmAction = async () => {
-  switch (confirmationAction.value) {
+const confirmTaskAction = async () => {
+  switch (taskAction.value) {
     case 'pause':
       await handlePauseTask();
       break;
@@ -558,23 +716,281 @@ const confirmAction = async () => {
       break;
     case 'end':
       await handleEndTask();
-      router.push('/tasks');
+      break;
+    case 'save':
+      await handleSaveTask();
       break;
     default:
       break;
   }
-  closeConfirmation();
+  closeTaskConfirmation();
 };
 
+// Tooltip and Animation Methods
+const updateTitleTooltipPosition = (event) => {
+  titleTooltipX.value = event.pageX;
+  titleTooltipY.value = event.pageY + 20;
+};
+
+const updateMousePosition = (event, type) => {
+  if (type === 'attachment') {
+    attachmentTooltipX.value = event.pageX;
+    attachmentTooltipY.value = event.pageY + 20;
+  }
+};
+
+const showTitleTooltip = () => {
+  isTitleTooltipVisible.value = true;
+};
+
+const hideTitleTooltip = () => {
+  isTitleTooltipVisible.value = false;
+};
+
+const showAttachmentConfirmation = (action, attachment) => {
+  attachmentAction.value = action;
+  selectedAttachment.value = { ...attachment }; // Clone to avoid direct mutation
+  attachmentConfirmationMessage.value = `Do you wish to ${action} this file?`;
+  isAttachmentConfirmationVisible.value = true;
+  showFileInput.value = action === 'edit';
+  if (showFileInput.value && fileInputRef.value) {
+    fileInputRef.value.value = ''; // Clear previous file selection
+  }
+};
+
+const closeAttachmentConfirmation = () => {
+  isAttachmentConfirmationVisible.value = false;
+  attachmentAction.value = '';
+  attachmentConfirmationMessage.value = '';
+  selectedAttachment.value = null;
+  showFileInput.value = false;
+  uploadedFile.value = null;
+  if (fileInputRef.value) {
+    fileInputRef.value.value = ''; // Ensure file input is cleared
+  }
+};
+
+const confirmAttachmentAction = async () => {
+  if (!selectedAttachment.value) return;
+
+  if (attachmentAction.value === 'delete') {
+    await deleteAttachment();
+    isSaveActive.value = true; // Activate save button on change
+  } else if (attachmentAction.value === 'edit' && uploadedFile.value) {
+    await replaceAttachment();
+    isSaveActive.value = true; // Activate save button on change
+  } else if (attachmentAction.value === 'edit' && !uploadedFile.value) {
+    alert('Please select a file to replace the current one.');
+    return;
+  }
+  closeAttachmentConfirmation();
+};
+
+const deleteAttachment = async () => {
+  try {
+    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+    const taskIndex = tasks.findIndex(task => task.id === taskData.id);
+    if (taskIndex !== -1) {
+      tasks[taskIndex].attachments = tasks[taskIndex].attachments.filter(
+        att => att.id !== selectedAttachment.value.id
+      );
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+      taskData.attachments = [...tasks[taskIndex].attachments];
+      console.log(`Attachment deleted: ${selectedAttachment.value.name}`);
+    }
+  } catch (error) {
+    console.error('Failed to delete attachment:', error);
+    alert('Failed to delete attachment. Please try again.');
+  }
+};
+
+const navigateToViewAttachment = (attachment) => {
+  if (attachment.id) {
+    router.push({
+      path: `/view-attachment/${attachment.id}`,
+      query: { taskId: taskData.id } // Pass taskId for context
+    });
+  } else {
+    alert('Attachment ID is missing. Unable to view the file.');
+  }
+};
+
+const showAttachmentTooltip = (action, name) => {
+  attachmentTooltipAction.value = action;
+  attachmentTooltipName.value = name;
+  isAttachmentTooltipVisible.value = true;
+};
+
+const hideAttachmentTooltip = () => {
+  isAttachmentTooltipVisible.value = false;
+  attachmentTooltipAction.value = '';
+  attachmentTooltipName.value = '';
+};
+
+const handleFileUpload = (event) => {
+  uploadedFile.value = event.target.files[0];
+};
+
+const replaceAttachment = async () => {
+  if (!uploadedFile.value || !selectedAttachment.value) return;
+
+  try {
+    const newUrl = URL.createObjectURL(uploadedFile.value); // Temporary URL for demo
+    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+    const taskIndex = tasks.findIndex(task => task.id === taskData.id);
+    if (taskIndex !== -1) {
+      const attachmentIndex = tasks[taskIndex].attachments.findIndex(
+        att => att.id === selectedAttachment.value.id
+      );
+      if (attachmentIndex !== -1) {
+        tasks[taskIndex].attachments[attachmentIndex] = {
+          ...tasks[taskIndex].attachments[attachmentIndex],
+          name: uploadedFile.value.name,
+          url: newUrl // Replace with server-uploaded URL in production
+        };
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+        taskData.attachments = [...tasks[taskIndex].attachments];
+        console.log(`Attachment replaced: ${selectedAttachment.value.name} with ${uploadedFile.value.name}`);
+      }
+    }
+  } catch (error) {
+    console.error('Failed to replace attachment:', error);
+    alert('Failed to replace attachment. Please try again.');
+  }
+};
+
+const showAgentAnimation = (id) => {
+  animatedCards.value.add(`agent-${id}`);
+};
+
+const hideAgentAnimation = (id) => {
+  animatedCards.value.delete(`agent-${id}`);
+};
+
+const showClientAnimation = (id) => {
+  animatedCards.value.add(`client-${id}`);
+};
+
+const hideClientAnimation = (id) => {
+  animatedCards.value.delete(`client-${id}`);
+};
+
+const showAgentDeleteConfirmation = (agent) => {
+  selectedPerson.value = agent;
+  isAgentDeleteVisible.value = true;
+};
+
+const showClientDeleteConfirmation = (client) => {
+  selectedPerson.value = client;
+  isClientDeleteVisible.value = true;
+};
+
+const closePersonDeleteConfirmation = () => {
+  isAgentDeleteVisible.value = false;
+  isClientDeleteVisible.value = false;
+  selectedPerson.value = null;
+};
+
+const confirmPersonDeletion = async () => {
+  if (!selectedPerson.value) return;
+
+  try {
+    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+    const taskIndex = tasks.findIndex(task => task.id === taskData.id);
+    if (taskIndex !== -1) {
+      if (isAgentDeleteVisible.value) {
+        tasks[taskIndex].agentDetails = tasks[taskIndex].agentDetails.filter(
+          agent => agent.id !== selectedPerson.value.id
+        );
+        taskData.agentDetails = [...tasks[taskIndex].agentDetails];
+      } else if (isClientDeleteVisible.value) {
+        tasks[taskIndex].clientDetails = tasks[taskIndex].clientDetails.filter(
+          client => client.id !== selectedPerson.value.id
+        );
+        taskData.clientDetails = [...tasks[taskIndex].clientDetails];
+      }
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+      console.log(`Deleted ${selectedPerson.value.name} from ${isAgentDeleteVisible.value ? 'agents' : 'clients'}`);
+      isSaveActive.value = true; // Activate save button on change
+    }
+  } catch (error) {
+    console.error('Failed to delete person:', error);
+    alert('Failed to delete person. Please try again.');
+  }
+  closePersonDeleteConfirmation();
+};
+
+// Data Persistence
+const persistTaskData = async (updates) => {
+  try {
+    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+    const taskIndex = tasks.findIndex(task => task.id === taskData.id);
+    if (taskIndex !== -1) {
+      tasks[taskIndex] = { ...tasks[taskIndex], ...updates, updatedAt: new Date().toISOString() };
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+      Object.assign(taskData, updates);
+    }
+  } catch (error) {
+    console.error('Failed to persist task data:', error);
+    throw error;
+  }
+};
+
+const persistTimerState = () => {
+  const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+  const taskIndex = tasks.findIndex(task => task.id === taskData.id);
+  if (taskIndex !== -1) {
+    tasks[taskIndex].elapsedTime = elapsedTime.value;
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+  }
+};
+
+// Change Detection
+watch([() => taskData.agentDetails, () => taskData.clientDetails, () => taskData.attachments], () => {
+  const initialAgents = JSON.stringify(taskData.agentDetails);
+  const initialClients = JSON.stringify(taskData.clientDetails);
+  const initialAttachments = JSON.stringify(taskData.attachments);
+  const loadedTask = JSON.parse(localStorage.getItem('tasks') || '[]').find(task => task.id === taskData.id);
+  const originalAgents = JSON.stringify(loadedTask?.agentDetails || []);
+  const originalClients = JSON.stringify(loadedTask?.clientDetails || []);
+  const originalAttachments = JSON.stringify(loadedTask?.attachments || []);
+
+  isSaveActive.value = initialAgents !== originalAgents || initialClients !== originalClients || initialAttachments !== originalAttachments;
+}, { deep: true });
+
+// Due Date Check Interval
+const checkDueDate = () => {
+  if (taskData.status === 'in_progress' && isDueDateReached()) {
+    stopTimer();
+    alert('Task timer has automatically stopped as the due date and time have been reached.');
+  }
+};
+
+onMounted(async () => {
+  try {
+    const hasAccess = await checkAccess(['agent', 'admin']);
+    if (!hasAccess) {
+      router.push('/unauthorized');
+      return;
+    }
+    await loadTaskData();
+    setInterval(checkDueDate, 60000); // Check every minute
+  } catch (error) {
+    console.error('Failed to initialize task:', error);
+    alert('Failed to initialize task. Please try again.');
+  }
+});
+
+// Data Loading and Lifecycle
 watch(() => route.params.id, () => {
   loadTaskData();
 });
 
 const loadTaskData = async () => {
   try {
-    const taskId = parseInt(route.params.id);
+    const taskId = parseInt(route.params.id, 10);
     const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-    const task = tasks.find(t => t.id === taskId);
+    const task = tasks.find(task => task.id === taskId);
 
     if (!task) {
       alert('Task not found');
@@ -592,7 +1008,6 @@ const loadTaskData = async () => {
       priority: task.priority || 'Medium'
     });
 
-    // Load persisted timer values
     const savedElapsedTime = localStorage.getItem(`task_${taskId}_elapsedTime`);
     const savedTotalPausedTime = localStorage.getItem(`task_${taskId}_totalPausedTime`);
     if (savedElapsedTime && savedTotalPausedTime) {
@@ -607,24 +1022,10 @@ const loadTaskData = async () => {
       if (!taskData.isPaused) startTimer();
     }
   } catch (error) {
-    console.error('Failed to load task:', error);
+    console.error('Failed to load task data:', error);
     alert('Failed to load task. Please try again.');
   }
 };
-
-onMounted(async () => {
-  try {
-    const hasAccess = await checkAccess(['agent', 'admin']);
-    if (!hasAccess) {
-      router.push('/unauthorized');
-      return;
-    }
-    loadTaskData();
-  } catch (error) {
-    console.error('Failed to initialize task:', error);
-    alert('Failed to initialize task. Please try again.');
-  }
-});
 
 onUnmounted(() => {
   if (timerInterval.value) {
@@ -634,16 +1035,22 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.task-detail__header {
+/* Header Styles */
+.task-detail__headerbg {
   padding: 20px;
-  background-color: #f8f9fa;
+  background-color: #fff;
   border-bottom: 1px solid #e6e6e6;
+}
+
+.task-detail__header {
   display: flex;
+  width: 80%;
+  margin: auto;
   justify-content: space-between;
   align-items: center;
 }
 
-.taskdetailflex {
+.task-detail__flex-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -654,6 +1061,7 @@ onUnmounted(() => {
   flex-direction: column;
   align-items: flex-start;
   gap: 4px;
+  position: relative;
 }
 
 .task-detail__title {
@@ -661,6 +1069,31 @@ onUnmounted(() => {
   font-weight: 600;
   color: #666666;
   margin: 0;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.task-detail__title-tooltip {
+  position: fixed;
+  background: #333;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(5px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 1001;
+  pointer-events: none;
+}
+
+.task-detail__title:hover + .task-detail__title-tooltip {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .task-detail__status-group {
@@ -677,20 +1110,25 @@ onUnmounted(() => {
 }
 
 .task-detail__status--in_progress {
-  background: #EAF8F1;
+  background: #eaf8f1;
   color: #008530;
   margin-left: 20px;
   font-size: 12px;
 }
 
 .task-detail__status--draft {
-  background: #FFC107;
-  color: #FFFFFF;
+  background: #ffc107;
+  color: #ffffff;
 }
 
 .task-detail__status--completed {
-  background: #6C757D;
-  color: #FFFFFF;
+  background: #6c757d;
+  color: #ffffff;
+}
+
+.task-detail__status-container {
+  display: flex;
+  align-items: center;
 }
 
 .task-detail__date {
@@ -704,7 +1142,7 @@ onUnmounted(() => {
 
 .task-detail__color {
   font-size: 14px;
-  color: #074F90;
+  color: #074f90;
 }
 
 .task-detail__timer {
@@ -749,24 +1187,40 @@ onUnmounted(() => {
 
 .task-detail__action-btn--pause,
 .task-detail__action-btn--resume {
-  background: #28A745;
-  color: #FFFFFF;
+  background: #28a745;
+  color: #ffffff;
 }
 
 .task-detail__action-btn--end {
-  background: #DC3545;
-  color: #FFFFFF;
+  background: #dc3545;
+  color: #ffffff;
 }
 
 .task-detail__action-btn--start {
-  background: #28A745;
-  color: #FFFFFF;
+  background: #28a745;
+  color: #ffffff;
 }
 
-.task-detail__action-btn:hover {
+.task-detail__action-btn--save {
+  background: #ced4da; /* Grey when inactive */
+  color: #6c757d;
+}
+
+.task-detail__action-btn--save.task-detail__action-btn--active {
+  background: #4CAF50; /* New color (softer green) when active */
+  color: #ffffff;
+}
+
+.task-detail__action-btn:hover:not(:disabled) {
   opacity: 0.8;
 }
 
+.task-detail__action-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Main Layout Styles */
 .task-detail {
   margin: 0 auto;
   box-sizing: border-box;
@@ -779,7 +1233,7 @@ onUnmounted(() => {
 }
 
 .task-detail__left-column {
-  background-color: #E6F0FF;
+  background-color: #eaeff9;
   border-radius: 8px;
   padding: 50px 90px;
   display: flex;
@@ -791,17 +1245,17 @@ onUnmounted(() => {
   background: #ffffff;
   border-radius: 8px;
   padding: 35px;
-  border: 1px solid #E6E6E6;
+  border: 1px solid #e6e6e6;
 }
 
 .taskdetails {
   background: #ffffff;
   border-radius: 8px;
   padding: 15px 20px;
-  border: 1px solid #E6E6E6;
+  border: 1px solid #e6e6e6;
 }
 
-.addflexbox {
+.task-detail__add-flex {
   display: flex;
   margin: auto;
   align-items: center;
@@ -809,7 +1263,7 @@ onUnmounted(() => {
   justify-content: space-between;
 }
 
-.task-desc__right-column {
+.task-detail__right-column {
   background-color: white;
   border-radius: 8px;
   padding: 10px;
@@ -819,7 +1273,7 @@ onUnmounted(() => {
 }
 
 .task-detail__column.description {
-  border: 1px solid #E6E6E6;
+  border: 1px solid #e6e6e6;
   border-radius: 8px;
   padding: 35px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -840,8 +1294,8 @@ onUnmounted(() => {
 }
 
 .task-detail__add-btn {
-  background: #007BFF;
-  color: #FFFFFF;
+  background: #007bff;
+  color: #ffffff;
   border: none;
   border-radius: 6px;
   padding: 7px 20px;
@@ -854,6 +1308,11 @@ onUnmounted(() => {
 
 .task-detail__add-btn:hover {
   opacity: 0.8;
+}
+
+.task-detail__add-button-container {
+  display: flex;
+  align-items: center;
 }
 
 .task-detail__agent-list {
@@ -870,13 +1329,23 @@ onUnmounted(() => {
   padding: 12px;
   border-radius: 6px;
   border: 1px solid rgba(7, 79, 144, 0.35);
-  transition: box-shadow 0.2s ease;
+  transition: box-shadow 0.2s ease, transform 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
 .task-detail__agent-card:hover {
   border: 1px solid rgba(7, 79, 144, 0.6);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   cursor: pointer;
+}
+
+.task-detail__agent-card.animated {
+  transform: translateX(10px);
+}
+
+.task-detail__agent-info-header {
+  flex-grow: 1;
 }
 
 .task-detail__agent-avatar {
@@ -905,7 +1374,7 @@ onUnmounted(() => {
 }
 
 .task-detail__reminder-btn {
-  background: #EAE8E8;
+  background: #eae8e8;
   color: rgb(20, 20, 20);
   border: none;
   border-radius: 8px;
@@ -917,8 +1386,29 @@ onUnmounted(() => {
 }
 
 .task-detail__reminder-btn:hover {
-  background: #007BFF;
+  background: #007bff;
   color: white;
+}
+
+.task-detail__delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 10px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.task-detail__agent-card:hover .task-detail__delete-btn {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.task-detail__delete-btn svg {
+  width: 16px;
+  height: 16px;
 }
 
 .task-detail__description-header {
@@ -929,7 +1419,7 @@ onUnmounted(() => {
 }
 
 .task-detail__priority {
-  color: #FFFFFF;
+  color: #ffffff;
   padding: 5px 10px;
   border-radius: 4px;
   font-size: 14px;
@@ -937,15 +1427,15 @@ onUnmounted(() => {
 }
 
 .task-detail__priority--low {
-  background: #28A745;
+  background: #28a745;
 }
 
 .task-detail__priority--medium {
-  background: #FFC107;
+  background: #ffc107;
 }
 
 .task-detail__priority--high {
-  background: #DC3545;
+  background: #dc3545;
 }
 
 .task-detail__description-list {
@@ -957,7 +1447,7 @@ onUnmounted(() => {
   line-height: 1.5;
 }
 
-.task-detail__description-list p {
+.task-detail__description-item {
   margin-bottom: 8px;
 }
 
@@ -1006,37 +1496,77 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px;
-  border-top: 1px solid #E6E6E6;
+  padding: 8px 12px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s ease;
+  position: relative;
+}
+
+.task-detail__attachment:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .task-detail__attachment-icon {
   width: 20px;
   height: 20px;
-  fill: #999999;
 }
 
 .task-detail__attachment-name {
   flex: 1;
   font-size: 14px;
-  color: #666666;
+  color: #333333;
+  font-weight: 400;
 }
 
 .task-detail__attachment-actions {
   display: flex;
-  gap: 8px;
+  gap: 12px;
+  position: relative;
 }
 
 .task-detail__action-icon {
-  width: 20px;
-  height: 20px;
-  fill: #999999;
+  width: 16px;
+  height: 16px;
   cursor: pointer;
-  transition: fill 0.2s ease;
+  transition: opacity 0.2s ease;
 }
 
 .task-detail__action-icon:hover {
-  fill: #007BFF;
+  opacity: 0.8;
+}
+
+.task-detail__action-icon--edit {
+  stroke: #a78bfa; /* Purple */
+}
+
+.task-detail__action-icon--delete {
+  stroke: #f87171; /* Red */
+}
+
+.task-detail__action-icon--view {
+  stroke: #60a5fa; /* Blue */
+}
+
+.task-detail__attachment-tooltip {
+  position: fixed;
+  background: #333;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 1001;
+  pointer-events: none;
+}
+
+.task-detail__attachment-actions:hover .task-detail__attachment-tooltip {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .task-detail__no-attachments {
@@ -1044,9 +1574,24 @@ onUnmounted(() => {
   font-size: 14px;
   text-align: center;
   padding: 16px;
-  background: #F3F4F6;
+  background: #f3f4f6;
   border-radius: 6px;
   margin-top: 8px;
+}
+
+.task-detail__file-input {
+  display: block;
+  margin: 10px auto;
+  padding: 8px;
+  border: 1px solid #d3d3d3;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #333333;
+  width: 80%;
+}
+
+.file-input-container {
+  margin-bottom: 15px;
 }
 
 /* Confirmation Pop-up Styles */
@@ -1061,6 +1606,7 @@ onUnmounted(() => {
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  animation: fadeIn 0.3s ease-in-out;
 }
 
 .confirmation-card {
@@ -1069,40 +1615,49 @@ onUnmounted(() => {
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   text-align: center;
-  width: 400px; /* Wider as per image */
-  animation: fadeIn 0.3s ease-in-out;
+  width: 400px;
+  animation: slideIn 0.3s ease-in-out;
   border: 1px solid #e6e6e6;
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: scale(0.9);
   }
   to {
     opacity: 1;
-    transform: scale(1);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
 }
 
 .confirmation-title {
   font-size: 24px;
   font-weight: 600;
-  color: #4a4a4a; /* Dark gray as in image */
-  margin: 0 0 15px; /* Increased spacing */
+  color: #4a4a4a;
+  margin: 0 0 15px;
 }
 
 .confirmation-text {
   font-size: 16px;
-  color: #757575; /* Lighter gray as in image */
-  margin-bottom: 25px; /* Increased spacing */
+  color: #757575;
+  margin-bottom: 25px;
   line-height: 1.5;
 }
 
 .confirmation-actions {
   display: flex;
   justify-content: center;
-  gap: 20px; /* More spaced buttons */
+  gap: 20px;
 }
 
 .confirmation-btn {
@@ -1119,13 +1674,13 @@ onUnmounted(() => {
   background: #ffffff;
   color: #333333;
   border: 1px solid #d3d3d3;
-  width: 70px; /* Match image button width */
+  width: 70px;
 }
 
 .confirmation-btn--yes {
   background: #dc3545;
   color: #ffffff;
-  width: 70px; /* Match image button width */
+  width: 70px;
 }
 
 .confirmation-btn:hover {
@@ -1136,6 +1691,7 @@ onUnmounted(() => {
   background: #f8f9fa;
 }
 
+/* Responsive Design */
 @media (max-width: 767px) {
   .task-detail__header {
     flex-direction: column;
@@ -1165,14 +1721,20 @@ onUnmounted(() => {
     text-align: center;
   }
   .confirmation-card {
-    width: 90%; /* Adjust width for smaller screens */
+    width: 90%;
     padding: 15px 20px;
+  }
+  .task-detail__title {
+    max-width: 200px; /* Adjusted for mobile */
   }
 }
 
 @media (min-width: 768px) and (max-width: 1023px) {
   .task-detail__grid {
     gap: 24px;
+  }
+  .task-detail__title {
+    max-width: 250px;
   }
 }
 

@@ -4,7 +4,7 @@
     <header class="task-create__header">
       <div class="task-create__nav">
         <button class="task-create__back" @click="handleBack" aria-label="Back to tasks">
-          <span class="task-create__back-arrow"><</span>
+          <span class="task-create__back-arrow">&lt;</span>
           Create new task
         </button>
         <div class="task-create__subtitle">
@@ -24,8 +24,8 @@
         </button>
         <div class="task-create__user">
           <img
-           src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1739408381/Screenshot_2025-02-13_015617_mhjgby.png"
-           alt="Profile"
+            src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1739408381/Screenshot_2025-02-13_015617_mhjgby.png"
+            alt="Profile"
             class="task-create__avatar"
             @error="handleAvatarError"
           >
@@ -205,7 +205,7 @@
               class="task-create__file-input"
               accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.gif,.zip,.rar"
             >
-            <button class="task-create__upload-btn" @click="triggerFileInput">
+            <button type="button" class="task-create__upload-btn" @click="triggerFileInput">
               <svg class="task-create__upload-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
               </svg>
@@ -272,7 +272,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, watch } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useRoleGuard } from '@/composables/useRoleGuard'
 import AgentModal from './AgentModal.vue'
@@ -392,12 +392,6 @@ const saveDraftChanges = () => {
     localStorage.setItem('tasks', JSON.stringify(tasks))
   }
 }
-
-watch([taskData, selectedAgents, selectedClients, taskDescription], () => {
-  if (route.query.draftId) {
-    saveDraftChanges()
-  }
-}, { deep: true })
 
 const hasFormData = () => {
   return taskData.name ||
@@ -600,10 +594,10 @@ onMounted(async () => {
   line-height: 1;
 }
 
-/* .task-create__subtitle {
+.task-create__subtitle {
   color: #666666;
   font-size: 14px;
-} */
+}
 
 .task-create__profile {
   display: flex;
@@ -656,12 +650,10 @@ onMounted(async () => {
 
 .task-create__content {
   background: #FFFFFF;
-  padding:45px 70px;
-  /* box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3); */
+  padding: 45px 70px;
   border: 1px solid rgba(0, 0, 0, 0.1);
   max-width: 980px;
   margin: 0 auto;
-  /* width: 100%; */
   box-sizing: border-box;
 }
 
