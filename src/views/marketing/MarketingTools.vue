@@ -3,7 +3,7 @@
     <MarketingHeader />
     <MarketingNavigation />
     <div class="content-area">
-      <div class="success-plans" v-if="isSuccessPlanRoute">
+      <div v-if="isSuccessPlanRoute" class="success-plans">
         <div class="grid-container">
           <div v-for="(plan, index) in marketingPlans" :key="index" class="plan-card" @click="viewPlan(index)">
             <h3>{{ plan.title }}</h3>
@@ -40,7 +40,7 @@ const route = useRoute();
 const marketingPlans = ref(JSON.parse(localStorage.getItem('marketingPlans') || '[]'));
 
 const isSuccessPlanRoute = computed(() => {
-  return route.path === '/marketing-tools';
+  return route.path === '/RCR/marketing-tools' || route.path === '/RCR/marketing-tools/success-plan';
 });
 
 const viewPlan = (index) => {

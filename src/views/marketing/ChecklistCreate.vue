@@ -166,7 +166,7 @@ const saveChecklist = () => {
     console.log('Verification - Reading back from localStorage:', verifyStorage);
 
     // Navigate back to checklist list
-    router.push('/marketing-tools/checklist');
+    router.push('/RCR/marketing-tools/checklist');
   } catch (error) {
     console.error('Error saving checklist:', error);
     alert('There was an error saving your checklist. Please try again.');
@@ -174,7 +174,7 @@ const saveChecklist = () => {
 };
 
 const cancel = () => {
-  router.push('/marketing-tools/checklist');
+  router.push('/RCR/marketing-tools/checklist');
 };
 </script>
 

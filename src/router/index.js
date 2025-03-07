@@ -151,7 +151,26 @@ const routes = [
       },
       {
         path: 'checklist',
-        component: () => import('@/views/marketing/MyChecklist.vue')
+        name: 'ChecklistList',
+        component: () => import('@/views/marketing/MyChecklist.vue'),
+        meta: { keepAlive: true }
+      },
+      {
+        path: 'checklist/create',
+        name: 'ChecklistCreate',
+        component: () => import('@/views/marketing/ChecklistCreate.vue')
+      },
+      {
+        path: 'checklist/:id',
+        name: 'ChecklistDetail',
+        component: () => import('@/views/marketing/ChecklistDetail.vue'),
+        props: true,
+        meta: { keepAlive: true }
+      },
+      {
+        path: 'checklist/:id/edit',
+        name: 'ChecklistEdit',
+        component: () => import('@/views/marketing/ChecklistEdit.vue')
       },
       {
         path: 'done-for-you',
@@ -162,28 +181,6 @@ const routes = [
         component: () => import('@/views/marketing/SocialPlatforms.vue')
       }
     ]
-  },
-  {
-    path: '/marketing-tools/checklist',
-    component: () => import('@/views/marketing/MyChecklist.vue'),
-    meta: {
-      keepAlive: true
-    }
-  },
-  {
-    path: '/marketing-tools/checklist/create',
-    component: () => import('@/views/marketing/ChecklistCreate.vue')
-  },
-  {
-    path: '/marketing-tools/checklist/:id',
-    component: () => import('@/views/marketing/ChecklistDetail.vue'),
-    meta: {
-      keepAlive: true
-    }
-  },
-  {
-    path: '/marketing-tools/checklist/:id/edit',
-    component: () => import('@/views/marketing/ChecklistEdit.vue')
   },
 
   // Chat routes

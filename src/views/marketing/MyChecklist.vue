@@ -151,7 +151,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -161,6 +161,7 @@ const searchQuery = ref('');
 const currentFilter = ref('all');
 const sortBy = ref('newest');
 const selectedChecklists = ref([]);
+const checklists = ref([]);
 
 // Filter tabs
 const filterTabs = [
@@ -169,26 +170,23 @@ const filterTabs = [
   { label: 'Completed', value: 'completed' }
 ];
 
-// Mock data - replace with localStorage implementation
-const checklists = ref([
-  {
-    id: 1,
-    title: 'Mastering client connections for better results',
-    creationDate: '2024-12-01T10:00:00',
-    progress: 70,
-    status: 'draft',
-    completed: false,
-    dueDate: '2024-12-15T10:00:00'
-  },
-  {
-    id: 2,
-    title: 'Mastering client connections for better results',
-    creationDate: '2024-12-01T10:00:00',
-    progress: 100,
-    status: 'completed',
-    completed: true
+// Load checklists from localStorage
+const loadChecklists = () => {
+  try {
+    const storedChecklists = localStorage.getItem('checklists');
+    if (storedChecklists) {
+      checklists.value = JSON.parse(storedChecklists);
+      console.log('Loaded checklists:', checklists.value);
+    }
+  } catch (error) {
+    console.error('Error loading checklists:', error);
+    checklists.value = [];
   }
-]);
+};
+
+onMounted(() => {
+  loadChecklists();
+});
 
 // Computed
 const filteredChecklists = computed(() => {
@@ -203,9 +201,9 @@ const filteredChecklists = computed(() => {
 
   // Apply status filter
   if (currentFilter.value === 'drafts') {
-    filtered = filtered.filter(checklist => !checklist.completed);
+    filtered = filtered.filter(checklist => checklist.status === 'draft');
   } else if (currentFilter.value === 'completed') {
-    filtered = filtered.filter(checklist => checklist.completed);
+    filtered = filtered.filter(checklist => checklist.status === 'completed');
   }
 
   // Apply sorting
@@ -225,7 +223,13 @@ const filteredChecklists = computed(() => {
 
 // Methods
 const formatDate = (date) => {
-  return new Date(date).toLocaleString();
+  return new Date(date).toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
 };
 
 const isOverdue = (checklist) => {
@@ -244,6 +248,7 @@ const createNewChecklist = () => {
 };
 
 const viewChecklist = (id) => {
+  console.log('Viewing checklist with ID:', id);
   router.push(`/marketing-tools/checklist/${id}`);
 };
 
@@ -253,8 +258,14 @@ const editChecklist = (id) => {
 
 const deleteChecklist = async (id) => {
   if (await confirm('Are you sure you want to delete this checklist?')) {
-    checklists.value = checklists.value.filter(c => c.id !== id);
-    selectedChecklists.value = selectedChecklists.value.filter(selectedId => selectedId !== id);
+    try {
+      const updatedChecklists = checklists.value.filter(c => c.id !== id);
+      localStorage.setItem('checklists', JSON.stringify(updatedChecklists));
+      loadChecklists();
+      selectedChecklists.value = selectedChecklists.value.filter(selectedId => selectedId !== id);
+    } catch (error) {
+      console.error('Error deleting checklist:', error);
+    }
   }
 };
 
@@ -268,21 +279,39 @@ const toggleSelection = (id) => {
 };
 
 const markSelectedAsCompleted = async () => {
-  checklists.value = checklists.value.map(checklist => {
-    if (selectedChecklists.value.includes(checklist.id)) {
-      return { ...checklist, completed: true, progress: 100, status: 'completed' };
-    }
-    return checklist;
-  });
-  selectedChecklists.value = [];
+  try {
+    const updatedChecklists = checklists.value.map(checklist => {
+      if (selectedChecklists.value.includes(checklist.id)) {
+        return {
+          ...checklist,
+          status: 'completed',
+          progress: 100,
+          items: checklist.items.map(item => ({ ...item, completed: true }))
+        };
+      }
+      return checklist;
+    });
+
+    localStorage.setItem('checklists', JSON.stringify(updatedChecklists));
+    loadChecklists();
+    selectedChecklists.value = [];
+  } catch (error) {
+    console.error('Error marking checklists as completed:', error);
+  }
 };
 
 const deleteSelected = async () => {
   if (await confirm(`Are you sure you want to delete ${selectedChecklists.value.length} checklists?`)) {
-    checklists.value = checklists.value.filter(
-      checklist => !selectedChecklists.value.includes(checklist.id)
-    );
-    selectedChecklists.value = [];
+    try {
+      const updatedChecklists = checklists.value.filter(
+        checklist => !selectedChecklists.value.includes(checklist.id)
+      );
+      localStorage.setItem('checklists', JSON.stringify(updatedChecklists));
+      loadChecklists();
+      selectedChecklists.value = [];
+    } catch (error) {
+      console.error('Error deleting selected checklists:', error);
+    }
   }
 };
 </script>
