@@ -4,6 +4,14 @@
     <div class="task-detail__header">
       <div class="task-detail__flex-container">
         <div class="task-detail__header-left">
+          <div class="task-detail__back-button-container">
+            <button class="task-detail__back-button" @click="goBack">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Back
+            </button>
+          </div>
           <h1 class="task-detail__title" @mouseover="showTitleTooltip" @mouseleave="hideTitleTooltip" @mousemove="updateTitleTooltipPosition($event)">{{ taskData.name }}</h1>
           <div v-if="isTitleTooltipVisible" class="task-detail__title-tooltip" :style="{ left: titleTooltipX + 'px', top: titleTooltipY + 'px' }">
             {{ taskData.name }}
@@ -76,7 +84,40 @@
   </header>
 
   <main class="task-detail" role="main" aria-label="Task management details">
-    <div class="task-detail__grid">
+    <!-- Loading Skeleton -->
+    <div v-if="loading" class="task-detail__loading-skeleton">
+      <div class="task-detail__skeleton-grid">
+        <div class="task-detail__skeleton-left">
+          <div class="task-detail__skeleton-section">
+            <div class="task-detail__skeleton-header"></div>
+            <div class="task-detail__skeleton-card"></div>
+            <div class="task-detail__skeleton-card"></div>
+          </div>
+          <div class="task-detail__skeleton-section">
+            <div class="task-detail__skeleton-header"></div>
+            <div class="task-detail__skeleton-card"></div>
+            <div class="task-detail__skeleton-card"></div>
+          </div>
+        </div>
+        <div class="task-detail__skeleton-right">
+          <div class="task-detail__skeleton-section">
+            <div class="task-detail__skeleton-header"></div>
+            <div class="task-detail__skeleton-content"></div>
+          </div>
+          <div class="task-detail__skeleton-section">
+            <div class="task-detail__skeleton-header"></div>
+            <div class="task-detail__skeleton-timeline"></div>
+          </div>
+          <div class="task-detail__skeleton-section">
+            <div class="task-detail__skeleton-header"></div>
+            <div class="task-detail__skeleton-attachment"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Task Content -->
+    <div v-else class="task-detail__grid">
       <!-- Left Column: Agents and Clients -->
       <div class="task-detail__left-column">
         <!-- Agents Section -->
@@ -394,6 +435,9 @@ import ReminderModal from './ReminderModal.vue';
 const router = useRouter();
 const route = useRoute();
 const { checkAccess } = useRoleGuard();
+
+// Loading State
+const loading = ref(true);
 
 // Modal, Tooltip, and Animation State Management
 const isAgentModalOpen = ref(false);
@@ -968,16 +1012,26 @@ const checkDueDate = () => {
 
 onMounted(async () => {
   try {
+    loading.value = true; // Set loading to true at the start
+
     const hasAccess = await checkAccess(['agent', 'admin']);
     if (!hasAccess) {
       router.push('/unauthorized');
       return;
     }
+
     await loadTaskData();
+
+    // Add a slight delay to show the skeleton loader
+    setTimeout(() => {
+      loading.value = false; // Set loading to false after data is loaded
+    }, 800);
+
     setInterval(checkDueDate, 60000); // Check every minute
   } catch (error) {
     console.error('Failed to initialize task:', error);
     alert('Failed to initialize task. Please try again.');
+    loading.value = false; // Make sure to set loading to false in case of error
   }
 });
 
@@ -989,6 +1043,33 @@ watch(() => route.params.id, () => {
 const loadTaskData = async () => {
   try {
     const taskId = parseInt(route.params.id, 10);
+
+    // First try to get the task from localStorage currentTaskDetail
+    const storedTaskDetail = localStorage.getItem('currentTaskDetail');
+    if (storedTaskDetail) {
+      const parsedTask = JSON.parse(storedTaskDetail);
+      if (parsedTask.id === taskId) {
+        Object.assign(taskData, {
+          ...parsedTask,
+          description: parsedTask.description || [],
+          agentDetails: parsedTask.agentDetails || [],
+          clientDetails: parsedTask.clientDetails || [],
+          attachments: parsedTask.attachments || [],
+          isPaused: parsedTask.isPaused || false,
+          priority: parsedTask.priority || 'Medium'
+        });
+
+        // Set up timer if needed
+        if (parsedTask.status === 'in_progress' && parsedTask.startedAt) {
+          startTime.value = new Date(parsedTask.startedAt).getTime();
+          if (!taskData.isPaused) startTimer();
+        }
+
+        return; // Exit early if we found the task in currentTaskDetail
+      }
+    }
+
+    // If not found in currentTaskDetail, try to find it in the tasks list
     const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
     const task = tasks.find(task => task.id === taskId);
 
@@ -1032,6 +1113,18 @@ onUnmounted(() => {
     clearInterval(timerInterval.value);
   }
 });
+
+const goBack = () => {
+  // Determine which page to go back to based on task status
+  if (taskData.status === 'completed') {
+    router.push({ name: 'CompletedTasks' });
+  } else if (taskData.status === 'draft') {
+    router.push({ name: 'DraftTasks' });
+  } else {
+    // Default to in-progress tasks
+    router.push({ name: 'InProgressTasks' });
+  }
+};
 </script>
 
 <style scoped>
@@ -1062,6 +1155,31 @@ onUnmounted(() => {
   align-items: flex-start;
   gap: 4px;
   position: relative;
+}
+
+.task-detail__back-button-container {
+  margin-bottom: 10px;
+}
+
+.task-detail__back-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  color: #4B5563;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.task-detail__back-button:hover {
+  background-color: #F3F4F6;
+  color: #111827;
+  transform: translateX(-2px);
 }
 
 .task-detail__title {
@@ -1594,6 +1712,116 @@ onUnmounted(() => {
   margin-bottom: 15px;
 }
 
+/* Skeleton Loading Styles */
+.task-detail__loading-skeleton {
+  animation: fadeIn 0.4s ease-out;
+}
+
+.task-detail__skeleton-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+
+.task-detail__skeleton-left {
+  background-color: #eaeff9;
+  border-radius: 8px;
+  padding: 50px 90px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.task-detail__skeleton-right {
+  background-color: white;
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.task-detail__skeleton-section {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 35px;
+  border: 1px solid #e6e6e6;
+  position: relative;
+  overflow: hidden;
+}
+
+.task-detail__skeleton-section::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0,
+    rgba(255, 255, 255, 0.2) 20%,
+    rgba(255, 255, 255, 0.5) 60%,
+    rgba(255, 255, 255, 0)
+  );
+  animation: shimmer 2s infinite;
+}
+
+.task-detail__skeleton-header {
+  width: 70%;
+  height: 24px;
+  background-color: #E5E7EB;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.task-detail__skeleton-card {
+  width: 100%;
+  height: 60px;
+  background-color: #E5E7EB;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.task-detail__skeleton-content {
+  width: 100%;
+  height: 120px;
+  background-color: #E5E7EB;
+  border-radius: 8px;
+}
+
+.task-detail__skeleton-timeline {
+  width: 100%;
+  height: 80px;
+  background-color: #E5E7EB;
+  border-radius: 8px;
+}
+
+.task-detail__skeleton-attachment {
+  width: 100%;
+  height: 50px;
+  background-color: #E5E7EB;
+  border-radius: 8px;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Confirmation Pop-up Styles */
 .confirmation-overlay {
   position: fixed;
@@ -1618,15 +1846,6 @@ onUnmounted(() => {
   width: 400px;
   animation: slideIn 0.3s ease-in-out;
   border: 1px solid #e6e6e6;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
 }
 
 @keyframes slideIn {
@@ -1726,6 +1945,13 @@ onUnmounted(() => {
   }
   .task-detail__title {
     max-width: 200px; /* Adjusted for mobile */
+  }
+  .task-detail__skeleton-grid {
+    grid-template-columns: 1fr;
+  }
+  .task-detail__skeleton-left,
+  .task-detail__skeleton-right {
+    padding: 20px;
   }
 }
 

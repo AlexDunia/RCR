@@ -1,7 +1,38 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, watch } from 'vue';
+import { useRoute } from 'vue-router';
 
-const activeMenu = ref('dashboard');
+const route = useRoute();
+const activeMenu = ref('');
+
+// Function to determine which menu item should be active based on the current route
+const getActiveMenuFromPath = (path) => {
+  if (path === '/') return 'dashboard';
+  if (path.startsWith('/tasks')) return 'tasks';
+  if (path.startsWith('/completed-tasks')) return 'tasks';
+
+  // For other routes, find the matching menu item
+  const matchingItem = menuItems.find(item =>
+    path.startsWith(item.path) && item.path !== '/'
+  );
+
+  return matchingItem ? matchingItem.key : 'dashboard';
+};
+
+// Set active menu based on current route
+const updateActiveMenu = () => {
+  activeMenu.value = getActiveMenuFromPath(route.path);
+};
+
+// Watch for route changes and update active menu
+watch(() => route.path, () => {
+  updateActiveMenu();
+}, { immediate: true });
+
+// Initialize on component mount
+onMounted(() => {
+  updateActiveMenu();
+});
 
 const menuItems = [
   {
@@ -105,10 +136,6 @@ const menuItems = [
     `
   }
 ];
-
-const setActiveMenu = (key) => {
-  activeMenu.value = key;
-};
 </script>
 
 <template>
@@ -121,7 +148,10 @@ const setActiveMenu = (key) => {
           :key="item.key"
           :class="{ active: activeMenu === item.key }"
         >
-          <router-link :to="item.path" @click="setActiveMenu(item.key)">
+          <router-link
+            :to="item.path"
+            :class="{ active: activeMenu === item.key }"
+          >
             <span class="icon" v-html="item.icon"></span>
             {{ item.name }}
           </router-link>
@@ -147,6 +177,7 @@ const setActiveMenu = (key) => {
   font-size: 22px;
   font-weight: bold;
   animation: fadeIn 0.8s ease-in-out;
+  margin-bottom: 30px;
 }
 
 .logo span {
@@ -156,33 +187,32 @@ const setActiveMenu = (key) => {
 nav ul {
   list-style: none;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 nav ul li {
-  padding: 12px;
+  padding: 8px 12px;
   border-radius: 6px;
   cursor: pointer;
-  transition: background 0.3s ease, transform 0.2s ease-in-out;
-  display: flex;
-  align-items: center;
+  transition: all 0.3s ease;
 }
 
 nav ul li a {
   text-decoration: none;
   color: white;
   display: flex;
-  font-size: 14.3px;
+  font-size: 14px;
   align-items: center;
   width: 100%;
-  margin-bottom: 8px;
+  padding: 6px 0;
   font-weight: 400;
-  transition: color 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 nav ul li.active {
   background: white;
-  padding: 10px 12px;
-  transform: scale(1.05);
 }
 
 nav ul li.active a {
@@ -194,23 +224,23 @@ nav ul li.active .icon svg {
 }
 
 .icon {
-  margin-right: 10px;
+  margin-right: 12px;
   display: flex;
   align-items: center;
 }
 
 .icon svg {
-  transition: stroke 0.3s ease, transform 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 /* Hover effect on non-active items */
 nav ul li:not(.active):hover {
   background: #1f63bb;
-  transform: scale(1.02);
 }
 
 nav ul li:not(.active):hover a {
   color: #ffcc00;
+  transform: translateX(4px);
 }
 
 nav ul li:not(.active):hover .icon svg {
@@ -230,3 +260,4 @@ nav ul li:not(.active):hover .icon svg {
   }
 }
 </style>
+

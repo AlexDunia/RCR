@@ -12,6 +12,7 @@ import DraftTasks from '@/views/tasks/DraftTasks.vue';
 import CompletedTasks from '@/views/tasks/CompletedTasks.vue';
 import TaskCreate from '@/components/task/TaskCreate.vue';
 import TaskDetail from '@/components/task/TaskDetail.vue';
+import CompletedTaskDetail from '@/views/tasks/CompletedTaskDetail.vue';
 import { useLayoutStore } from '@/stores/layout'; // Add this import
 
 const routes = [
@@ -50,17 +51,38 @@ const routes = [
   {
     path: '/tasks/in-progress',
     name: 'InProgressTasks',
-    component: InProgressTasks
+    component: InProgressTasks,
+    meta: {
+      requiresAuth: true,
+      allowedRoles: ['agent', 'admin'],
+      hideSidebar: false,
+      hideHeader: false,
+      background: '#F9FAFB'
+    }
   },
   {
     path: '/tasks/drafts',
     name: 'DraftTasks',
-    component: DraftTasks
+    component: DraftTasks,
+    meta: {
+      requiresAuth: true,
+      allowedRoles: ['agent', 'admin'],
+      hideSidebar: false,
+      hideHeader: false,
+      background: '#F9FAFB'
+    }
   },
   {
     path: '/tasks/completed',
     name: 'CompletedTasks',
-    component: CompletedTasks
+    component: CompletedTasks,
+    meta: {
+      requiresAuth: true,
+      allowedRoles: ['agent', 'admin'],
+      hideSidebar: false,
+      hideHeader: false,
+      background: '#F9FAFB'
+    }
   },
   {
     path: '/tasks/create',
@@ -82,6 +104,18 @@ const routes = [
       requiresAuth: true,
       allowedRoles: ['agent', 'admin'],
       hideSidebar: true,
+      hideHeader: true,
+      background: '#FFFFFF'
+    }
+  },
+  {
+    path: '/completed-tasks/:id',
+    name: 'CompletedTaskDetail',
+    component: CompletedTaskDetail,
+    meta: {
+      requiresAuth: true,
+      allowedRoles: ['agent', 'admin'],
+      hideSidebar: false,
       hideHeader: true,
       background: '#FFFFFF'
     }
@@ -123,6 +157,19 @@ router.beforeEach(async (to, from, next) => {
   }
 
   next();
+});
+
+// Add an afterEach guard to ensure layout is properly updated
+router.afterEach((to) => {
+  // Force layout update after navigation is complete
+  const layoutStore = useLayoutStore();
+
+  // Apply the route's meta settings
+  layoutStore.setLayout({
+    hideSidebar: to.meta.hideSidebar || false,
+    hideHeader: to.meta.hideHeader || false,
+    background: to.meta.background || '#F4F4F4'
+  });
 });
 
 export default router;

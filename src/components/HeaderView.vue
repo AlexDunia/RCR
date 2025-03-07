@@ -8,7 +8,6 @@ const title = computed(() => headerStore.title);
 </script>
 
 <template>
-
   <!-- Do something where its like... if its not dashboard, show title,
    if its dashboard, do not show title -->
   <header class="header">
@@ -21,7 +20,6 @@ const title = computed(() => headerStore.title);
       </svg>
       <input type="text" placeholder="Search..." />
     </div>
-
 
     <!-- Wrapping both icons in a flex container -->
     <div class="icon-wrapper">
@@ -156,19 +154,23 @@ input {
 .notification-badge {
   position: absolute;
   top: -4px;
-  /* Moves closer */
+  /* Move it slightly up */
   right: -4px;
-  /* Moves closer */
-  min-width: 16px;
-  height: 16px;
-  background: red;
+  /* Move it closer to the icon */
+  background-color: red;
   color: white;
   font-size: 10px;
   font-weight: bold;
-  text-align: center;
-  line-height: 16px;
-  padding: 0 5px;
+  width: auto;
+  min-width: 16px;
+  /* Ensure it adapts to numbers like 99+ */
+  height: 16px;
+  padding: 2px 5px;
   border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 
@@ -200,25 +202,5 @@ input {
   fill: currentColor;
 }
 
-.notification-badge {
-  position: absolute;
-  top: -4px;
-  /* Move it slightly up */
-  right: -4px;
-  /* Move it closer to the icon */
-  background-color: red;
-  color: white;
-  font-size: 10px;
-  font-weight: bold;
-  width: auto;
-  min-width: 16px;
-  /* Ensure it adapts to numbers like 99+ */
-  height: 16px;
-  padding: 2px 5px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-}
+/* Back button styles removed */
 </style>

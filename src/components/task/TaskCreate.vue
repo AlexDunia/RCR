@@ -5,10 +5,10 @@
       <div class="task-create__nav">
         <button class="task-create__back" @click="handleBack" aria-label="Back to tasks">
           <span class="task-create__back-arrow">&lt;</span>
-          Create new task
+          {{ isEditMode ? 'Edit task' : 'Create new task' }}
         </button>
         <div class="task-create__subtitle">
-          Here, you can add, remove, edit properties on your profile
+          {{ isEditMode ? 'Update your task details and save changes' : 'Here, you can add, remove, edit properties on your profile' }}
         </div>
       </div>
       <div class="task-create__profile">
@@ -37,9 +37,36 @@
       </div>
     </header>
 
+    <!-- Loading Skeleton -->
+    <div v-if="loading" class="task-create__loading-skeleton">
+      <div class="task-create__skeleton-title"></div>
+      <div class="task-create__skeleton-form">
+        <div class="task-create__skeleton-group">
+          <div class="task-create__skeleton-label"></div>
+          <div class="task-create__skeleton-input"></div>
+        </div>
+        <div class="task-create__skeleton-group">
+          <div class="task-create__skeleton-label"></div>
+          <div class="task-create__skeleton-input"></div>
+        </div>
+        <div class="task-create__skeleton-group">
+          <div class="task-create__skeleton-label"></div>
+          <div class="task-create__skeleton-textarea"></div>
+        </div>
+        <div class="task-create__skeleton-group">
+          <div class="task-create__skeleton-label"></div>
+          <div class="task-create__skeleton-select"></div>
+        </div>
+        <div class="task-create__skeleton-group">
+          <div class="task-create__skeleton-label"></div>
+          <div class="task-create__skeleton-cards"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- Main Form Section -->
-    <section class="task-create__content">
-      <h1 class="task-create__title">Create a task</h1>
+    <section v-else class="task-create__content">
+      <h1 class="task-create__title">{{ isEditMode ? 'Edit task' : 'Create a task' }}</h1>
 
       <form class="task-create__form" @submit.prevent="handleSubmit" role="form">
         <!-- Task Name -->
@@ -50,7 +77,7 @@
             id="taskName"
             v-model="taskData.name"
             class="task-create__input"
-            placeholder="Visit offshore island"
+            :placeholder="isEditMode ? 'Edit task name' : 'Visit offshore island'"
             required
             aria-required="true"
           >
@@ -231,7 +258,7 @@
         <!-- Submit Button -->
         <div class="task-create__form-group">
           <button type="submit" class="task-create__submit">
-            Create Task
+            {{ isEditMode ? 'Update Task' : 'Create Task' }}
           </button>
         </div>
       </form>
@@ -272,7 +299,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useRoleGuard } from '@/composables/useRoleGuard'
 import AgentModal from './AgentModal.vue'
@@ -282,8 +309,15 @@ const router = useRouter()
 const route = useRoute()
 const { checkAccess } = useRoleGuard()
 
+// Loading state
+const loading = ref(true)
+
+// Check if we're in edit mode
+const isEditMode = computed(() => !!route.query.draftId)
+
+// Form refs
 const fileInput = ref(null)
-const taskDescription = ref('') // New ref for textarea input
+const taskDescription = ref('')
 
 const taskData = reactive({
   name: '',
@@ -490,7 +524,7 @@ const handleSubmit = async () => {
   }
 }
 
-const loadDraftData = (draftId) => {
+const loadDraftData = async (draftId) => {
   const tasks = JSON.parse(localStorage.getItem('tasks') || '[]')
   const draft = tasks.find(task => task.id === draftId)
   if (draft) {
@@ -540,15 +574,23 @@ const getFileExtension = (filename) => {
 }
 
 onMounted(async () => {
+  loading.value = true; // Set loading to true at the start
+
   const hasAccess = await checkAccess(['agent', 'admin'])
   if (!hasAccess) {
     router.push('/unauthorized')
     return
   }
+
   const draftId = route.query.draftId
   if (draftId) {
-    loadDraftData(parseInt(draftId))
+    await loadDraftData(parseInt(draftId))
   }
+
+  // Add a slight delay to show the skeleton loader
+  setTimeout(() => {
+    loading.value = false; // Set loading to false after data is loaded
+  }, 800);
 })
 </script>
 
@@ -1000,5 +1042,137 @@ onMounted(async () => {
   background: #F3F4F6;
   border-radius: 6px;
   margin-top: 8px;
+}
+
+/* Skeleton Loading Styles */
+.task-create__loading-skeleton {
+  animation: fadeIn 0.4s ease-out;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.task-create__skeleton-title,
+.task-create__skeleton-input,
+.task-create__skeleton-textarea,
+.task-create__skeleton-select,
+.task-create__skeleton-group {
+  position: relative;
+  overflow: hidden;
+}
+
+.task-create__skeleton-cards {
+  position: relative;
+  overflow: hidden;
+}
+
+.task-create__skeleton-title {
+  width: 300px;
+  height: 36px;
+  background-color: #E5E7EB;
+  border-radius: 6px;
+  margin-bottom: 30px;
+}
+
+.task-create__skeleton-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.task-create__skeleton-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.task-create__skeleton-label {
+  width: 120px;
+  height: 16px;
+  background-color: #E5E7EB;
+  border-radius: 4px;
+}
+
+.task-create__skeleton-input {
+  width: 100%;
+  height: 48px;
+  background-color: #E5E7EB;
+  border-radius: 6px;
+}
+
+.task-create__skeleton-textarea {
+  width: 100%;
+  height: 120px;
+  background-color: #E5E7EB;
+  border-radius: 6px;
+}
+
+.task-create__skeleton-select {
+  width: 100%;
+  height: 48px;
+  background-color: #E5E7EB;
+  border-radius: 6px;
+}
+
+.task-create__skeleton-cards {
+  display: flex;
+  gap: 12px;
+}
+
+.task-create__skeleton-cards::before {
+  content: "";
+  width: 120px;
+  height: 60px;
+  background-color: #E5E7EB;
+  border-radius: 6px;
+}
+
+.task-create__skeleton-cards::after {
+  content: "";
+  width: 120px;
+  height: 60px;
+  background-color: #E5E7EB;
+  border-radius: 6px;
+}
+
+.task-create__skeleton-group::after,
+.task-create__skeleton-title::after,
+.task-create__skeleton-input::after,
+.task-create__skeleton-textarea::after,
+.task-create__skeleton-select::after,
+.task-create__skeleton-cards::before,
+.task-create__skeleton-cards::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0,
+    rgba(255, 255, 255, 0.2) 20%,
+    rgba(255, 255, 255, 0.5) 60%,
+    rgba(255, 255, 255, 0)
+  );
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>

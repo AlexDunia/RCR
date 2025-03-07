@@ -5,6 +5,7 @@ import { useLayoutStore } from '@/stores/layout'; // Add this import
 import { watch } from 'vue';
 import Sidebar from './components/SidebarView.vue';
 import Header from './components/HeaderView.vue';
+import PageTransition from './components/PageTransition.vue';
 import '@fontsource/poppins'; // Defaults to 400 weight
 import '@fontsource/poppins/700.css'; // If you need bold
 
@@ -13,9 +14,10 @@ const headerStore = useHeaderStore();
 const layoutStore = useLayoutStore(); // Use the layout store
 
 // Watch route changes and update the header title dynamically
-watch(route, () => {
-  if (route.meta && route.meta.title) {
-    headerStore.setTitle(route.meta.title);
+watch(route, (to) => {
+  // Update header title
+  if (to.meta && to.meta.title) {
+    headerStore.setTitle(to.meta.title);
   } else {
     headerStore.setTitle('Dashboard');
   }
@@ -27,7 +29,9 @@ watch(route, () => {
     <Sidebar v-if="!layoutStore.hideSidebar" />
     <div class="main-content">
       <Header v-if="!layoutStore.hideHeader" />
-      <router-view></router-view>
+      <PageTransition>
+        <router-view></router-view>
+      </PageTransition>
     </div>
   </div>
 </template>
@@ -60,5 +64,6 @@ body {
 .main-content {
   flex: 1;
   overflow-y: auto;
+  position: relative;
 }
 </style>
