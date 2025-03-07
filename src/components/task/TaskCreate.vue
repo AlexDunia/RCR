@@ -283,14 +283,19 @@
     <!-- Confirmation Dialog -->
     <div v-if="showDraftConfirm" class="task-create__dialog-overlay" @click="showDraftConfirm = false">
       <div class="task-create__dialog" @click.stop>
-        <h3 class="task-create__dialog-title">Save as Draft?</h3>
-        <p class="task-create__dialog-text">Would you like to save your progress as a draft?</p>
+        <h3 class="task-create__dialog-title">Unsaved Changes</h3>
+        <p class="task-create__dialog-text">
+          {{ isEditMode ?
+            'You have unsaved changes to this task. Would you like to save your changes to drafts?' :
+            'You have started creating a task. Would you like to save your progress as a draft?'
+          }}
+        </p>
         <div class="task-create__dialog-actions">
           <button class="task-create__dialog-btn task-create__dialog-btn--secondary" @click="handleDraftCancel">
-            No, Discard
+            Discard Changes
           </button>
           <button class="task-create__dialog-btn task-create__dialog-btn--primary" @click="handleDraftSave">
-            Yes, Save as Draft
+            Save to Drafts
           </button>
         </div>
       </div>
@@ -344,6 +349,9 @@ const selectedClients = ref([])
 // Dialog state
 const showDraftConfirm = ref(false)
 
+// Add originalTaskData to store the initial state
+const originalTaskData = ref(null)
+
 // Methods
 const handleAvatarError = (e) => {
   e.target.src = '/default-avatar.jpg'
@@ -390,15 +398,16 @@ const removeClient = (client) => {
 }
 
 const handleBack = () => {
-  if (route.query.draftId) {
-    saveDraftChanges()
-    router.push('/tasks/drafts')
-    return
-  }
-  if (!route.query.draftId && hasFormData()) {
-    showDraftConfirm.value = true
+  // Check if there are unsaved changes in either mode
+  if (hasFormData() && hasChanges()) {
+    showDraftConfirm.value = true;
   } else {
-    router.push('/tasks/drafts')
+    // No changes, just go back
+    if (route.query.draftId) {
+      router.push('/tasks/drafts');
+    } else {
+      router.push('/tasks');
+    }
   }
 }
 
@@ -439,27 +448,33 @@ const hasFormData = () => {
 
 const handleDraftSave = async () => {
   try {
-    const descriptionArray = taskDescription.value
-      ? taskDescription.value.split('##').map(item => `- ${item.trim()}`).filter(item => item !== '- ')
-      : [];
-    const draftData = {
-      ...taskData,
-      id: Date.now(),
-      title: taskData.name || 'Untitled Task',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      status: 'draft',
-      agentDetails: selectedAgents.value,
-      clientDetails: selectedClients.value,
-      lastEditedAt: new Date().toISOString(),
-      isPartiallyComplete: true,
-      attachments: taskData.attachments,
-      description: descriptionArray
+    if (route.query.draftId) {
+      // If editing an existing draft, save changes to it
+      saveDraftChanges();
+    } else {
+      // Creating a new draft
+      const descriptionArray = taskDescription.value
+        ? taskDescription.value.split('##').map(item => `- ${item.trim()}`).filter(item => item !== '- ')
+        : [];
+      const draftData = {
+        ...taskData,
+        id: Date.now(),
+        title: taskData.name || 'Untitled Task',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        status: 'draft',
+        agentDetails: selectedAgents.value,
+        clientDetails: selectedClients.value,
+        lastEditedAt: new Date().toISOString(),
+        isPartiallyComplete: true,
+        attachments: taskData.attachments,
+        description: descriptionArray
+      }
+      const tasks = JSON.parse(localStorage.getItem('tasks') || '[]')
+      tasks.push(draftData)
+      localStorage.setItem('tasks', JSON.stringify(tasks))
     }
-    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]')
-    tasks.push(draftData)
-    localStorage.setItem('tasks', JSON.stringify(tasks))
-    router.push('/tasks')
+    router.push('/tasks/drafts')
   } catch (error) {
     console.error('Failed to save draft:', error)
     alert('Failed to save draft. Please try again.')
@@ -524,6 +539,29 @@ const handleSubmit = async () => {
   }
 }
 
+// Add hasChanges function to check if the form data has changed
+const hasChanges = () => {
+  if (!originalTaskData.value) return true; // If no original data, assume changes
+
+  // Compare current form data with original data
+  const currentData = {
+    name: taskData.name,
+    startDate: taskData.startDate,
+    startTime: taskData.startTime,
+    endDate: taskData.endDate,
+    endTime: taskData.endTime,
+    priority: taskData.priority,
+    agents: taskData.agents,
+    clients: taskData.clients,
+    attachments: taskData.attachments,
+    description: taskDescription.value
+  };
+
+  // Simple comparison of stringified objects
+  return JSON.stringify(currentData) !== JSON.stringify(originalTaskData.value);
+}
+
+// Update loadDraftData to save original state
 const loadDraftData = async (draftId) => {
   const tasks = JSON.parse(localStorage.getItem('tasks') || '[]')
   const draft = tasks.find(task => task.id === draftId)
@@ -543,6 +581,20 @@ const loadDraftData = async (draftId) => {
     taskDescription.value = draft.description ? draft.description.map(item => item.replace('- ', '')).join(' ## ') : ''
     selectedAgents.value = draft.agentDetails
     selectedClients.value = draft.clientDetails
+
+    // Save original state for change detection
+    originalTaskData.value = {
+      name: draft.title,
+      startDate: draft.startDate,
+      startTime: draft.startTime,
+      endDate: draft.endDate,
+      endTime: draft.endTime,
+      priority: draft.priority,
+      agents: [...draft.agents],
+      clients: [...draft.clients],
+      attachments: JSON.parse(JSON.stringify(draft.attachments)),
+      description: taskDescription.value
+    }
   }
 }
 
@@ -585,6 +637,20 @@ onMounted(async () => {
   const draftId = route.query.draftId
   if (draftId) {
     await loadDraftData(parseInt(draftId))
+  } else {
+    // Initialize original data for new tasks
+    originalTaskData.value = {
+      name: '',
+      startDate: '',
+      startTime: '09:00',
+      endDate: '',
+      endTime: '21:00',
+      priority: 'medium',
+      agents: [],
+      clients: [],
+      attachments: [],
+      description: ''
+    }
   }
 
   // Add a slight delay to show the skeleton loader

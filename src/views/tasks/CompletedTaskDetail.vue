@@ -9,6 +9,7 @@
         Back
       </button>
       <h2>Completed Task Details</h2>
+      <span v-if="isModified" class="modified-indicator">Modified</span>
     </div>
 
     <!-- Loading Skeleton -->
@@ -37,7 +38,14 @@
       </div>
 
       <!-- Task Title -->
-      <h1 class="task-title">{{ task.title }}</h1>
+      <h1 class="task-title">
+        <input
+          v-model="task.title"
+          type="text"
+          class="editable-title"
+          @input="checkForChanges"
+        />
+      </h1>
 
       <!-- Task Dates -->
       <div class="task-dates">
@@ -59,9 +67,11 @@
       <div v-if="task.description && task.description.length > 0" class="description-section">
         <h2 class="section-heading">Description</h2>
         <div class="description-content">
-          <p v-for="(line, index) in task.description" :key="index" class="description-line">
-            {{ line }}
-          </p>
+          <textarea
+            v-model="task.description"
+            class="editable-description"
+            @input="checkForChanges"
+          ></textarea>
         </div>
       </div>
 
@@ -158,20 +168,72 @@
       <p class="error-text">The task you're looking for doesn't exist or has been removed</p>
       <button class="back-to-list-btn" @click="goBack">Back</button>
     </div>
+
+    <!-- Confirmation Dialog -->
+    <div v-if="showConfirmDialog" class="confirmation-dialog">
+      <div class="dialog-content">
+        <h2>Save Changes?</h2>
+        <p>You've made changes to this task. Would you like to save them to drafts or discard them?</p>
+        <div class="button-group">
+          <button class="discard-btn" @click="confirmDiscard">Discard Changes</button>
+          <button class="save-btn" @click="saveAsDraft">Save to Drafts</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
+const router = useRouter();
 const task = ref(null);
 const loading = ref(true);
+const originalTask = ref(null); // Store the original task data
+const showConfirmDialog = ref(false); // Control the confirmation dialog visibility
+const isModified = ref(false); // Track if the task has been modified
 
 const goBack = () => {
-  // Use browser history to go back
+  // Check if there are unsaved changes
+  if (checkForChanges()) {
+    showConfirmDialog.value = true;
+  } else {
+    // No changes, just go back
+    window.history.back();
+  }
+};
+
+const confirmDiscard = () => {
+  showConfirmDialog.value = false;
   window.history.back();
+};
+
+const saveAsDraft = () => {
+  // Save the modified task to drafts
+  const drafts = JSON.parse(localStorage.getItem('draftTasks') || '[]');
+
+  // Create a draft version of the task
+  const draftTask = {
+    ...task.value,
+    status: 'draft',
+    modifiedAt: new Date().toISOString()
+  };
+
+  // Add to drafts or update existing draft
+  const existingDraftIndex = drafts.findIndex(d => String(d.id) === String(task.value.id));
+  if (existingDraftIndex >= 0) {
+    drafts[existingDraftIndex] = draftTask;
+  } else {
+    drafts.push(draftTask);
+  }
+
+  localStorage.setItem('draftTasks', JSON.stringify(drafts));
+
+  // Close dialog and navigate to drafts
+  showConfirmDialog.value = false;
+  router.push('/tasks/drafts');
 };
 
 const formatDate = (date) => {
@@ -199,6 +261,14 @@ const getInitials = (name) => {
 const capitalizeFirst = (str) => {
   if (!str) return '';
   return str.charAt(0).toUpperCase() + str.slice(1);
+};
+
+const checkForChanges = () => {
+  if (!task.value || !originalTask.value) return false;
+
+  const hasChanged = JSON.stringify(task.value) !== JSON.stringify(originalTask.value);
+  isModified.value = hasChanged;
+  return hasChanged;
 };
 
 onMounted(async () => {
@@ -234,6 +304,9 @@ onMounted(async () => {
       }
 
       console.log('Final task value:', task.value);
+
+      // Save original task data to track changes
+      originalTask.value = JSON.parse(JSON.stringify(task.value));
     } catch (error) {
       console.error('Error loading task:', error);
     }
@@ -709,5 +782,113 @@ onMounted(async () => {
   background-color: #F3F4F6;
   color: #111827;
   transform: translateX(-2px);
+}
+
+/* Confirmation Dialog */
+.confirmation-dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dialog-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 100%;
+}
+
+.dialog-content h2 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 16px;
+}
+
+.dialog-content p {
+  color: #4B5563;
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+
+.button-group {
+  display: flex;
+  justify-content: space-between;
+}
+
+.discard-btn, .save-btn {
+  background-color: #2563EB;
+  color: white;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 10px 20px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.discard-btn:hover, .save-btn:hover {
+  background-color: #1D4ED8;
+  transform: translateY(-1px);
+}
+
+.editable-title {
+  width: 100%;
+  font-size: 24px;
+  font-weight: 600;
+  color: #111827;
+  border: 1px solid transparent;
+  background: transparent;
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin: -4px -8px;
+  transition: all 0.2s ease;
+}
+
+.editable-title:hover, .editable-title:focus {
+  border-color: #E5E7EB;
+  background-color: #F9FAFB;
+  outline: none;
+}
+
+.editable-description {
+  width: 100%;
+  min-height: 120px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #4B5563;
+  border: 1px solid transparent;
+  background: transparent;
+  padding: 8px;
+  border-radius: 4px;
+  margin: -8px;
+  resize: vertical;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.editable-description:hover, .editable-description:focus {
+  border-color: #E5E7EB;
+  background-color: #FFFFFF;
+  outline: none;
+}
+
+.modified-indicator {
+  background-color: #FBBF24;
+  color: #92400E;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-left: auto;
 }
 </style>

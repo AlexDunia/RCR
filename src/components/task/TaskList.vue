@@ -274,6 +274,7 @@ const getEmptyStateText = () => {
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(0, 0, 0, 0.08);
   cursor: pointer;
+  margin-bottom:20px;
   position: relative;
 }
 
