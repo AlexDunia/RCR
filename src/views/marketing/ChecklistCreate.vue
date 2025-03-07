@@ -103,7 +103,7 @@ const checklist = ref({
   title: '',
   description: '',
   dueDate: '',
-  items: [{ text: '' }],
+  items: [{ text: '', completed: false }],
   status: 'draft',
   progress: 0,
   creationDate: new Date().toISOString(),
@@ -111,7 +111,7 @@ const checklist = ref({
 });
 
 const addItem = () => {
-  checklist.value.items.push({ text: '' });
+  checklist.value.items.push({ text: '', completed: false });
 };
 
 const removeItem = (index) => {
@@ -122,24 +122,55 @@ const removeItem = (index) => {
 };
 
 const saveChecklist = () => {
-  // Get existing checklists from localStorage or initialize empty array
-  const existingChecklists = JSON.parse(localStorage.getItem('checklists') || '[]');
+  try {
+    // Log the current state before saving
+    console.log('Current checklist to save:', checklist.value);
 
-  // Create new checklist object
-  const newChecklist = {
-    ...checklist.value,
-    id: Date.now(), // Simple way to generate unique ID
-    items: checklist.value.items.filter(item => item.text.trim() !== '')
-  };
+    // Get existing checklists from localStorage
+    let existingChecklists = [];
+    const storedChecklists = localStorage.getItem('checklists');
 
-  // Add new checklist to array
-  existingChecklists.push(newChecklist);
+    if (storedChecklists) {
+      console.log('Found existing checklists:', storedChecklists);
+      existingChecklists = JSON.parse(storedChecklists);
+    } else {
+      console.log('No existing checklists found in localStorage');
+    }
 
-  // Save back to localStorage
-  localStorage.setItem('checklists', JSON.stringify(existingChecklists));
+    // Create new checklist object with all required fields
+    const newChecklist = {
+      ...checklist.value,
+      id: Date.now(),
+      items: checklist.value.items
+        .filter(item => item.text.trim() !== '')
+        .map(item => ({
+          text: item.text,
+          completed: false
+        })),
+      creationDate: new Date().toISOString(),
+      status: 'draft',
+      progress: 0
+    };
 
-  // Navigate back to checklist list
-  router.push('/marketing-tools/checklist');
+    // Log the new checklist object
+    console.log('New checklist object created:', newChecklist);
+
+    // Add new checklist to array
+    existingChecklists.push(newChecklist);
+
+    // Save back to localStorage
+    localStorage.setItem('checklists', JSON.stringify(existingChecklists));
+
+    // Verify the save by reading it back
+    const verifyStorage = localStorage.getItem('checklists');
+    console.log('Verification - Reading back from localStorage:', verifyStorage);
+
+    // Navigate back to checklist list
+    router.push('/marketing-tools/checklist');
+  } catch (error) {
+    console.error('Error saving checklist:', error);
+    alert('There was an error saving your checklist. Please try again.');
+  }
 };
 
 const cancel = () => {

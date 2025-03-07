@@ -1,58 +1,56 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import ViewListings from '@/views/ViewListings.vue';
-import ManageListings from '@/views/agents/ManageListings.vue';
-import PropertyDetail from '@/views/PropertyDetail.vue';
-import PendingApprovals from '@/views/PendingApprovals.vue';
-import Drafts from '@/views/Drafts.vue';
-import AddListing from '@/views/agents/AddListing.vue';
-import AgentDashBoardView from '@/views/agents/AgentDashBoardView.vue';
-import AgentProfile from '@/views/agents/AgentProfile.vue';
-import InProgressTasks from '@/views/tasks/InProgressTasks.vue';
-import DraftTasks from '@/views/tasks/DraftTasks.vue';
-import CompletedTasks from '@/views/tasks/CompletedTasks.vue';
-import TaskCreate from '@/components/task/TaskCreate.vue';
-import TaskDetail from '@/components/task/TaskDetail.vue';
-import CompletedTaskDetail from '@/views/tasks/CompletedTaskDetail.vue';
-import MarketingTools from '@/views/MarketingTools.vue';
-import MarketingPlanDetail from '@/views/MarketingPlanDetail.vue';
-import MarketingChecklist from '@/views/MarketingChecklist.vue';
-import MarketingDoneForYou from '@/views/MarketingDoneForYou.vue';
-import { useLayoutStore } from '@/stores/layout'; // Add this import
-import CreateSuccessPlan from '@/views/CreateSuccessPlan.vue';
-import MyChecklist from '../views/marketing/MyChecklist.vue';
-import DoneForYou from '../views/marketing/DoneForYou.vue';
-import SocialPlatforms from '../views/marketing/SocialPlatforms.vue';
+import { useLayoutStore } from '@/stores/layout';
 
+// Lazy-loaded route components
 const routes = [
+  // Dashboard routes
   {
     path: '/',
     name: 'AgentDashboardView',
-    component: AgentDashBoardView
+    component: () => import('@/views/dashboard/AgentDashboardView.vue')
   },
   {
-    path: '/',
+    path: '/agent-profile',
     name: 'AgentProfile',
-    component: AgentProfile
+    component: () => import('@/views/agents/AgentProfile.vue')
   },
+
+  // Listing routes
   {
     path: '/view-listings',
-    component: ViewListings,
-    meta: { title: 'View Listings' },
+    name: 'ViewListings',
+    component: () => import('@/views/listings/ViewListings.vue'),
+    meta: { title: 'View Listings' }
   },
   {
     path: '/manage-listings',
-    component: ManageListings,
-    meta: { title: 'Manage Listings' },
+    name: 'ManageListings',
+    component: () => import('@/views/agents/ManageListings.vue'),
+    meta: { title: 'Manage Listings' }
   },
   {
     path: '/property/:id',
-    component: PropertyDetail,
-    meta: { title: 'Property Details' },
+    name: 'PropertyDetail',
+    component: () => import('@/views/listings/PropertyDetail.vue'),
+    meta: { title: 'Property Details' }
   },
-  { path: '/add-listing', component: AddListing },
-  { path: '/pending-approvals', component: PendingApprovals },
-  { path: '/drafts', component: Drafts },
+  {
+    path: '/add-listing',
+    name: 'AddListing',
+    component: () => import('@/views/agents/AddListing.vue')
+  },
+  {
+    path: '/pending-approvals',
+    name: 'PendingApprovals',
+    component: () => import('@/views/listings/PendingApprovals.vue')
+  },
+  {
+    path: '/drafts',
+    name: 'Drafts',
+    component: () => import('@/views/listings/Drafts.vue')
+  },
 
+  // Task routes
   {
     path: '/tasks',
     redirect: '/tasks/in-progress'
@@ -60,7 +58,7 @@ const routes = [
   {
     path: '/tasks/in-progress',
     name: 'InProgressTasks',
-    component: InProgressTasks,
+    component: () => import('@/views/tasks/InProgressTasks.vue'),
     meta: {
       requiresAuth: true,
       allowedRoles: ['agent', 'admin'],
@@ -72,7 +70,7 @@ const routes = [
   {
     path: '/tasks/drafts',
     name: 'DraftTasks',
-    component: DraftTasks,
+    component: () => import('@/views/tasks/DraftTasks.vue'),
     meta: {
       requiresAuth: true,
       allowedRoles: ['agent', 'admin'],
@@ -84,7 +82,7 @@ const routes = [
   {
     path: '/tasks/completed',
     name: 'CompletedTasks',
-    component: CompletedTasks,
+    component: () => import('@/views/tasks/CompletedTasks.vue'),
     meta: {
       requiresAuth: true,
       allowedRoles: ['agent', 'admin'],
@@ -96,7 +94,7 @@ const routes = [
   {
     path: '/tasks/create',
     name: 'TaskCreate',
-    component: TaskCreate,
+    component: () => import('@/components/task/TaskCreate.vue'),
     meta: {
       requiresAuth: true,
       allowedRoles: ['agent', 'admin'],
@@ -108,7 +106,7 @@ const routes = [
   {
     path: '/tasks/:id',
     name: 'TaskDetail',
-    component: TaskDetail,
+    component: () => import('@/components/task/TaskDetail.vue'),
     meta: {
       requiresAuth: true,
       allowedRoles: ['agent', 'admin'],
@@ -118,9 +116,9 @@ const routes = [
     }
   },
   {
-    path: '/completed-tasks/:id',
+    path: '/tasks/completed/:id',
     name: 'CompletedTaskDetail',
-    component: CompletedTaskDetail,
+    component: () => import('@/views/tasks/CompletedTaskDetail.vue'),
     meta: {
       requiresAuth: true,
       allowedRoles: ['agent', 'admin'],
@@ -130,10 +128,10 @@ const routes = [
     }
   },
 
-    // Marketing links.
+  // Marketing routes
   {
     path: '/marketing-tools',
-    component: MarketingTools,
+    component: () => import('@/views/marketing/MarketingTools.vue'),
     children: [
       {
         path: '',
@@ -145,77 +143,32 @@ const routes = [
       },
       {
         path: 'create',
-        component: CreateSuccessPlan
+        component: () => import('@/views/marketing/CreateSuccessPlan.vue')
       },
       {
         path: 'plan/:id',
-        component: MarketingPlanDetail
+        component: () => import('@/views/marketing/MarketingPlanDetail.vue')
       },
       {
         path: 'checklist',
-        component: MyChecklist
+        component: () => import('@/views/marketing/MyChecklist.vue')
       },
       {
         path: 'done-for-you',
-        component: DoneForYou
+        component: () => import('@/views/marketing/DoneForYou.vue')
       },
       {
         path: 'social-platforms',
-        component: SocialPlatforms
+        component: () => import('@/views/marketing/SocialPlatforms.vue')
       }
     ]
   },
   {
-    path: '/marketing-tools/my-checklist',
-    name: 'MarketingChecklist',
-    component: MarketingChecklist,
-    meta: {
-      requiresAuth: true,
-      allowedRoles: ['agent', 'admin'],
-      hideSidebar: false,
-      hideHeader: false,
-      background: '#F9FAFB'
-    }
-  },
-  {
-    path: '/marketing-tools/done-for-you',
-    name: 'MarketingDoneForYou',
-    component: MarketingDoneForYou,
-    meta: {
-      requiresAuth: true,
-      allowedRoles: ['agent', 'admin'],
-      hideSidebar: false,
-      hideHeader: false,
-      background: '#F9FAFB'
-    }
-  },
-  {
-    path: '/marketing-tools/:section',
-    name: 'MarketingToolsSection',
-    component: MarketingTools,
-    meta: {
-      requiresAuth: true,
-      allowedRoles: ['agent', 'admin'],
-      hideSidebar: false,
-      hideHeader: false,
-      background: '#F9FAFB'
-    }
-  },
-  {
-    path: '/marketing-tools/plan/:id',
-    name: 'MarketingPlanDetail',
-    component: MarketingPlanDetail,
-    meta: {
-      requiresAuth: true,
-      allowedRoles: ['agent', 'admin'],
-      hideSidebar: false,
-      hideHeader: false,
-      background: '#F9FAFB'
-    }
-  },
-  {
     path: '/marketing-tools/checklist',
-    component: MyChecklist
+    component: () => import('@/views/marketing/MyChecklist.vue'),
+    meta: {
+      keepAlive: true
+    }
   },
   {
     path: '/marketing-tools/checklist/create',
@@ -223,11 +176,26 @@ const routes = [
   },
   {
     path: '/marketing-tools/checklist/:id',
-    component: () => import('@/views/marketing/ChecklistDetail.vue')
+    component: () => import('@/views/marketing/ChecklistDetail.vue'),
+    meta: {
+      keepAlive: true
+    }
   },
   {
     path: '/marketing-tools/checklist/:id/edit',
     component: () => import('@/views/marketing/ChecklistEdit.vue')
+  },
+
+  // Chat routes
+  {
+    path: '/chat/admin',
+    name: 'AdminChat',
+    component: () => import('@/views/chat/AdminChatView.vue')
+  },
+  {
+    path: '/chat/client',
+    name: 'ClientChat',
+    component: () => import('@/views/chat/ClientChatView.vue')
   }
 ];
 
@@ -238,12 +206,11 @@ const router = createRouter({
 
 // Navigation guard for role-based access control and layout
 router.beforeEach(async (to, from, next) => {
-  // Set layout properties first (applies to all routes)
   const layoutStore = useLayoutStore();
   layoutStore.setLayout({
     hideSidebar: to.meta.hideSidebar || false,
     hideHeader: to.meta.hideHeader || false,
-    background: to.meta.background || '#F4F4F4' // Default background
+    background: to.meta.background || '#FFFFFF'
   });
 
   // Authentication and role checks
@@ -277,7 +244,7 @@ router.afterEach((to) => {
   layoutStore.setLayout({
     hideSidebar: to.meta.hideSidebar || false,
     hideHeader: to.meta.hideHeader || false,
-    background: to.meta.background || '#F4F4F4'
+    background: to.meta.background || '#FFFFFF'
   });
 });
 

@@ -32,8 +32,8 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import MarketingHeader from '../components/marketing/MarketingHeader.vue';
-import MarketingNavigation from '../components/marketing/MarketingNavigation.vue';
+import MarketingHeader from '@/components/marketing/MarketingHeader.vue';
+import MarketingNavigation from '@/components/marketing/MarketingNavigation.vue';
 
 const router = useRouter();
 const route = useRoute();
