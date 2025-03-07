@@ -13,7 +13,15 @@ import CompletedTasks from '@/views/tasks/CompletedTasks.vue';
 import TaskCreate from '@/components/task/TaskCreate.vue';
 import TaskDetail from '@/components/task/TaskDetail.vue';
 import CompletedTaskDetail from '@/views/tasks/CompletedTaskDetail.vue';
+import MarketingTools from '@/views/MarketingTools.vue';
+import MarketingPlanDetail from '@/views/MarketingPlanDetail.vue';
+import MarketingChecklist from '@/views/MarketingChecklist.vue';
+import MarketingDoneForYou from '@/views/MarketingDoneForYou.vue';
 import { useLayoutStore } from '@/stores/layout'; // Add this import
+import CreateSuccessPlan from '@/views/CreateSuccessPlan.vue';
+import MyChecklist from '../views/marketing/MyChecklist.vue';
+import DoneForYou from '../views/marketing/DoneForYou.vue';
+import SocialPlatforms from '../views/marketing/SocialPlatforms.vue';
 
 const routes = [
   {
@@ -44,6 +52,7 @@ const routes = [
   { path: '/add-listing', component: AddListing },
   { path: '/pending-approvals', component: PendingApprovals },
   { path: '/drafts', component: Drafts },
+
   {
     path: '/tasks',
     redirect: '/tasks/in-progress'
@@ -119,6 +128,106 @@ const routes = [
       hideHeader: true,
       background: '#FFFFFF'
     }
+  },
+
+    // Marketing links.
+  {
+    path: '/marketing-tools',
+    component: MarketingTools,
+    children: [
+      {
+        path: '',
+        component: () => import('@/views/marketing/SuccessPlan.vue')
+      },
+      {
+        path: 'success-plan',
+        component: () => import('@/views/marketing/SuccessPlan.vue')
+      },
+      {
+        path: 'create',
+        component: CreateSuccessPlan
+      },
+      {
+        path: 'plan/:id',
+        component: MarketingPlanDetail
+      },
+      {
+        path: 'checklist',
+        component: MyChecklist
+      },
+      {
+        path: 'done-for-you',
+        component: DoneForYou
+      },
+      {
+        path: 'social-platforms',
+        component: SocialPlatforms
+      }
+    ]
+  },
+  {
+    path: '/marketing-tools/my-checklist',
+    name: 'MarketingChecklist',
+    component: MarketingChecklist,
+    meta: {
+      requiresAuth: true,
+      allowedRoles: ['agent', 'admin'],
+      hideSidebar: false,
+      hideHeader: false,
+      background: '#F9FAFB'
+    }
+  },
+  {
+    path: '/marketing-tools/done-for-you',
+    name: 'MarketingDoneForYou',
+    component: MarketingDoneForYou,
+    meta: {
+      requiresAuth: true,
+      allowedRoles: ['agent', 'admin'],
+      hideSidebar: false,
+      hideHeader: false,
+      background: '#F9FAFB'
+    }
+  },
+  {
+    path: '/marketing-tools/:section',
+    name: 'MarketingToolsSection',
+    component: MarketingTools,
+    meta: {
+      requiresAuth: true,
+      allowedRoles: ['agent', 'admin'],
+      hideSidebar: false,
+      hideHeader: false,
+      background: '#F9FAFB'
+    }
+  },
+  {
+    path: '/marketing-tools/plan/:id',
+    name: 'MarketingPlanDetail',
+    component: MarketingPlanDetail,
+    meta: {
+      requiresAuth: true,
+      allowedRoles: ['agent', 'admin'],
+      hideSidebar: false,
+      hideHeader: false,
+      background: '#F9FAFB'
+    }
+  },
+  {
+    path: '/marketing-tools/checklist',
+    component: MyChecklist
+  },
+  {
+    path: '/marketing-tools/checklist/create',
+    component: () => import('@/views/marketing/ChecklistCreate.vue')
+  },
+  {
+    path: '/marketing-tools/checklist/:id',
+    component: () => import('@/views/marketing/ChecklistDetail.vue')
+  },
+  {
+    path: '/marketing-tools/checklist/:id/edit',
+    component: () => import('@/views/marketing/ChecklistEdit.vue')
   }
 ];
 
