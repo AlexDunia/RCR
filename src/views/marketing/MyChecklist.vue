@@ -1,5 +1,21 @@
 <template>
   <div class="checklist-container">
+    <div class="marketing-tools-header">
+      <h1 class="marketing-tools-title">My Checklist</h1>
+      <p class="marketing-tools-subtitle">Organize and manage your tasks efficiently with customizable checklists.</p>
+    </div>
+
+    <div class="marketing-tabs">
+      <button
+        v-for="(info, key) in tabInfo"
+        :key="key"
+        :class="['marketing-tab', { active: currentTab === key }]"
+        @click="handleTabChange(key)"
+      >
+        {{ info.title }}
+      </button>
+    </div>
+
     <!-- Add New Checklist Button -->
     <button class="add-checklist-btn" @click="createNewChecklist" aria-label="Create new checklist">
       <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -147,14 +163,51 @@
       <p>No checklists found for this filter</p>
       <button class="add-checklist-btn" @click="createNewChecklist">Create your first checklist</button>
     </div>
+
+    <ConfirmationModal
+      v-model="showModal"
+      :title="modalConfig.title"
+      :message="modalConfig.message"
+      :type="modalConfig.type"
+      :confirm-text="modalConfig.confirmText"
+      @confirm="modalConfig.onConfirm"
+      @close="showModal = false"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import ConfirmationModal from '@/components/ConfirmationModal.vue';
 
 const router = useRouter();
+const currentTab = ref('checklist');
+
+const tabInfo = {
+  success: {
+    title: 'Success Plan',
+    subtitle: 'Create and track your success milestones with our comprehensive planning tools.'
+  },
+  checklist: {
+    title: 'My Checklist',
+    subtitle: 'Organize and manage your tasks efficiently with customizable checklists.'
+  },
+  done: {
+    title: 'Done for You',
+    subtitle: 'Access our pre-made templates and automated solutions for quick implementation.'
+  },
+  social: {
+    title: 'Social Platforms',
+    subtitle: 'Link your social media accounts to reach a wider audience.'
+  }
+};
+
+const currentTabInfo = computed(() => {
+  const info = tabInfo[currentTab.value] || tabInfo.checklist;
+  console.log('Current tab info:', info); // Debug log
+  return info;
+});
 
 // State
 const searchQuery = ref('');
@@ -162,6 +215,14 @@ const currentFilter = ref('all');
 const sortBy = ref('newest');
 const selectedChecklists = ref([]);
 const checklists = ref([]);
+const showModal = ref(false);
+const modalConfig = ref({
+  title: '',
+  message: '',
+  type: 'default',
+  confirmText: 'Confirm',
+  onConfirm: () => {}
+});
 
 // Filter tabs
 const filterTabs = [
@@ -189,8 +250,28 @@ onMounted(() => {
 });
 
 // Computed
+const sortedChecklists = computed(() => {
+  const allChecklists = [...checklists.value];
+
+  // Sort by date (newest first) and then by completion status
+  return allChecklists.sort((a, b) => {
+    // First sort by lastModified date (newest first)
+    const dateA = new Date(a.lastModified || a.creationDate);
+    const dateB = new Date(b.lastModified || b.creationDate);
+
+    if (dateA > dateB) return -1;
+    if (dateA < dateB) return 1;
+
+    // If dates are equal, sort completed items after non-completed
+    if (a.status === 'completed' && b.status !== 'completed') return 1;
+    if (a.status !== 'completed' && b.status === 'completed') return -1;
+
+    return 0;
+  });
+});
+
 const filteredChecklists = computed(() => {
-  let filtered = [...checklists.value];
+  let filtered = [...sortedChecklists.value];
 
   // Apply search filter
   if (searchQuery.value) {
@@ -206,13 +287,23 @@ const filteredChecklists = computed(() => {
     filtered = filtered.filter(checklist => checklist.status === 'completed');
   }
 
-  // Apply sorting
+  // Sort based on status and date
   filtered.sort((a, b) => {
-    if (sortBy.value === 'newest') {
-      return new Date(b.creationDate) - new Date(a.creationDate);
-    } else if (sortBy.value === 'oldest') {
-      return new Date(a.creationDate) - new Date(b.creationDate);
-    } else if (sortBy.value === 'progress') {
+    // If sorting by newest/oldest
+    if (sortBy.value === 'newest' || sortBy.value === 'oldest') {
+      // First, separate completed and non-completed items
+      if (a.status === 'completed' && b.status !== 'completed') return 1;
+      if (a.status !== 'completed' && b.status === 'completed') return -1;
+
+      // Then sort by date within each group
+      const dateComparison = sortBy.value === 'newest'
+        ? new Date(b.creationDate) - new Date(a.creationDate)
+        : new Date(a.creationDate) - new Date(b.creationDate);
+
+      return dateComparison;
+    }
+    // If sorting by progress
+    else if (sortBy.value === 'progress') {
       return a.progress - b.progress;
     }
     return 0;
@@ -244,29 +335,35 @@ const getDaysOverdue = (checklist) => {
 };
 
 const createNewChecklist = () => {
-  router.push('/marketing-tools/checklist/create');
+  router.push('/RCR/marketing-tools/checklist/create');
 };
 
 const viewChecklist = (id) => {
-  console.log('Viewing checklist with ID:', id);
-  router.push(`/marketing-tools/checklist/${id}`);
+  router.push(`/RCR/marketing-tools/checklist/${id}`);
 };
 
 const editChecklist = (id) => {
-  router.push(`/marketing-tools/checklist/${id}/edit`);
+  router.push(`/RCR/marketing-tools/checklist/${id}/edit`);
 };
 
-const deleteChecklist = async (id) => {
-  if (await confirm('Are you sure you want to delete this checklist?')) {
-    try {
-      const updatedChecklists = checklists.value.filter(c => c.id !== id);
-      localStorage.setItem('checklists', JSON.stringify(updatedChecklists));
-      loadChecklists();
-      selectedChecklists.value = selectedChecklists.value.filter(selectedId => selectedId !== id);
-    } catch (error) {
-      console.error('Error deleting checklist:', error);
+const deleteChecklist = (id) => {
+  showModal.value = true;
+  modalConfig.value = {
+    title: 'Delete Checklist',
+    message: 'Are you sure you want to delete this checklist? This action cannot be undone.',
+    type: 'delete',
+    confirmText: 'Delete',
+    onConfirm: async () => {
+      try {
+        const updatedChecklists = checklists.value.filter(c => c.id !== id);
+        localStorage.setItem('checklists', JSON.stringify(updatedChecklists));
+        loadChecklists();
+        selectedChecklists.value = selectedChecklists.value.filter(selectedId => selectedId !== id);
+      } catch (error) {
+        console.error('Error deleting checklist:', error);
+      }
     }
-  }
+  };
 };
 
 const toggleSelection = (id) => {
@@ -300,18 +397,43 @@ const markSelectedAsCompleted = async () => {
   }
 };
 
-const deleteSelected = async () => {
-  if (await confirm(`Are you sure you want to delete ${selectedChecklists.value.length} checklists?`)) {
-    try {
-      const updatedChecklists = checklists.value.filter(
-        checklist => !selectedChecklists.value.includes(checklist.id)
-      );
-      localStorage.setItem('checklists', JSON.stringify(updatedChecklists));
-      loadChecklists();
-      selectedChecklists.value = [];
-    } catch (error) {
-      console.error('Error deleting selected checklists:', error);
+const deleteSelected = () => {
+  showModal.value = true;
+  modalConfig.value = {
+    title: 'Delete Selected',
+    message: `Are you sure you want to delete ${selectedChecklists.value.length} selected checklist(s)? This action cannot be undone.`,
+    type: 'delete',
+    confirmText: 'Delete',
+    onConfirm: async () => {
+      try {
+        const updatedChecklists = checklists.value.filter(
+          checklist => !selectedChecklists.value.includes(checklist.id)
+        );
+        localStorage.setItem('checklists', JSON.stringify(updatedChecklists));
+        loadChecklists();
+        selectedChecklists.value = [];
+      } catch (error) {
+        console.error('Error deleting selected checklists:', error);
+      }
     }
+  };
+};
+
+const handleTabChange = (key) => {
+  currentTab.value = key;
+  switch (key) {
+    case 'success':
+      router.push('/RCR/marketing-tools/success-plan');
+      break;
+    case 'checklist':
+      router.push('/RCR/marketing-tools/checklist');
+      break;
+    case 'done':
+      router.push('/RCR/marketing-tools/done-for-you');
+      break;
+    case 'social':
+      router.push('/RCR/marketing-tools/social-platforms');
+      break;
   }
 };
 </script>
@@ -644,5 +766,45 @@ const deleteSelected = async () => {
 .empty-state p {
   color: #6B7280;
   margin-bottom: 1.5rem;
+}
+
+.marketing-tools-header {
+  margin-bottom: 2rem;
+  padding: 2rem 0;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.marketing-tools-title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #1E3A8A;
+  margin-bottom: 0.75rem;
+}
+
+.marketing-tools-subtitle {
+  font-size: 1.125rem;
+  color: #6B7280;
+  max-width: 600px;
+}
+
+.marketing-tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.marketing-tab {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  background: transparent;
+  color: #6B7280;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.marketing-tab.active {
+  color: #2563EB;
+  border-bottom: 2px solid #2563EB;
 }
 </style>

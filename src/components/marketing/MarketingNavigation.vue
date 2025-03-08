@@ -39,14 +39,14 @@ import { useRoute } from 'vue-router';
 const route = useRoute();
 
 const links = ref([
-  { name: 'Success Plan', path: '/marketing-tools/success-plan' },
-  { name: 'My Checklist', path: '/marketing-tools/checklist' },
-  { name: 'Done for You', path: '/marketing-tools/done-for-you' },
-  { name: 'Social Platforms', path: '/marketing-tools/social-platforms' }
+  { name: 'Success Plan', path: '/RCR/marketing-tools/success-plan' },
+  { name: 'My Checklist', path: '/RCR/marketing-tools/checklist' },
+  { name: 'Done for You', path: '/RCR/marketing-tools/done-for-you' },
+  { name: 'Social Platforms', path: '/RCR/marketing-tools/social-platforms' }
 ]);
 
 const isActive = (link) => {
-  if (route.path === '/marketing-tools' && link.path === '/marketing-tools/success-plan') {
+  if (route.path === '/RCR/marketing-tools' && link.path === '/RCR/marketing-tools/success-plan') {
     return false;
   }
   return route.path === link.path;

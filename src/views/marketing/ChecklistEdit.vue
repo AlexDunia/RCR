@@ -3,7 +3,7 @@
     <div v-if="checklist" class="form-container">
       <h1>Edit Checklist</h1>
 
-      <form @submit.prevent="saveChecklist" class="edit-form">
+      <form @submit.prevent="handleSave" class="edit-form">
         <div class="form-group">
           <label for="title">Checklist Title</label>
           <input
@@ -142,16 +142,36 @@
       <p>The checklist you're trying to edit doesn't exist or has been deleted.</p>
       <button @click="goBack" class="back-btn">Return to Checklists</button>
     </div>
+
+    <ConfirmationModal
+      v-model="showSaveModal"
+      title="Save Changes"
+      message="Do you want to save your changes to this checklist?"
+      type="update"
+      confirm-text="Save"
+      @confirm="saveChecklist"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import ConfirmationModal from '@/components/ConfirmationModal.vue';
 
 const router = useRouter();
 const route = useRoute();
 const checklist = ref(null);
+const originalChecklist = ref(null);
+const showSaveModal = ref(false);
+const showModal = ref(false);
+const modalConfig = ref({
+  title: '',
+  message: '',
+  type: '',
+  confirmText: '',
+  onConfirm: null
+});
 
 onMounted(() => {
   const checklists = JSON.parse(localStorage.getItem('checklists') || '[]');
@@ -159,8 +179,13 @@ onMounted(() => {
 
   if (existingChecklist) {
     checklist.value = { ...existingChecklist };
+    originalChecklist.value = JSON.stringify(existingChecklist);
   }
 });
+
+const hasChanges = () => {
+  return originalChecklist.value !== JSON.stringify(checklist.value);
+};
 
 const addItem = () => {
   checklist.value.items.push({ text: '', completed: false });
@@ -173,6 +198,15 @@ const removeItem = (index) => {
   }
 };
 
+const handleSave = (e) => {
+  e.preventDefault();
+  if (hasChanges()) {
+    showSaveModal.value = true;
+  } else {
+    router.push(`/RCR/marketing-tools/checklist/${checklist.value.id}`);
+  }
+};
+
 const saveChecklist = () => {
   const checklists = JSON.parse(localStorage.getItem('checklists') || '[]');
   const index = checklists.findIndex(c => c.id === checklist.value.id);
@@ -181,28 +215,49 @@ const saveChecklist = () => {
     // Update existing checklist
     checklists[index] = {
       ...checklist.value,
-      items: checklist.value.items.filter(item => item.text.trim() !== '')
+      items: checklist.value.items.filter(item => item.text.trim() !== ''),
+      lastModified: new Date().toISOString() // Add last modified timestamp
     };
     localStorage.setItem('checklists', JSON.stringify(checklists));
-    router.push(`/marketing-tools/checklist/${checklist.value.id}`);
+    router.push('/RCR/marketing-tools/checklist'); // Route to checklist home
   }
 };
 
 const deleteChecklist = async () => {
-  if (await confirm('Are you sure you want to delete this checklist? This action cannot be undone.')) {
-    const checklists = JSON.parse(localStorage.getItem('checklists') || '[]');
-    const filteredChecklists = checklists.filter(c => c.id !== checklist.value.id);
-    localStorage.setItem('checklists', JSON.stringify(filteredChecklists));
-    router.push('/marketing-tools/checklist');
-  }
+  showModal.value = true;
+  modalConfig.value = {
+    title: 'Delete Checklist',
+    message: 'Are you sure you want to delete this checklist? This action cannot be undone.',
+    type: 'delete',
+    confirmText: 'Delete',
+    onConfirm: () => {
+      const checklists = JSON.parse(localStorage.getItem('checklists') || '[]');
+      const filteredChecklists = checklists.filter(c => c.id !== checklist.value.id);
+      localStorage.setItem('checklists', JSON.stringify(filteredChecklists));
+      router.push('/RCR/marketing-tools/checklist');
+    }
+  };
 };
 
 const cancel = () => {
-  router.push(`/marketing-tools/checklist/${checklist.value.id}`);
+  if (hasChanges()) {
+    showModal.value = true;
+    modalConfig.value = {
+      title: 'Discard Changes',
+      message: 'Are you sure you want to discard your changes?',
+      type: 'warning',
+      confirmText: 'Discard',
+      onConfirm: () => {
+        router.push(`/RCR/marketing-tools/checklist/${checklist.value.id}`);
+      }
+    };
+  } else {
+    router.push(`/RCR/marketing-tools/checklist/${checklist.value.id}`);
+  }
 };
 
 const goBack = () => {
-  router.push('/marketing-tools/checklist');
+  router.push('/RCR/marketing-tools/checklist');
 };
 </script>
 

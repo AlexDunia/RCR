@@ -130,7 +130,7 @@ const routes = [
 
   // Marketing routes
   {
-    path: '/marketing-tools',
+    path: '/RCR/marketing-tools',
     component: () => import('@/views/marketing/MarketingTools.vue'),
     children: [
       {
@@ -179,6 +179,18 @@ const routes = [
       {
         path: 'social-platforms',
         component: () => import('@/views/marketing/SocialPlatforms.vue')
+      },
+      {
+        path: 'social-platforms/create',
+        component: () => import('@/views/marketing/CreateSocialPost.vue')
+      },
+      {
+        path: 'social-platforms/edit/:id',
+        component: () => import('@/views/marketing/CreateSocialPost.vue')
+      },
+      {
+        path: 'social-platforms/post/:id',
+        component: () => import('@/views/marketing/PostDetail.vue')
       }
     ]
   },

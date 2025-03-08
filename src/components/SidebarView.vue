@@ -7,13 +7,16 @@ const activeMenu = ref('');
 
 // Function to determine which menu item should be active based on the current route
 const getActiveMenuFromPath = (path) => {
-  if (path === '/') return 'dashboard';
-  if (path.startsWith('/tasks')) return 'tasks';
-  if (path.startsWith('/completed-tasks')) return 'tasks';
+  // Remove /RCR prefix if it exists
+  const normalizedPath = path.replace('/RCR', '');
+
+  if (normalizedPath === '/') return 'dashboard';
+  if (normalizedPath.startsWith('/tasks')) return 'tasks';
+  if (normalizedPath.startsWith('/completed-tasks')) return 'tasks';
 
   // For other routes, find the matching menu item
   const matchingItem = menuItems.find(item =>
-    path.startsWith(item.path) && item.path !== '/'
+    normalizedPath.startsWith(item.path.replace('/RCR', '')) && item.path !== '/'
   );
 
   return matchingItem ? matchingItem.key : 'dashboard';
@@ -83,7 +86,7 @@ const menuItems = [
   {
     name: 'Marketing Tools',
     key: 'marketing-tools',
-    path: '/marketing-tools',
+    path: '/RCR/marketing-tools',
     icon: `
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M4 10L20 4V20L4 14V10Z" stroke="currentColor" stroke-width="2"/>

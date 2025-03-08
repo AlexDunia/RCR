@@ -44,11 +44,11 @@ const isSuccessPlanRoute = computed(() => {
 });
 
 const viewPlan = (index) => {
-  router.push(`/marketing-tools/plan/${index}`);
+  router.push(`/RCR/marketing-tools/plan/${index}`);
 };
 
 const createNewPlan = () => {
-  router.push('/marketing-tools/create');
+  router.push('/RCR/marketing-tools/create');
 };
 </script>
 

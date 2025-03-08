@@ -6,9 +6,9 @@
         <span class="icon">+</span>
         New Checklist
       </button>
-    </div>
+      </div>
 
-    <div class="filters">
+      <div class="filters">
       <div class="filter-tabs">
         <button
           v-for="filter in filters"
@@ -32,14 +32,14 @@
           <div class="title-section">
             <h3>{{ checklist.title }}</h3>
             <span class="date">Created: {{ formatDate(checklist.creationDate) }}</span>
-          </div>
+            </div>
           <div class="actions">
             <button class="icon-btn edit" @click.stop="editChecklist(checklist.id)" title="Edit checklist">
               <span class="material-icons">edit</span>
-            </button>
+              </button>
             <button class="icon-btn delete" @click.stop="deleteChecklist(checklist.id)" title="Delete checklist">
               <span class="material-icons">delete</span>
-            </button>
+              </button>
           </div>
         </div>
 
@@ -69,7 +69,7 @@
             >
               Overdue
             </span>
-          </div>
+        </div>
 
           <div class="items-preview">
             <span class="items-count">
@@ -127,7 +127,7 @@ const loadChecklists = () => {
     if (storedChecklists) {
       checklists.value = JSON.parse(storedChecklists);
       console.log('Loaded checklists:', checklists.value);
-    } else {
+  } else {
       checklists.value = [];
       console.log('No checklists found in localStorage');
     }

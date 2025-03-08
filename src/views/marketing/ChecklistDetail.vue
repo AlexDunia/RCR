@@ -96,16 +96,35 @@
       <p>The checklist you're looking for doesn't exist or has been deleted.</p>
       <button class="back-btn" @click="goBack">Return to Checklists</button>
     </div>
+
+    <button @click="saveEdit" class="btn-save">Save Changes</button>
+
+    <ConfirmationModal
+      v-model="showModal"
+      :title="modalConfig.title"
+      :message="modalConfig.message"
+      :type="modalConfig.type"
+      :confirm-text="modalConfig.confirmText"
+      @confirm="handleSaveConfirm"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import ConfirmationModal from '@/components/ConfirmationModal.vue';
 
 const router = useRouter();
 const route = useRoute();
 const checklist = ref(null);
+const showModal = ref(false);
+const modalConfig = ref({
+  title: '',
+  message: '',
+  type: '',
+  confirmText: ''
+});
 
 onMounted(() => {
   console.log('Component mounted, loading checklist...');
@@ -155,45 +174,81 @@ const getDaysOverdue = (checklist) => {
   return Math.floor(diff / (1000 * 60 * 60 * 24));
 };
 
-const toggleItem = (index) => {
+const toggleItem = async (index) => {
   if (!checklist.value || checklist.value.completed) return;
 
-  // Toggle the item's completed status
+  // Toggle the item's completed status directly
   checklist.value.items[index].completed = !checklist.value.items[index].completed;
 
   // Update progress
   const completedItems = checklist.value.items.filter(item => item.completed).length;
   checklist.value.progress = Math.round((completedItems / checklist.value.items.length) * 100);
 
-  // Update status if all items are completed
+  // Update status based on progress
   if (checklist.value.progress === 100) {
     checklist.value.status = 'completed';
-  }
-
-  // Save changes to localStorage
-  const checklists = JSON.parse(localStorage.getItem('checklists') || '[]');
-  const checklistIndex = checklists.findIndex(c => String(c.id) === String(route.params.id));
-  if (checklistIndex !== -1) {
-    checklists[checklistIndex] = checklist.value;
-    localStorage.setItem('checklists', JSON.stringify(checklists));
+  } else {
+    checklist.value.status = 'draft';
   }
 };
 
 const goBack = () => {
-  router.push('/marketing-tools/checklist');
+  showModal.value = true;
+  modalConfig.value = {
+    title: 'Leave Checklist',
+    message: 'Do you want to return to the checklist list?',
+    type: 'default',
+    confirmText: 'Leave',
+    onConfirm: () => {
+      router.push('/marketing-tools/checklist');
+    }
+  };
 };
 
 const editChecklist = () => {
-  router.push(`/marketing-tools/checklist/${route.params.id}/edit`);
+  router.push(`/RCR/marketing-tools/checklist/${route.params.id}/edit`);
 };
 
-const deleteChecklist = async () => {
-  if (!confirm('Are you sure you want to delete this checklist?')) return;
+const deleteChecklist = () => {
+  showModal.value = true;
+  modalConfig.value = {
+    title: 'Delete Checklist',
+    message: 'Are you sure you want to delete this checklist? This action cannot be undone.',
+    type: 'delete',
+    confirmText: 'Delete',
+    onConfirm: () => {
+      const checklists = JSON.parse(localStorage.getItem('checklists') || '[]');
+      const updatedChecklists = checklists.filter(c => String(c.id) !== String(route.params.id));
+      localStorage.setItem('checklists', JSON.stringify(updatedChecklists));
+      router.push('/marketing-tools/checklist');
+    }
+  };
+};
 
-  const checklists = JSON.parse(localStorage.getItem('checklists') || '[]');
-  const updatedChecklists = checklists.filter(c => String(c.id) !== String(route.params.id));
-  localStorage.setItem('checklists', JSON.stringify(updatedChecklists));
-  goBack();
+const saveEdit = async () => {
+  showModal.value = true;
+  modalConfig.value = {
+    title: 'Save Changes',
+    message: 'Do you want to save your changes to this checklist?',
+    type: 'update',
+    confirmText: 'Save'
+  };
+};
+
+const handleSaveConfirm = async () => {
+  try {
+    // Save the checklist changes to local storage
+    const checklists = JSON.parse(localStorage.getItem('checklists') || '[]');
+    const index = checklists.findIndex(c => c.id === checklist.value.id);
+    if (index !== -1) {
+      checklists[index] = checklist.value;
+      localStorage.setItem('checklists', JSON.stringify(checklists));
+      showModal.value = false;
+      router.push('/RCR/marketing-tools/checklist');
+    }
+  } catch (error) {
+    console.error('Error saving checklist:', error);
+  }
 };
 </script>
 
@@ -436,6 +491,24 @@ const deleteChecklist = async () => {
 .not-found p {
   color: #6B7280;
   margin-bottom: 1.5rem;
+}
+
+.btn-save {
+  display: block;
+  margin-top: 2rem;
+  padding: 0.75rem 1rem;
+  background: #2563EB;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-save:hover {
+  background: #1E40AF;
 }
 
 @media (max-width: 640px) {
