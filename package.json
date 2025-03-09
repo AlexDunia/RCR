@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "lint": "eslint . --fix",
     "format": "prettier --write src/",
-    "predeploy": "vite build",
+    "predeploy": "vite build && copy public\\favicon.ico dist\\ && copy public\\404.html dist\\ && copy public\\.nojekyll dist\\ && copy public\\CNAME dist\\ && copy public\\index-prod.html dist\\index.html",
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {

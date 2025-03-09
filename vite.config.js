@@ -8,7 +8,7 @@ import { dirname, resolve } from 'path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
-  base: './',  // Changed to relative path for better GitHub Pages support
+  base: './',  // Relative path for GitHub Pages
   plugins: [
     vue(),
     vueJsx(),
@@ -16,7 +16,15 @@ export default defineConfig({
   ],
   build: {
     outDir: 'dist',
-    emptyOutDir: true
+    emptyOutDir: true,
+    assetsInlineLimit: 4096, // 4kb - smaller files will be inlined as base64
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor': ['vue', 'vue-router', 'pinia'] // Group major libraries
+        }
+      }
+    }
   },
   resolve: {
     alias: {
