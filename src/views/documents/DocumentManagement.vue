@@ -1,48 +1,5 @@
 <!-- src/views/documents/DocumentManagement.vue -->
 <template>
-  <div class="document-grid">
-    <router-link to="/receipts-docs/buyer-rep" class="document-card">
-      <div class="card-icon buyer">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M4.5 6.375a4.125 4.125 0 118.25 0 4.125 4.125 0 01-8.25 0zM14.25 8.625a3.375 3.375 0 116.75 0 3.375 3.375 0 01-6.75 0zM1.5 19.125a7.125 7.125 0 0114.25 0v.003l-.001.119a.75.75 0 01-.363.63 13.067 13.067 0 01-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 01-.364-.63l-.001-.122zM17.25 19.128l-.001.144a2.25 2.25 0 01-.233.96 10.088 10.088 0 005.06-1.01.75.75 0 00.42-.643 4.875 4.875 0 00-6.957-4.611 8.586 8.586 0 011.71 5.157v.003z"/>
-        </svg>
-      </div>
-      <h3>Buyer Rep</h3>
-      <p>Create and manage buyer representation agreements</p>
-    </router-link>
-
-    <router-link to="/receipts-docs/seller-rep" class="document-card">
-      <div class="card-icon seller">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M4.5 6.375a4.125 4.125 0 118.25 0 4.125 4.125 0 01-8.25 0zM14.25 8.625a3.375 3.375 0 116.75 0 3.375 3.375 0 01-6.75 0zM1.5 19.125a7.125 7.125 0 0114.25 0v.003l-.001.119a.75.75 0 01-.363.63 13.067 13.067 0 01-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 01-.364-.63l-.001-.122zM17.25 19.128l-.001.144a2.25 2.25 0 01-.233.96 10.088 10.088 0 005.06-1.01.75.75 0 00.42-.643 4.875 4.875 0 00-6.957-4.611 8.586 8.586 0 011.71 5.157v.003z"/>
-        </svg>
-      </div>
-      <h3>Seller Rep</h3>
-      <p>Create and manage seller representation agreements</p>
-    </router-link>
-
-    <router-link to="/receipts-docs/mls" class="document-card">
-      <div class="card-icon mls">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V3.375c0-1.036-.84-1.875-1.875-1.875H5.625zM7.5 15a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5A.75.75 0 017.5 15zm.75-2.25h7.5a.75.75 0 000-1.5h-7.5a.75.75 0 000 1.5zM7.5 9a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5A.75.75 0 017.5 9z"/>
-        </svg>
-      </div>
-      <h3>MLS</h3>
-      <p>Create and manage MLS listings</p>
-    </router-link>
-
-    <router-link to="/receipts-docs/view-docs" class="document-card">
-      <div class="card-icon view">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" />
-          <path fillRule="evenodd" d="M1.323 11.447C2.811 6.976 7.028 3.75 12.001 3.75c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113-1.487 4.471-5.705 7.697-10.677 7.697-4.97 0-9.186-3.223-10.675-7.69a1.762 1.762 0 010-1.113zM17.25 12a5.25 5.25 0 11-10.5 0 5.25 5.25 0 0110.5 0z" clipRule="evenodd" />
-        </svg>
-      </div>
-      <h3>View Documents</h3>
-      <p>View and manage all your documents</p>
-    </router-link>
-  </div>
-
   <div class="recent-documents" v-if="recentDocuments.length > 0">
     <h2 class="section-title">Recent Documents</h2>
     <div class="documents-list">
@@ -212,6 +169,7 @@ p {
   justify-content: space-between;
   cursor: pointer;
   transition: all 0.2s;
+  margin-bottom: 10px;
   text-decoration: none;
 }
 

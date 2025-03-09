@@ -65,6 +65,16 @@ export const useDocumentStore = defineStore('documents', () => {
     return documents.value.filter(doc => doc.type === type)
   }
 
+  const updateDocument = (updatedDoc) => {
+    const index = documents.value.findIndex(doc => doc.id === updatedDoc.id)
+    if (index !== -1) {
+      documents.value[index] = updatedDoc
+      saveToLocalStorage()
+      return updatedDoc
+    }
+    return null
+  }
+
   return {
     documents,
     saveBuyerRepDocument,
@@ -72,6 +82,7 @@ export const useDocumentStore = defineStore('documents', () => {
     saveMLSDocument,
     deleteDocument,
     getDocument,
-    getDocumentsByType
+    getDocumentsByType,
+    updateDocument
   }
 })

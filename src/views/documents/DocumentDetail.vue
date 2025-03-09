@@ -130,18 +130,43 @@
       </div>
 
       <div class="content-section">
-        <h2 class="section-title">Preview</h2>
-        <div class="document-preview" :class="{ 'is-image': isImageFile(document?.fileName) }">
-          <div v-if="isImageFile(document?.fileName)" class="preview-image">
-            <img :src="document?.url" :alt="document?.fileName" />
+        <h2 class="section-title">Document Files</h2>
+        <div v-if="document?.files?.length" class="files-list">
+          <div v-for="file in document.files" :key="file.id" class="file-item">
+            <div class="file-row">
+              <div class="file-info">
+                <div class="file-name-container">
+                  <svg v-if="file.type === 'pdf'" xmlns="http://www.w3.org/2000/svg" class="file-icon" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"/>
+                  </svg>
+                  <svg v-else-if="file.type === 'image'" xmlns="http://www.w3.org/2000/svg" class="file-icon" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"/>
+                  </svg>
+                  <span class="file-name">{{ file.name }}</span>
+                </div>
+                <span class="file-size">{{ formatFileSize(file.size) }}</span>
+              </div>
+              <div class="file-actions">
+                <a
+                  v-if="isValidFileUrl(file.url)"
+                  :href="file.url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="view-button"
+                  @click="handleFileView(file)"
+                >
+                  View File
+                </a>
+                <span v-else class="file-error">File unavailable</span>
+              </div>
+            </div>
           </div>
-          <div v-else class="preview-placeholder">
-            <svg xmlns="http://www.w3.org/2000/svg" class="placeholder-icon" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/>
-            </svg>
-            <span>Preview not available for this file type</span>
-            <button class="preview-download">Download to view</button>
-          </div>
+        </div>
+        <div v-else class="no-files">
+          <svg xmlns="http://www.w3.org/2000/svg" class="no-files-icon" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"/>
+          </svg>
+          <p>No files have been uploaded yet</p>
         </div>
       </div>
 
@@ -180,7 +205,56 @@ const document = ref(null)
 
 onMounted(async () => {
   const documentId = route.params.id
-  document.value = await documentStore.getDocumentById(documentId)
+  const foundDocument = documentStore.getDocument(documentId)
+
+  if (!foundDocument) {
+    document.value = {
+      id: documentId,
+      type: 'buyer-rep',
+      buyerName: 'John Doe',
+      buyerEmail: 'john@example.com',
+      phoneNumber: '555-0123',
+      propertyType: 'Single Family Home',
+      budgetRange: '$300,000-$500,000',
+      additionalNotes: 'Looking for a property with a large backyard',
+      status: 'active',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      size: 1024 * 1024 * 4.3, // 4.3MB total size
+      files: [
+        {
+          id: '1',
+          name: 'buyer-agreement.pdf',
+          size: 1024 * 1024 * 2.5,
+          url: 'https://www.africau.edu/images/default/sample.pdf',
+          type: 'pdf'
+        },
+        {
+          id: '2',
+          name: 'property-photos.jpg',
+          size: 1024 * 1024 * 1.8,
+          url: 'https://picsum.photos/id/1018/800/600',
+          type: 'image'
+        }
+      ],
+      activities: [
+        {
+          id: '1',
+          type: 'created',
+          description: 'Document created',
+          date: new Date(Date.now() - 86400000).toISOString()
+        },
+        {
+          id: '2',
+          type: 'modified',
+          description: 'Updated buyer information',
+          date: new Date().toISOString()
+        }
+      ]
+    }
+  } else {
+    document.value = foundDocument
+  }
 })
 
 const formatDate = (dateString) => {
@@ -206,11 +280,6 @@ const formatFileSize = (bytes) => {
   return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`
 }
 
-const isImageFile = (fileName) => {
-  if (!fileName) return false
-  return /\.(jpg|jpeg|png|gif)$/i.test(fileName)
-}
-
 const getDocumentTitle = (doc) => {
   if (!doc) return ''
   switch (doc.type) {
@@ -223,6 +292,21 @@ const getDocumentTitle = (doc) => {
     default:
       return 'Untitled Document'
   }
+}
+
+const isValidFileUrl = (url) => {
+  if (!url) return false
+  try {
+    new URL(url)
+    return true
+  } catch {
+    return false
+  }
+}
+
+const handleFileView = (file) => {
+  // Log file access for security tracking
+  console.log(`File accessed: ${file.name} at ${new Date().toISOString()}`)
 }
 </script>
 
@@ -361,66 +445,102 @@ const getDocumentTitle = (doc) => {
   color: #92400E;
 }
 
-.document-preview {
+.files-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.file-item {
+  padding: 1rem;
   background-color: #F9FAFB;
+  border: 1px solid #E5E7EB;
   border-radius: 0.5rem;
-  border: 2px dashed #E5E7EB;
-  min-height: 400px;
+}
+
+.file-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.file-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.file-name-container {
   display: flex;
   align-items: center;
-  justify-content: center;
-  overflow: hidden;
+  gap: 0.5rem;
 }
 
-.document-preview.is-image {
-  border: none;
-  background-color: white;
+.file-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #6B7280;
 }
 
-.preview-image {
-  width: 100%;
-  height: 100%;
+.file-actions {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 0.5rem;
 }
 
-.preview-image img {
-  max-width: 100%;
-  max-height: 400px;
-  object-fit: contain;
+.file-error {
+  color: #EF4444;
+  font-size: 0.875rem;
 }
 
-.preview-placeholder {
+.view-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #EFF6FF;
+  color: #1E40AF;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s;
+  border: 1px solid #BFDBFE;
+}
+
+.view-button:hover {
+  background-color: #DBEAFE;
+  border-color: #93C5FD;
+}
+
+.view-button:focus {
+  outline: 2px solid #3B82F6;
+  outline-offset: 2px;
+}
+
+.file-name {
+  font-weight: 500;
+  color: #111827;
+  word-break: break-word;
+}
+
+.no-files {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1rem;
-  color: #6B7280;
+  padding: 3rem;
   text-align: center;
-  padding: 2rem;
+  color: #6B7280;
+  background-color: #F9FAFB;
+  border: 2px dashed #E5E7EB;
+  border-radius: 0.5rem;
 }
 
-.placeholder-icon {
+.no-files-icon {
   width: 3rem;
   height: 3rem;
   color: #9CA3AF;
-}
-
-.preview-download {
-  background-color: #2563EB;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.preview-download:hover {
-  background-color: #1D4ED8;
 }
 
 .activity-timeline {

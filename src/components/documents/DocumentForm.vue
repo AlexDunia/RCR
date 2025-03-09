@@ -52,15 +52,18 @@
           <p class="upload-hint">Supports PDF, DOC, DOCX, JPG, PNG</p>
         </div>
         <div v-else class="documents-list">
-          <div v-for="(doc, index) in documents" :key="index" class="document-item">
+          <div v-for="doc in documents" :key="doc.id" class="document-item">
             <div class="document-info">
-              <svg xmlns="http://www.w3.org/2000/svg" class="document-icon" viewBox="0 0 20 20" fill="currentColor">
+              <svg v-if="doc.type === 'pdf'" xmlns="http://www.w3.org/2000/svg" class="document-icon" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd" />
+              </svg>
+              <svg v-else xmlns="http://www.w3.org/2000/svg" class="document-icon" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
               </svg>
               <span class="document-name">{{ doc.name }}</span>
               <span class="document-size">{{ formatFileSize(doc.size) }}</span>
             </div>
-            <button type="button" class="remove-button" @click="removeDocument(index)">
+            <button type="button" class="remove-button" @click="removeDocument(doc.id)">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
               </svg>
@@ -91,30 +94,56 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 
 const props = defineProps({
   fields: {
     type: Array,
     required: true
+  },
+  initialValues: {
+    type: Object,
+    default: () => ({})
   }
 })
 
-const emit = defineEmits(['submit'])
+const emit = defineEmits(['submit', 'input'])
 const fileInput = ref(null)
 const isDragging = ref(false)
 const documents = ref([])
 const formData = reactive({})
 
-// Initialize form data based on fields
-props.fields.forEach(field => {
-  formData[field.name] = ''
+// Initialize form data with initial values
+onMounted(() => {
+  props.fields.forEach(field => {
+    formData[field.name] = props.initialValues[field.name] || ''
+  })
 })
+
+// Watch for changes in initialValues
+watch(() => props.initialValues, (newValues) => {
+  props.fields.forEach(field => {
+    formData[field.name] = newValues[field.name] || formData[field.name] || ''
+  })
+}, { deep: true })
+
+// Emit input events when form data changes
+watch(formData, (newValues) => {
+  Object.entries(newValues).forEach(([field, value]) => {
+    emit('input', field, value)
+  })
+}, { deep: true })
 
 const handleSubmit = () => {
   const formDataWithFiles = {
     ...formData,
-    documents: documents.value
+    files: documents.value.map(doc => ({
+      id: doc.id,
+      name: doc.name,
+      size: doc.size,
+      type: doc.type,
+      file: doc.file
+    }))
   }
   emit('submit', formDataWithFiles)
 }
@@ -127,7 +156,13 @@ const handleFileSelect = (event) => {
   const files = Array.from(event.target.files)
   files.forEach(file => {
     if (isValidFileType(file)) {
-      documents.value.push(file)
+      documents.value.push({
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+        name: file.name,
+        size: file.size,
+        type: file.type.includes('pdf') ? 'pdf' : 'image',
+        file: file // Store the actual file object for later upload
+      })
     }
   })
 }
@@ -137,7 +172,13 @@ const handleDrop = (event) => {
   const files = Array.from(event.dataTransfer.files)
   files.forEach(file => {
     if (isValidFileType(file)) {
-      documents.value.push(file)
+      documents.value.push({
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+        name: file.name,
+        size: file.size,
+        type: file.type.includes('pdf') ? 'pdf' : 'image',
+        file: file // Store the actual file object for later upload
+      })
     }
   })
 }
@@ -169,8 +210,8 @@ const formatFileSize = (bytes) => {
   return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`
 }
 
-const removeDocument = (index) => {
-  documents.value.splice(index, 1)
+const removeDocument = (id) => {
+  documents.value = documents.value.filter(doc => doc.id !== id)
 }
 </script>
 
