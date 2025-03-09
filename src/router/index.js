@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useLayoutStore } from '@/stores/layout';
+import DocumentLayout from '@/layouts/DocumentLayout.vue'
 
 // Lazy-loaded route components
 const routes = [
@@ -219,11 +220,43 @@ const routes = [
     path: '/chat/client',
     name: 'ClientChat',
     component: () => import('@/views/chat/ClientChatView.vue')
+  },
+
+  // Document management routes
+  {
+    path: '/receipts-docs',
+    component: DocumentLayout,
+    children: [
+      {
+        path: 'buyer-rep',
+        name: 'BuyerRep',
+        component: () => import('@/views/documents/BuyerRepForm.vue')
+      },
+      {
+        path: 'seller-rep',
+        name: 'SellerRep',
+        component: () => import('@/views/documents/SellerRepForm.vue')
+      },
+      {
+        path: 'mls',
+        name: 'MLS',
+        component: () => import('@/views/documents/MLSForm.vue')
+      },
+      {
+        path: 'view-docs',
+        name: 'ViewDocuments',
+        component: () => import('@/views/documents/DocumentManagement.vue')
+      },
+      {
+        path: '',
+        redirect: { name: 'ViewDocuments' }
+      }
+    ]
   }
 ];
 
 const router = createRouter({
-  history: createWebHistory('/RCR'),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes,
 });
 

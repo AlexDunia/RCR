@@ -110,26 +110,123 @@
               @input="handleInput"
             ></textarea>
 
-            <div class="media-preview" v-if="postData.media && postData.media.length">
-              <div class="media-grid">
-                <div v-for="(media, index) in postData.media" :key="index" class="media-item">
-                  <img :src="media" alt="Media preview">
+            <!-- Media Upload Section -->
+            <div class="media-section">
+              <div class="media-upload-header" @click="triggerFileInput" style="cursor: pointer;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="media-icon">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span>Add media</span>
+              </div>
+
+              <input
+                type="file"
+                ref="fileInput"
+                @change="handleFileUpload"
+                accept="image/*"
+                multiple
+                class="hidden-input"
+              >
+
+              <div class="media-preview" v-if="postData.media && postData.media.length">
+                <div class="media-grid">
+                  <div v-for="(media, index) in postData.media" :key="index" class="media-item">
+                    <div class="media-overlay">
+                      <div class="media-actions">
+                        <button @click="viewFullImage(media)" class="action-button">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="action-icon">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                        </button>
+                        <button @click="deleteImage(index)" class="action-button">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="action-icon">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
+                      <img :src="media" alt="Media preview">
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="composer-footer">
-            <button class="media-button">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="media-icon">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              Add media
+          <!-- Publishing Options -->
+          <div class="publishing-options">
+            <div class="radio-group">
+              <label class="radio-option" :class="{ selected: publishingOption === 'now' }">
+                <input
+                  type="radio"
+                  v-model="publishingOption"
+                  value="now"
+                  name="publishing-option"
+                >
+                <div class="radio-button"></div>
+                <span>Publish now</span>
+              </label>
+              <label class="radio-option" :class="{ selected: publishingOption === 'scheduled' }">
+                <input
+                  type="radio"
+                  v-model="publishingOption"
+                  value="scheduled"
+                  name="publishing-option"
+                >
+                <div class="radio-button"></div>
+                <span>Schedule for a specific date</span>
+              </label>
+            </div>
+
+            <!-- Date and Time Selection -->
+            <div v-if="publishingOption === 'scheduled'" class="datetime-selection">
+              <div class="datetime-group">
+                <label>Date</label>
+                <input
+                  type="date"
+                  v-model="scheduledDate"
+                  class="datetime-input"
+                  :min="minDate"
+                >
+              </div>
+              <div class="datetime-group">
+                <label>Time</label>
+                <input
+                  type="time"
+                  v-model="scheduledTime"
+                  class="datetime-input"
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="composer-footer">
+          <div class="footer-buttons">
+            <button class="save-draft-button" @click="saveDraft">
+              Save Draft
             </button>
-            <button class="submit-button" @click="submitPost" :disabled="!isFormValid">
-              Post
+            <button
+              class="post-button"
+              :class="{ ready: isReadyToPublish }"
+              @click="submitPost"
+              :disabled="!isFormValid"
+            >
+              {{ publishingOption === 'now' ? 'Post' : 'Schedule Post' }}
             </button>
           </div>
+        </div>
+      </div>
+
+      <!-- Full Image Modal -->
+      <div v-if="fullImageUrl" class="full-image-modal" @click="closeFullImage">
+        <div class="modal-content" @click.stop>
+          <button class="close-button" @click="closeFullImage">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          <img :src="fullImageUrl" alt="Full size image">
         </div>
       </div>
     </div>
@@ -158,9 +255,12 @@ import ConfirmationModal from '@/components/ConfirmationModal.vue';
 const route = useRoute();
 const layoutStore = useLayoutStore();
 const hasUnsavedChanges = ref(false);
-const scheduledDateTime = ref('');
+const publishingOption = ref('now');
+const scheduledDate = ref('');
+const scheduledTime = ref('');
 const showModal = ref(false);
 const selectAllAccounts = ref(false);
+const fileInput = ref(null);
 
 const modalConfig = ref({
   title: '',
@@ -216,6 +316,18 @@ watch(socialAccounts, (newValue) => {
 const isEditing = computed(() => route.params.id !== undefined);
 const isFormValid = computed(() => postData.value.content.trim() !== '' && postData.value.accounts.length > 0);
 
+// New computed properties
+const minDate = computed(() => {
+  const today = new Date();
+  return today.toISOString().split('T')[0];
+});
+
+const isReadyToPublish = computed(() => {
+  if (!isFormValid.value) return false;
+  if (publishingOption.value === 'now') return true;
+  return scheduledDate.value && scheduledTime.value;
+});
+
 // Lifecycle hooks
 onMounted(() => {
   console.log('CreateSocialPost component mounted');
@@ -233,7 +345,12 @@ onMounted(() => {
           console.log('Found draft post to edit:', draft);
           postData.value = { ...draft };
           socialAccounts.value.forEach(account => account.selected = draft.accounts.includes(account.id));
-          if (draft.scheduledDate) scheduledDateTime.value = formatDateTimeForInput(draft.scheduledDate);
+          if (draft.scheduledDate) {
+            const { date, time } = formatDateTimeForInput(draft.scheduledDate);
+            scheduledDate.value = date;
+            scheduledTime.value = time;
+            publishingOption.value = 'scheduled';
+          }
           return;
         }
       } catch (e) {
@@ -255,7 +372,17 @@ onBeforeUnmount(() => {
 // Helper functions
 function formatDateTimeForInput(dateString) {
   const date = new Date(dateString);
-  return date.toISOString().slice(0, 16);
+  const formattedDate = date.toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+  });
+  const formattedTime = date.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  }).toLowerCase();
+  return { date: formattedDate, time: formattedTime };
 }
 
 function handleInput() {
@@ -339,15 +466,77 @@ function saveToDrafts(post) {
   localStorage.setItem('draftPosts', JSON.stringify(drafts));
 }
 
+function handleFileUpload(event) {
+  const files = event.target.files;
+  if (!files.length) return;
+
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    if (!file.type.startsWith('image/')) continue;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      postData.value.media.push(e.target.result);
+      hasUnsavedChanges.value = true;
+    };
+    reader.readAsDataURL(file);
+  }
+  event.target.value = ''; // Reset file input
+}
+
+function saveDraft() {
+  console.log('Saving draft');
+  saveToDrafts(postData.value);
+  showModal.value = false;
+  hasUnsavedChanges.value = false;
+  navigateBack();
+}
+
 function submitPost() {
-  console.log('Submitting post');
   if (!isFormValid.value) return;
-  postData.value.status = 'published';
-  postData.value.publishedDate = new Date().toISOString();
+  if (publishingOption.value === 'scheduled' && (!scheduledDate.value || !scheduledTime.value)) {
+    modalConfig.value = {
+      title: 'Missing Schedule',
+      message: 'Please select both date and time for scheduling.',
+      type: 'error',
+      confirmText: 'OK',
+      action: null
+    };
+    showModal.value = true;
+    return;
+  }
+
+  postData.value.status = publishingOption.value === 'now' ? 'published' : 'scheduled';
+  if (publishingOption.value === 'scheduled') {
+    const scheduledDateTime = new Date(`${scheduledDate.value}T${scheduledTime.value}`);
+    postData.value.scheduledDate = scheduledDateTime.toISOString();
+  } else {
+    postData.value.publishedDate = new Date().toISOString();
+  }
+
   saveToDrafts(postData.value);
   localStorage.removeItem('pendingPost');
   hasUnsavedChanges.value = false;
   navigateBack();
+}
+
+// New functions for media handling
+const fullImageUrl = ref('');
+
+function viewFullImage(imageUrl) {
+  fullImageUrl.value = imageUrl;
+}
+
+function closeFullImage() {
+  fullImageUrl.value = '';
+}
+
+function deleteImage(index) {
+  postData.value.media.splice(index, 1);
+}
+
+function triggerFileInput() {
+  fileInput.value.click();
 }
 </script>
 
@@ -363,7 +552,6 @@ function submitPost() {
   display: flex;
   flex-direction: column;
   background-color: #f9fafb;
-  overflow: hidden;
 }
 
 /* Header Styles */
@@ -471,7 +659,7 @@ function submitPost() {
 .main-content {
   display: flex;
   flex: 1;
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 /* Left Column - Account Selection */
@@ -479,7 +667,6 @@ function submitPost() {
   width: 320px;
   padding: 24px;
   background-color: #f9fafb;
-  overflow-y: auto;
 }
 
 .accounts-title {
@@ -671,15 +858,12 @@ function submitPost() {
 .composer-column {
   flex: 1;
   padding: 24px;
-  overflow-y: auto;
 }
 
 .composer-card {
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  height: 100%;
   display: flex;
   flex-direction: column;
 }
@@ -736,25 +920,81 @@ function submitPost() {
 }
 
 .media-preview {
-  margin-top: 16px;
+  margin-top: 12px;
 }
 
 .media-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .media-item {
-  aspect-ratio: 1;
+  position: relative;
+  width: 80px;
+  height: 80px;
   border-radius: 4px;
   overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-.media-item img {
+.media-overlay {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.media-overlay img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.media-actions {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.action-button {
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.action-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.media-upload-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6B7280;
+  font-size: 14px;
+  padding: 8px 12px;
+  border: 1px dashed #D1D5DB;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  margin-bottom: 0;
 }
 
 .composer-footer {
@@ -793,6 +1033,57 @@ function submitPost() {
   cursor: pointer;
 }
 
+.media-overlay:hover .media-actions {
+  opacity: 1;
+}
+
+.hidden-input {
+  display: none;
+}
+
+/* Full Image Modal Styles */
+.full-image-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+
+.modal-content {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+}
+
+.modal-content img {
+  max-width: 100%;
+  max-height: 90vh;
+  object-fit: contain;
+}
+
+.close-button {
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+}
+
+.close-button svg {
+  width: 24px;
+  height: 24px;
+  color: white;
+}
+
+/* Mobile Responsive Adjustments */
 @media (max-width: 768px) {
   .main-content {
     flex-direction: column;
@@ -813,6 +1104,236 @@ function submitPost() {
 
   .header-left {
     gap: 12px;
+  }
+
+  .media-grid {
+    gap: 8px;
+  }
+
+  .media-item {
+    width: 70px;
+    height: 70px;
+  }
+
+  .close-button {
+    top: 16px;
+    right: 16px;
+  }
+
+  .modal-content img {
+    max-height: 80vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .media-item {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+/* Media Upload Section */
+.media-section {
+  margin-top: 24px;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 24px;
+}
+
+.media-upload-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6B7280;
+  font-size: 14px;
+  margin-bottom: 16px;
+  padding: 8px;
+  border: 1px dashed #D1D5DB;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.media-upload-header:hover {
+  border-color: #6366F1;
+  color: #6366F1;
+}
+
+.media-upload-header .media-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Publishing Options */
+.publishing-options {
+  margin-top: 24px;
+  border-top: 1px solid #e5e7eb;
+  padding: 24px 24px 32px;
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+  padding: 12px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.radio-option:hover {
+  background-color: #F3F4F6;
+}
+
+.radio-option.selected {
+  background-color: #EFF6FF;
+}
+
+.radio-option input[type="radio"] {
+  display: none;
+}
+
+.radio-button {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #D1D5DB;
+  border-radius: 50%;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.radio-option input[type="radio"]:checked + .radio-button {
+  border-color: #6366F1;
+}
+
+.radio-option input[type="radio"]:checked + .radio-button::after {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: #6366F1;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.radio-option span {
+  font-size: 14px;
+  color: #374151;
+}
+
+/* Date and Time Selection */
+.datetime-selection {
+  display: flex;
+  gap: 24px;
+  margin-top: 16px;
+  padding-left: 32px;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.datetime-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.datetime-group label {
+  font-size: 14px;
+  color: #374151;
+  font-weight: 500;
+}
+
+.datetime-input {
+  padding: 8px 12px;
+  border: 1px solid #D1D5DB;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #374151;
+  background-color: white;
+  min-width: 180px;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.datetime-input:hover {
+  border-color: #6366F1;
+}
+
+.datetime-input:focus {
+  outline: none;
+  border-color: #6366F1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+}
+
+/* Footer Buttons */
+.footer-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.save-draft-button {
+  padding: 8px 16px;
+  background-color: #F3F4F6;
+  border: none;
+  border-radius: 6px;
+  color: #374151;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.save-draft-button:hover {
+  background-color: #E5E7EB;
+}
+
+.post-button {
+  padding: 8px 16px;
+  background-color: #D1D5DB;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.post-button.ready {
+  background-color: #2563EB;
+}
+
+.post-button.ready:hover {
+  background-color: #1D4ED8;
+}
+
+.post-button:disabled {
+  background-color: #93C5FD;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .datetime-selection {
+    flex-direction: column;
+    gap: 16px;
   }
 }
 </style>
