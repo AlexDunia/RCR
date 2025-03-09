@@ -130,7 +130,7 @@ const routes = [
 
   // Marketing routes
   {
-    path: '/RCR/marketing-tools',
+    path: '/marketing-tools',
     component: () => import('@/views/marketing/MarketingTools.vue'),
     children: [
       {
@@ -153,7 +153,9 @@ const routes = [
         path: 'checklist',
         name: 'ChecklistList',
         component: () => import('@/views/marketing/MyChecklist.vue'),
-        meta: { keepAlive: true }
+        meta: {
+          keepAlive: true
+        }
       },
       {
         path: 'checklist/create',
@@ -165,7 +167,9 @@ const routes = [
         name: 'ChecklistDetail',
         component: () => import('@/views/marketing/ChecklistDetail.vue'),
         props: true,
-        meta: { keepAlive: true }
+        meta: {
+          keepAlive: true
+        }
       },
       {
         path: 'checklist/:id/edit',
@@ -182,11 +186,21 @@ const routes = [
       },
       {
         path: 'social-platforms/create',
-        component: () => import('@/views/marketing/CreateSocialPost.vue')
+        component: () => import('@/views/marketing/CreateSocialPost.vue'),
+        meta: {
+          hideSidebar: true,
+          hideHeader: true,
+          background: '#f9fafb'
+        }
       },
       {
         path: 'social-platforms/edit/:id',
-        component: () => import('@/views/marketing/CreateSocialPost.vue')
+        component: () => import('@/views/marketing/CreateSocialPost.vue'),
+        meta: {
+          hideSidebar: true,
+          hideHeader: true,
+          background: '#f9fafb'
+        }
       },
       {
         path: 'social-platforms/post/:id',
@@ -209,19 +223,12 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory('/RCR/'),
+  history: createWebHistory('/RCR'),
   routes,
 });
 
 // Navigation guard for role-based access control and layout
 router.beforeEach(async (to, from, next) => {
-  const layoutStore = useLayoutStore();
-  layoutStore.setLayout({
-    hideSidebar: to.meta.hideSidebar || false,
-    hideHeader: to.meta.hideHeader || false,
-    background: to.meta.background || '#FFFFFF'
-  });
-
   // Authentication and role checks
   if (to.meta.requiresAuth) {
     const isAuthenticated = true; // Replace with real auth check in production
@@ -249,12 +256,16 @@ router.afterEach((to) => {
   // Force layout update after navigation is complete
   const layoutStore = useLayoutStore();
 
+  console.log(`Router afterEach: navigated to ${to.path}`);
+
   // Apply the route's meta settings
   layoutStore.setLayout({
     hideSidebar: to.meta.hideSidebar || false,
     hideHeader: to.meta.hideHeader || false,
     background: to.meta.background || '#FFFFFF'
   });
+
+  console.log(`Layout applied: hideSidebar=${layoutStore.hideSidebar}, hideHeader=${layoutStore.hideHeader}`);
 });
 
 export default router;

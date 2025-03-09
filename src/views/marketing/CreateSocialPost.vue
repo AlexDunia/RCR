@@ -3,7 +3,7 @@
     <!-- Simple Header -->
     <div class="create-post-header">
       <div class="header-left">
-        <button class="back-button" @click="goBack">
+        <button type="button" class="back-button" @click="goBack">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="back-icon">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
@@ -54,11 +54,7 @@
         </div>
 
         <div class="accounts-list">
-          <div
-            v-for="account in socialAccounts"
-            :key="account.id"
-            class="account-item"
-          >
+          <div v-for="account in socialAccounts" :key="account.id" class="account-item">
             <div class="account-info">
               <div class="account-avatar-container">
                 <div class="account-avatar" :class="account.platform">
@@ -154,17 +150,17 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { useRoute } from 'vue-router';
+import { useLayoutStore } from '@/stores/layout';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
 
-const router = useRouter();
+// State management
 const route = useRoute();
+const layoutStore = useLayoutStore();
 const hasUnsavedChanges = ref(false);
 const scheduledDateTime = ref('');
 const showModal = ref(false);
 const selectAllAccounts = ref(false);
-const selectedPost = ref(null);
-const posts = ref([]);
 
 const modalConfig = ref({
   title: '',
@@ -177,42 +173,17 @@ const modalConfig = ref({
 
 // Social accounts data
 const socialAccounts = ref([
-  {
-    id: 1,
-    handle: '@alexanderrealtor_',
-    platformName: 'LinkedIn',
-    platform: 'linkedin',
-    avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-    selected: false
-  },
-  {
-    id: 2,
-    handle: '@alexanderrealtor_',
-    platformName: 'Instagram',
-    platform: 'instagram',
-    avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-    selected: false
-  },
-  {
-    id: 3,
-    handle: '@alexanderrealtor_',
-    platformName: 'Facebook',
-    platform: 'facebook',
-    avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-    selected: false
-  }
+  { id: 1, handle: '@alexanderrealtor_', platformName: 'LinkedIn', platform: 'linkedin', avatar: 'https://randomuser.me/api/portraits/men/32.jpg', selected: false },
+  { id: 2, handle: '@alexanderrealtor_', platformName: 'Instagram', platform: 'instagram', avatar: 'https://randomuser.me/api/portraits/men/32.jpg', selected: false },
+  { id: 3, handle: '@alexanderrealtor_', platformName: 'Facebook', platform: 'facebook', avatar: 'https://randomuser.me/api/portraits/men/32.jpg', selected: false }
 ]);
 
-// Initialize with default values or load from existing post
+// Post data
 const postData = ref({
   id: null,
   title: '',
   content: '',
-  media: [
-    'https://picsum.photos/800/600?random=1',
-    'https://picsum.photos/800/600?random=2',
-    'https://picsum.photos/800/600?random=3'
-  ],
+  media: ['https://picsum.photos/800/600?random=1', 'https://picsum.photos/800/600?random=2', 'https://picsum.photos/800/600?random=3'],
   status: 'drafts',
   creationDate: new Date().toISOString(),
   scheduledDate: null,
@@ -220,174 +191,130 @@ const postData = ref({
   accounts: []
 });
 
-// Get platform icon based on platform name
+// Utility function to get platform icon
 function getPlatformIcon(platform) {
-  switch (platform) {
-    case 'linkedin':
-      return 'https://cdn-icons-png.flaticon.com/512/174/174857.png';
-    case 'instagram':
-      return 'https://cdn-icons-png.flaticon.com/512/174/174855.png';
-    case 'facebook':
-      return 'https://cdn-icons-png.flaticon.com/512/174/174848.png';
-    default:
-      return '';
-  }
+  const iconMap = {
+    linkedin: 'https://cdn-icons-png.flaticon.com/512/174/174857.png',
+    instagram: 'https://cdn-icons-png.flaticon.com/512/174/174855.png',
+    facebook: 'https://cdn-icons-png.flaticon.com/512/174/174848.png'
+  };
+  return iconMap[platform] || '';
 }
 
-// Watch for select all changes
+// Watchers for reactive updates
 watch(selectAllAccounts, (newValue) => {
-  socialAccounts.value.forEach(account => {
-    account.selected = newValue;
-  });
+  socialAccounts.value.forEach(account => account.selected = newValue);
 });
 
-// Watch for individual account selection changes
 watch(socialAccounts, (newValue) => {
   const allSelected = newValue.every(account => account.selected);
-  const someSelected = newValue.some(account => account.selected);
-
-  if (allSelected) {
-    selectAllAccounts.value = true;
-  } else if (!someSelected) {
-    selectAllAccounts.value = false;
-  }
-
-  // Update postData accounts
-  postData.value.accounts = newValue
-    .filter(account => account.selected)
-    .map(account => account.id);
-
-  hasUnsavedChanges.value = true;
+  selectAllAccounts.value = allSelected;
+  postData.value.accounts = newValue.filter(account => account.selected).map(account => account.id);
+  hasUnsavedChanges.value = newValue.some(account => account.selected) || postData.value.content.trim() !== '';
 }, { deep: true });
 
-const isEditing = computed(() => {
-  return route.params.id !== undefined;
-});
+const isEditing = computed(() => route.params.id !== undefined);
+const isFormValid = computed(() => postData.value.content.trim() !== '' && postData.value.accounts.length > 0);
 
-const isFormValid = computed(() => {
-  return postData.value.content.trim() !== '' &&
-         postData.value.accounts.length > 0;
-});
-
-// Load post data if editing
+// Lifecycle hooks
 onMounted(() => {
+  console.log('CreateSocialPost component mounted');
+  layoutStore.setLayout({ hideSidebar: true, hideHeader: true, background: '#f9fafb' });
+
   if (isEditing.value) {
     const postId = parseInt(route.params.id);
-    // Try to get post from localStorage first (for drafts)
+    console.log(`Editing post with ID: ${postId}`);
     const savedDrafts = localStorage.getItem('draftPosts');
     if (savedDrafts) {
       try {
         const drafts = JSON.parse(savedDrafts);
         const draft = drafts.find(d => d.id === postId);
         if (draft) {
+          console.log('Found draft post to edit:', draft);
           postData.value = { ...draft };
-
-          // Set selected accounts
-          if (draft.accounts && draft.accounts.length) {
-            socialAccounts.value.forEach(account => {
-              account.selected = draft.accounts.includes(account.id);
-            });
-          }
-
-          if (draft.scheduledDate) {
-            scheduledDateTime.value = formatDateTimeForInput(draft.scheduledDate);
-          }
+          socialAccounts.value.forEach(account => account.selected = draft.accounts.includes(account.id));
+          if (draft.scheduledDate) scheduledDateTime.value = formatDateTimeForInput(draft.scheduledDate);
           return;
         }
       } catch (e) {
         console.error('Error loading draft:', e);
       }
     }
-
-    // If not found in drafts, fetch from API or parent component
-    // For now, we'll simulate by redirecting back
-    router.push('/RCR/marketing-tools/social-platforms');
+    console.log('Draft post not found, navigating back');
+    navigateBack();
   }
 
-  // Set up beforeunload event to catch browser/tab close
   window.addEventListener('beforeunload', handleBeforeUnload);
 });
 
 onBeforeUnmount(() => {
+  console.log('CreateSocialPost component unmounting');
   window.removeEventListener('beforeunload', handleBeforeUnload);
 });
 
-// Format date for datetime-local input
+// Helper functions
 function formatDateTimeForInput(dateString) {
   const date = new Date(dateString);
   return date.toISOString().slice(0, 16);
 }
 
 function handleInput() {
-  hasUnsavedChanges.value = true;
+  hasUnsavedChanges.value = postData.value.content.trim() !== '' || socialAccounts.value.some(account => account.selected);
 }
 
 function goBack() {
+  console.log('Back button clicked');
   if (hasUnsavedChanges.value) {
-    // Save current state to localStorage for recovery
-    localStorage.setItem('pendingPost', JSON.stringify(postData.value));
-
-    // Show confirmation dialog
+    console.log('Unsaved changes detected, showing confirmation dialog');
+    // Sanitize data before storing to prevent XSS
+    const sanitizedPostData = JSON.stringify(postData.value).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    localStorage.setItem('pendingPost', sanitizedPostData);
     showModal.value = true;
     modalConfig.value = {
-      title: 'Save to Drafts',
-      message: 'You have unsaved changes. Would you like to save this post to drafts?',
+      title: 'Unsaved Changes',
+      message: 'Save to drafts or discard?',
       type: 'info',
-      confirmText: 'Save to Drafts',
+      confirmText: 'Save',
       cancelText: 'Discard',
       action: 'saveToDrafts'
     };
   } else {
-    router.push('/RCR/marketing-tools/social-platforms');
+    console.log('No unsaved changes, navigating back');
+    navigateBack();
   }
+}
+
+function navigateBack() {
+  // Use window.location.href for direct navigation to the specified route
+  window.location.href = '/RCR/marketing-tools/social-platforms';
+  layoutStore.resetLayout(); // Ensure layout resets before navigation
 }
 
 function handleModalConfirm() {
-  if (!selectedPost.value && modalConfig.value.action === 'saveToDrafts') {
-    selectedPost.value = postData.value;
+  console.log('Modal confirmed:', modalConfig.value.action);
+  if (modalConfig.value.action === 'saveToDrafts') {
+    saveToDrafts(postData.value);
   }
-
-  if (!selectedPost.value) return;
-
-  if (modalConfig.value.action === 'delete') {
-    const index = posts.value.findIndex(p => p.id === selectedPost.value.id);
-    if (index !== -1) {
-      posts.value.splice(index, 1);
-
-      if (selectedPost.value.status === 'drafts') {
-        const drafts = posts.value.filter(p => p.status === 'drafts');
-        localStorage.setItem('draftPosts', JSON.stringify(drafts));
-      }
-    }
-  } else if (modalConfig.value.action === 'saveToDrafts') {
-    saveToDrafts(selectedPost.value);
-  }
-
   showModal.value = false;
-  selectedPost.value = null;
-
-  router.push('/RCR/marketing-tools/social-platforms');
+  hasUnsavedChanges.value = false;
+  localStorage.removeItem('pendingPost');
+  navigateBack();
 }
 
 function handleModalCancel() {
+  console.log('Modal cancelled:', modalConfig.value.action);
   if (modalConfig.value.action === 'saveToDrafts') {
     localStorage.removeItem('pendingPost');
+    hasUnsavedChanges.value = false;
+    navigateBack();
   }
-
   showModal.value = false;
-  selectedPost.value = null;
-
-  if (modalConfig.value.action === 'saveToDrafts') {
-    router.push('/RCR/marketing-tools/social-platforms');
-  }
 }
 
 function handleBeforeUnload(event) {
   if (hasUnsavedChanges.value) {
-    // Save current state to localStorage for recovery
-    localStorage.setItem('pendingPost', JSON.stringify(postData.value));
-
-    // Standard way to show confirmation dialog when closing browser
+    const sanitizedPostData = JSON.stringify(postData.value).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    localStorage.setItem('pendingPost', sanitizedPostData);
     event.preventDefault();
     event.returnValue = '';
     return '';
@@ -395,12 +322,7 @@ function handleBeforeUnload(event) {
 }
 
 function saveToDrafts(post) {
-  // Ensure post has an ID
-  if (!post.id) {
-    post.id = Date.now();
-  }
-
-  // Get existing drafts
+  if (!post.id) post.id = Date.now();
   let drafts = [];
   const savedDrafts = localStorage.getItem('draftPosts');
   if (savedDrafts) {
@@ -410,46 +332,38 @@ function saveToDrafts(post) {
       console.error('Error parsing drafts:', e);
     }
   }
-
-  // Update or add the post
   const existingIndex = drafts.findIndex(d => d.id === post.id);
-  if (existingIndex !== -1) {
-    drafts[existingIndex] = { ...post };
-  } else {
-    drafts.push({ ...post });
-  }
-
-  // Save back to localStorage
+  const sanitizedPost = { ...post, content: post.content.replace(/</g, '&lt;').replace(/>/g, '&gt;') };
+  if (existingIndex !== -1) drafts[existingIndex] = sanitizedPost;
+  else drafts.push(sanitizedPost);
   localStorage.setItem('draftPosts', JSON.stringify(drafts));
 }
 
 function submitPost() {
+  console.log('Submitting post');
   if (!isFormValid.value) return;
-
-  // Set post as published
   postData.value.status = 'published';
   postData.value.publishedDate = new Date().toISOString();
-
-  // Save to localStorage (in a real app, this would be an API call)
   saveToDrafts(postData.value);
-
-  // Clear pending post
   localStorage.removeItem('pendingPost');
   hasUnsavedChanges.value = false;
-
-  // Navigate back to posts list
-  router.push('/RCR/marketing-tools/social-platforms');
+  navigateBack();
 }
 </script>
 
 <style scoped>
 .create-post-container {
-  width: 100%;
+  width: 100vw;
   height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   display: flex;
   flex-direction: column;
   background-color: #f9fafb;
+  overflow: hidden;
 }
 
 /* Header Styles */
@@ -477,6 +391,11 @@ function submitPost() {
   cursor: pointer;
   padding: 0;
   color: #4b5563;
+  transition: color 0.3s ease;
+}
+
+.back-button:hover {
+  color: #1f2937; /* Darker gray on hover */
 }
 
 .back-icon {

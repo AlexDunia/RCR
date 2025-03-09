@@ -40,15 +40,15 @@ const route = useRoute();
 const marketingPlans = ref(JSON.parse(localStorage.getItem('marketingPlans') || '[]'));
 
 const isSuccessPlanRoute = computed(() => {
-  return route.path === '/RCR/marketing-tools' || route.path === '/RCR/marketing-tools/success-plan';
+  return route.path === '/marketing-tools' || route.path === '/marketing-tools/success-plan';
 });
 
 const viewPlan = (index) => {
-  router.push(`/RCR/marketing-tools/plan/${index}`);
+  router.push(`/marketing-tools/plan/${index}`);
 };
 
 const createNewPlan = () => {
-  router.push('/RCR/marketing-tools/create');
+  router.push('/marketing-tools/create');
 };
 </script>
 

@@ -1,8 +1,8 @@
 <script setup>
 import { useRoute } from 'vue-router';
 import { useHeaderStore } from '@/stores/headerStore';
-import { useLayoutStore } from '@/stores/layout'; // Add this import
-import { watch } from 'vue';
+import { useLayoutStore } from '@/stores/layout';
+import { watch, computed, onMounted } from 'vue';
 import Sidebar from './components/SidebarView.vue';
 import Header from './components/HeaderView.vue';
 import PageTransition from './components/PageTransition.vue';
@@ -11,7 +11,26 @@ import '@fontsource/poppins/700.css'; // If you need bold
 
 const route = useRoute();
 const headerStore = useHeaderStore();
-const layoutStore = useLayoutStore(); // Use the layout store
+const layoutStore = useLayoutStore();
+
+// Computed properties for better reactivity
+const hideSidebar = computed(() => layoutStore.hideSidebar);
+const hideHeader = computed(() => layoutStore.hideHeader);
+const background = computed(() => layoutStore.background);
+
+// Force layout update on mount
+onMounted(() => {
+  console.log('App.vue mounted - Forcing initial layout update');
+
+  // Apply route meta settings
+  if (route.meta) {
+    layoutStore.setLayout({
+      hideSidebar: route.meta.hideSidebar || false,
+      hideHeader: route.meta.hideHeader || false,
+      background: route.meta.background || '#FFFFFF'
+    });
+  }
+});
 
 // Watch route changes and update the header title dynamically
 watch(route, (to) => {
@@ -21,16 +40,28 @@ watch(route, (to) => {
   } else {
     headerStore.setTitle('Dashboard');
   }
+
+  console.log(`App.vue - Route changed to: ${to.path}`);
+  console.log(`App.vue - Layout state: hideSidebar=${hideSidebar.value}, hideHeader=${hideHeader.value}`);
+
+  // Apply the route's meta settings
+  if (to.meta) {
+    layoutStore.setLayout({
+      hideSidebar: to.meta.hideSidebar || false,
+      hideHeader: to.meta.hideHeader || false,
+      background: to.meta.background || '#FFFFFF'
+    });
+  }
 }, { immediate: true });
 </script>
 
 <template>
-  <div class="app-container" :style="{ background: layoutStore.background }">
-    <Sidebar v-if="!layoutStore.hideSidebar" />
-    <div class="main-content">
-      <Header v-if="!layoutStore.hideHeader" />
+  <div class="app-container" :style="{ background: background }">
+    <Sidebar v-if="!hideSidebar" />
+    <div class="main-content" :class="{ 'full-width': hideSidebar }">
+      <Header v-if="!hideHeader" />
       <PageTransition>
-        <router-view></router-view>
+        <router-view :key="$route.fullPath"></router-view>
       </PageTransition>
     </div>
   </div>
@@ -54,6 +85,7 @@ body {
   width: 100vw;
   background: #F4F4F4; /* Fallback if layoutStore fails */
   overflow: hidden;
+  transition: background 0.3s ease;
 }
 
 .app-container.no-sidebar .main-content {
@@ -65,5 +97,11 @@ body {
   flex: 1;
   overflow-y: auto;
   position: relative;
+  transition: all 0.3s ease;
+}
+
+.main-content.full-width {
+  margin-left: 0;
+  width: 100%;
 }
 </style>

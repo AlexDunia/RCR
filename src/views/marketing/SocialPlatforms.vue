@@ -76,7 +76,7 @@
     </div>
 
     <ConfirmationModal
-      v-model="showModal"
+      v-if="showModal"
       :title="modalConfig.title"
       :message="modalConfig.message"
       :type="modalConfig.type"
@@ -89,7 +89,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
 
@@ -112,6 +112,7 @@ const tabOptions = [
   { id: 'published', name: 'Published' },
 ];
 
+// Initialize with default posts
 const posts = ref([
   {
     id: 1,
@@ -164,20 +165,38 @@ const posts = ref([
 ]);
 
 onMounted(() => {
+  console.log('SocialPlatforms component mounted');
+  loadData();
+});
+
+// Remove the route watcher for layout
+watch(() => router.currentRoute.value.query, () => {
+  console.log('Route query changed, reloading data');
+  loadData();
+}, { immediate: true });
+
+// Function to load data
+function loadData() {
+  console.log('Loading data in SocialPlatforms');
+
+  // Load drafts from localStorage
   const savedDrafts = localStorage.getItem('draftPosts');
   if (savedDrafts) {
     try {
       const drafts = JSON.parse(savedDrafts);
+      // Clear existing drafts first
+      posts.value = posts.value.filter(post => post.status !== 'drafts');
+      // Add drafts from localStorage
       drafts.forEach(draft => {
-        if (!posts.value.some(post => post.id === draft.id)) {
-          posts.value.push(draft);
-        }
+        posts.value.push(draft);
       });
+      console.log('Loaded drafts:', drafts);
     } catch (e) {
       console.error('Error loading drafts:', e);
     }
   }
 
+  // Check for pending post
   const pendingPost = localStorage.getItem('pendingPost');
   if (pendingPost) {
     try {
@@ -188,7 +207,7 @@ onMounted(() => {
       localStorage.removeItem('pendingPost');
     }
   }
-});
+}
 
 const filteredPosts = computed(() => {
   return posts.value.filter(post => post.status === currentTab.value);
@@ -210,11 +229,13 @@ const formatDate = (dateString) => {
 };
 
 const handleCreatePost = () => {
-  router.push('/RCR/marketing-tools/social-platforms/create');
+  console.log('Navigating to create post page');
+  router.push('/marketing-tools/social-platforms/create');
 };
 
 const editPost = (post) => {
-  router.push(`/RCR/marketing-tools/social-platforms/edit/${post.id}`);
+  console.log('Navigating to edit post page', post.id);
+  router.push(`/marketing-tools/social-platforms/edit/${post.id}`);
 };
 
 const deletePost = (post) => {

@@ -86,7 +86,7 @@ const menuItems = [
   {
     name: 'Marketing Tools',
     key: 'marketing-tools',
-    path: '/RCR/marketing-tools',
+    path: '/marketing-tools',
     icon: `
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M4 10L20 4V20L4 14V10Z" stroke="currentColor" stroke-width="2"/>
