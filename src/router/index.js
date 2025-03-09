@@ -252,6 +252,20 @@ const routes = [
         redirect: { name: 'ViewDocuments' }
       }
     ]
+  },
+  {
+    path: '/receipts-docs/document/:id',
+    name: 'DocumentDetail',
+    component: () => import('@/views/documents/DocumentDetail.vue')
+  },
+  {
+    path: '',
+    redirect: { name: 'ViewDocuments' }
+  },
+  {
+    path: '/receipts-docs/document/:id/edit',
+    name: 'DocumentEdit',
+    component: () => import('@/views/documents/DocumentEdit.vue')
   }
 ];
 

@@ -35,7 +35,7 @@
     </div>
 
     <div class="upload-section">
-      <h3 class="upload-title">Upload cover photo</h3>
+      <h3 class="upload-title">Upload Documents</h3>
       <div
         class="upload-area"
         @drop.prevent="handleDrop"
@@ -43,20 +43,34 @@
         @dragleave.prevent="handleDragLeave"
         :class="{ 'drag-over': isDragging }"
       >
-        <div v-if="!coverPhoto" class="upload-placeholder">
+        <div v-if="documents.length === 0" class="upload-placeholder">
           <svg xmlns="http://www.w3.org/2000/svg" class="upload-icon" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
           </svg>
-          <p>Upload cover photo by Dragging & dropping files or</p>
+          <p>Upload documents by dragging & dropping files or</p>
           <button type="button" class="browse-button" @click="triggerFileInput">Browse</button>
-          <p class="upload-hint">Supported formats: JPEG and PNG</p>
+          <p class="upload-hint">Supports PDF, DOC, DOCX, JPG, PNG</p>
         </div>
-        <div v-else class="preview-container">
-          <img :src="coverPhotoPreview" alt="Cover photo preview" class="photo-preview" />
-          <button type="button" class="remove-button" @click="removeCoverPhoto">
+        <div v-else class="documents-list">
+          <div v-for="(doc, index) in documents" :key="index" class="document-item">
+            <div class="document-info">
+              <svg xmlns="http://www.w3.org/2000/svg" class="document-icon" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd" />
+              </svg>
+              <span class="document-name">{{ doc.name }}</span>
+              <span class="document-size">{{ formatFileSize(doc.size) }}</span>
+            </div>
+            <button type="button" class="remove-button" @click="removeDocument(index)">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </div>
+          <button type="button" class="add-more-button" @click="triggerFileInput">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+              <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
             </svg>
+            Add More Documents
           </button>
         </div>
       </div>
@@ -64,8 +78,9 @@
         type="file"
         ref="fileInput"
         class="hidden"
-        accept="image/jpeg,image/png"
+        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
         @change="handleFileSelect"
+        multiple
       />
     </div>
 
@@ -77,7 +92,6 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
 
 const props = defineProps({
   fields: {
@@ -87,11 +101,9 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['submit'])
-const router = useRouter()
 const fileInput = ref(null)
 const isDragging = ref(false)
-const coverPhoto = ref(null)
-const coverPhotoPreview = ref('')
+const documents = ref([])
 const formData = reactive({})
 
 // Initialize form data based on fields
@@ -100,11 +112,11 @@ props.fields.forEach(field => {
 })
 
 const handleSubmit = () => {
-  const formDataWithFile = {
+  const formDataWithFiles = {
     ...formData,
-    coverPhoto: coverPhoto.value
+    documents: documents.value
   }
-  emit('submit', formDataWithFile)
+  emit('submit', formDataWithFiles)
 }
 
 const triggerFileInput = () => {
@@ -112,41 +124,53 @@ const triggerFileInput = () => {
 }
 
 const handleFileSelect = (event) => {
-  const file = event.target.files[0]
-  if (file) {
-    processFile(file)
-  }
+  const files = Array.from(event.target.files)
+  files.forEach(file => {
+    if (isValidFileType(file)) {
+      documents.value.push(file)
+    }
+  })
 }
 
 const handleDrop = (event) => {
   isDragging.value = false
-  const file = event.dataTransfer.files[0]
-  if (file && (file.type === 'image/jpeg' || file.type === 'image/png')) {
-    processFile(file)
-  }
+  const files = Array.from(event.dataTransfer.files)
+  files.forEach(file => {
+    if (isValidFileType(file)) {
+      documents.value.push(file)
+    }
+  })
 }
 
-const handleDragOver = (event) => {
+const handleDragOver = () => {
   isDragging.value = true
 }
 
-const handleDragLeave = (event) => {
+const handleDragLeave = () => {
   isDragging.value = false
 }
 
-const processFile = (file) => {
-  coverPhoto.value = file
-  const reader = new FileReader()
-  reader.onload = (e) => {
-    coverPhotoPreview.value = e.target.result
-  }
-  reader.readAsDataURL(file)
+const isValidFileType = (file) => {
+  const validTypes = [
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'image/jpeg',
+    'image/png'
+  ]
+  return validTypes.includes(file.type)
 }
 
-const removeCoverPhoto = () => {
-  coverPhoto.value = null
-  coverPhotoPreview.value = ''
-  fileInput.value.value = ''
+const formatFileSize = (bytes) => {
+  if (bytes === 0) return '0 B'
+  const k = 1024
+  const sizes = ['B', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`
+}
+
+const removeDocument = (index) => {
+  documents.value.splice(index, 1)
 }
 </script>
 
@@ -208,7 +232,6 @@ const removeCoverPhoto = () => {
   border: 2px dashed #d1d5db;
   border-radius: 0.5rem;
   padding: 2rem;
-  text-align: center;
   transition: all 0.2s;
 }
 
@@ -235,6 +258,9 @@ const removeCoverPhoto = () => {
   color: #2563eb;
   font-weight: 500;
   cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
 }
 
 .upload-hint {
@@ -242,23 +268,48 @@ const removeCoverPhoto = () => {
   color: #9ca3af;
 }
 
-.preview-container {
-  position: relative;
-  display: inline-block;
+.documents-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.photo-preview {
-  max-width: 100%;
-  max-height: 200px;
+.document-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background-color: #f9fafb;
   border-radius: 0.375rem;
+  border: 1px solid #e5e7eb;
+}
+
+.document-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.document-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: #6b7280;
+}
+
+.document-name {
+  font-size: 0.875rem;
+  color: #374151;
+  font-weight: 500;
+}
+
+.document-size {
+  font-size: 0.75rem;
+  color: #6b7280;
 }
 
 .remove-button {
-  position: absolute;
-  top: -0.5rem;
-  right: -0.5rem;
-  background-color: #ef4444;
-  color: white;
+  background-color: #fee2e2;
+  color: #dc2626;
   width: 1.5rem;
   height: 1.5rem;
   border-radius: 9999px;
@@ -266,11 +317,32 @@ const removeCoverPhoto = () => {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background-color 0.2s;
+  border: none;
+  transition: all 0.2s;
 }
 
 .remove-button:hover {
-  background-color: #dc2626;
+  background-color: #fecaca;
+}
+
+.add-more-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #f3f4f6;
+  border: 1px dashed #d1d5db;
+  border-radius: 0.375rem;
+  color: #374151;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.add-more-button:hover {
+  background-color: #e5e7eb;
 }
 
 .hidden {
@@ -283,8 +355,10 @@ const removeCoverPhoto = () => {
   padding: 0.75rem;
   border-radius: 0.375rem;
   font-weight: 500;
+  border: none;
   transition: background-color 0.2s;
   margin-top: 1rem;
+  cursor: pointer;
 }
 
 .submit-button:hover {

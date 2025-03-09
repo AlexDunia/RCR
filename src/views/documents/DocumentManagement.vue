@@ -46,11 +46,11 @@
   <div class="recent-documents" v-if="recentDocuments.length > 0">
     <h2 class="section-title">Recent Documents</h2>
     <div class="documents-list">
-      <div
+      <router-link
         v-for="doc in recentDocuments"
         :key="doc.id"
+        :to="{ name: 'DocumentDetail', params: { id: doc.id }}"
         class="document-item"
-        @click="viewDocument(doc)"
       >
         <div class="document-info">
           <span class="document-badge" :class="doc.type">{{ doc.type }}</span>
@@ -62,17 +62,15 @@
             <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
           </svg>
         </div>
-      </div>
+      </router-link>
     </div>
   </div>
 </template>
 
 <script setup>
 import { computed } from 'vue'
-import { useRouter } from 'vue-router'
 import { useDocumentStore } from '@/stores/documents'
 
-const router = useRouter()
 const documentStore = useDocumentStore()
 
 const recentDocuments = computed(() => {
@@ -81,14 +79,6 @@ const recentDocuments = computed(() => {
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 5)
 })
-
-const viewDocument = (doc) => {
-  // Navigate to view-docs and store the selected document ID for highlighting
-  router.push({
-    path: '/receipts-docs/view-docs',
-    query: { highlight: doc.id }
-  })
-}
 
 const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('en-US', {
@@ -128,6 +118,21 @@ const getDocumentTitle = (doc) => {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   text-decoration: none;
   transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.document-card::after {
+  content: "Supports PDF, DOC, DOCX, JPG, PNG";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0.5rem 1.5rem;
+  background: #F8FAFC;
+  color: #64748B;
+  font-size: 0.75rem;
+  border-top: 1px solid #E5E7EB;
 }
 
 .document-card:hover {
@@ -200,17 +205,19 @@ p {
 .document-item {
   background-color: white;
   border: 1px solid #e5e7eb;
-  border-radius: 0.375rem;
+  border-radius: 0.5rem;
   padding: 1rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
   transition: all 0.2s;
+  text-decoration: none;
 }
 
 .document-item:hover {
   background-color: #f9fafb;
+  border-color: #2563EB;
 }
 
 .document-badge {
@@ -250,5 +257,9 @@ p {
 
 .document-arrow {
   color: #9ca3af;
+}
+
+.recent-documents {
+  margin-top: 2rem;
 }
 </style>

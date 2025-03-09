@@ -1,17 +1,7 @@
 <!-- src/views/documents/DocumentsLayout.vue -->
 <template>
   <div class="documents-container">
-    <header class="documents-header">
-      <h1 class="text-xl font-semibold">Documents</h1>
-      <p class="text-gray-600">Manage your docs in one place</p>
-    </header>
-
     <div class="document-management-card">
-      <div class="card-header">
-        <h2 class="text-lg">Document Management</h2>
-        <p class="text-gray-600">Manage your real estate docs in one place.</p>
-      </div>
-
       <div class="tabs-container">
         <router-link
           v-for="tab in tabs"
@@ -68,19 +58,11 @@ const isActiveTab = (route) => {
   margin: 0 auto;
 }
 
-.documents-header {
-  margin-bottom: 2rem;
-}
-
 .document-management-card {
   background-color: #fff;
   border-radius: 0.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   padding: 1.5rem;
-}
-
-.card-header {
-  margin-bottom: 1.5rem;
 }
 
 .tabs-container {

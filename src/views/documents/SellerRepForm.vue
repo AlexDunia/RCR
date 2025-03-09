@@ -1,6 +1,7 @@
 <!-- src/views/documents/SellerRepForm.vue -->
 <template>
   <div class="seller-rep-form">
+    <h2 class="form-title">Seller Rep</h2>
     <DocumentForm
       :fields="formFields"
       @submit="handleSubmit"
@@ -39,19 +40,32 @@ const formFields = [
     name: 'propertyType',
     label: 'Property Type',
     type: 'select',
-    options: ['Single Family Home', 'Condo', 'Townhouse', 'Multi-Family', 'Land', 'Commercial']
+    options: [
+      'Single Family Home',
+      'Condo',
+      'Townhouse',
+      'Multi-Family',
+      'Land',
+      'Commercial'
+    ]
   },
   {
-    name: 'budgetRange',
-    label: 'Budget Range',
+    name: 'propertyAddress',
+    label: 'Property Address',
     type: 'text',
-    placeholder: '$200,000-$500,000'
+    placeholder: 'e.g., 123 Main St, City, State, ZIP'
+  },
+  {
+    name: 'listingPrice',
+    label: 'Desired Listing Price',
+    type: 'text',
+    placeholder: 'e.g., $500,000'
   },
   {
     name: 'additionalNotes',
     label: 'Additional Notes/Requirements',
     type: 'textarea',
-    placeholder: 'Any specific requirements?'
+    placeholder: 'Any specific requirements or details about the property?'
   }
 ]
 
@@ -74,5 +88,13 @@ const handleSubmit = async (formData) => {
 .seller-rep-form {
   max-width: 800px;
   margin: 0 auto;
+  padding: 2rem;
+}
+
+.form-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 1.5rem;
 }
 </style>

@@ -1,6 +1,7 @@
 <!-- src/views/documents/MLSForm.vue -->
 <template>
   <div class="mls-form">
+    <h2 class="form-title">MLS Listing</h2>
     <DocumentForm
       :fields="formFields"
       @submit="handleSubmit"
@@ -51,7 +52,7 @@ const formFields = [
     name: 'propertyDescription',
     label: 'Property Description',
     type: 'textarea',
-    placeholder: 'Any specific requirements?'
+    placeholder: 'Describe the property features and amenities'
   }
 ]
 
@@ -74,5 +75,13 @@ const handleSubmit = async (formData) => {
 .mls-form {
   max-width: 800px;
   margin: 0 auto;
+  padding: 2rem;
+}
+
+.form-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 1.5rem;
 }
 </style>
