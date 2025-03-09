@@ -45,7 +45,7 @@
 
 <script setup>
 import { ref, computed } from "vue";
-import { useChatStore } from "../stores/chatStore";
+import { useChatStore } from "@/stores/chatStore";
 
 const store = useChatStore();
 const emit = defineEmits(['user-selected']);

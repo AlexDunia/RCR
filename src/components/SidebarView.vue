@@ -13,6 +13,11 @@ const getActiveMenuFromPath = (path) => {
   if (normalizedPath === '/') return 'dashboard';
   if (normalizedPath.startsWith('/tasks')) return 'tasks';
   if (normalizedPath.startsWith('/completed-tasks')) return 'tasks';
+  if (normalizedPath.startsWith('/manage-listings') ||
+      normalizedPath.startsWith('/add-listing') ||
+      normalizedPath.startsWith('/view-listings') ||
+      normalizedPath.startsWith('/pending-approvals') ||
+      normalizedPath.startsWith('/drafts')) return 'manage-listing';
 
   // For other routes, find the matching menu item
   const matchingItem = menuItems.find(item =>

@@ -1,7 +1,9 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import Loader from '@/components/Loader.vue';
 
+const router = useRouter();
 const isLoading = ref(true);
 
 onMounted(() => {
@@ -9,6 +11,10 @@ onMounted(() => {
     isLoading.value = false;
   }, 1000);
 });
+
+const navigateToAddListing = () => {
+  router.push('/add-listing');
+};
 </script>
 
 <template>
@@ -62,7 +68,7 @@ onMounted(() => {
       <!-- Property Options -->
       <div class="property-options">
         <!-- Create Listing -->
-        <div class="property-card create-listing">
+        <div class="property-card create-listing" @click="navigateToAddListing">
           <i class="fas fa-cloud-upload-alt"></i>
           <p>Create listing</p>
           <span>Take the first step to your success</span>

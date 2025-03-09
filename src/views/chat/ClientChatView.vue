@@ -8,7 +8,7 @@
 <script setup>
 import { computed } from "vue";
 import { useChatStore } from "@/stores/chatStore";
-import ChatSidebar from "../components/ChatSidebar.vue";
+import ChatSidebar from "@/components/chat/ChatSidebar.vue";
 import ChatWindow from "@/components/chat/ChatWindow.vue";
 
 const store = useChatStore();
