@@ -4,129 +4,120 @@ import DocumentLayout from '@/layouts/DocumentLayout.vue'
 
 // Lazy-loaded route components
 const routes = [
-  // Dashboard routes
+  // Dashboard route
   {
     path: '/',
     name: 'AgentDashboardView',
     component: () => import('@/views/dashboard/AgentDashboardView.vue')
   },
+
+  // Manage Listings routes
+  {
+    path: '/manage-listings',
+    component: () => import('@/views/agents/ManageListings.vue')
+  },
+  {
+    path: '/add-listing',
+    component: () => import('@/views/agents/AddListing.vue')
+  },
+  {
+    path: '/view-listings',
+    component: () => import('@/views/listings/ViewListings.vue')
+  },
+  {
+    path: '/pending-approvals',
+    component: () => import('@/views/listings/PendingApprovals.vue')
+  },
+  {
+    path: '/drafts',
+    component: () => import('@/views/listings/Drafts.vue')
+  },
+
+  // Tasks routes
+  {
+    path: '/tasks',
+    component: () => import('@/views/tasks/TaskHome.vue'),
+    children: [
+      {
+        path: '',
+        redirect: '/tasks/in-progress'
+      },
+      {
+        path: 'in-progress',
+        component: () => import('@/views/tasks/InProgressTasks.vue')
+      },
+      {
+        path: 'drafts',
+        component: () => import('@/views/tasks/DraftTasks.vue')
+      },
+      {
+        path: 'completed',
+        component: () => import('@/views/tasks/CompletedTasks.vue')
+      },
+      {
+        path: 'create',
+        component: () => import('@/components/task/TaskCreate.vue')
+      },
+      {
+        path: ':id',
+        name: 'TaskDetail',
+        component: () => import('@/components/task/TaskDetail.vue')
+      },
+      {
+        path: 'completed/:id',
+        name: 'CompletedTaskDetail',
+        component: () => import('@/components/task/TaskDetail.vue')
+      }
+    ]
+  },
+
+  // Agent Profile route
   {
     path: '/agent-profile',
     name: 'AgentProfile',
     component: () => import('@/views/agents/AgentProfile.vue')
   },
 
-  // Listing routes
+  // Document management routes
   {
-    path: '/view-listings',
-    name: 'ViewListings',
-    component: () => import('@/views/listings/ViewListings.vue'),
-    meta: { title: 'View Listings' }
+    path: '/receipts-docs',
+    component: DocumentLayout,
+    children: [
+      {
+        path: 'buyer-rep',
+        name: 'BuyerRep',
+        component: () => import('@/views/documents/BuyerRepForm.vue')
+      },
+      {
+        path: 'seller-rep',
+        name: 'SellerRep',
+        component: () => import('@/views/documents/SellerRepForm.vue')
+      },
+      {
+        path: 'mls',
+        name: 'MLS',
+        component: () => import('@/views/documents/MLSForm.vue')
+      },
+      {
+        path: 'view-docs',
+        name: 'ViewDocuments',
+        component: () => import('@/views/documents/DocumentManagement.vue')
+      },
+      {
+        path: '',
+        redirect: { name: 'ViewDocuments' }
+      }
+    ]
   },
   {
-    path: '/manage-listings',
-    name: 'ManageListings',
-    component: () => import('@/views/agents/ManageListings.vue'),
-    meta: { title: 'Manage Listings' }
+    path: '/receipts-docs/document/:id',
+    name: 'DocumentDetail',
+    component: () => import('@/views/documents/DocumentDetail.vue')
   },
   {
-    path: '/property/:id',
-    name: 'PropertyDetail',
-    component: () => import('@/views/listings/PropertyDetail.vue'),
-    meta: { title: 'Property Details' }
-  },
-  {
-    path: '/add-listing',
-    name: 'AddListing',
-    component: () => import('@/views/agents/AddListing.vue')
-  },
-  {
-    path: '/pending-approvals',
-    name: 'PendingApprovals',
-    component: () => import('@/views/listings/PendingApprovals.vue')
-  },
-  {
-    path: '/drafts',
-    name: 'Drafts',
-    component: () => import('@/views/listings/Drafts.vue')
-  },
-
-  // Task routes
-  {
-    path: '/tasks',
-    redirect: '/tasks/in-progress'
-  },
-  {
-    path: '/tasks/in-progress',
-    name: 'InProgressTasks',
-    component: () => import('@/views/tasks/InProgressTasks.vue'),
-    meta: {
-      requiresAuth: true,
-      allowedRoles: ['agent', 'admin'],
-      hideSidebar: false,
-      hideHeader: false,
-      background: '#F9FAFB'
-    }
-  },
-  {
-    path: '/tasks/drafts',
-    name: 'DraftTasks',
-    component: () => import('@/views/tasks/DraftTasks.vue'),
-    meta: {
-      requiresAuth: true,
-      allowedRoles: ['agent', 'admin'],
-      hideSidebar: false,
-      hideHeader: false,
-      background: '#F9FAFB'
-    }
-  },
-  {
-    path: '/tasks/completed',
-    name: 'CompletedTasks',
-    component: () => import('@/views/tasks/CompletedTasks.vue'),
-    meta: {
-      requiresAuth: true,
-      allowedRoles: ['agent', 'admin'],
-      hideSidebar: false,
-      hideHeader: false,
-      background: '#F9FAFB'
-    }
-  },
-  {
-    path: '/tasks/create',
-    name: 'TaskCreate',
-    component: () => import('@/components/task/TaskCreate.vue'),
-    meta: {
-      requiresAuth: true,
-      allowedRoles: ['agent', 'admin'],
-      hideSidebar: true,
-      hideHeader: true,
-      background: '#FFFFFF'
-    }
-  },
-  {
-    path: '/tasks/:id',
-    name: 'TaskDetail',
-    component: () => import('@/components/task/TaskDetail.vue'),
-    meta: {
-      requiresAuth: true,
-      allowedRoles: ['agent', 'admin'],
-      hideSidebar: true,
-      hideHeader: true,
-      background: '#FFFFFF'
-    }
-  },
-  {
-    path: '/tasks/completed/:id',
-    name: 'CompletedTaskDetail',
-    component: () => import('@/views/tasks/CompletedTaskDetail.vue'),
-    meta: {
-      requiresAuth: true,
-      allowedRoles: ['agent', 'admin'],
-      hideSidebar: false,
-      hideHeader: true,
-      background: '#FFFFFF'
-    }
+    path: '/receipts-docs/document/:id/edit',
+    name: 'DocumentEdit',
+    component: () => import('@/views/documents/DocumentEdit.vue')
   },
 
   // Marketing routes
@@ -220,58 +211,12 @@ const routes = [
     path: '/chat/client',
     name: 'ClientChat',
     component: () => import('@/views/chat/ClientChatView.vue')
-  },
-
-  // Document management routes
-  {
-    path: '/receipts-docs',
-    component: DocumentLayout,
-    children: [
-      {
-        path: 'buyer-rep',
-        name: 'BuyerRep',
-        component: () => import('@/views/documents/BuyerRepForm.vue')
-      },
-      {
-        path: 'seller-rep',
-        name: 'SellerRep',
-        component: () => import('@/views/documents/SellerRepForm.vue')
-      },
-      {
-        path: 'mls',
-        name: 'MLS',
-        component: () => import('@/views/documents/MLSForm.vue')
-      },
-      {
-        path: 'view-docs',
-        name: 'ViewDocuments',
-        component: () => import('@/views/documents/DocumentManagement.vue')
-      },
-      {
-        path: '',
-        redirect: { name: 'ViewDocuments' }
-      }
-    ]
-  },
-  {
-    path: '/receipts-docs/document/:id',
-    name: 'DocumentDetail',
-    component: () => import('@/views/documents/DocumentDetail.vue')
-  },
-  {
-    path: '',
-    redirect: { name: 'ViewDocuments' }
-  },
-  {
-    path: '/receipts-docs/document/:id/edit',
-    name: 'DocumentEdit',
-    component: () => import('@/views/documents/DocumentEdit.vue')
   }
 ];
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes,
+  routes
 });
 
 // Navigation guard for role-based access control and layout

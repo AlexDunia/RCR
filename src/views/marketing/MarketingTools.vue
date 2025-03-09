@@ -1,43 +1,56 @@
 <template>
   <div class="marketing-tools">
-    <MarketingHeader />
-    <MarketingNavigation />
-    <div class="content-area">
-      <div v-if="isSuccessPlanRoute" class="success-plans">
-        <div class="grid-container">
-          <div v-for="(plan, index) in marketingPlans" :key="index" class="plan-card" @click="viewPlan(index)">
-            <h3>{{ plan.title }}</h3>
-            <p class="date">Created: {{ new Date(plan.creationDate).toLocaleDateString() }}</p>
-            <p class="description">{{ plan.strategyOverview }}</p>
-            <div class="card-footer">
-              <span class="status" :class="plan.status.toLowerCase()">{{ plan.status }}</span>
-              <button class="view-btn">View plan</button>
+    <div v-if="isLoading" class="loader-container">
+      <Loader />
+    </div>
+    <template v-else>
+      <MarketingHeader />
+      <MarketingNavigation />
+      <div class="content-area">
+        <div v-if="isSuccessPlanRoute" class="success-plans">
+          <div class="grid-container">
+            <div v-for="(plan, index) in marketingPlans" :key="index" class="plan-card" @click="viewPlan(index)">
+              <h3>{{ plan.title }}</h3>
+              <p class="date">Created: {{ new Date(plan.creationDate).toLocaleDateString() }}</p>
+              <p class="description">{{ plan.strategyOverview }}</p>
+              <div class="card-footer">
+                <span class="status" :class="plan.status.toLowerCase()">{{ plan.status }}</span>
+                <button class="view-btn">View plan</button>
+              </div>
             </div>
-          </div>
-          <div class="plan-card add-new" @click="createNewPlan">
-            <div class="add-content">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="add-icon">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-              </svg>
-              <h3>Create New Plan</h3>
+            <div class="plan-card add-new" @click="createNewPlan">
+              <div class="add-content">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="add-icon">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                <h3>Create New Plan</h3>
+              </div>
             </div>
           </div>
         </div>
+        <router-view v-else></router-view>
       </div>
-      <router-view v-else></router-view>
-    </div>
+    </template>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import MarketingHeader from '@/components/marketing/MarketingHeader.vue';
 import MarketingNavigation from '@/components/marketing/MarketingNavigation.vue';
+import Loader from '@/components/Loader.vue';
 
 const router = useRouter();
 const route = useRoute();
 const marketingPlans = ref(JSON.parse(localStorage.getItem('marketingPlans') || '[]'));
+const isLoading = ref(true);
+
+onMounted(() => {
+  setTimeout(() => {
+    isLoading.value = false;
+  }, 1000);
+});
 
 const isSuccessPlanRoute = computed(() => {
   return route.path === '/marketing-tools' || route.path === '/marketing-tools/success-plan';
@@ -57,6 +70,13 @@ const createNewPlan = () => {
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
+}
+
+.loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
 }
 
 .content-area {

@@ -1,100 +1,106 @@
 <!-- src/components/documents/DocumentForm.vue -->
 <template>
   <form @submit.prevent="handleSubmit" class="document-form">
-    <div v-for="field in fields" :key="field.name" class="form-group">
-      <label :for="field.name" class="form-label">{{ field.label }}</label>
-      <input
-        v-if="field.type !== 'textarea' && field.type !== 'select'"
-        :type="field.type"
-        :id="field.name"
-        :name="field.name"
-        v-model="formData[field.name]"
-        :placeholder="field.placeholder"
-        class="form-input"
-      />
-      <textarea
-        v-else-if="field.type === 'textarea'"
-        :id="field.name"
-        :name="field.name"
-        v-model="formData[field.name]"
-        :placeholder="field.placeholder"
-        class="form-textarea"
-      ></textarea>
-      <select
-        v-else
-        :id="field.name"
-        :name="field.name"
-        v-model="formData[field.name]"
-        class="form-select"
-      >
-        <option value="">Select {{ field.label.toLowerCase() }}</option>
-        <option v-for="option in field.options" :key="option" :value="option">
-          {{ option }}
-        </option>
-      </select>
+    <div v-if="isLoading" class="form-loader">
+      <Loader v-for="n in fields.length" :key="n" />
     </div>
+    <div v-else>
+      <div v-for="field in fields" :key="field.name" class="form-group">
+        <label :for="field.name" class="form-label">{{ field.label }}</label>
+        <input
+          v-if="field.type !== 'textarea' && field.type !== 'select'"
+          :type="field.type"
+          :id="field.name"
+          :name="field.name"
+          v-model="formData[field.name]"
+          :placeholder="field.placeholder"
+          class="form-input"
+        />
+        <textarea
+          v-else-if="field.type === 'textarea'"
+          :id="field.name"
+          :name="field.name"
+          v-model="formData[field.name]"
+          :placeholder="field.placeholder"
+          class="form-textarea"
+        ></textarea>
+        <select
+          v-else
+          :id="field.name"
+          :name="field.name"
+          v-model="formData[field.name]"
+          class="form-select"
+        >
+          <option value="">Select {{ field.label.toLowerCase() }}</option>
+          <option v-for="option in field.options" :key="option" :value="option">
+            {{ option }}
+          </option>
+        </select>
+      </div>
 
-    <div class="upload-section">
-      <h3 class="upload-title">Upload Documents</h3>
-      <div
-        class="upload-area"
-        @drop.prevent="handleDrop"
-        @dragover.prevent="handleDragOver"
-        @dragleave.prevent="handleDragLeave"
-        :class="{ 'drag-over': isDragging }"
-      >
-        <div v-if="documents.length === 0" class="upload-placeholder">
-          <svg xmlns="http://www.w3.org/2000/svg" class="upload-icon" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-          </svg>
-          <p>Upload documents by dragging & dropping files or</p>
-          <button type="button" class="browse-button" @click="triggerFileInput">Browse</button>
-          <p class="upload-hint">Supports PDF, DOC, DOCX, JPG, PNG</p>
-        </div>
-        <div v-else class="documents-list">
-          <div v-for="doc in documents" :key="doc.id" class="document-item">
-            <div class="document-info">
-              <svg v-if="doc.type === 'pdf'" xmlns="http://www.w3.org/2000/svg" class="document-icon" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd" />
-              </svg>
-              <svg v-else xmlns="http://www.w3.org/2000/svg" class="document-icon" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
-              </svg>
-              <span class="document-name">{{ doc.name }}</span>
-              <span class="document-size">{{ formatFileSize(doc.size) }}</span>
+      <div class="upload-section">
+        <h3 class="upload-title">Upload Documents</h3>
+        <div
+          class="upload-area"
+          @drop.prevent="handleDrop"
+          @dragover.prevent="handleDragOver"
+          @dragleave.prevent="handleDragLeave"
+          :class="{ 'drag-over': isDragging }"
+        >
+          <div v-if="documents.length === 0" class="upload-placeholder">
+            <svg xmlns="http://www.w3.org/2000/svg" class="upload-icon" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+            </svg>
+            <p>Upload documents by dragging & dropping files or</p>
+            <button type="button" class="browse-button" @click="triggerFileInput">Browse</button>
+            <p class="upload-hint">Supports PDF, DOC, DOCX, JPG, PNG</p>
+          </div>
+          <div v-else class="documents-list">
+            <div v-for="doc in documents" :key="doc.id" class="document-item">
+              <div class="document-info">
+                <svg v-if="doc.type === 'pdf'" xmlns="http://www.w3.org/2000/svg" class="document-icon" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd" />
+                </svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" class="document-icon" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
+                </svg>
+                <span class="document-name">{{ doc.name }}</span>
+                <span class="document-size">{{ formatFileSize(doc.size) }}</span>
+              </div>
+              <button type="button" class="remove-button" @click="removeDocument(doc.id)">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+              </button>
             </div>
-            <button type="button" class="remove-button" @click="removeDocument(doc.id)">
+            <button type="button" class="add-more-button" @click="triggerFileInput">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
               </svg>
+              Add More Documents
             </button>
           </div>
-          <button type="button" class="add-more-button" @click="triggerFileInput">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-            </svg>
-            Add More Documents
-          </button>
         </div>
+        <input
+          type="file"
+          ref="fileInput"
+          class="hidden"
+          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+          @change="handleFileSelect"
+          multiple
+        />
       </div>
-      <input
-        type="file"
-        ref="fileInput"
-        class="hidden"
-        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-        @change="handleFileSelect"
-        multiple
-      />
-    </div>
 
-    <button type="submit" class="submit-button">
-      Proceed
-    </button>
+      <button type="submit" class="submit-button">
+        Proceed
+      </button>
+    </div>
   </form>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted, watch } from 'vue'
+import Loader from "@/components/Loader.vue";
 
 const props = defineProps({
   fields: {
@@ -112,12 +118,16 @@ const fileInput = ref(null)
 const isDragging = ref(false)
 const documents = ref([])
 const formData = reactive({})
+const isLoading = ref(true)
 
 // Initialize form data with initial values
 onMounted(() => {
   props.fields.forEach(field => {
     formData[field.name] = props.initialValues[field.name] || ''
   })
+  setTimeout(() => {
+    isLoading.value = false;
+  }, 1000);
 })
 
 // Watch for changes in initialValues
@@ -404,5 +414,11 @@ const removeDocument = (id) => {
 
 .submit-button:hover {
   background-color: #1e3a8a;
+}
+
+.form-loader {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 </style>

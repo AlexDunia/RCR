@@ -11,7 +11,10 @@
       </div>
     </div>
 
-    <div v-if="document" class="edit-content">
+    <div v-if="isLoading" class="edit-loader">
+      <Loader v-for="n in 5" :key="n" />
+    </div>
+    <div v-else-if="document" class="edit-content">
       <div class="content-section">
         <h2 class="section-title">Edit Document</h2>
         <DocumentForm
@@ -85,12 +88,14 @@ import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useDocumentStore } from '@/stores/documents'
 import DocumentForm from '@/components/documents/DocumentForm.vue'
+import Loader from "@/components/Loader.vue"
 
 const route = useRoute()
 const router = useRouter()
 const documentStore = useDocumentStore()
 const document = ref(null)
 const hasUnsavedChanges = ref(false)
+const isLoading = ref(true)
 
 // Load document data
 onMounted(() => {
@@ -105,6 +110,10 @@ onMounted(() => {
 
   // Store the actual document data
   document.value = foundDocument
+
+  setTimeout(() => {
+    isLoading.value = false
+  }, 1000)
 })
 
 // Handle unsaved changes
@@ -568,5 +577,14 @@ const removeFile = (fileToRemove) => {
 
 .hidden-input {
   display: none;
+}
+
+.edit-loader {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  max-width: 800px;
+  margin: 0 auto;
 }
 </style>

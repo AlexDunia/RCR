@@ -20,7 +20,10 @@
     </div>
 
     <div class="document-content">
-      <div class="content-section">
+      <div v-if="isLoading" class="document-loader">
+        <Loader v-for="n in 5" :key="n" />
+      </div>
+      <div v-else class="content-section">
         <h2 class="section-title">{{ getDocumentTitle(document) }}</h2>
         <div class="details-grid">
           <template v-if="document?.type === 'buyer-rep'">
@@ -197,11 +200,13 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useDocumentStore } from '@/stores/documents'
+import Loader from "@/components/Loader.vue"
 
 const route = useRoute()
 const router = useRouter()
 const documentStore = useDocumentStore()
 const document = ref(null)
+const isLoading = ref(true)
 
 onMounted(async () => {
   const documentId = route.params.id
@@ -255,6 +260,10 @@ onMounted(async () => {
   } else {
     document.value = foundDocument
   }
+
+  setTimeout(() => {
+    isLoading.value = false
+  }, 1000)
 })
 
 const formatDate = (dateString) => {
@@ -591,5 +600,12 @@ const handleFileView = (file) => {
 .activity-date {
   font-size: 0.75rem;
   color: #6B7280;
+}
+
+.document-loader {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
 }
 </style>

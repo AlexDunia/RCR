@@ -1,34 +1,49 @@
 <!-- src/views/documents/DocumentManagement.vue -->
 <template>
-  <div class="recent-documents" v-if="recentDocuments.length > 0">
-    <h2 class="section-title">Recent Documents</h2>
-    <div class="documents-list">
-      <router-link
-        v-for="doc in recentDocuments"
-        :key="doc.id"
-        :to="{ name: 'DocumentDetail', params: { id: doc.id }}"
-        class="document-item"
-      >
-        <div class="document-info">
-          <span class="document-badge" :class="doc.type">{{ doc.type }}</span>
-          <h4 class="document-name">{{ getDocumentTitle(doc) }}</h4>
-          <p class="document-date">{{ formatDate(doc.createdAt) }}</p>
+  <div class="document-management">
+    <div v-if="isLoading" class="documents-loader">
+      <Loader v-for="n in 3" :key="n" />
+    </div>
+    <div v-else>
+      <div class="recent-documents" v-if="recentDocuments.length > 0">
+        <h2 class="section-title">Recent Documents</h2>
+        <div class="documents-list">
+          <router-link
+            v-for="doc in recentDocuments"
+            :key="doc.id"
+            :to="{ name: 'DocumentDetail', params: { id: doc.id }}"
+            class="document-item"
+          >
+            <div class="document-info">
+              <span class="document-badge" :class="doc.type">{{ doc.type }}</span>
+              <h4 class="document-name">{{ getDocumentTitle(doc) }}</h4>
+              <p class="document-date">{{ formatDate(doc.createdAt) }}</p>
+            </div>
+            <div class="document-arrow">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+              </svg>
+            </div>
+          </router-link>
         </div>
-        <div class="document-arrow">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-          </svg>
-        </div>
-      </router-link>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useDocumentStore } from '@/stores/documents'
+import Loader from "@/components/Loader.vue";
 
 const documentStore = useDocumentStore()
+const isLoading = ref(true)
+
+onMounted(() => {
+  setTimeout(() => {
+    isLoading.value = false
+  }, 1000)
+})
 
 const recentDocuments = computed(() => {
   return documentStore.documents
@@ -219,5 +234,12 @@ p {
 
 .recent-documents {
   margin-top: 2rem;
+}
+
+.documents-loader {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
 }
 </style>

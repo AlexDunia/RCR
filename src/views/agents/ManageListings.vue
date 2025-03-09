@@ -1,79 +1,85 @@
 <script setup>
-// import { computed } from "vue";
-// import { useRoute } from "vue-router";
+import { ref, onMounted } from 'vue';
+import Loader from '@/components/Loader.vue';
 
-// const route = useRoute();
+const isLoading = ref(true);
 
-// Define which tab is active based on the route
-// const activeTab = computed(() => route.path);
+onMounted(() => {
+  setTimeout(() => {
+    isLoading.value = false;
+  }, 1000);
+});
 </script>
 
 <template>
   <div class="manage-listings">
-    <!-- Tab Navigation -->
-    <div class="tab-navigation">
-      <div class="tab-item">
-        <router-link to="/add-listing" class="special">
-          <i class="fas fa-plus-circle"></i> Add Listing
+    <div v-if="isLoading" class="loader-container">
+      <Loader />
+    </div>
+    <template v-else>
+      <!-- Tab Navigation -->
+      <div class="tab-navigation">
+        <div class="tab-item">
+          <router-link to="/add-listing" class="special">
+            <i class="fas fa-plus-circle"></i> Add Listing
+          </router-link>
+          <div class="special-underline"></div>
+        </div>
+        <router-link to="/view-listings">
+          <i class="fas fa-home"></i> View Listings
         </router-link>
-        <div class="special-underline"></div>
+
+        <router-link to="/pending-approvals" class="pend">
+          <i class="fas fa-clock"></i> Pending Approvals
+        </router-link>
+        <router-link to="/drafts" class="drafts">
+          <i class="fas fa-file-alt"></i> Drafts
+        </router-link>
+        <div class="tab-underline"></div>
       </div>
-      <router-link to="/view-listings">
-  <i class="fas fa-home"></i> View Listings
-</router-link>
+      <br/>
+      <div class="second-special-underline"></div>
 
-      <router-link to="/pending-approvals" class="pend">
-        <i class="fas fa-clock"></i> Pending Approvals
-      </router-link>
-      <router-link to="/drafts" class="drafts">
-        <i class="fas fa-file-alt"></i> Drafts
-      </router-link>
-      <div class="tab-underline"></div>
-    </div>
-   <br/>
-    <div class="second-special-underline"></div>
-
-    <!-- Add Property & Search -->
-    <div class="add-property-container">
-      <div class="add-property">
-        <h2>Add a property</h2>
-      </div>
-      <!-- Search Bar -->
-      <div class="search-bar">
-      <svg class="search-icon" viewBox="0 0 24 24">
-        <circle cx="11" cy="11" r="8" stroke="black" stroke-width="1.5" fill="none" />
-        <line x1="16" y1="16" x2="22" y2="22" stroke="black" stroke-width="1.5" />
-      </svg>
-      <input type="text" placeholder="Search..." />
-    </div>
-    </div>
-
-    <div class='propertystatus'>
-      <p>You currently have no properties on your profile.</p>
+      <!-- Add Property & Search -->
+      <div class="add-property-container">
+        <div class="add-property">
+          <h2>Add a property</h2>
+        </div>
+        <!-- Search Bar -->
+        <div class="search-bar">
+          <svg class="search-icon" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8" stroke="black" stroke-width="1.5" fill="none" />
+            <line x1="16" y1="16" x2="22" y2="22" stroke="black" stroke-width="1.5" />
+          </svg>
+          <input type="text" placeholder="Search..." />
+        </div>
       </div>
 
-    <!-- Property Options -->
-    <div class="property-options">
-      <!-- Create Listing -->
-      <div class="property-card create-listing">
-        <i class="fas fa-cloud-upload-alt"></i>
-        <p>Create listing</p>
-        <span>Take the first step to your success</span>
+      <div class='propertystatus'>
+        <p>You currently have no properties on your profile.</p>
       </div>
 
-      <!-- Saved Draft -->
-    <!-- Saved Draft -->
-<div class="property-card saved-draft">
-  <img src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png" alt="Saved Draft" />
-  <div class="draft-overlay">
-    <div class="edit-icon">
-      <i class="fas fa-pen"></i>
-    </div>
-    <p>Saved Draft</p>
-  </div>
-</div>
+      <!-- Property Options -->
+      <div class="property-options">
+        <!-- Create Listing -->
+        <div class="property-card create-listing">
+          <i class="fas fa-cloud-upload-alt"></i>
+          <p>Create listing</p>
+          <span>Take the first step to your success</span>
+        </div>
 
-    </div>
+        <!-- Saved Draft -->
+        <div class="property-card saved-draft">
+          <img src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png" alt="Saved Draft" />
+          <div class="draft-overlay">
+            <div class="edit-icon">
+              <i class="fas fa-pen"></i>
+            </div>
+            <p>Saved Draft</p>
+          </div>
+        </div>
+      </div>
+    </template>
   </div>
 </template>
 
@@ -354,4 +360,10 @@ br {
   margin: auto;
 }
 
+.loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
 </style>
