@@ -134,44 +134,10 @@ const loadTasks = () => {
 
   // Simulate network delay for skeleton loader
   setTimeout(() => {
-    // Add sample tasks if none exist
     const storedTasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-    if (storedTasks.length === 0) {
-      const sampleTasks = [
-        {
-          id: 1,
-          title: 'Review Property Listing',
-          status: 'in_progress',
-          startedAt: new Date().toISOString(),
-          createdAt: new Date().toISOString(),
-          description: ['Check property details', 'Verify pricing', 'Review photos'],
-          priority: 'high'
-        },
-        {
-          id: 2,
-          title: 'Client Meeting Preparation',
-          status: 'draft',
-          createdAt: new Date().toISOString(),
-          description: ['Prepare presentation', 'Gather market data', 'Review client history'],
-          priority: 'medium'
-        },
-        {
-          id: 3,
-          title: 'Property Inspection Report',
-          status: 'completed',
-          createdAt: new Date(Date.now() - 86400000).toISOString(), // Yesterday
-          completedAt: new Date().toISOString(),
-          description: ['Complete inspection checklist', 'Take photos', 'Write summary'],
-          priority: 'high'
-        }
-      ];
-      localStorage.setItem('tasks', JSON.stringify(sampleTasks));
-      tasks.value = sampleTasks;
-    } else {
-      tasks.value = storedTasks;
-    }
+    tasks.value = storedTasks;
     loading.value = false;
-    console.log('Loaded tasks:', tasks.value); // Debug to verify dates
+    console.log('Loaded tasks:', storedTasks); // Debug to verify dates
   }, 1000);
 };
 

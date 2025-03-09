@@ -36,12 +36,7 @@ const routes = [
   // Tasks routes
   {
     path: '/tasks',
-    component: () => import('@/views/tasks/TaskHome.vue'),
     children: [
-      {
-        path: '',
-        redirect: '/tasks/in-progress'
-      },
       {
         path: 'in-progress',
         component: () => import('@/views/tasks/InProgressTasks.vue')
