@@ -8,14 +8,15 @@ import { dirname, resolve } from 'path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
-  base: '/RCR/',  // Must match your repository name exactly
+  base: './',  // Changed to relative path for better GitHub Pages support
   plugins: [
     vue(),
     vueJsx(),
     vueDevTools(),
   ],
   build: {
-    outDir: 'dist'
+    outDir: 'dist',
+    emptyOutDir: true
   },
   resolve: {
     alias: {
