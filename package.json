@@ -9,9 +9,8 @@
     "preview": "vite preview",
     "lint": "eslint . --fix",
     "format": "prettier --write src/",
-    "predeploy": "vite build && copy dist\\index.html dist\\404.html && copy public\\.nojekyll dist\\",
-    "deploy": "gh-pages -d dist",
-    "deploy:script": "node deploy.js"
+    "predeploy": "vite build",
+    "deploy": "node deploy.js"
   },
   "dependencies": {
     "@fontsource/poppins": "^5.1.1",

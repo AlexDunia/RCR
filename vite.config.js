@@ -8,7 +8,7 @@ import { dirname, resolve } from 'path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
-  base: '/RCR/', // Set the base to your GitHub repo name
+  base: './', // Use relative paths for GitHub Pages
   plugins: [
     vue(),
     vueJsx(),
@@ -24,14 +24,6 @@ export default defineConfig({
       output: {
         manualChunks: {
           'vendor': ['vue', 'vue-router', 'pinia'], // Group major libraries
-          'tasks': [
-            '@/views/tasks/InProgressTasks.vue',
-            '@/views/tasks/DraftTasks.vue',
-            '@/views/tasks/CompletedTasks.vue',
-            '@/components/task/TaskCreate.vue',
-            '@/components/task/TaskDetail.vue'
-          ],
-          'layouts': ['@/layouts/TasksLayout.vue', '@/layouts/DocumentLayout.vue']
         },
         // Ensure chunk filenames are predictable
         entryFileNames: 'assets/[name].[hash].js',
