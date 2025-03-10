@@ -1,0 +1,1 @@
+import{c as o,b as e}from"./vendor.Aw2G90K5.js";import{_ as a}from"./index.BkSZUhqi.js";const r={name:"AppLoader"},s={class:"app-loader"};function t(c,p,n,_,d,f){return e(),o("div",s)}const l=a(r,[["render",t],["__scopeId","data-v-2f8d6d12"]]);export{l as L};
