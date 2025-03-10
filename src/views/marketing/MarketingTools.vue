@@ -143,16 +143,16 @@ const formatTime = (date) => {
 
 <style scoped>
 .marketing-tools {
-  padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  padding: 0;
+  max-width: 100%;
+  margin: 0;
 }
 
 .content-area {
   background: #FFFFFF;
-  border-radius: 1rem;
-  padding: 2rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 80px 2rem 2rem; /* Top padding to account for the fixed navigation */
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .content-loader {
@@ -174,12 +174,13 @@ const formatTime = (date) => {
   border-radius: 0.75rem;
   padding: 1.5rem;
   cursor: pointer;
+  margin-bottom:20px;
 }
 
 .plan-header {
   display: flex;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1.1rem;
 }
 
 .plan-icon {

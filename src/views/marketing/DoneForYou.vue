@@ -58,7 +58,7 @@ const handleTabChange = (key) => {
 
 <style scoped>
 .done-for-you-container {
-  padding: 2rem;
+  padding: 80px 2rem 2rem 2rem; /* Combined padding with top padding for the fixed navigation */
 }
 
 .marketing-tools-header {

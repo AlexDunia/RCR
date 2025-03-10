@@ -168,7 +168,7 @@ const formatTime = (date) => {
 
 <style scoped>
 .success-plan-container {
-  padding: 1.5rem;
+  padding: 80px 1.5rem 1.5rem 1.5rem; /* Combined padding with top padding for the fixed navigation */
 }
 
 .marketing-tools-header {
@@ -219,12 +219,13 @@ const formatTime = (date) => {
   border-radius: 0.75rem;
   padding: 1.5rem;
   cursor: pointer;
+  margin-bottom: 20px;
 }
 
 .plan-header {
   display: flex;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1.1rem;
 }
 
 .plan-icon {
@@ -235,7 +236,7 @@ const formatTime = (date) => {
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 600;
   color: white;
   margin-right: 1rem;
   flex-shrink: 0;
@@ -246,7 +247,7 @@ const formatTime = (date) => {
 }
 
 .plan-card h3 {
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #1E3A8A;
   margin: 0 0 0.25rem 0;
@@ -285,6 +286,7 @@ const formatTime = (date) => {
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  font-size: 14px;
 }
 
 .card-footer {

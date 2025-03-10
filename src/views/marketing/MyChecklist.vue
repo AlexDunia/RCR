@@ -440,7 +440,7 @@ const handleTabChange = (key) => {
 
 <style scoped>
 .checklist-container {
-  padding: 2rem;
+  padding: 80px 2rem 2rem 2rem; /* Combined padding with top padding for the fixed navigation */
 }
 
 /* Add New Checklist Button */

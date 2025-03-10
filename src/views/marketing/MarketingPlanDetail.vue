@@ -6,7 +6,7 @@
           <path d="M19 12H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        Back to Marketing Tools
+        Back to Home
       </button>
       <h1 class="plan-title">{{ plan.title }}</h1>
       <p class="plan-date">Created on {{ new Date(plan.creationDate).toLocaleString() }}</p>
@@ -133,7 +133,7 @@ const goBack = () => {
 
 <style scoped>
 .plan-detail-container {
-  padding: 2rem;
+  padding: 0 2rem 2rem 2rem; /* Combined padding with top padding for the fixed navigation */
   max-width: 1000px;
   margin: 0 auto;
 }
@@ -163,10 +163,9 @@ const goBack = () => {
 }
 
 .plan-title {
-  font-size: 1.75rem;
+  font-size: 1.3rem;
   font-weight: 600;
-  color: #1E3A8A;
-  margin-bottom: 0.5rem;
+  color: #565656;
 }
 
 .plan-date {
@@ -212,8 +211,8 @@ const goBack = () => {
 
 .target-item {
   display: flex;
-  align-items: flex-start;
-  gap: 1rem;
+    align-items: center;
+    gap: 1rem;
 }
 
 .target-icon {
