@@ -217,7 +217,14 @@ const routes = [
 
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
-  routes
+  routes,
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition;
+    } else {
+      return { top: 0 };
+    }
+  }
 });
 
 // Navigation guard for role-based access control and layout
@@ -241,24 +248,31 @@ router.beforeEach(async (to, from, next) => {
     }
   }
 
-  next();
-});
-
-// Add an afterEach guard to ensure layout is properly updated
-router.afterEach((to) => {
-  // Force layout update after navigation is complete
+  // Set layout based on route
   const layoutStore = useLayoutStore();
 
-  console.log(`Router afterEach: navigated to ${to.path}`);
+  // Set background color if specified in route meta
+  if (to.meta.background) {
+    layoutStore.setBackgroundColor(to.meta.background);
+  } else {
+    layoutStore.resetBackgroundColor();
+  }
 
-  // Apply the route's meta settings
-  layoutStore.setLayout({
-    hideSidebar: to.meta.hideSidebar || false,
-    hideHeader: to.meta.hideHeader || false,
-    background: to.meta.background || '#FFFFFF'
-  });
+  // Set sidebar visibility
+  if (to.meta.hideSidebar !== undefined) {
+    layoutStore.setSidebarVisibility(!to.meta.hideSidebar);
+  } else {
+    layoutStore.setSidebarVisibility(true);
+  }
 
-  console.log(`Layout applied: hideSidebar=${layoutStore.hideSidebar}, hideHeader=${layoutStore.hideHeader}`);
+  // Set header visibility
+  if (to.meta.hideHeader !== undefined) {
+    layoutStore.setHeaderVisibility(!to.meta.hideHeader);
+  } else {
+    layoutStore.setHeaderVisibility(true);
+  }
+
+  next();
 });
 
 export default router;

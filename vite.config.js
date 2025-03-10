@@ -8,7 +8,7 @@ import { dirname, resolve } from 'path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
-  base: './',  // Relative path for GitHub Pages
+  base: '/RCR/', // Set the base to your GitHub repo name
   plugins: [
     vue(),
     vueJsx(),
@@ -26,7 +26,7 @@ export default defineConfig({
           'vendor': ['vue', 'vue-router', 'pinia'], // Group major libraries
           'tasks': [
             '@/views/tasks/InProgressTasks.vue',
-            '@/views/tasks/DraftTasks.vue', 
+            '@/views/tasks/DraftTasks.vue',
             '@/views/tasks/CompletedTasks.vue',
             '@/components/task/TaskCreate.vue',
             '@/components/task/TaskDetail.vue'
@@ -43,6 +43,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
+      'vue': 'vue/dist/vue.esm-bundler.js', // Ensure Vue is properly resolved
     },
   },
   server: {

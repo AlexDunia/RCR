@@ -10,8 +10,6 @@ export const useLayoutStore = defineStore('layout', {
 
   actions: {
     setLayout({ hideSidebar, hideHeader, background }) {
-      console.log(`Setting layout: hideSidebar=${hideSidebar}, hideHeader=${hideHeader}, background=${background}`);
-
       // Set new values
       this.hideSidebar = hideSidebar ?? false;
       this.hideHeader = hideHeader ?? false;
@@ -23,14 +21,27 @@ export const useLayoutStore = defineStore('layout', {
         hideHeader: this.hideHeader,
         background: this.background
       });
+    },
 
-      console.log(`Layout updated: hideSidebar=${this.hideSidebar}, hideHeader=${this.hideHeader}`);
+    // Add individual setters for more granular control
+    setSidebarVisibility(isVisible) {
+      this.hideSidebar = !isVisible;
+    },
+
+    setHeaderVisibility(isVisible) {
+      this.hideHeader = !isVisible;
+    },
+
+    setBackgroundColor(color) {
+      this.background = color || '#F4F4F4';
+    },
+
+    resetBackgroundColor() {
+      this.background = '#F4F4F4';
     },
 
     // Add a method to reset the layout to default values
     resetLayout() {
-      console.log('Resetting layout to default values');
-
       this.setLayout({
         hideSidebar: false,
         hideHeader: false,

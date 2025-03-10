@@ -9,8 +9,9 @@
     "preview": "vite preview",
     "lint": "eslint . --fix",
     "format": "prettier --write src/",
-    "predeploy": "vite build && copy public\\favicon.ico dist\\ && copy public\\404.html dist\\ && copy public\\.nojekyll dist\\ && copy public\\CNAME dist\\ && copy public\\index-prod.html dist\\index.html",
-    "deploy": "gh-pages -d dist"
+    "predeploy": "vite build && copy dist\\index.html dist\\404.html && copy public\\.nojekyll dist\\",
+    "deploy": "gh-pages -d dist",
+    "deploy:script": "node deploy.js"
   },
   "dependencies": {
     "@fontsource/poppins": "^5.1.1",
