@@ -18,11 +18,25 @@ export default defineConfig({
     outDir: 'dist',
     emptyOutDir: true,
     assetsInlineLimit: 4096, // 4kb - smaller files will be inlined as base64
+    chunkSizeWarningLimit: 1000, // Increase the warning limit
+    cssCodeSplit: true, // Split CSS into multiple files
     rollupOptions: {
       output: {
         manualChunks: {
-          'vendor': ['vue', 'vue-router', 'pinia'] // Group major libraries
-        }
+          'vendor': ['vue', 'vue-router', 'pinia'], // Group major libraries
+          'tasks': [
+            '@/views/tasks/InProgressTasks.vue',
+            '@/views/tasks/DraftTasks.vue', 
+            '@/views/tasks/CompletedTasks.vue',
+            '@/components/task/TaskCreate.vue',
+            '@/components/task/TaskDetail.vue'
+          ],
+          'layouts': ['@/layouts/TasksLayout.vue', '@/layouts/DocumentLayout.vue']
+        },
+        // Ensure chunk filenames are predictable
+        entryFileNames: 'assets/[name].[hash].js',
+        chunkFileNames: 'assets/[name].[hash].js',
+        assetFileNames: 'assets/[name].[hash].[ext]'
       }
     }
   },

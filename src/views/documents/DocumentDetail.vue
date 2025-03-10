@@ -384,7 +384,7 @@ const handleFileView = (file) => {
 .document-content {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 2rem;
+  /* padding: 0 2rem; */
 }
 
 .content-section {

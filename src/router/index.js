@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
 import { useLayoutStore } from '@/stores/layout';
 import DocumentLayout from '@/layouts/DocumentLayout.vue'
+import TasksLayout from '@/layouts/TasksLayout.vue'
 
 // Lazy-loaded route components
 const routes = [
@@ -36,7 +37,12 @@ const routes = [
   // Tasks routes
   {
     path: '/tasks',
+    component: TasksLayout,
     children: [
+      {
+        path: '',
+        redirect: '/tasks/in-progress' // Default redirect
+      },
       {
         path: 'in-progress',
         component: () => import('@/views/tasks/InProgressTasks.vue')

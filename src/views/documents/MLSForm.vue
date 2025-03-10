@@ -1,21 +1,37 @@
 <!-- src/views/documents/MLSForm.vue -->
 <template>
   <div class="mls-form">
-    <h2 class="form-title">MLS Listing</h2>
-    <DocumentForm
-      :fields="formFields"
-      @submit="handleSubmit"
-    />
+    <div class="form-card">
+      <div class="card-header">
+        <Loader v-if="isLoading" class="title-loader" />
+        <h2 v-else class="form-title">MLS Listing</h2>
+      </div>
+      <div class="card-content">
+        <DocumentForm
+          :fields="formFields"
+          @submit="handleSubmit"
+          :isLoading="isLoading"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import DocumentForm from '@/components/documents/DocumentForm.vue'
 import { useDocumentStore } from '@/stores/documents'
+import Loader from '@/components/Loader.vue'
 
 const router = useRouter()
 const documentStore = useDocumentStore()
+const isLoading = ref(true)
+
+// Initialize with loading state and turn it off after a delay
+setTimeout(() => {
+  isLoading.value = false
+}, 1000)
 
 const formFields = [
   {
@@ -75,13 +91,33 @@ const handleSubmit = async (formData) => {
 .mls-form {
   max-width: 800px;
   margin: 0 auto;
-  padding: 2rem;
+}
+
+.form-card {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1.5rem;
+}
+
+.card-header {
+  background: #F3F4F4;
+  padding: 1rem 1.5rem;
+}
+
+.card-content {
+  background: white;
+  padding: 1.5rem;
 }
 
 .form-title {
   font-size: 1.25rem;
   font-weight: 600;
   color: #111827;
-  margin-bottom: 1.5rem;
+  margin: 0;
+}
+
+.title-loader {
+  height: 30px !important;
 }
 </style>

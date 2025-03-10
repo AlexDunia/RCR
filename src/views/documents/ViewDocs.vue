@@ -302,9 +302,6 @@ const deleteDocument = async (doc) => {
   color: #9ca3af;
 }
 
-.document-content {
-  padding: 1rem;
-}
 
 .document-title {
   font-size: 1rem;
