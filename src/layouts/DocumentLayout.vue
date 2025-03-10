@@ -116,6 +116,7 @@
 }
 
 .document-content {
-   padding: 1rem;
+  width:100%;
+   /* padding: 1rem; */
 }
 </style>

@@ -21,59 +21,60 @@
       </div>
     </div>
 
-    <div class="posts-container">
-      <div v-if="filteredPosts.length" :class="['posts-list', { 'posts-list--grid': currentTab === 'published' }]">
-        <article
-          v-for="post in filteredPosts"
-          :key="post.id"
-          :class="['post-card', { 'post-card--grid': currentTab === 'published' }]"
-        >
-          <div :class="['post-card__thumbnail', { 'post-card__thumbnail--grid': currentTab === 'published' }]">
-            <img :src="post.image" :alt="post.title">
-          </div>
+    <MarketingContentLoader>
+      <div class="posts-container">
+        <div v-if="filteredPosts.length" :class="['posts-list', { 'posts-list--grid': currentTab === 'published' }]">
+          <article
+            v-for="post in filteredPosts"
+            :key="post.id"
+            :class="['post-card', { 'post-card--grid': currentTab === 'published' }]"
+          >
+            <div :class="['post-card__thumbnail', { 'post-card__thumbnail--grid': currentTab === 'published' }]">
+              <img :src="post.image" :alt="post.title">
+            </div>
 
-          <div :class="['post-card__content', { 'post-card__content--grid': currentTab === 'published' }]">
-            <h3 class="post-card__title">{{ post.title }}</h3>
-            <p class="post-card__schedule">
-              <template v-if="post.status === 'drafts'">
-                Created: {{ formatDate(post.creationDate) }}
-              </template>
-              <template v-else-if="post.status === 'scheduled'">
-                Scheduled for: {{ formatDate(post.scheduledDate) }}
-              </template>
-              <template v-else>
-                Published: {{ formatDate(post.publishedDate || post.creationDate) }}
-              </template>
-            </p>
-          </div>
+            <div :class="['post-card__content', { 'post-card__content--grid': currentTab === 'published' }]">
+              <h3 class="post-card__title">{{ post.title }}</h3>
+              <p class="post-card__schedule">
+                <template v-if="post.status === 'drafts'">
+                  Created: {{ formatDate(post.creationDate) }}
+                </template>
+                <template v-else-if="post.status === 'scheduled'">
+                  Scheduled for: {{ formatDate(post.scheduledDate) }}
+                </template>
+                <template v-else>
+                  Published: {{ formatDate(post.publishedDate || post.creationDate) }}
+                </template>
+              </p>
+            </div>
 
-          <div :class="['post-card__actions', { 'post-card__actions--grid': currentTab === 'published' }]">
-            <button
-              class="action-button action-button--edit"
-              @click.stop="editPost(post)"
-              aria-label="Edit post"
-            >
-              <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-              </svg>
-            </button>
-            <button
-              class="action-button action-button--delete"
-              @click.stop="deletePost(post)"
-              aria-label="Delete post"
-            >
-              <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-              </svg>
-            </button>
-          </div>
-        </article>
+            <div :class="['post-card__actions', { 'post-card__actions--grid': currentTab === 'published' }]">
+              <button
+                class="action-button action-button--edit"
+                @click.stop="editPost(post)"
+                aria-label="Edit post"
+              >
+                <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+              </button>
+              <button
+                class="action-button action-button--delete"
+                @click.stop="deletePost(post)"
+                aria-label="Delete post"
+              >
+                <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+              </button>
+            </div>
+          </article>
+        </div>
+        <div v-else class="empty-state">
+          <p>No posts found in this category.</p>
+        </div>
       </div>
-
-      <div v-else class="empty-state">
-        <p>No {{ currentTab }} posts found</p>
-      </div>
-    </div>
+    </MarketingContentLoader>
 
     <ConfirmationModal
       v-if="showModal"
@@ -92,6 +93,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
+import MarketingContentLoader from '@/components/marketing/MarketingContentLoader.vue';
 
 const router = useRouter();
 const currentTab = ref('scheduled');

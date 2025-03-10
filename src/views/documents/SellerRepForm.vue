@@ -102,7 +102,6 @@ const handleSubmit = async (formData) => {
 
 <style scoped>
 .seller-rep-form {
-  max-width: 800px;
   margin: 0 auto;
 }
 
@@ -120,12 +119,12 @@ const handleSubmit = async (formData) => {
 
 .card-content {
   background: white;
-  padding: 1.5rem;
+  padding: 2rem;
 }
 
 .form-title {
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 500;
   color: #111827;
   margin: 0;
 }

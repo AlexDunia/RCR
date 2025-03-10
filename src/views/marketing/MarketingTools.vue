@@ -1,21 +1,29 @@
 <template>
   <div class="marketing-tools">
-    <div v-if="isLoading" class="loader-container">
-      <Loader />
-    </div>
-    <template v-else>
-      <MarketingHeader />
-      <MarketingNavigation />
-      <div class="content-area">
+    <MarketingNavigation />
+    <div class="content-area">
+      <div v-if="isLoading" class="content-loader">
+        <Loader v-for="n in 3" :key="n" />
+      </div>
+      <template v-else>
         <div v-if="isSuccessPlanRoute" class="success-plans">
-          <div class="grid-container">
+          <div class="plans-container">
             <div v-for="(plan, index) in marketingPlans" :key="index" class="plan-card" @click="viewPlan(index)">
-              <h3>{{ plan.title }}</h3>
-              <p class="date">Created: {{ new Date(plan.creationDate).toLocaleDateString() }}</p>
+              <div class="plan-header">
+                <div class="plan-icon" :style="{ backgroundColor: getRandomColor(plan.title) }">
+                  {{ getFirstLetter(plan.title) }}
+                </div>
+                <div class="plan-info">
+                  <h3>{{ plan.title }}</h3>
+                  <p class="date">Creation date: {{ formatDate(plan.creationDate) }}</p>
+                </div>
+                <button class="view-plan-btn">
+                  View plan
+                </button>
+              </div>
               <p class="description">{{ plan.strategyOverview }}</p>
               <div class="card-footer">
                 <span class="status" :class="plan.status.toLowerCase()">{{ plan.status }}</span>
-                <button class="view-btn">View plan</button>
               </div>
             </div>
             <div class="plan-card add-new" @click="createNewPlan">
@@ -29,15 +37,14 @@
           </div>
         </div>
         <router-view v-else></router-view>
-      </div>
-    </template>
+      </template>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import MarketingHeader from '@/components/marketing/MarketingHeader.vue';
 import MarketingNavigation from '@/components/marketing/MarketingNavigation.vue';
 import Loader from '@/components/Loader.vue';
 
@@ -45,6 +52,35 @@ const router = useRouter();
 const route = useRoute();
 const marketingPlans = ref(JSON.parse(localStorage.getItem('marketingPlans') || '[]'));
 const isLoading = ref(true);
+
+// Expanded array of colors that work well with white text (good contrast)
+// More diverse with less emphasis on purple shades
+const contrastColors = [
+  '#1E3A8A', // Navy Blue
+  '#1D4ED8', // Royal Blue
+  '#0369A1', // Ocean Blue
+  '#0E7490', // Teal
+  '#065F46', // Forest Green
+  '#166534', // Emerald Green
+  '#3F6212', // Olive Green
+  '#854D0E', // Bronze
+  '#92400E', // Amber
+  '#9A3412', // Burnt Orange
+  '#B91C1C', // Crimson
+  '#991B1B', // Dark Red
+  '#831843', // Burgundy
+  '#701A75', // Magenta
+  '#581C87', // Deep Purple
+  '#4338CA', // Indigo
+  '#1E40AF', // Cobalt
+  '#0F172A', // Dark Slate
+  '#374151', // Charcoal
+  '#4B5563', // Slate Gray
+  '#7E22CE', // Violet
+  '#BE123C', // Ruby
+  '#0F766E', // Dark Teal
+  '#0C4A6E'  // Dark Cyan
+];
 
 onMounted(() => {
   setTimeout(() => {
@@ -63,6 +99,46 @@ const viewPlan = (index) => {
 const createNewPlan = () => {
   router.push('/marketing-tools/create');
 };
+
+// Get the first letter of the plan title
+const getFirstLetter = (title) => {
+  return title && title.length > 0 ? title.charAt(0).toUpperCase() : 'P';
+};
+
+// Get a random color based on the plan title (but consistent for the same title)
+const getRandomColor = (title) => {
+  if (!title) return contrastColors[0];
+  
+  // Use the sum of character codes as a seed for consistent color selection
+  let sum = 0;
+  for (let i = 0; i < title.length; i++) {
+    sum += title.charCodeAt(i);
+  }
+  
+  // Use the sum to select a color from the array
+  const colorIndex = sum % contrastColors.length;
+  return contrastColors[colorIndex];
+};
+
+// Format date to a more readable format
+const formatDate = (dateString) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return `${date.toLocaleString('default', { month: 'short' })} ${date.getDate()}, ${date.getFullYear()}, ${formatTime(date)}`;
+};
+
+// Format time to 12-hour format with am/pm
+const formatTime = (date) => {
+  let hours = date.getHours();
+  const minutes = date.getMinutes();
+  const ampm = hours >= 12 ? 'pm' : 'am';
+  
+  hours = hours % 12;
+  hours = hours ? hours : 12; // the hour '0' should be '12'
+  const minutesStr = minutes < 10 ? '0' + minutes : minutes;
+  
+  return `${hours}:${minutesStr}${ampm}`;
+};
 </script>
 
 <style scoped>
@@ -72,13 +148,6 @@ const createNewPlan = () => {
   margin: 0 auto;
 }
 
-.loader-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 400px;
-}
-
 .content-area {
   background: #FFFFFF;
   border-radius: 1rem;
@@ -86,9 +155,16 @@ const createNewPlan = () => {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.grid-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+.content-loader {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.plans-container {
+  display: flex;
+  flex-direction: column;
   gap: 1.5rem;
 }
 
@@ -98,25 +174,63 @@ const createNewPlan = () => {
   border-radius: 0.75rem;
   padding: 1.5rem;
   cursor: pointer;
-  transition: all 0.3s ease;
 }
 
-.plan-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+.plan-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.plan-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: white;
+  margin-right: 1rem;
+  flex-shrink: 0;
+}
+
+.plan-info {
+  flex: 1;
 }
 
 .plan-card h3 {
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #1E3A8A;
-  margin-bottom: 0.5rem;
+  margin: 0 0 0.25rem 0;
 }
 
 .date {
   font-size: 0.875rem;
   color: #6B7280;
-  margin-bottom: 1rem;
+  margin: 0;
+}
+
+.view-plan-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  color: #2563EB;
+  background: #EFF6FF;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.view-plan-btn:hover {
+  background: #DBEAFE;
 }
 
 .description {
@@ -126,11 +240,12 @@ const createNewPlan = () => {
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  font-size:14px;
 }
 
 .card-footer {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
 }
 
@@ -156,24 +271,12 @@ const createNewPlan = () => {
   color: #6B7280;
 }
 
-.view-btn {
-  background: none;
-  border: none;
-  color: #2563EB;
-  font-weight: 500;
-  cursor: pointer;
-}
-
 .add-new {
   border: 2px dashed #E5E7EB;
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 200px;
-}
-
-.add-new:hover {
-  border-color: #2563EB;
 }
 
 .add-content {

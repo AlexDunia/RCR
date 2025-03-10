@@ -239,7 +239,7 @@ const removeDocument = (id) => {
 }
 
 .form-label {
-  font-size: 0.875rem;
+  font-size: 0.820rem;
   font-weight: 500;
   color: #374151;
 }
@@ -248,10 +248,10 @@ const removeDocument = (id) => {
 .form-textarea,
 .form-select {
   width: 100%;
-  padding: 0.5rem;
+  padding: 0.85em;
   border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
   font-size: 0.875rem;
+  margin-bottom:30px;
   transition: border-color 0.2s;
 }
 
