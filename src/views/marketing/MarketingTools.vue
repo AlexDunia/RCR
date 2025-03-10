@@ -150,7 +150,7 @@ const formatTime = (date) => {
 
 .content-area {
   background: #FFFFFF;
-  padding: 80px 2rem 2rem; /* Top padding to account for the fixed navigation */
+  padding: 120px 2rem 2rem; 
   max-width: 1200px;
   margin: 0 auto;
 }

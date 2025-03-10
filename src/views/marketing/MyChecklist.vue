@@ -3,28 +3,33 @@
     <!-- Single Card Container -->
     <div class="card-container">
       <!-- Top Action Bar (with gray background) -->
-      <div class="checklist-action-bar">
-        <button class="add-checklist-btn" @click="createNewChecklist" aria-label="Create new checklist">
-          <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
-          Add new checklist
+      <div class="checklist-action-bar" :class="{ 'fixed': isActionBarFixed }">
+        <div class="action-bar-content">
+    <button class="add-checklist-btn" @click="createNewChecklist" aria-label="Create new checklist">
+      <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+      </svg>
+      Add new checklist
+    </button>
+
+      <div class="filter-tabs" role="tablist">
+        <button
+          v-for="tab in filterTabs"
+          :key="tab.value"
+          class="filter-tab"
+          :class="{ active: currentFilter === tab.value }"
+          @click="currentFilter = tab.value"
+          :aria-selected="currentFilter === tab.value"
+          role="tab"
+        >
+          {{ tab.label }}
         </button>
-        
-        <div class="filter-tabs" role="tablist">
-          <button
-            v-for="tab in filterTabs"
-            :key="tab.value"
-            class="filter-tab"
-            :class="{ active: currentFilter === tab.value }"
-            @click="currentFilter = tab.value"
-            :aria-selected="currentFilter === tab.value"
-            role="tab"
-          >
-            {{ tab.label }}
-          </button>
+          </div>
         </div>
       </div>
+
+      <!-- Spacer to prevent content jump when action bar is fixed -->
+      <div class="action-bar-spacer" v-if="isActionBarFixed"></div>
 
       <!-- Search Container (white background) -->
       <div class="search-container">
@@ -38,120 +43,114 @@
             placeholder="Search checklists..."
             aria-label="Search checklists"
           >
-        </div>
-
-        <div class="sort-dropdown">
-          <select v-model="sortBy" aria-label="Sort checklists">
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
-            <option value="progress">Progress (Low to High)</option>
-          </select>
-        </div>
       </div>
+
+      <div class="sort-dropdown">
+        <select v-model="sortBy" aria-label="Sort checklists">
+          <option value="newest">Newest First</option>
+          <option value="oldest">Oldest First</option>
+          <option value="progress">Progress (Low to High)</option>
+        </select>
+      </div>
+    </div>
 
       <!-- Checklist Content (white background) -->
       <div class="checklist-content">
-        <!-- Bulk Actions -->
-        <div class="bulk-actions" v-if="selectedChecklists.length > 0">
-          <span>{{ selectedChecklists.length }} selected</span>
-          <button class="bulk-action-btn" @click="markSelectedAsCompleted">
-            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            Mark as Completed
-          </button>
-          <button class="bulk-action-btn delete" @click="deleteSelected">
-            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-            Delete Selected
-          </button>
+    <!-- Bulk Actions -->
+    <div class="bulk-actions" v-if="selectedChecklists.length > 0">
+      <span>{{ selectedChecklists.length }} selected</span>
+      <button class="bulk-action-btn" @click="markSelectedAsCompleted">
+        <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+        Mark as Completed
+      </button>
+      <button class="bulk-action-btn delete" @click="deleteSelected">
+        <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+        </svg>
+        Delete Selected
+      </button>
+    </div>
+
+    <!-- Checklist Cards -->
+        <div class="checklist-cards" v-if="filteredChecklists.length > 0" ref="checklistCards">
+      <div
+        v-for="checklist in filteredChecklists"
+        :key="checklist.id"
+        class="checklist-card"
+        :class="{ 'is-selected': selectedChecklists.includes(checklist.id) }"
+        @click="viewChecklist(checklist.id)"
+      >
+        <div class="card-checkbox">
+          <input
+            type="checkbox"
+            :checked="selectedChecklists.includes(checklist.id)"
+            @click.stop="toggleSelection(checklist.id)"
+            :aria-label="'Select ' + checklist.title"
+          >
         </div>
 
-        <!-- Checklist Cards -->
-        <div class="checklist-cards" v-if="filteredChecklists.length > 0">
-          <div
-            v-for="checklist in filteredChecklists"
-            :key="checklist.id"
-            class="checklist-card"
-            :class="{ 'is-selected': selectedChecklists.includes(checklist.id) }"
-            @click="viewChecklist(checklist.id)"
-          >
-            <div class="card-checkbox">
-              <input
-                type="checkbox"
-                :checked="selectedChecklists.includes(checklist.id)"
-                @click.stop="toggleSelection(checklist.id)"
-                :aria-label="'Select ' + checklist.title"
-              >
-            </div>
+        <div class="card-emoji">
+              {{ getFirstLetter(checklist.title) }}
+        </div>
 
-            <div class="card-emoji">
-              <svg class="emoji-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2"/>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"/>
-              </svg>
-            </div>
+        <div class="card-content">
+          <h3>{{ checklist.title }}</h3>
+          <p class="creation-date">Creation date: {{ formatDate(checklist.creationDate) }}</p>
 
-            <div class="card-content">
-              <h3>{{ checklist.title }}</h3>
-              <p class="creation-date">Creation date: {{ formatDate(checklist.creationDate) }}</p>
-
-              <div class="progress-section">
-                <div v-if="!checklist.completed" class="progress-info">
-                  <span class="progress-text">Progress: {{ checklist.progress }}% done</span>
-                  <span v-if="checklist.status === 'draft'" class="draft-badge">Draft</span>
-                  <span v-if="isOverdue(checklist)" class="overdue-badge" :title="'Overdue by ' + getDaysOverdue(checklist) + ' days'">
-                    <svg class="overdue-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                      <circle cx="12" cy="12" r="10" stroke-width="2"/>
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2"/>
-                    </svg>
-                    Overdue
-                  </span>
-                </div>
-                <div v-else class="completed-badge">
-                  <svg class="check-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                  </svg>
-                  Completed
-                </div>
-                <div class="progress-bar" v-if="!checklist.completed">
-                  <div class="progress-fill" :style="{ width: checklist.progress + '%' }"></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="card-actions">
-              <button
-                class="action-btn edit"
-                @click.stop="editChecklist(checklist.id)"
-                aria-label="Edit checklist"
-              >
-                <svg class="action-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+          <div class="progress-section">
+            <div v-if="!checklist.completed" class="progress-info">
+              <span class="progress-text">Progress: {{ checklist.progress }}% done</span>
+              <span v-if="checklist.status === 'draft'" class="draft-badge">Draft</span>
+              <span v-if="isOverdue(checklist)" class="overdue-badge" :title="'Overdue by ' + getDaysOverdue(checklist) + ' days'">
+                <svg class="overdue-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2"/>
                 </svg>
-              </button>
-              <button
-                class="action-btn delete"
-                @click.stop="deleteChecklist(checklist.id)"
-                aria-label="Delete checklist"
-              >
-                <svg class="action-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                </svg>
-              </button>
+                Overdue
+              </span>
+            </div>
+            <div v-else class="completed-badge">
+              Completed
+            </div>
+            <div class="progress-bar" v-if="!checklist.completed">
+              <div class="progress-fill" :style="{ width: checklist.progress + '%' }"></div>
             </div>
           </div>
         </div>
 
-        <!-- Empty State -->
-        <div v-else class="empty-state">
-          <svg class="empty-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2"/>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m-4-4h8"/>
-          </svg>
-          <p>No checklists found for this filter</p>
-          <button class="add-checklist-btn" @click="createNewChecklist">Create your first checklist</button>
+        <div class="card-actions">
+          <button
+            class="action-btn edit"
+            @click.stop="editChecklist(checklist.id)"
+            aria-label="Edit checklist"
+          >
+            <svg class="action-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+            </svg>
+          </button>
+          <button
+            class="action-btn delete"
+            @click.stop="deleteChecklist(checklist.id)"
+            aria-label="Delete checklist"
+          >
+            <svg class="action-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div v-else class="empty-state">
+      <svg class="empty-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2"/>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m-4-4h8"/>
+      </svg>
+      <p>No checklists found for this filter</p>
+      <button class="add-checklist-btn" @click="createNewChecklist">Create your first checklist</button>
         </div>
       </div>
     </div>
@@ -169,7 +168,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
 
@@ -189,6 +188,10 @@ const modalConfig = ref({
   confirmText: 'Confirm',
   onConfirm: () => {}
 });
+
+// Scroll behavior state
+const isActionBarFixed = ref(false);
+const checklistCards = ref(null);
 
 // Filter tabs
 const filterTabs = [
@@ -211,8 +214,48 @@ const loadChecklists = () => {
   }
 };
 
+// Scroll event handler
+const handleScroll = () => {
+  if (!checklistCards.value) return;
+
+  // Get the position of the first card
+  const cardsPosition = checklistCards.value.getBoundingClientRect().top;
+  const marketingNav = document.querySelector('.marketing-nav');
+
+  // Define threshold for when to fix the action bar
+  const threshold = 150; // Adjust based on testing
+
+  // If we've scrolled past the threshold
+  if (cardsPosition <= threshold) {
+    if (!isActionBarFixed.value) {
+      // Only apply these changes when transitioning to fixed state
+      isActionBarFixed.value = true;
+
+      // Hide the marketing nav
+      if (marketingNav) {
+        marketingNav.style.display = 'none';
+      }
+    }
+  } else {
+    if (isActionBarFixed.value) {
+      // Only apply these changes when transitioning to normal state
+      isActionBarFixed.value = false;
+
+      // Show the marketing nav
+      if (marketingNav) {
+        marketingNav.style.display = '';
+      }
+    }
+  }
+};
+
 onMounted(() => {
   loadChecklists();
+  window.addEventListener('scroll', handleScroll);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll);
 });
 
 // Computed
@@ -384,13 +427,13 @@ const deleteSelected = () => {
     }
   };
 };
+
+const getFirstLetter = (title) => {
+  return title.charAt(0).toUpperCase();
+};
 </script>
 
 <style scoped>
-.checklist-container {
-  padding: 80px 2rem 2rem 2rem; /* Combined padding with top padding for the fixed navigation */
-}
-
 /* Single Card Container */
 .card-container {
   background: white;
@@ -398,16 +441,50 @@ const deleteSelected = () => {
   border-radius: 0.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   overflow: hidden; /* Ensures the gray background doesn't overflow the rounded corners */
+  position: relative;
 }
 
 /* Top Action Bar - Gray Background */
 .checklist-action-bar {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  padding: 1rem;
+  padding: 1rem 0;
   background-color: #f9fafb;
   border-bottom: 1px solid #E5E7EB;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 100;
+  height: 60px; /* Fixed height to prevent jumps */
+}
+
+.action-bar-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1300px;
+  width: 100%;
+  padding: 0 1rem;
+}
+
+/* Fixed action bar styling */
+.checklist-action-bar.fixed {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000; /* Higher than marketing nav */
+  border-radius: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  background-color: #f9fafb;
+  border-bottom: 1px solid #E5E7EB;
+  padding: 1rem 0;
+}
+
+/* Add padding to prevent content jump when action bar becomes fixed */
+.checklist-action-bar.fixed + .search-container {
+  padding-top: 1rem;
 }
 
 /* Add New Checklist Button */
@@ -557,17 +634,31 @@ const deleteSelected = () => {
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1.5rem;
+  padding: 1.25rem;
   background: white;
-  border: 1px solid #E5E7EB;
+  border: 1px solid #eeeff1;
   border-radius: 0.5rem;
   cursor: pointer;
+  margin-bottom:25px;
   transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.checklist-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #C9E3FB;
+  border-top-left-radius: 0.5rem;
+  border-bottom-left-radius: 0.5rem;
 }
 
 .checklist-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
 .checklist-card.is-selected {
@@ -576,41 +667,41 @@ const deleteSelected = () => {
 }
 
 .card-checkbox {
-  display: flex;
-  align-items: center;
+  display: none;
 }
 
 .card-emoji {
   width: 3rem;
   height: 3rem;
-  background: #FEE2E2;
+  background: #FF4444;
+  color: white;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.emoji-icon {
-  width: 1.5rem;
-  height: 1.5rem;
-  color: #EF4444;
+  font-size: 1.5rem;
+  font-weight: bold;
+  flex-shrink: 0;
 }
 
 .card-content {
   flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .card-content h3 {
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 600;
+  margin-top:-6px;
   color: #111827;
-  margin-bottom: 0.25rem;
+  margin-bottom: -0.5rem;
 }
 
 .creation-date {
   font-size: 0.875rem;
   color: #6B7280;
-  margin-bottom: 1rem;
+  margin-bottom: 0.3rem;
 }
 
 .progress-section {
@@ -657,10 +748,14 @@ const deleteSelected = () => {
 }
 
 .completed-badge {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  background: #ECFDF5;
   color: #059669;
+  border-radius: 1rem;
+  font-size: 0.75rem;
   font-weight: 500;
 }
 
@@ -684,7 +779,8 @@ const deleteSelected = () => {
 
 .card-actions {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  margin-left: auto;
 }
 
 .action-btn {
@@ -697,21 +793,20 @@ const deleteSelected = () => {
   border-radius: 50%;
   cursor: pointer;
   transition: all 0.2s ease;
+  color: #6B7280;
+  background: transparent;
 }
 
 .action-btn.edit {
-  background: #BFDBFE;
-  color: #2563EB;
+  color: #6366F1;
 }
 
 .action-btn.delete {
-  background: #FEE2E2;
   color: #EF4444;
 }
 
 .action-btn:hover {
-  transform: scale(1.1);
-  opacity: 0.9;
+  background: #F3F4F6;
 }
 
 .action-icon {
@@ -738,5 +833,11 @@ const deleteSelected = () => {
 .empty-state p {
   color: #6B7280;
   margin-bottom: 1.5rem;
+}
+
+/* Action bar spacer to prevent content jump */
+.action-bar-spacer {
+  height: 60px; /* Same height as the action bar */
+  width: 100%;
 }
 </style>

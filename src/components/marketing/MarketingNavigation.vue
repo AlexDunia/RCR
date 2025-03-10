@@ -50,8 +50,8 @@ const links = ref([
 const isActive = computed(() => (link) => {
   // Success Plan is active on main marketing tools page, success plan page, or plan detail page
   if (link.path === '/marketing-tools/success-plan') {
-    return route.path === '/marketing-tools' || 
-           route.path === '/marketing-tools/success-plan' || 
+    return route.path === '/marketing-tools' ||
+           route.path === '/marketing-tools/success-plan' ||
            route.path.includes('/marketing-tools/plan/');
   }
   return route.path === link.path;
@@ -62,7 +62,7 @@ const isActive = computed(() => (link) => {
 .marketing-nav {
   position: fixed;
   top: 105px;
-  z-index: 10;
+  z-index: 50;
   display: flex;
   justify-content: center;
   gap: 1rem;
@@ -71,6 +71,7 @@ const isActive = computed(() => (link) => {
   margin-bottom: 2rem;
   background: #FFFFFF;
   width: 100%;
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .nav-content {
