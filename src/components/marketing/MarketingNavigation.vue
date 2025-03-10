@@ -32,8 +32,6 @@
       </router-link>
     </div>
   </nav>
-  <br/>
-  <br/>
 </template>
 
 <script setup>
