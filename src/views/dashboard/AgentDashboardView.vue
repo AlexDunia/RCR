@@ -24,45 +24,59 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="dashboard">
-    <!-- Greetings Section -->
-    <div class="greetings" :class="{ 'animate-metric': isLoaded }">
-      <Loader v-if="!isLoaded" />
-      <div v-else>
-        <div class="greetings-data">
-          <h1>Hi, Alex!</h1>
-          <p>Here’s an overview of your account</p>
+  <div class="dashboard-container">
+    <div v-if="!isLoaded" class="loader-container">
+      <Loader />
+    </div>
+    <div v-else class="dashboard-content">
+      <!-- Debug button for education page -->
+      <div class="debug-section">
+        <h3>Debug Navigation</h3>
+        <div class="debug-buttons">
+          <router-link to="/education-training" class="debug-button">Go to Education & Training</router-link>
+          <router-link to="/education-training/test" class="debug-button">Go to Education Test Page</router-link>
         </div>
       </div>
-    </div>
-    <br/>
 
-    <div class="metricsloader"  :class="{ 'animate-metric': isLoaded }"  :style="{ animationDelay: `${index * 0.2}s` }">
-    <div class="metrics">
-      <div v-for="(metric) in metrics" :key="metric.label" class="metric-card"
-       >
+      <!-- Greetings Section -->
+      <div class="greetings" :class="{ 'animate-metric': isLoaded }">
         <Loader v-if="!isLoaded" />
         <div v-else>
-          <div class="metric-header">
-            <div class="metric-content">
-              <div class="metrics-title">
-                <h3>{{ metric.label }}</h3>
-                <br />
-                <p>{{ metric.value }}</p>
-                <a href="#">view</a>
+          <div class="greetings-data">
+            <h1>Hi, Alex!</h1>
+            <p>Here's an overview of your account</p>
+          </div>
+        </div>
+      </div>
+      <br/>
+
+      <div class="metricsloader"  :class="{ 'animate-metric': isLoaded }"  :style="{ animationDelay: `${index * 0.2}s` }">
+      <div class="metrics">
+        <div v-for="(metric) in metrics" :key="metric.label" class="metric-card"
+         >
+          <Loader v-if="!isLoaded" />
+          <div v-else>
+            <div class="metric-header">
+              <div class="metric-content">
+                <div class="metrics-title">
+                  <h3>{{ metric.label }}</h3>
+                  <br />
+                  <p>{{ metric.value }}</p>
+                  <a href="#">view</a>
+                </div>
+                <div class="metrics-circle" :style="{ background: metric.color }"></div>
               </div>
-              <div class="metrics-circle" :style="{ background: metric.color }"></div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-    <div class="property-list-section">
-      <Loader v-if="!isLoaded" />
-      <div v-else>
-        <PropertyList />
+      <div class="property-list-section">
+        <Loader v-if="!isLoaded" />
+        <div v-else>
+          <PropertyList />
+        </div>
       </div>
     </div>
   </div>
@@ -184,5 +198,41 @@ onMounted(() => {
 
 .property-list-section {
   margin-top: 20px;
+}
+
+/* Add these styles at the end of your existing styles */
+.debug-section {
+  background-color: #f8fafc;
+  border: 1px dashed #94a3b8;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.debug-section h3 {
+  color: #334155;
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+.debug-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.debug-button {
+  display: inline-block;
+  background-color: #3b82f6;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.debug-button:hover {
+  background-color: #2563eb;
 }
 </style>

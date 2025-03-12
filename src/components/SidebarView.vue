@@ -18,6 +18,7 @@ const getActiveMenuFromPath = (path) => {
       normalizedPath.startsWith('/view-listings') ||
       normalizedPath.startsWith('/pending-approvals') ||
       normalizedPath.startsWith('/drafts')) return 'manage-listing';
+  if (normalizedPath.startsWith('/education-training')) return 'education-training';
 
   // For other routes, find the matching menu item
   const matchingItem = menuItems.find(item =>

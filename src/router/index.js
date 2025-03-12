@@ -2,6 +2,7 @@ import { createRouter, createWebHashHistory } from 'vue-router';
 import { useLayoutStore } from '@/stores/layout';
 import DocumentLayout from '@/layouts/DocumentLayout.vue'
 import TasksLayout from '@/layouts/TasksLayout.vue'
+import EducationLayout from '@/layouts/EducationLayout.vue'
 
 // Lazy-loaded route components
 const routes = [
@@ -212,6 +213,41 @@ const routes = [
     path: '/chat/client',
     name: 'ClientChat',
     component: () => import('@/views/chat/ClientChatView.vue')
+  },
+
+  // Education & Training routes
+  {
+    path: '/education-training',
+    component: EducationLayout,
+    children: [
+      {
+        path: '',
+        name: 'EducationTraining',
+        component: () => import('@/views/education/EducationTrainingView.vue')
+      },
+      {
+        path: 'create',
+        name: 'CreateEducationSession',
+        component: () => import('@/views/education/CreateEducationSession.vue')
+      },
+      {
+        path: 'session/:id',
+        name: 'SessionDetails',
+        component: () => import('@/views/education/SessionDetailsView.vue'),
+        props: true
+      },
+      {
+        path: 'module/:id',
+        name: 'ModuleDetails',
+        component: () => import('@/views/education/ModuleDetailsView.vue'),
+        props: true
+      },
+      {
+        path: 'test',
+        name: 'EducationTest',
+        component: () => import('@/views/education/TestView.vue')
+      }
+    ]
   }
 ];
 
