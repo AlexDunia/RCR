@@ -76,7 +76,16 @@
             <div v-if="selectedDate" class="selected-date-info">
               <div class="date-header">
                 <h3>{{ formatSelectedDate(selectedDate) }}</h3>
-                <button v-if="isSessionDay(selectedDate)" class="join-button">
+                <button v-if="isSessionDay(selectedDate)" class="join-button" @click="openMeetLink">
+                  <span class="platform-icon" v-if="getMeetingPlatform(session.meetLink) === 'google'">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/9/9b/Google_Meet_icon.svg" alt="Google Meet" width="16" height="16">
+                  </span>
+                  <span class="platform-icon" v-else-if="getMeetingPlatform(session.meetLink) === 'zoom'">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Zoom_Communications_Logo.svg/1200px-Zoom_Communications_Logo.svg.png" alt="Zoom" width="16" height="16">
+                  </span>
+                  <span class="platform-icon" v-else-if="getMeetingPlatform(session.meetLink) === 'teams'">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Microsoft_Office_Teams_%282018%E2%80%93present%29.svg/1200px-Microsoft_Office_Teams_%282018%E2%80%93present%29.svg.png" alt="Microsoft Teams" width="16" height="16">
+                  </span>
                   JOIN
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M7 17L17 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -89,11 +98,11 @@
                 <h4>Host</h4>
                 <div class="host-details">
                   <div class="host-avatar">
-                    <img :src="session.host && session.host.avatar ? session.host.avatar : 'https://randomuser.me/api/portraits/men/32.jpg'" alt="Host avatar">
+                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Host avatar">
                   </div>
                   <div class="host-data">
-                    <p class="host-name">{{ session.host ? session.host.name : 'Alex Dunia' }}</p>
-                    <p class="host-role">{{ session.host ? session.host.role : 'Real Estate Marketing Specialist' }}</p>
+                    <p class="host-name">{{ session.host.name }}</p>
+                    <p class="host-role">{{ session.host.role }}</p>
                   </div>
                 </div>
               </div>
@@ -102,95 +111,157 @@
         </div>
 
         <div class="details-section">
-          <div class="details-scroll-container">
-            <div v-if="selectedDate && isSessionDay(selectedDate)" class="details-content">
-              <!-- Chapter dropdown section -->
-              <div class="chapter-section">
-                <div class="chapter-header">
-                  <div class="chapter-info">
-                    <img :src="session.thumbnail ? URL.createObjectURL(session.thumbnail) : 'https://randomuser.me/api/portraits/women/65.jpg'" alt="Chapter image" class="chapter-image">
-                    <div class="chapter-text">
-                      <span class="chapter-label">Chapter one</span>
-                      <h3 class="chapter-title">{{ session.chapters && session.chapters[0] ? session.chapters[0].title : 'Mastering client connections for better results' }}</h3>
-                    </div>
-                  </div>
-                  <button class="dropdown-button" @click="toggleChapterExpanded">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M6 9L12 15L18 9" stroke="#0F172A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                  </button>
-                </div>
-
-                <!-- Chapter sections (expanded view) -->
-                <div class="chapter-sections" v-if="chapterExpanded && session.chapters && session.chapters[0] && session.chapters[0].sections">
-                  <div v-for="(section, index) in session.chapters[0].sections" :key="index" class="chapter-section-item">
-                    <div class="section-number">1.{{ index + 1 }}</div>
-                    <div class="section-title">{{ section.title }}</div>
+          <div v-if="selectedDate && isSessionDay(selectedDate)" class="details-content">
+            <!-- Chapter dropdown section -->
+            <div class="chapter-section">
+              <div class="chapter-header">
+                <div class="chapter-info">
+                  <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Chapter image" class="chapter-image">
+                  <div class="chapter-text">
+                    <span class="chapter-label">Chapter</span>
+                    <h3 class="chapter-title">{{ session.chapter || 'No chapter specified' }}</h3>
                   </div>
                 </div>
-              </div>
-
-              <!-- Description section -->
-              <div class="description-section">
-                <h3 class="section-label">Description</h3>
-                <p class="description-text">{{ session.description || 'Master these five steps and you would be a guru in 3 months' }}</p>
-              </div>
-
-              <!-- Session date and time -->
-              <div class="session-datetime">
-                <div class="datetime-pill">
-                  {{ formatSelectedDate(selectedDate) }}, {{ session.startTime || '18:00' }}
-                </div>
-                <button class="join-button">
-                  JOIN
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M7 17L17 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M7 7H17V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <button class="dropdown-button" @click="toggleChapterDetails">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" :class="{ 'rotated': showChapterDetails }">
+                    <path d="M6 9L12 15L18 9" stroke="#0F172A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
                 </button>
               </div>
 
-              <!-- Host section -->
-              <div class="host-section">
-                <h3 class="section-label">Host</h3>
-                <div class="host-details">
-                  <div class="host-avatar">
-                    <img :src="session.host && session.host.avatar ? session.host.avatar : 'https://randomuser.me/api/portraits/men/32.jpg'" alt="Host avatar">
+              <div class="chapter-details" v-if="showChapterDetails">
+                <div class="chapter-description" v-if="session.description">
+                  <p>{{ session.description }}</p>
+                </div>
+                <div class="chapter-meta">
+                  <div class="chapter-meta-item">
+                    <span class="meta-label">Duration:</span>
+                    <span class="meta-value">{{ formatDuration(session.startTime, session.endTime) }}</span>
                   </div>
-                  <div class="host-data">
-                    <p class="host-name">{{ session.host ? session.host.name : 'Alex Dunia' }}</p>
-                    <p class="host-role">{{ session.host ? session.host.role : 'Real Estate Marketing Specialist' }}</p>
+                  <div class="chapter-meta-item" v-if="session.objectives && session.objectives.length > 0">
+                    <span class="meta-label">Learning objectives:</span>
+                    <span class="meta-value">{{ session.objectives.length }} objectives</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div v-else-if="selectedDate && !isSessionDay(selectedDate)" class="details-content no-session-content">
-              <div class="no-session-message">
-                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M8 2V5" stroke="#94A3B8" stroke-width="2" stroke-linecap="round"/>
-                  <path d="M16 2V5" stroke="#94A3B8" stroke-width="2" stroke-linecap="round"/>
-                  <path d="M3 8H21" stroke="#94A3B8" stroke-width="2"/>
-                  <rect x="3" y="4" width="18" height="18" rx="2" stroke="#94A3B8" stroke-width="2"/>
-                  <path d="M12 10V16" stroke="#94A3B8" stroke-width="2" stroke-linecap="round"/>
-                  <path d="M9 13H15" stroke="#94A3B8" stroke-width="2" stroke-linecap="round"/>
+            <!-- Description section -->
+            <div class="description-section">
+              <h3 class="section-label">Description</h3>
+              <p class="description-text">{{ session.description || 'No description available' }}</p>
+            </div>
+
+            <!-- Session date and time -->
+            <div class="session-datetime">
+              <div class="datetime-pill">
+                {{ formatSessionDateTime(session.date, session.startTime) }}
+              </div>
+              <button class="join-button" @click="openMeetLink" v-if="session.meetLink">
+                <span class="platform-icon" v-if="getMeetingPlatform(session.meetLink) === 'google'">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/9/9b/Google_Meet_icon.svg" alt="Google Meet" width="16" height="16">
+                </span>
+                <span class="platform-icon" v-else-if="getMeetingPlatform(session.meetLink) === 'zoom'">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Zoom_Communications_Logo.svg/1200px-Zoom_Communications_Logo.svg.png" alt="Zoom" width="16" height="16">
+                </span>
+                <span class="platform-icon" v-else-if="getMeetingPlatform(session.meetLink) === 'teams'">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Microsoft_Office_Teams_%282018%E2%80%93present%29.svg/1200px-Microsoft_Office_Teams_%282018%E2%80%93present%29.svg.png" alt="Microsoft Teams" width="16" height="16">
+                </span>
+                JOIN {{ getMeetingPlatformName(session.meetLink) }}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 17L17 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M7 7H17V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-                <h3>No trainings scheduled on {{ formatSelectedDate(selectedDate) }}</h3>
-                <p>Sessions are indicated by blue circles on the calendar</p>
+              </button>
+            </div>
+
+            <!-- Host section -->
+            <div class="host-section">
+              <h3 class="section-label">Host</h3>
+              <div class="host-details">
+                <div class="host-avatar">
+                  <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Host avatar">
+                </div>
+                <div class="host-data">
+                  <p class="host-name">{{ session.host?.name || 'No host assigned' }}</p>
+                  <p class="host-role">{{ session.host?.role || 'No role specified' }}</p>
+                </div>
               </div>
             </div>
 
-            <div v-else class="details-content default-content">
-              <div class="default-message">
-                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M8 2V5" stroke="#94A3B8" stroke-width="2" stroke-linecap="round"/>
-                  <path d="M16 2V5" stroke="#94A3B8" stroke-width="2" stroke-linecap="round"/>
-                  <path d="M3 8H21" stroke="#94A3B8" stroke-width="2"/>
-                  <rect x="3" y="4" width="18" height="18" rx="2" stroke="#94A3B8" stroke-width="2"/>
-                </svg>
-                <h3>Select a date to view details</h3>
-                <p>Click on any date in the calendar to see session information</p>
+            <!-- Objectives section (if available) -->
+            <div class="objectives-section" v-if="session.objectives && session.objectives.length > 0">
+              <h3 class="section-label">Objectives</h3>
+              <div class="objectives-container">
+                <div v-for="(objective, index) in session.objectives" :key="index" class="objective-item">
+                  <div class="objective-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M22 11.08V12C21.9988 14.1564 21.3005 16.2547 20.0093 17.9818C18.7182 19.709 16.9033 20.9725 14.8354 21.5839C12.7674 22.1953 10.5573 22.1219 8.53447 21.3746C6.51168 20.6273 4.78465 19.2461 3.61096 17.4371C2.43727 15.628 1.87979 13.4881 2.02168 11.3363C2.16356 9.18455 2.99721 7.13631 4.39828 5.49706C5.79935 3.85781 7.69279 2.71537 9.79619 2.24013C11.8996 1.7649 14.1003 1.98232 16.07 2.85999" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M22 4L12 14.01L9 11.01" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </div>
+                  <div class="objective-text">{{ objective }}</div>
+                </div>
               </div>
+            </div>
+
+            <!-- Prerequisites section (if available) -->
+            <div class="prerequisites-section" v-if="session.prerequisites">
+              <h3 class="section-label">Prerequisites</h3>
+              <div class="prerequisites-container">
+                <div class="prerequisites-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#64748B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 8V12" stroke="#64748B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 16H12.01" stroke="#64748B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <div class="prerequisites-text">{{ session.prerequisites }}</div>
+              </div>
+            </div>
+
+            <!-- Table of Contents section (if available) -->
+            <div class="toc-section" v-if="session.tableOfContent && session.tableOfContent.length > 0">
+              <h3 class="section-label">Table of Contents</h3>
+              <div class="toc-container">
+                <div v-for="(topic, index) in session.tableOfContent" :key="index" class="toc-item">
+                  <div class="toc-number">{{ index + 1 }}</div>
+                  <div class="toc-content">
+                    <div class="toc-title">{{ topic }}</div>
+                    <div class="toc-progress-container">
+                      <div class="toc-progress-bar" :style="{ width: index === 0 ? '100%' : index === 1 ? '75%' : index === 2 ? '50%' : '25%' }"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div v-else-if="selectedDate && !isSessionDay(selectedDate)" class="details-content no-session-content">
+            <div class="no-session-message">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 2V5" stroke="#94A3B8" stroke-width="2" stroke-linecap="round"/>
+                <path d="M16 2V5" stroke="#94A3B8" stroke-width="2" stroke-linecap="round"/>
+                <path d="M3 8H21" stroke="#94A3B8" stroke-width="2"/>
+                <rect x="3" y="4" width="18" height="18" rx="2" stroke="#94A3B8" stroke-width="2"/>
+                <path d="M12 10V16" stroke="#94A3B8" stroke-width="2" stroke-linecap="round"/>
+                <path d="M9 13H15" stroke="#94A3B8" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <h3>No trainings scheduled on {{ formatSelectedDate(selectedDate) }}</h3>
+              <p>Sessions are indicated by blue circles on the calendar</p>
+            </div>
+          </div>
+
+          <div v-else class="details-content default-content">
+            <div class="default-message">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 2V5" stroke="#94A3B8" stroke-width="2" stroke-linecap="round"/>
+                <path d="M16 2V5" stroke="#94A3B8" stroke-width="2" stroke-linecap="round"/>
+                <path d="M3 8H21" stroke="#94A3B8" stroke-width="2"/>
+                <rect x="3" y="4" width="18" height="18" rx="2" stroke="#94A3B8" stroke-width="2"/>
+              </svg>
+              <h3>Select a date to view details</h3>
+              <p>Click on any date in the calendar to see session information</p>
             </div>
           </div>
         </div>
@@ -200,17 +271,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { ref, computed, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 
 const route = useRoute();
-const router = useRouter();
-
-// Chapter expansion state
-const chapterExpanded = ref(false);
-const toggleChapterExpanded = () => {
-  chapterExpanded.value = !chapterExpanded.value;
-};
 
 // Session data
 const session = ref({
@@ -219,7 +283,7 @@ const session = ref({
   description: '',
   tableOfContent: [],
   objectives: [],
-  chapters: [],
+  chapter: '',
   prerequisites: '',
   date: '',
   startTime: '',
@@ -268,9 +332,30 @@ const formatDate = (dateString) => {
 
 // Format selected date
 const formatSelectedDate = (date) => {
-  if (!date) return '';
   const options = { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' };
-  return date.toLocaleDateString('en-US', options).toUpperCase();
+  return date.toLocaleDateString('en-US', options);
+};
+
+// Format session date and time for display
+const formatSessionDateTime = (dateString, timeString) => {
+  if (!dateString || !timeString) return 'Date and time not set';
+
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      return 'Invalid date';
+    }
+
+    const weekday = date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
+    const day = date.getDate();
+    const month = date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+    const year = date.getFullYear();
+
+    return `${weekday}, ${day} ${month} ${year}, ${timeString}`;
+  } catch (error) {
+    console.error('Error formatting session date time:', error);
+    return 'Invalid date or time';
+  }
 };
 
 // Format duration
@@ -357,17 +442,44 @@ const calendarDays = computed(() => {
 
 // Check if a date is the session day
 const isSessionDay = (date) => {
-  if (!session.value.date || !date) return false;
+  if (!session.value.date) return false;
 
+  try {
   const sessionDate = new Date(session.value.date);
-  return date.getFullYear() === sessionDate.getFullYear() &&
+
+    // Check if the date is valid
+    if (isNaN(sessionDate.getTime())) {
+      console.error('Invalid session date:', session.value.date);
+      return false;
+    }
+
+    // Compare year, month, and day
+    const isMatch = date.getFullYear() === sessionDate.getFullYear() &&
          date.getMonth() === sessionDate.getMonth() &&
          date.getDate() === sessionDate.getDate();
+
+    // Debug log for specific dates to help troubleshoot
+    if (date.getDate() === sessionDate.getDate()) {
+      console.log('Date match check:', {
+        calendarDate: date.toISOString(),
+        sessionDate: sessionDate.toISOString(),
+        yearMatch: date.getFullYear() === sessionDate.getFullYear(),
+        monthMatch: date.getMonth() === sessionDate.getMonth(),
+        dayMatch: date.getDate() === sessionDate.getDate(),
+        isMatch
+      });
+    }
+
+    return isMatch;
+  } catch (error) {
+    console.error('Error checking session day:', error);
+    return false;
+  }
 };
 
 // Check if a date is the selected day
 const isSelectedDay = (date) => {
-  if (!selectedDate.value || !date) return false;
+  if (!selectedDate.value) return false;
 
   return date.getFullYear() === selectedDate.value.getFullYear() &&
          date.getMonth() === selectedDate.value.getMonth() &&
@@ -376,7 +488,12 @@ const isSelectedDay = (date) => {
 
 // Select a day
 const selectDay = (date) => {
-  selectedDate.value = date;
+  if (isSessionDay(date)) {
+    selectedDate.value = date;
+  } else {
+    // Allow selecting non-session days too
+    selectedDate.value = date;
+  }
 };
 
 // Navigate to previous month
@@ -397,107 +514,214 @@ const nextMonth = () => {
   );
 };
 
+// Open meeting link in new tab
+const openMeetLink = () => {
+  if (session.value.meetLink) {
+    // Add http:// if not present
+    let url = session.value.meetLink;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = 'https://' + url;
+    }
+    window.open(url, '_blank');
+  }
+};
+
+// Determine meeting platform from URL
+const getMeetingPlatform = (url) => {
+  if (!url) return 'unknown';
+
+  const lowerUrl = url.toLowerCase();
+
+  if (lowerUrl.includes('meet.google') || lowerUrl.includes('google.com/meet')) {
+    return 'google';
+  } else if (lowerUrl.includes('zoom.us') || lowerUrl.includes('zoom.com')) {
+    return 'zoom';
+  } else if (lowerUrl.includes('teams.microsoft') || lowerUrl.includes('teams.live')) {
+    return 'teams';
+  } else {
+    return 'unknown';
+  }
+};
+
+// Get meeting platform display name
+const getMeetingPlatformName = (url) => {
+  const platform = getMeetingPlatform(url);
+
+  switch (platform) {
+    case 'google':
+      return 'Google Meet';
+    case 'zoom':
+      return 'Zoom';
+    case 'teams':
+      return 'MS Teams';
+    default:
+      return '';
+  }
+};
+
 // Load session data
 const loadSession = () => {
   try {
-    // Get the session ID from the route
-    const sessionId = route.params.id;
-
-    // Try to get all sessions from localStorage
-    const savedSessions = JSON.parse(localStorage.getItem('educationSessions') || '[]');
-
-    // Find the session with the matching ID
-    const foundSession = savedSessions.find(s => s.id.toString() === sessionId);
-
-    if (foundSession) {
-      session.value = foundSession;
+    // Try to get the session data from localStorage
+    const savedSession = localStorage.getItem('currentSession');
+    if (savedSession) {
+      session.value = JSON.parse(savedSession);
+      console.log('Loaded session from localStorage:', session.value);
 
       // If session has a date, set it as the selected date and update current date
       if (session.value.date) {
-        const sessionDate = new Date(session.value.date);
+        console.log('Raw session date:', session.value.date);
+
+        // Handle different date formats
+        let sessionDate;
+        if (typeof session.value.date === 'string') {
+          // Try to parse the date string
+          sessionDate = new Date(session.value.date);
+
+          // If the date is invalid, try to parse it as a YYYY-MM-DD format
+          if (isNaN(sessionDate.getTime()) && session.value.date.includes('-')) {
+            const [year, month, day] = session.value.date.split('-').map(Number);
+            sessionDate = new Date(year, month - 1, day); // Month is 0-indexed in JavaScript
+          }
+        } else {
+          sessionDate = new Date(session.value.date);
+        }
+
+        // Check if the date is valid
+        if (!isNaN(sessionDate.getTime())) {
+          console.log('Parsed session date:', sessionDate);
         selectedDate.value = sessionDate;
         currentDate.value = new Date(
           sessionDate.getFullYear(),
           sessionDate.getMonth(),
           1
         );
-      }
+          console.log('Session date set to:', sessionDate);
     } else {
-      // If no session found with that ID, try to get the current session
-      const currentSessionData = localStorage.getItem('currentSession');
-      if (currentSessionData) {
-        session.value = JSON.parse(currentSessionData);
+          console.error('Invalid session date format:', session.value.date);
+        }
+      }
+    } else if (route.params.id) {
+      // If we have an ID in the route, try to find the session in the educationSessions array
+      console.log('Session ID from route:', route.params.id);
+      const sessionId = parseInt(route.params.id);
+
+      // Get all sessions from localStorage
+      const allSessions = JSON.parse(localStorage.getItem('educationSessions') || '[]');
+      console.log('All sessions:', allSessions);
+
+      // Find the session with the matching ID
+      const foundSession = allSessions.find(s => s.id === sessionId);
+
+      if (foundSession) {
+        console.log('Found session by ID:', foundSession);
+        session.value = foundSession;
+
+        // Save it as the current session for future reference
+        localStorage.setItem('currentSession', JSON.stringify(foundSession));
 
         // If session has a date, set it as the selected date and update current date
-        if (session.value.date) {
-          const sessionDate = new Date(session.value.date);
-          selectedDate.value = sessionDate;
-          currentDate.value = new Date(
-            sessionDate.getFullYear(),
-            sessionDate.getMonth(),
-            1
-          );
+        if (foundSession.date) {
+          console.log('Raw session date from found session:', foundSession.date);
+
+          // Handle different date formats
+          let sessionDate;
+          if (typeof foundSession.date === 'string') {
+            // Try to parse the date string
+            sessionDate = new Date(foundSession.date);
+
+            // If the date is invalid, try to parse it as a YYYY-MM-DD format
+            if (isNaN(sessionDate.getTime()) && foundSession.date.includes('-')) {
+              const [year, month, day] = foundSession.date.split('-').map(Number);
+              sessionDate = new Date(year, month - 1, day); // Month is 0-indexed in JavaScript
+            }
+          } else {
+            sessionDate = new Date(foundSession.date);
+          }
+
+          // Check if the date is valid
+          if (!isNaN(sessionDate.getTime())) {
+            console.log('Parsed session date from found session:', sessionDate);
+            selectedDate.value = sessionDate;
+            currentDate.value = new Date(
+              sessionDate.getFullYear(),
+              sessionDate.getMonth(),
+              1
+            );
+            console.log('Session date set to:', sessionDate);
+          } else {
+            console.error('Invalid session date format:', foundSession.date);
+          }
         }
       } else {
         console.error('Session not found with ID:', sessionId);
-        // Redirect to education page if session not found
-        router.push('/education-training');
       }
+    } else {
+      console.error('No session data available');
     }
   } catch (error) {
     console.error('Error loading session data:', error);
   }
 };
 
-// Watch for changes in the route
-watch(() => route.params.id, (newId) => {
-  if (newId) {
-    loadSession();
-  }
-});
+// Toggle chapter details
+const showChapterDetails = ref(false);
+const toggleChapterDetails = () => {
+  showChapterDetails.value = !showChapterDetails.value;
+};
 
 onMounted(() => {
+  console.log('SessionDetailsView mounted');
   loadSession();
+
+  // Debug session data after loading
+  setTimeout(() => {
+    console.log('Current session data:', session.value);
+    console.log('Session date:', session.value.date);
+    console.log('Session date type:', typeof session.value.date);
+
+    if (session.value.date) {
+      const testDate = new Date(session.value.date);
+      console.log('Parsed session date:', testDate);
+      console.log('Is valid date:', !isNaN(testDate.getTime()));
+    }
+
+    console.log('Selected date:', selectedDate.value);
+    console.log('Current date:', currentDate.value);
+  }, 500);
 });
 </script>
 
 <style scoped>
 .session-details-container {
-  padding: 28px;
+  padding: 20px;
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  color: #1E293B;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
 }
 
 .session-details-header {
   display: flex;
   align-items: center;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 
 .back-button {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   background-color: #E5EDF9;
   border-radius: 50%;
   cursor: pointer;
-  margin-right: 20px;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin-right: 16px;
+  transition: background-color 0.2s ease;
 }
 
 .back-button:hover {
   background-color: #D1E0F6;
-  transform: translateX(-2px);
 }
 
 .header-content {
@@ -505,15 +729,14 @@ onMounted(() => {
 }
 
 .header-title {
-  font-size: 24px;
-  font-weight: 700;
+  font-size: 22px;
+  font-weight: 600;
   color: #0F172A;
-  margin: 0 0 6px 0;
-  letter-spacing: -0.01em;
+  margin: 0 0 4px 0;
 }
 
 .header-subtitle {
-  font-size: 15px;
+  font-size: 14px;
   color: #64748B;
   margin: 0;
 }
@@ -521,25 +744,18 @@ onMounted(() => {
 .session-details-content {
   display: flex;
   flex-direction: column;
-  gap: 28px;
-  flex: 1;
+  gap: 24px;
 }
 
 .session-overview {
   background-color: #FFFFFF;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
-  padding: 28px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   border: 1px solid #E2E8F0;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.session-overview:hover {
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
-  transform: translateY(-2px);
 }
 
 .session-overview-left {
@@ -548,22 +764,21 @@ onMounted(() => {
 }
 
 .session-icon-large {
-  width: 72px;
-  height: 72px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 32px;
+  font-size: 28px;
   font-weight: bold;
   color: white;
-  margin-right: 28px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  margin-right: 24px;
 }
 
 .session-stats {
   display: flex;
-  gap: 32px;
+  gap: 24px;
 }
 
 .stat-item {
@@ -572,17 +787,14 @@ onMounted(() => {
 }
 
 .stat-value {
-  font-size: 24px;
-  font-weight: 700;
+  font-size: 22px;
+  font-weight: 600;
   color: #0F172A;
 }
 
 .stat-label {
-  font-size: 13px;
+  font-size: 12px;
   color: #64748B;
-  margin-top: 4px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 
 .session-details-grid {
@@ -592,86 +804,60 @@ onMounted(() => {
   gap: 24px;
   justify-content: space-between;
   flex-wrap: wrap;
-  position: relative;
-  flex: 1;
 }
 
 @media (min-width: 992px) {
   .session-details-grid {
     flex-wrap: nowrap;
-    height: calc(100vh - 220px); /* Adjust based on your header height */
-    min-height: 600px;
-    overflow: hidden;
   }
 
   .calendar-wrapper {
     flex: 0 0 calc(35% - 24px);
     width: calc(35% - 24px);
-    position: sticky;
-    top: 28px;
-    align-self: flex-start;
-    max-height: 100%;
   }
 
   .details-section {
     flex: 0 0 65%;
     width: 65%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .details-scroll-container {
-    overflow-y: auto;
-    height: 100%;
-    padding-right: 4px; /* Add some padding for the scrollbar */
   }
 }
 
 .section-title {
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 600;
   color: #0F172A;
   margin: 0 0 16px 0;
 }
 
 .calendar-wrapper .section-title {
-  font-size: 15px;
-  margin-bottom: 8px;
+  font-size: 14px;
 }
 
-.calendar-info {
-  font-size: 15px;
-  color: #64748B;
-  margin-bottom: 20px;
-  line-height: 1.5;
-}
-
-.calendar-wrapper .calendar-info {
-  font-size: 13px;
-  margin-bottom: 16px;
+.calendar-section, .details-section {
+  background-color: #FFFFFF;
+  border-radius: 8px;
+  width: 100%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  border: 1px solid #E2E8F0;
+  height: 100%;
+  box-sizing: border-box;
 }
 
 .calendar-wrapper {
   display: flex;
   flex-direction: column;
   width: 100%;
-  padding: 0 8px;
 }
 
-.calendar-section {
-  background-color: #FFFFFF;
-  border-radius: 12px;
-  width: 100%;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
-  padding: 24px;
-  border: 1px solid #E2E8F0;
-  box-sizing: border-box;
-  transition: box-shadow 0.3s ease;
+.calendar-info {
+  font-size: 14px;
+  color: #64748B;
+  margin-bottom: 20px;
 }
 
-.calendar-section:hover {
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+.calendar-wrapper .calendar-info {
+  font-size: 12px;
 }
 
 .calendar {
@@ -710,39 +896,38 @@ onMounted(() => {
 }
 
 .calendar-month {
-  font-size: 19px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 500;
   color: #0F172A;
   margin: 0;
 }
 
 .calendar-wrapper .calendar-month {
-  font-size: 17px;
+  font-size: 16px;
 }
 
 .calendar-days-header {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .calendar-day-header {
   text-align: center;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 500;
   color: #64748B;
   padding: 8px 0;
-  text-transform: uppercase;
 }
 
 .calendar-wrapper .calendar-day-header {
-  font-size: 11px;
+  font-size: 10px;
 }
 
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
+  gap: 4px;
   max-width: 100%;
 }
 
@@ -750,26 +935,24 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
-  font-size: 15px;
+  width: 36px;
+  height: 36px;
+  font-size: 14px;
   color: #0F172A;
   cursor: pointer;
   border-radius: 50%;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   margin: 0 auto;
   flex-shrink: 0;
-  position: relative;
 }
 
 .calendar-wrapper .calendar-day {
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .calendar-day:hover:not(.other-month):not(.past-day) {
   background-color: #F1F5F9;
-  transform: scale(1.08);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transform: scale(1.05);
 }
 
 .other-month {
@@ -789,11 +972,9 @@ onMounted(() => {
 }
 
 .session-day {
-  background-color: #3B82F6;
-  color: white;
+  background-color: #DBEAFE;
+  color: #1E40AF;
   font-weight: 600;
-  box-shadow: 0 2px 4px rgba(30, 64, 175, 0.2);
-  transform: scale(1.05);
 }
 
 .selected-day {
@@ -801,9 +982,8 @@ onMounted(() => {
   color: white !important;
   font-weight: 600;
   border: none !important;
-  box-shadow: 0 0 0 2px #1E40AF, 0 4px 6px rgba(59, 130, 246, 0.3) !important;
-  transform: scale(1.08);
-  z-index: 1;
+  box-shadow: 0 0 0 2px #1E40AF;
+  transform: scale(1.05);
 }
 
 .selected-date-info {
@@ -833,27 +1013,56 @@ onMounted(() => {
 .join-button {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   padding: 8px 16px;
   background-color: #3B82F6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+/* Enhanced JOIN button */
+.join-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  background-color: #2563EB;
   color: white;
   border: none;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
-}
-
-.calendar-wrapper .join-button {
-  font-size: 11px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
 }
 
 .join-button:hover {
-  background-color: #2563EB;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
+  background-color: #1D4ED8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(37, 99, 235, 0.25);
+}
+
+.platform-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 4px;
+}
+
+.platform-icon img {
+  border-radius: 2px;
+  background-color: white;
+  padding: 1px;
+}
+
+.calendar-wrapper .join-button {
+  font-size: 10px;
 }
 
 .host-info {
@@ -917,66 +1126,35 @@ onMounted(() => {
   font-size: 8px;
 }
 
-.details-section {
-  background-color: #FFFFFF;
-  border-radius: 12px;
-  width: 100%;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
-  padding: 24px;
-  border: 1px solid #E2E8F0;
-  box-sizing: border-box;
-  transition: box-shadow 0.3s ease;
-}
-
-.details-section:hover {
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
-}
-
-.details-scroll-container {
-  overflow-y: auto;
-  height: 100%;
-  padding-right: 4px; /* Add some padding for the scrollbar */
-}
-
 .details-content {
-  padding: 20px;
+  height: 100%;
+  overflow-y: auto;
+  padding: 16px;
   background-color: #F9FAFB;
-  border-radius: 10px;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
 }
 
 .chapter-section {
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 
 .chapter-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px;
-  background-color: white;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
-}
-
-.chapter-header:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
 }
 
 .chapter-info {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .chapter-image {
-  width: 64px;
-  height: 64px;
-  border-radius: 8px;
+  width: 60px;
+  height: 60px;
+  border-radius: 4px;
   object-fit: cover;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .chapter-text {
@@ -985,62 +1163,51 @@ onMounted(() => {
 }
 
 .chapter-label {
-  font-size: 13px;
+  font-size: 12px;
   color: #64748B;
-  margin-bottom: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 500;
+  margin-bottom: 4px;
 }
 
 .chapter-title {
-  font-size: 17px;
-  font-weight: 600;
-  color: #0F172A;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1E293B;
   margin: 0;
-  line-height: 1.4;
+  line-height: 1.3;
 }
 
 .dropdown-button {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 10px;
-  border-radius: 50%;
-  transition: all 0.3s ease;
+  padding: 8px;
 }
 
-.dropdown-button:hover {
-  background-color: #F1F5F9;
-  transform: scale(1.1);
+.dropdown-button svg {
+  transition: transform 0.3s ease;
+}
+
+.rotated {
+  transform: rotate(180deg);
 }
 
 .section-label {
   font-size: 15px;
   font-weight: 600;
-  color: #64748B;
-  margin: 0 0 10px 0;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  color: #475569;
+  margin: 0 0 12px 0;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #E2E8F0;
+  letter-spacing: 0.3px;
 }
 
 .description-section {
-  margin-bottom: 28px;
-  padding: 16px;
-  background-color: white;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
-}
-
-.description-section:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
+  margin-bottom: 24px;
 }
 
 .description-text {
-  font-size: 15px;
-  line-height: 1.7;
+  font-size: 14px;
+  line-height: 1.6;
   color: #334155;
   margin: 0;
 }
@@ -1049,98 +1216,141 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 28px;
-  padding: 16px;
-  background-color: white;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
-}
-
-.session-datetime:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
+  margin-bottom: 24px;
 }
 
 .datetime-pill {
   background-color: #E0EAFF;
   color: #3B82F6;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Enhanced datetime pill */
+.datetime-pill {
+  background-color: #EFF6FF;
+  color: #2563EB;
   padding: 10px 18px;
-  border-radius: 24px;
+  border-radius: 20px;
   font-size: 13px;
   font-weight: 600;
-  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+  display: flex;
+  align-items: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.datetime-pill::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background-color: #2563EB;
+  border-radius: 50%;
+  margin-right: 8px;
 }
 
 .host-section {
-  margin-bottom: 28px;
-  padding: 16px;
-  background-color: white;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
+  margin-bottom: 24px;
 }
 
-.host-section:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
+.objectives-section, .prerequisites-section {
+  margin-bottom: 24px;
 }
 
-.host-details {
-  display: flex;
-  align-items: center;
-  margin-top: 10px;
-  padding: 12px;
-  background-color: #F8FAFC;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-}
-
-.host-details:hover {
-  background-color: #F1F5F9;
-  transform: translateY(-2px);
-}
-
-.host-avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  overflow: hidden;
-  margin-right: 14px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  border: 2px solid white;
-}
-
-.host-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.host-data {
+.objectives-container {
   display: flex;
   flex-direction: column;
+  gap: 8px;
 }
 
-.host-name {
+.objective-item {
+  display: flex;
+  align-items: center;
+}
+
+.objective-icon {
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
+}
+
+.objective-text {
+  font-size: 14px;
+  color: #334155;
+}
+
+.prerequisites-section {
+  margin-bottom: 24px;
+}
+
+.prerequisites-container {
+  display: flex;
+  align-items: center;
+}
+
+.prerequisites-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+}
+
+.prerequisites-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.prerequisites-text {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #334155;
+  margin: 0;
+}
+
+.toc-section {
+  margin-bottom: 24px;
+}
+
+.toc-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.toc-item {
+  display: flex;
+  align-items: center;
+}
+
+.toc-number {
   font-size: 12px;
   font-weight: 500;
-  color: #0F172A;
-  margin: 0;
-}
-
-.calendar-wrapper .host-name {
-  font-size: 10px;
-}
-
-.host-role {
-  font-size: 10px;
   color: #64748B;
-  margin: 0;
+  margin-right: 8px;
 }
 
-.calendar-wrapper .host-role {
-  font-size: 8px;
+.toc-content {
+  flex: 1;
+}
+
+.toc-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0F172A;
+  margin: 0 0 4px 0;
+}
+
+.toc-progress-container {
+  height: 8px;
+  background-color: #E2E8F0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.toc-progress-bar {
+  height: 100%;
+  background-color: #3B82F6;
 }
 
 .no-session-content, .default-content {
@@ -1153,108 +1363,57 @@ onMounted(() => {
 
 .no-session-message, .default-message {
   text-align: center;
-  padding: 40px;
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  width: 100%;
-  max-width: 400px;
-  transition: all 0.3s ease;
-}
-
-.no-session-message:hover, .default-message:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  padding: 32px;
 }
 
 .no-session-message svg, .default-message svg {
-  margin-bottom: 20px;
-  color: #94A3B8;
-  transition: transform 0.3s ease;
-}
-
-.no-session-message:hover svg, .default-message:hover svg {
-  transform: scale(1.1);
+  margin-bottom: 16px;
 }
 
 .no-session-message h3, .default-message h3 {
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 600;
   color: #0F172A;
-  margin: 0 0 10px 0;
+  margin: 0 0 8px 0;
 }
 
 .no-session-message p, .default-message p {
-  font-size: 13px;
+  font-size: 12px;
   color: #64748B;
   margin: 0;
-  line-height: 1.6;
 }
 
-/* Custom scrollbar for the details section */
-.details-scroll-container::-webkit-scrollbar {
-  width: 8px;
-}
-
-.details-scroll-container::-webkit-scrollbar-track {
-  background: #F1F5F9;
-  border-radius: 10px;
-}
-
-.details-scroll-container::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
-  border-radius: 10px;
-}
-
-.details-scroll-container::-webkit-scrollbar-thumb:hover {
-  background: #94A3B8;
-}
-
-/* Add these new styles for chapter sections */
-.chapter-sections {
-  padding: 16px;
-  background-color: #F8FAFC;
-  border-top: 1px solid #E2E8F0;
-  animation: slideDown 0.3s ease;
-}
-
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.chapter-section-item {
-  display: flex;
-  align-items: center;
-  padding: 12px 16px;
-  margin-bottom: 8px;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+.chapter-details {
+  margin-top: 16px;
+  padding-left: 20px;
+  overflow: hidden;
   transition: all 0.3s ease;
 }
 
-.chapter-section-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+.chapter-description {
+  margin-bottom: 16px;
 }
 
-.section-number {
+.chapter-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chapter-meta-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.meta-label {
+  font-size: 12px;
+  color: #64748B;
+  margin-bottom: 4px;
+}
+
+.meta-value {
   font-size: 14px;
   font-weight: 500;
-  color: #64748B;
-  background-color: #F1F5F9;
-  padding: 6px 10px;
-  border-radius: 6px;
-  margin-right: 12px;
-  min-width: 40px;
-  text-align: center;
-}
-
-.section-title {
-  font-size: 15px;
-  font-weight: 500;
   color: #0F172A;
-  flex: 1;
 }
 </style>

@@ -217,19 +217,67 @@
           <div class="form-group">
             <label for="meetLink">Meeting Link</label>
             <div class="input-hint">Where will participants join the session?</div>
-            <div class="custom-select">
-              <input
-                type="text"
-                id="meetLink"
-                v-model="sessionData.meetLink"
-                placeholder="Paste Zoom, Google Meet, or other virtual meeting link"
-                class="form-control"
+
+            <!-- Meeting platform selection -->
+            <div class="meeting-platform-grid">
+              <div
+                v-for="platform in meetingPlatforms"
+                :key="platform.id"
+                class="platform-card"
+                :class="{ 'selected': selectedPlatform === platform.id }"
+                @click="selectPlatform(platform.id)"
               >
-              <div class="select-arrow">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+                <div class="platform-icon">
+                  <img :src="platform.icon" :alt="platform.name">
+                </div>
+                <div class="platform-name">{{ platform.name }}</div>
+                <div class="platform-status" v-if="selectedPlatform === platform.id">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <div class="platform-loading" v-if="isCreatingMeeting && selectedPlatform === platform.id">
+                  <div class="loading-spinner"></div>
+                  Creating meeting...
+                </div>
               </div>
+            </div>
+
+            <div class="meeting-details" v-if="selectedPlatform && !isCreatingMeeting">
+              <div class="meeting-info" v-if="sessionData.meetLink">
+                <div class="meeting-success">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22 11.08V12C21.9988 14.1564 21.3005 16.2547 20.0093 17.9818C18.7182 19.709 16.9033 20.9725 14.8354 21.5839C12.7674 22.1953 10.5573 22.1219 8.53447 21.3746C6.51168 20.6273 4.78465 19.2461 3.61096 17.4371C2.43727 15.628 1.87979 13.4881 2.02168 11.3363C2.16356 9.18455 2.99721 7.13631 4.39828 5.49706C5.79935 3.85781 7.69279 2.71537 9.79619 2.24013C11.8996 1.7649 14.1003 1.98232 16.07 2.85999" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M22 4L12 14.01L9 11.01" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  <span>Meeting created successfully!</span>
+                </div>
+                <div class="meeting-link">
+                  <input type="text" readonly :value="sessionData.meetLink" class="form-control">
+                  <button class="copy-button" @click="copyMeetingLink">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M20 9H11C9.89543 9 9 9.89543 9 11V20C9 21.1046 9.89543 22 11 22H20C21.1046 22 22 21.1046 22 20V11C22 9.89543 21.1046 9 20 9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M5 15H4C3.46957 15 2.96086 14.7893 2.58579 14.4142C2.21071 14.0391 2 13.5304 2 13V4C2 3.46957 2.21071 2.96086 2.58579 2.58579C2.96086 2.21071 3.46957 2 4 2H13C13.5304 2 14.0391 2.21071 14.4142 2.58579C14.7893 2.96086 15 3.46957 15 4V5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Copy
+                  </button>
+                </div>
+              </div>
+              <button
+                class="create-meeting-button"
+                @click="createMeeting"
+                v-if="!sessionData.meetLink"
+                :disabled="!sessionData.date || !sessionData.startTime || !sessionData.endTime"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 5V19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Create Meeting
+              </button>
+              <p class="meeting-hint" v-if="!sessionData.date || !sessionData.startTime || !sessionData.endTime">
+                Please select date and time to create a meeting
+              </p>
             </div>
           </div>
 
@@ -348,7 +396,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -553,7 +601,7 @@ const saveSession = () => {
 
   // Save back to localStorage
   localStorage.setItem('educationSessions', JSON.stringify(existingSessions));
-  
+
   // Also save as current session for immediate viewing
   localStorage.setItem('currentSession', JSON.stringify(session));
 
@@ -564,6 +612,162 @@ const saveSession = () => {
 onMounted(() => {
   timeOptions.value = generateTimeOptions();
 });
+
+// Meeting creation state
+const isCreatingMeeting = ref(false);
+
+// Updated meeting platforms with better icons
+const meetingPlatforms = ref([
+  {
+    id: 'zoom',
+    name: 'Zoom',
+    icon: 'https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/zoom.svg',
+    apiEndpoint: 'https://api.zoom.us/v2/users/me/meetings'
+  },
+  {
+    id: 'google-meet',
+    name: 'Google Meet',
+    icon: 'https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/googlemeet.svg',
+    apiEndpoint: 'https://www.googleapis.com/calendar/v3/calendars/primary/events'
+  },
+  {
+    id: 'microsoft-teams',
+    name: 'Microsoft Teams',
+    icon: 'https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/microsoftteams.svg',
+    apiEndpoint: 'https://graph.microsoft.com/v1.0/me/onlineMeetings'
+  },
+  {
+    id: 'other',
+    name: 'Other',
+    icon: 'https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/internetexplorer.svg'
+  }
+]);
+
+const selectedPlatform = ref('');
+
+// Platform selection handler with visual feedback
+const selectPlatform = async (platformId) => {
+  selectedPlatform.value = platformId;
+
+  // Clear existing meeting link when changing platforms
+  if (sessionData.value.meetLink) {
+    sessionData.value.meetLink = '';
+  }
+};
+
+// Create meeting based on selected platform
+const createMeeting = async () => {
+  if (!selectedPlatform.value || !sessionData.value.date || !sessionData.value.startTime || !sessionData.value.endTime) {
+    return;
+  }
+
+  isCreatingMeeting.value = true;
+
+  try {
+    const platform = meetingPlatforms.value.find(p => p.id === selectedPlatform.value);
+
+    if (platform.id === 'other') {
+      // For "Other" platform, just show manual input
+      sessionData.value.meetLink = '';
+      isCreatingMeeting.value = false;
+      return;
+    }
+
+    // Format date and time for API requests
+    const startDateTime = new Date(`${sessionData.value.date}T${sessionData.value.startTime}`).toISOString();
+    const endDateTime = new Date(`${sessionData.value.date}T${sessionData.value.endTime}`).toISOString();
+
+    let meetingLink = '';
+
+    switch (platform.id) {
+      case 'zoom':
+        // Zoom meeting creation would go here
+        // Requires Zoom OAuth token
+        meetingLink = await createZoomMeeting(startDateTime, endDateTime);
+        break;
+
+      case 'google-meet':
+        // Google Meet creation would go here
+        // Requires Google Calendar API credentials
+        meetingLink = await createGoogleMeet(startDateTime, endDateTime);
+        break;
+
+      case 'microsoft-teams':
+        // Teams meeting creation would go here
+        // Requires Microsoft Graph API token
+        meetingLink = await createTeamsMeeting(startDateTime, endDateTime);
+        break;
+    }
+
+    // Update meeting link
+    sessionData.value.meetLink = meetingLink;
+
+  } catch (error) {
+    console.error('Error creating meeting:', error);
+    // You would want to show an error message to the user here
+  } finally {
+    isCreatingMeeting.value = false;
+  }
+};
+
+// Platform-specific meeting creation functions
+const createZoomMeeting = async (startTime, endTime) => {
+  // This is a placeholder - you would need to implement the actual Zoom API call
+  // Requires Zoom OAuth token and proper API setup
+  const meetingData = {
+    topic: sessionData.value.title,
+    type: 2, // Scheduled meeting
+    start_time: startTime,
+    duration: Math.round((new Date(endTime) - new Date(startTime)) / (60 * 1000)), // Duration in minutes
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+  };
+  console.log('Creating Zoom meeting with data:', meetingData);
+  return 'https://zoom.us/j/example';
+};
+
+const createGoogleMeet = async (startTime, endTime) => {
+  // This is a placeholder - you would need to implement the actual Google Calendar API call
+  // Requires Google OAuth credentials and proper API setup
+  const eventData = {
+    summary: sessionData.value.title,
+    description: sessionData.value.description,
+    start: { dateTime: startTime },
+    end: { dateTime: endTime },
+    conferenceData: {
+      createRequest: { requestId: Date.now().toString() }
+    }
+  };
+  console.log('Creating Google Meet with data:', eventData);
+  return 'https://meet.google.com/example';
+};
+
+const createTeamsMeeting = async (startTime, endTime) => {
+  // This is a placeholder - you would need to implement the actual Microsoft Graph API call
+  // Requires Microsoft OAuth token and proper API setup
+  const meetingData = {
+    subject: sessionData.value.title,
+    startDateTime: startTime,
+    endDateTime: endTime,
+    participants: {
+      attendees: []
+    }
+  };
+  console.log('Creating Teams meeting with data:', meetingData);
+  return 'https://teams.microsoft.com/l/meetup-join/example';
+};
+
+// Copy meeting link to clipboard
+const copyMeetingLink = async () => {
+  if (sessionData.value.meetLink) {
+    try {
+      await navigator.clipboard.writeText(sessionData.value.meetLink);
+      // You would want to show a success message to the user here
+    } catch (err) {
+      console.error('Failed to copy:', err);
+      // You would want to show an error message to the user here
+    }
+  }
+};
 </script>
 
 <style scoped>
@@ -1497,5 +1701,196 @@ label {
     font-size: 20px;
     margin-right: 16px;
   }
+}
+
+/* Meeting Platform Grid Styles */
+.meeting-platform-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.platform-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background: #FFFFFF;
+  border: 2px solid #E2E8F0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.platform-card:hover {
+  border-color: #3B82F6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+}
+
+.platform-card.selected {
+  border-color: #3B82F6;
+  background-color: #EFF6FF;
+}
+
+.platform-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.platform-icon img {
+  width: 32px;
+  height: 32px;
+  filter: grayscale(100%);
+  transition: filter 0.3s ease;
+}
+
+.platform-card:hover .platform-icon img,
+.platform-card.selected .platform-icon img {
+  filter: grayscale(0%);
+}
+
+.platform-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748B;
+  text-align: center;
+  transition: color 0.3s ease;
+}
+
+.platform-card:hover .platform-name,
+.platform-card.selected .platform-name {
+  color: #3B82F6;
+}
+
+.platform-status {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  color: #3B82F6;
+  animation: fadeIn 0.3s ease;
+}
+
+.platform-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  font-size: 12px;
+  color: #3B82F6;
+  gap: 8px;
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #E2E8F0;
+  border-top-color: #3B82F6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Meeting Details Styles */
+.meeting-details {
+  margin-top: 24px;
+  animation: slideUp 0.3s ease;
+}
+
+.meeting-info {
+  background: #F8FAFC;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.meeting-success {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #10B981;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.meeting-link {
+  display: flex;
+  gap: 8px;
+}
+
+.copy-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  color: #64748B;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.copy-button:hover {
+  border-color: #3B82F6;
+  color: #3B82F6;
+}
+
+.create-meeting-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px;
+  background: #3B82F6;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.create-meeting-button:disabled {
+  background: #E2E8F0;
+  cursor: not-allowed;
+}
+
+.create-meeting-button:not(:disabled):hover {
+  background: #2563EB;
+  transform: translateY(-1px);
+}
+
+.meeting-hint {
+  font-size: 13px;
+  color: #64748B;
+  text-align: center;
+  margin-top: 8px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>
