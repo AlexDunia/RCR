@@ -3,6 +3,8 @@ import { useLayoutStore } from '@/stores/layout';
 import DocumentLayout from '@/layouts/DocumentLayout.vue'
 import TasksLayout from '@/layouts/TasksLayout.vue'
 import EducationLayout from '@/layouts/EducationLayout.vue'
+import UserProfile from '../views/Profile.vue'
+import UserProfileEdit from '../views/ProfileEdit.vue'
 
 // Lazy-loaded route components
 const routes = [
@@ -248,6 +250,39 @@ const routes = [
         component: () => import('@/views/education/TestView.vue')
       }
     ]
+  },
+
+  // Profile routes
+  {
+    path: '/profile',
+    component: UserProfile,
+    children: [
+      {
+        path: '',
+        name: 'profile-bio',
+        component: UserProfile
+      },
+      {
+        path: 'listings',
+        name: 'profile-listings',
+        component: () => import('@/views/profile/ProfileListings.vue')
+      },
+      {
+        path: 'documents',
+        name: 'profile-documents',
+        component: () => import('@/views/profile/ProfileDocuments.vue')
+      },
+      {
+        path: 'documents/edit/:id',
+        name: 'profile-document-edit',
+        component: () => import('@/views/profile/DocumentEdit.vue')
+      }
+    ]
+  },
+  {
+    path: '/profile/edit',
+    name: 'profile-edit',
+    component: UserProfileEdit
   }
 ];
 
