@@ -46,7 +46,7 @@ const formFields = [
     type: 'email',
     placeholder: 'johndoe@gmail.com'
   },
-  
+
   {
     name: 'phoneNumber',
     label: 'Phone Number',
