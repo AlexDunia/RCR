@@ -50,14 +50,14 @@
               <button @click="triggerFileInput" class="browse-link">Browse</button>
             </div>
             <div class="upload-formats">
-              Supported formats: PDF, DOC, XLS, PPT
+              Supported formats: PDF, DOC, XLS, PPT, JPG, PNG, GIF, TIFF, HEIC
             </div>
             <input
               type="file"
               ref="fileInput"
               @change="handleFileSelect"
               multiple
-              accept=".pdf,.doc,.xls,.ppt"
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.tiff,.heic"
               class="hidden"
             />
           </div>
@@ -66,9 +66,10 @@
           <div v-if="uploadedFiles.length > 0" class="uploaded-files">
             <div v-for="(file, index) in uploadedFiles" :key="index" class="file-item">
               <div class="file-info">
-                <svg class="file-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <svg v-if="isDocument(file.type)" class="file-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
                   <path d="M7.5 9.16667H12.5M7.5 12.5H10.8333M6.66667 2.5H13.3333L17.5 6.66667V15.8333C17.5 16.2754 17.3244 16.6993 17.0118 17.0118C16.6993 17.3244 16.2754 17.5 15.8333 17.5H4.16667C3.72464 17.5 3.30072 17.3244 2.98816 17.0118C2.67559 16.6993 2.5 16.2754 2.5 15.8333V4.16667C2.5 3.72464 2.67559 3.30072 2.98816 2.98816C3.30072 2.67559 3.72464 2.5 4.16667 2.5H6.66667ZM13.3333 2.5V6.66667H17.5L13.3333 2.5Z" stroke="#6B7280" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
+                <img v-else-if="isImage(file.type)" :src="getFilePreview(file)" class="file-preview" :alt="file.name" />
                 <span class="file-name">{{ file.name }}</span>
               </div>
               <button @click="removeFile(index)" class="file-remove">
@@ -87,8 +88,8 @@
             <p class="section-description">Here you can edit your saved files and document</p>
           </div>
 
-          <div class="form-grid">
-            <div v-for="field in documentFields" :key="field.name" class="form-group" :class="{ 'full-width': field.type === 'textarea' }">
+          <div class="form-list">
+            <div v-for="field in documentFields" :key="field.name" class="form-group">
               <label :for="field.name" class="form-label">
                 {{ field.label }}
                 <span v-if="field.required" class="required">*</span>
@@ -333,13 +334,29 @@ const handleFile = (file) => {
     size: file.size,
     type: file.type
   });
-  addNotification(`File "${file.name}" added successfully`, 'success');
 };
 
 const removeFile = (index) => {
-  const file = uploadedFiles.value[index];
   uploadedFiles.value.splice(index, 1);
-  addNotification(`File "${file.name}" removed`, 'info');
+};
+
+const isDocument = (type) => {
+  return type.includes('pdf') ||
+         type.includes('doc') ||
+         type.includes('xls') ||
+         type.includes('ppt');
+};
+
+const isImage = (type) => {
+  return type.includes('image/');
+};
+
+const getFilePreview = (file) => {
+  if (file.preview) return file.preview;
+  if (isImage(file.type)) {
+    return URL.createObjectURL(file);
+  }
+  return null;
 };
 
 // Add notification system
@@ -654,20 +671,17 @@ const confirmSave = async () => {
   color: #6B7280;
 }
 
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px 32px;
+.form-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
   gap: 6px;
-}
-
-.form-group.full-width {
-  grid-column: 1 / -1;
+  width: 100%;
 }
 
 .input-wrapper {
@@ -1102,6 +1116,19 @@ textarea.form-control {
 
 .notification-close:hover {
   background: #F3F4F6;
+}
+
+.form-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.file-preview {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  object-fit: cover;
 }
 </style>
 

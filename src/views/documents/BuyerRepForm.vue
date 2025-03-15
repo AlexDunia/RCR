@@ -9,8 +9,8 @@
       <div class="card-content">
         <DocumentForm
           :fields="formFields"
-          @submit="handleSubmit"
           :isLoading="isLoading"
+          @submit="handleSubmit"
         />
       </div>
     </div>
@@ -38,25 +38,28 @@ const formFields = [
     name: 'buyerName',
     label: 'Buyer name',
     type: 'text',
-    placeholder: "Enter buyer's full name"
+    placeholder: "Enter buyer's full name",
+    required: true
   },
   {
     name: 'buyerEmail',
     label: 'Buyer Email',
     type: 'email',
-    placeholder: 'johndoe@gmail.com'
+    placeholder: 'johndoe@gmail.com',
+    required: true
   },
-
   {
     name: 'phoneNumber',
     label: 'Phone Number',
     type: 'tel',
-    placeholder: '555-123-4567'
+    placeholder: '555-123-4567',
+    required: true
   },
   {
     name: 'propertyType',
     label: 'Property Type',
     type: 'select',
+    required: true,
     options: [
       'Single Family Home',
       'Condo',
@@ -70,26 +73,55 @@ const formFields = [
     name: 'budgetRange',
     label: 'Budget Range',
     type: 'text',
-    placeholder: '$200,000-$500,000'
+    placeholder: '$200,000-$500,000',
+    required: true
   },
   {
     name: 'additionalNotes',
     label: 'Additional Notes/Requirements',
     type: 'textarea',
-    placeholder: 'Any specific requirements?'
+    placeholder: 'Any specific requirements?',
+    required: false
+  },
+  {
+    name: 'documents',
+    label: 'Upload Documents',
+    type: 'file',
+    accept: '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.tiff,.heic',
+    multiple: true,
+    required: false,
+    placeholder: 'Upload relevant documents (pre-approval letters, wish lists, etc.)'
   }
 ]
 
 const handleSubmit = async (formData) => {
   try {
+    // Create FormData to handle file uploads
+    const submitData = new FormData();
+
+    // Add all form fields
+    Object.keys(formData).forEach(key => {
+      if (key !== 'documents') {
+        submitData.append(key, formData[key]);
+      }
+    });
+
+    // Add files if any
+    if (formData.documents) {
+      Array.from(formData.documents).forEach((file, index) => {
+        submitData.append(`documents[${index}]`, file);
+      });
+    }
+
     await documentStore.saveBuyerRepDocument({
       ...formData,
       type: 'buyer-rep',
-      createdAt: new Date().toISOString()
-    })
-    router.push('/receipts-docs/view-docs')
+      createdAt: new Date().toISOString(),
+      files: submitData
+    });
+    router.push('/receipts-docs/view-docs');
   } catch (error) {
-    console.error('Error saving buyer rep document:', error)
+    console.error('Error saving buyer rep document:', error);
   }
 }
 </script>
@@ -97,28 +129,30 @@ const handleSubmit = async (formData) => {
 <style scoped>
 .buyer-rep-form {
   margin: 0 auto;
+  max-width: 800px;
+  padding: 32px;
 }
 
 .form-card {
+  background: white;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  margin-bottom: 1.5rem;
 }
 
 .card-header {
-  background: #F3F4F4;
-  padding: 1rem 1.5rem;
+  background: #F3F4F6;
+  padding: 16px 24px;
+  border-bottom: 1px solid #E5E7EB;
 }
 
 .card-content {
-  background: white;
-  padding: 2rem;
+  padding: 24px;
 }
 
 .form-title {
-  font-size: 16px;
-  font-weight: 500;
+  font-size: 18px;
+  font-weight: 600;
   color: #111827;
   margin: 0;
 }

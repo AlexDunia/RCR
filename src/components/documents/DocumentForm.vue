@@ -1,424 +1,476 @@
-<!-- src/components/documents/DocumentForm.vue -->
 <template>
   <form @submit.prevent="handleSubmit" class="document-form">
-    <div v-if="isLoading" class="form-loader">
-      <Loader v-for="n in fields.length" :key="n" />
+    <!-- Document Title and Description -->
+    <div class="input-group">
+      <div v-if="isLoading" class="skeleton-loader label-skeleton"></div>
+      <label v-else>Document Title</label>
+      <div v-if="isLoading" class="skeleton-loader input-skeleton"></div>
+      <input
+        v-else
+        v-model="formData.title"
+        type="text"
+        placeholder="Enter document title"
+        required
+      />
     </div>
-    <div v-else>
-      <div v-for="field in fields" :key="field.name" class="form-group">
-        <label :for="field.name" class="form-label">{{ field.label }}</label>
-        <input
-          v-if="field.type !== 'textarea' && field.type !== 'select'"
-          :type="field.type"
-          :id="field.name"
-          :name="field.name"
-          v-model="formData[field.name]"
-          :placeholder="field.placeholder"
-          class="form-input"
-        />
-        <textarea
-          v-else-if="field.type === 'textarea'"
-          :id="field.name"
-          :name="field.name"
-          v-model="formData[field.name]"
-          :placeholder="field.placeholder"
-          class="form-textarea"
-        ></textarea>
-        <select
-          v-else
-          :id="field.name"
-          :name="field.name"
-          v-model="formData[field.name]"
-          class="form-select"
-        >
-          <option value="">Select {{ field.label.toLowerCase() }}</option>
-          <option v-for="option in field.options" :key="option" :value="option">
-            {{ option }}
-          </option>
-        </select>
-      </div>
 
-      <div class="upload-section">
-        <h3 class="upload-title">Upload Documents</h3>
-        <div
-          class="upload-area"
-          @drop.prevent="handleDrop"
-          @dragover.prevent="handleDragOver"
-          @dragleave.prevent="handleDragLeave"
-          :class="{ 'drag-over': isDragging }"
-        >
-          <div v-if="documents.length === 0" class="upload-placeholder">
-            <svg xmlns="http://www.w3.org/2000/svg" class="upload-icon" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-            </svg>
-            <p>Upload documents by dragging & dropping files or</p>
-            <button type="button" class="browse-button" @click="triggerFileInput">Browse</button>
-            <p class="upload-hint">Supports PDF, DOC, DOCX, JPG, PNG</p>
-          </div>
-          <div v-else class="documents-list">
-            <div v-for="doc in documents" :key="doc.id" class="document-item">
-              <div class="document-info">
-                <svg v-if="doc.type === 'pdf'" xmlns="http://www.w3.org/2000/svg" class="document-icon" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd" />
-                </svg>
-                <svg v-else xmlns="http://www.w3.org/2000/svg" class="document-icon" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
-                </svg>
-                <span class="document-name">{{ doc.name }}</span>
-                <span class="document-size">{{ formatFileSize(doc.size) }}</span>
-              </div>
-              <button type="button" class="remove-button" @click="removeDocument(doc.id)">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                </svg>
-              </button>
-            </div>
-            <button type="button" class="add-more-button" @click="triggerFileInput">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-              </svg>
-              Add More Documents
-            </button>
+    <div class="input-group">
+      <div v-if="isLoading" class="skeleton-loader label-skeleton"></div>
+      <label v-else>Document Description</label>
+      <div v-if="isLoading" class="skeleton-loader skeleton-textarea"></div>
+      <textarea
+        v-else
+        v-model="formData.description"
+        placeholder="Enter document description"
+        rows="3"
+        required
+      ></textarea>
+    </div>
+
+    <!-- Associated Agents -->
+    <div class="input-group">
+      <div v-if="isLoading" class="skeleton-loader label-skeleton"></div>
+      <label v-else>Associated Agents</label>
+      <div v-if="isLoading" class="skeleton-loader input-skeleton"></div>
+      <div v-else>
+        <div class="agents-list">
+          <div v-for="agent in selectedAgents" :key="agent.id" class="agent-item">
+            <img :src="agent.avatar" :alt="agent.name" class="agent-avatar" />
+            <span>{{ agent.name }}</span>
+            <button type="button" @click="removeAgent(agent)" class="remove-agent">×</button>
           </div>
         </div>
-        <input
-          type="file"
-          ref="fileInput"
-          class="hidden"
-          accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-          @change="handleFileSelect"
-          multiple
-        />
+        <button type="button" @click="showAgentModal = true" class="add-agent-btn">
+          + Add Agent
+        </button>
       </div>
-
-      <button type="submit" class="submit-button">
-        Proceed
-      </button>
     </div>
+
+    <!-- Original Form Fields -->
+    <div v-for="field in fields" :key="field.name" class="input-group">
+      <div v-if="isLoading" class="skeleton-loader label-skeleton"></div>
+      <label v-else>{{ field.label }}</label>
+      <div v-if="isLoading"
+        :class="[
+          'skeleton-loader',
+          { 'skeleton-textarea': field.type === 'textarea' },
+          { 'input-skeleton': field.type !== 'textarea' }
+        ]"
+      ></div>
+      <template v-else>
+        <template v-if="field.type === 'textarea'">
+          <textarea
+            v-model="formData[field.name]"
+            :placeholder="field.placeholder"
+            rows="4"
+          ></textarea>
+        </template>
+        <template v-else-if="field.type === 'select'">
+          <select
+            v-model="formData[field.name]"
+          >
+            <option value="" disabled selected>Select {{ field.label.toLowerCase() }}</option>
+            <option v-for="option in field.options" :key="option" :value="option">
+              {{ option }}
+            </option>
+          </select>
+        </template>
+        <template v-else>
+          <input
+            v-model="formData[field.name]"
+            :type="field.type"
+            :placeholder="field.placeholder"
+          >
+        </template>
+      </template>
+    </div>
+
+    <!-- Agent Selection Modal -->
+    <div v-if="showAgentModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Select Agents</h3>
+          <button type="button" @click="showAgentModal = false" class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <input
+            type="text"
+            v-model="agentSearchQuery"
+            placeholder="Search agents..."
+            class="search-input"
+          />
+          <div class="agents-grid">
+            <div
+              v-for="agent in filteredAgents"
+              :key="agent.id"
+              class="agent-card"
+              :class="{ 'selected': isAgentSelected(agent) }"
+              @click="toggleAgent(agent)"
+            >
+              <img :src="agent.avatar" :alt="agent.name" class="agent-avatar" />
+              <div class="agent-info">
+                <span class="agent-name">{{ agent.name }}</span>
+                <span class="agent-experience">{{ agent.experience }} years exp.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" @click="showAgentModal = false" class="btn-primary">Done</button>
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="btn-primary">Proceed</button>
   </form>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, watch } from 'vue'
-import Loader from "@/components/Loader.vue";
+import { ref, reactive, computed } from 'vue'
 
 const props = defineProps({
   fields: {
     type: Array,
     required: true
   },
-  initialValues: {
-    type: Object,
-    default: () => ({})
+  isLoading: {
+    type: Boolean,
+    default: false
   }
 })
 
-const emit = defineEmits(['submit', 'input'])
-const fileInput = ref(null)
-const isDragging = ref(false)
-const documents = ref([])
+const emit = defineEmits(['submit'])
 const formData = reactive({})
-const isLoading = ref(true)
+const formErrors = ref({})
+const showAgentModal = ref(false)
+const agentSearchQuery = ref('')
+const selectedAgents = ref([])
 
-// Initialize form data with initial values
-onMounted(() => {
-  props.fields.forEach(field => {
-    formData[field.name] = props.initialValues[field.name] || ''
-  })
-  setTimeout(() => {
-    isLoading.value = false;
-  }, 1000);
+// Mock agents data - replace with your actual agents data
+const allAgents = [
+  { id: 1, name: 'John Doe', email: 'john@example.com', avatar: '/avatars/john.jpg', experience: 5 },
+  { id: 2, name: 'Jane Smith', email: 'jane@example.com', avatar: '/avatars/jane.jpg', experience: 8 },
+]
+
+const filteredAgents = computed(() => {
+  const query = agentSearchQuery.value.toLowerCase()
+  return allAgents.filter(agent =>
+    agent.name.toLowerCase().includes(query) ||
+    agent.email.toLowerCase().includes(query)
+  )
 })
 
-// Watch for changes in initialValues
-watch(() => props.initialValues, (newValues) => {
-  props.fields.forEach(field => {
-    formData[field.name] = newValues[field.name] || formData[field.name] || ''
-  })
-}, { deep: true })
+const isAgentSelected = (agent) => {
+  return selectedAgents.value.some(a => a.id === agent.id)
+}
 
-// Emit input events when form data changes
-watch(formData, (newValues) => {
-  Object.entries(newValues).forEach(([field, value]) => {
-    emit('input', field, value)
+const toggleAgent = (agent) => {
+  const index = selectedAgents.value.findIndex(a => a.id === agent.id)
+  if (index === -1) {
+    selectedAgents.value.push(agent)
+  } else {
+    selectedAgents.value.splice(index, 1)
+  }
+}
+
+const removeAgent = (agent) => {
+  const index = selectedAgents.value.findIndex(a => a.id === agent.id)
+  if (index !== -1) {
+    selectedAgents.value.splice(index, 1)
+  }
+}
+
+const validateForm = () => {
+  const errors = {}
+  if (!formData.title) {
+    errors.title = 'Document title is required'
+  }
+  if (!formData.description) {
+    errors.description = 'Document description is required'
+  }
+  props.fields.forEach(field => {
+    if (field.required && !formData[field.name]) {
+      errors[field.name] = `${field.label} is required`
+    }
   })
-}, { deep: true })
+  formErrors.value = errors
+  return Object.keys(errors).length === 0
+}
 
 const handleSubmit = () => {
-  const formDataWithFiles = {
+  if (!validateForm()) return
+
+  emit('submit', {
     ...formData,
-    files: documents.value.map(doc => ({
-      id: doc.id,
-      name: doc.name,
-      size: doc.size,
-      type: doc.type,
-      file: doc.file
-    }))
-  }
-  emit('submit', formDataWithFiles)
-}
-
-const triggerFileInput = () => {
-  fileInput.value.click()
-}
-
-const handleFileSelect = (event) => {
-  const files = Array.from(event.target.files)
-  files.forEach(file => {
-    if (isValidFileType(file)) {
-      documents.value.push({
-        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-        name: file.name,
-        size: file.size,
-        type: file.type.includes('pdf') ? 'pdf' : 'image',
-        file: file // Store the actual file object for later upload
-      })
-    }
+    agents: selectedAgents.value
   })
-}
-
-const handleDrop = (event) => {
-  isDragging.value = false
-  const files = Array.from(event.dataTransfer.files)
-  files.forEach(file => {
-    if (isValidFileType(file)) {
-      documents.value.push({
-        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-        name: file.name,
-        size: file.size,
-        type: file.type.includes('pdf') ? 'pdf' : 'image',
-        file: file // Store the actual file object for later upload
-      })
-    }
-  })
-}
-
-const handleDragOver = () => {
-  isDragging.value = true
-}
-
-const handleDragLeave = () => {
-  isDragging.value = false
-}
-
-const isValidFileType = (file) => {
-  const validTypes = [
-    'application/pdf',
-    'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'image/jpeg',
-    'image/png'
-  ]
-  return validTypes.includes(file.type)
-}
-
-const formatFileSize = (bytes) => {
-  if (bytes === 0) return '0 B'
-  const k = 1024
-  const sizes = ['B', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`
-}
-
-const removeDocument = (id) => {
-  documents.value = documents.value.filter(doc => doc.id !== id)
 }
 </script>
 
 <style scoped>
-.document-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+/* Base form styles */
+form {
+  padding: 24px;
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+.input-group {
+  margin-bottom: 24px;
 }
 
-.form-label {
-  font-size: 0.820rem;
-  font-weight: 500;
+.input-group label {
+  display: block;
+  margin-bottom: 12px;
   color: #374151;
+  font-size: 14px;
+  font-weight: 500;
 }
 
-.form-input,
-.form-textarea,
-.form-select {
+input, select, textarea {
   width: 100%;
-  padding: 0.85em;
-  border: 1px solid #d1d5db;
-  font-size: 0.875rem;
-  margin-bottom:30px;
-  transition: border-color 0.2s;
+  padding: 10px 12px;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #111827;
+  background: #fff;
 }
 
-.form-input:focus,
-.form-textarea:focus,
-.form-select:focus {
-  outline: none;
-  border-color: #2563eb;
-  ring: 2px solid rgba(37, 99, 235, 0.2);
+input::placeholder,
+textarea::placeholder {
+  color: #9CA3AF;
 }
 
-.form-textarea {
+textarea {
   min-height: 100px;
   resize: vertical;
 }
 
-.upload-section {
-  margin-top: 1rem;
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
 }
 
-.upload-title {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #374151;
-  margin-bottom: 0.5rem;
-}
-
-.upload-area {
-  border: 2px dashed #d1d5db;
-  border-radius: 0.5rem;
-  padding: 2rem;
-  transition: all 0.2s;
-}
-
-.upload-area.drag-over {
-  border-color: #2563eb;
-  background-color: rgba(37, 99, 235, 0.05);
-}
-
-.upload-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  color: #6b7280;
-}
-
-.upload-icon {
-  width: 2rem;
-  height: 2rem;
-  color: #9ca3af;
-}
-
-.browse-button {
-  color: #2563eb;
+.btn-primary {
+  background: #2563EB;
+  color: white;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+  background: #1D4ED8;
+}
+
+/* Agent styles */
+.agents-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.agent-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: #F3F4F6;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.agent-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.remove-agent {
+  padding: 0;
   background: none;
   border: none;
-  padding: 0;
+  color: #EF4444;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  margin-left: 4px;
 }
 
-.upload-hint {
-  font-size: 0.75rem;
-  color: #9ca3af;
+.add-agent-btn {
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px dashed #D1D5DB;
+  border-radius: 6px;
+  color: #6B7280;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.documents-list {
+.add-agent-btn:hover {
+  border-color: #9CA3AF;
+  color: #4B5563;
+}
+
+/* Modal styles */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  width: 480px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.modal-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid #E5E7EB;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #E5E7EB;
+  text-align: right;
+}
+
+.search-input {
+  margin-bottom: 20px;
+}
+
+.agents-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.agent-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.agent-card:hover {
+  border-color: #2563EB;
+  background: rgba(37, 99, 235, 0.05);
+}
+
+.agent-card.selected {
+  border-color: #2563EB;
+  background: rgba(37, 99, 235, 0.05);
+}
+
+.agent-info {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 2px;
 }
 
-.document-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem;
-  background-color: #f9fafb;
-  border-radius: 0.375rem;
-  border: 1px solid #e5e7eb;
-}
-
-.document-info {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.document-icon {
-  width: 1.5rem;
-  height: 1.5rem;
-  color: #6b7280;
-}
-
-.document-name {
-  font-size: 0.875rem;
-  color: #374151;
+.agent-name {
+  font-size: 14px;
   font-weight: 500;
+  color: #111827;
 }
 
-.document-size {
-  font-size: 0.75rem;
-  color: #6b7280;
+.agent-experience {
+  font-size: 12px;
+  color: #6B7280;
 }
 
-.remove-button {
-  background-color: #fee2e2;
-  color: #dc2626;
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: 9999px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
+.close-modal {
+  background: none;
   border: none;
-  transition: all 0.2s;
-}
-
-.remove-button:hover {
-  background-color: #fecaca;
-}
-
-.add-more-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  width: 100%;
-  padding: 0.75rem;
-  background-color: #f3f4f6;
-  border: 1px dashed #d1d5db;
-  border-radius: 0.375rem;
-  color: #374151;
-  font-size: 0.875rem;
+  color: #6B7280;
+  font-size: 24px;
+  line-height: 1;
+  padding: 0;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: color 0.2s;
 }
 
-.add-more-button:hover {
-  background-color: #e5e7eb;
+.close-modal:hover {
+  color: #374151;
 }
 
-.hidden {
+.skeleton-loader {
+  width: 100%;
+  height: 42px; /* Standard input height */
+  background: #E5E7EB;
+  border-radius: 6px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.skeleton-textarea {
+  height: 100px; /* Textarea height */
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Remove old loader styles */
+.loader-wrapper,
+.input-group:has(textarea) .loader-wrapper,
+.input-group:has(.agents-list) .loader-wrapper {
   display: none;
 }
 
-.submit-button {
-  background-color: #1e40af;
-  color: white;
-  padding: 0.75rem;
-  border-radius: 0.375rem;
-  font-weight: 500;
-  border: none;
-  transition: background-color 0.2s;
-  margin-top: 1rem;
-  cursor: pointer;
+.label-skeleton {
+  width: 30%;
+  height: 20px;
+  margin-bottom: 12px;
+  background: #E5E7EB;
+  border-radius: 4px;
 }
 
-.submit-button:hover {
-  background-color: #1e3a8a;
-}
-
-.form-loader {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+.input-skeleton {
+  height: 42px;
 }
 </style>
