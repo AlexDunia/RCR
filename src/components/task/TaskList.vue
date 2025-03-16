@@ -178,6 +178,8 @@ const filteredTasks = computed(() => {
           return task.status === 'draft';
         case 'completed':
           return task.status === 'completed';
+        case 'scheduled':
+          return task.status === 'scheduled';
         default:
           return true;
       }
@@ -213,7 +215,7 @@ const handleTaskClick = (task) => {
 
 const handleEditClick = (task) => {
   event.stopPropagation();
-  router.push(`/tasks/create?draftId=${task.id}`);
+  router.push(`/tasks/create?draftId=${task.id}&mode=edit`);
 };
 
 const formatDate = (date) => {
@@ -243,6 +245,8 @@ const getEmptyStateTitle = () => {
     return 'No tasks in progress';
   } else if (path.includes('/completed')) {
     return 'No completed tasks';
+  } else if (path.includes('/scheduled')) {
+    return 'No scheduled tasks';
   }
   return 'No tasks found';
 };
@@ -255,6 +259,8 @@ const getEmptyStateText = () => {
     return 'Start working on a task to see it here';
   } else if (path.includes('/completed')) {
     return 'Complete tasks will appear here';
+  } else if (path.includes('/scheduled')) {
+    return 'Schedule a task to see it here';
   }
   return 'Create a task to get started';
 };

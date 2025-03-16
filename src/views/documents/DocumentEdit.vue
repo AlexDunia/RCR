@@ -1,82 +1,248 @@
 <template>
-  <div class="document-edit">
-    <div class="document-header">
-      <div class="header-content">
+  <div class="document-edit-container">
+    <!-- Notifications -->
+    <div class="notifications-container">
+      <transition-group name="notification">
+        <div
+          v-for="notification in notifications"
+          :key="notification.id"
+          class="notification"
+          :class="notification.type"
+        >
+          <span class="notification-message">{{ notification.message }}</span>
+          <button class="notification-close" @click="removeNotification(notification.id)">×</button>
+        </div>
+      </transition-group>
+    </div>
+
+    <!-- Header -->
+    <div class="page-header">
+      <div class="header-top">
         <button class="back-button" @click="handleBack">
-          <svg xmlns="http://www.w3.org/2000/svg" class="button-icon" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M15.8337 10H4.16699M4.16699 10L10.0003 15.8333M4.16699 10L10.0003 4.16667" stroke="currentColor" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
           Back
         </button>
+        <h1 class="page-title">Currently editing: Legal documentation for {{ getClientName() }}</h1>
+      </div>
+      <div class="breadcrumb">
+        <router-link to="/profile/documents" class="breadcrumb-link">Documents</router-link>
+        <span class="breadcrumb-separator">/</span>
+        <span class="breadcrumb-current">Legal documentation</span>
       </div>
     </div>
 
-    <div v-if="isLoading" class="edit-loader">
-      <Loader v-for="n in 5" :key="n" />
-    </div>
-    <div v-else-if="document" class="edit-content">
-      <div class="content-section">
-        <h2 class="section-title">Edit Document</h2>
-        <DocumentForm
-          :fields="formFields"
-          :initial-values="document"
-          @submit="handleSubmit"
-          @input="handleInput"
-        />
-      </div>
+    <!-- Main content -->
+    <div class="content-layout">
+      <!-- Left Section -->
+      <div class="main-content">
+        <!-- Upload Section -->
+        <div class="upload-container">
+          <div class="upload-area" @drop.prevent="handleFileDrop" @dragover.prevent>
+            <div class="upload-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M12 12V19M12 12L15 15M12 12L9 15M20 16.7428C21.2215 15.734 22 14.2079 22 12.5C22 9.46243 19.5376 7 16.5 7C16.2815 7 16.0771 7.01349 15.8767 7.03857C14.9827 4.67583 12.6997 3 10 3C6.13401 3 3 6.13401 3 10C3 12.2501 4.07741 14.2509 5.75 15.4805" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="upload-text">
+              Upload document by Dragging & dropping files or
+              <button @click="triggerFileInput" class="browse-link">Browse</button>
+            </div>
+            <div class="upload-formats">
+              Supported formats: PDF, DOC, XLS, PPT, JPG, PNG, GIF, TIFF, HEIC
+            </div>
+            <input
+              type="file"
+              ref="fileInput"
+              @change="handleFileSelect"
+              multiple
+              accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.tiff,.heic"
+              class="hidden"
+            />
+          </div>
 
-      <div class="content-section">
-        <h2 class="section-title">Document Files</h2>
-        <div v-if="document.files?.length" class="files-list">
-          <div v-for="file in document.files" :key="file.id" class="file-item">
-            <div class="file-row">
-              <div class="file-info">
-                <div class="file-name-container">
-                  <svg v-if="file.type === 'pdf'" xmlns="http://www.w3.org/2000/svg" class="file-icon" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"/>
+          <!-- Existing and Uploaded Files -->
+          <div class="files-section">
+            <h3 class="section-title">Attached Files</h3>
+            <div v-if="allFiles.length > 0" class="uploaded-files">
+              <div v-for="(file, index) in allFiles" :key="index" class="file-item">
+                <div class="file-info">
+                  <svg v-if="isDocument(file.type)" class="file-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M7.5 9.16667H12.5M7.5 12.5H10.8333M6.66667 2.5H13.3333L17.5 6.66667V15.8333C17.5 16.2754 17.3244 16.6993 17.0118 17.0118C16.6993 17.3244 16.2754 17.5 15.8333 17.5H4.16667C3.72464 17.5 3.30072 17.3244 2.98816 17.0118C2.67559 16.6993 2.5 16.2754 2.5 15.8333V4.16667C2.5 3.72464 2.67559 3.30072 2.98816 2.98816C3.30072 2.67559 3.72464 2.5 4.16667 2.5H6.66667ZM13.3333 2.5V6.66667H17.5L13.3333 2.5Z" stroke="#6B7280" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
-                  <svg v-else-if="file.type === 'image'" xmlns="http://www.w3.org/2000/svg" class="file-icon" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"/>
-                  </svg>
-                  <span class="file-name">{{ file.name }}</span>
+                  <img v-else-if="isImage(file.type)" :src="file.preview" class="file-preview" :alt="file.name" />
+                  <div class="file-details">
+                    <span class="file-name">{{ file.name }}</span>
+                    <span class="file-type">{{ file.type }}</span>
+                  </div>
                 </div>
-                <span class="file-size">{{ formatFileSize(file.size) }}</span>
-              </div>
-              <div class="file-actions">
-                <a
-                  v-if="isValidFileUrl(file.url)"
-                  :href="file.url"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="view-button"
-                >
-                  View
-                </a>
-                <button @click="removeFile(file)" class="delete-button">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="button-icon" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                <button @click="removeFile(index)" class="file-remove">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M13.3333 5L6.66667 11.6667M6.66667 5L13.3333 11.6667" stroke="#EF4444" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
-                  Remove
                 </button>
+              </div>
+            </div>
+            <div v-else class="no-files">
+              No files attached yet
+            </div>
+          </div>
+
+          <!-- File Content Display Section -->
+          <div v-if="allFiles.length > 0" class="file-content-section">
+            <h3 class="section-title">Document Contents</h3>
+            <div v-for="(file, index) in allFiles" :key="index" class="file-content">
+              <h4>{{ file.name }}</h4>
+              <div v-if="isImage(file.type)" class="image-preview">
+                <img :src="file.content" :alt="file.name" class="full-image" />
+              </div>
+              <div v-else class="text-content">
+                <pre>{{ file.content || 'Loading content...' }}</pre>
               </div>
             </div>
           </div>
         </div>
-        <div class="file-upload">
-          <label for="file-input" class="upload-label">
-            <svg xmlns="http://www.w3.org/2000/svg" class="upload-icon" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
-            </svg>
-            <span>Upload Files</span>
+
+        <!-- Edit Form -->
+        <div class="edit-section">
+          <div class="section-header">
+            <h2 class="section-title">Edit file</h2>
+            <p class="section-description">Here you can edit your saved files and document</p>
+          </div>
+
+          <div class="form-list">
+            <div v-for="field in documentFields" :key="field.name" class="form-group">
+              <label :for="field.name" class="form-label">
+                {{ field.label }}
+                <span v-if="field.required" class="required">*</span>
+              </label>
+
+              <template v-if="field.type === 'textarea'">
+                <textarea
+                  :id="field.name"
+                  v-model="document[field.name]"
+                  :placeholder="field.placeholder"
+                  class="form-control"
+                  :class="{ 'error': formErrors[field.name] }"
+                  rows="4"
+                ></textarea>
+              </template>
+              <template v-else-if="field.type === 'select'">
+                <select
+                  :id="field.name"
+                  v-model="document[field.name]"
+                  class="form-control"
+                  :class="{ 'error': formErrors[field.name] }"
+                >
+                  <option value="" disabled selected>Select {{ field.label.toLowerCase() }}</option>
+                  <option v-for="option in field.options" :key="option" :value="option">
+                    {{ option }}
+                  </option>
+                </select>
+              </template>
+              <template v-else>
+                <div class="input-wrapper">
+                  <input
+                    :id="field.name"
+                    v-model="document[field.name]"
+                    :type="field.type"
+                    :placeholder="field.placeholder"
+                    class="form-control"
+                    :class="{ 'error': formErrors[field.name] }"
+                  >
+                </div>
+              </template>
+              <span v-if="formErrors[field.name]" class="error-message">
+                {{ formErrors[field.name] }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Sidebar -->
+      <div class="sidebar">
+        <div class="agents-section">
+          <h3 class="agents-title">Associated agents</h3>
+          <div v-if="document.associatedAgents?.length" class="agents-list">
+            <div v-for="agent in document.associatedAgents" :key="agent.id" class="agent-card">
+              <div class="agent-info">
+                <img :src="agent.avatar" :alt="agent.name" class="agent-avatar">
+                <div class="agent-details">
+                  <span class="agent-name">{{ agent.name }}</span>
+                  <span class="agent-email">{{ agent.email }}</span>
+                </div>
+              </div>
+              <button @click="removeAgent(agent.id)" class="remove-agent">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path d="M13.3333 5L6.66667 11.6667M6.66667 5L13.3333 11.6667" stroke="#EF4444" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <button class="add-agent-button" @click="showAgentModal = true">
+            <span class="plus-icon">+</span>
+            Add agent
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="page-footer">
+      <button class="btn-secondary" @click="handleBack">Exit</button>
+      <button class="btn-primary" @click="handleSave">Save</button>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div v-if="showConfirmModal" class="modal-overlay">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h3>Confirm Changes</h3>
+          <button @click="showConfirmModal = false" class="modal-close">×</button>
+        </div>
+        <div class="modal-body">
+          <p>Do you wish to make changes to this document?</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" @click="showConfirmModal = false">No</button>
+          <button class="btn-primary" @click="confirmSave">Yes</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Agent Modal -->
+    <div v-if="showAgentModal" class="modal-overlay">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h3>Select Agent</h3>
+          <button @click="showAgentModal = false" class="modal-close">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="search-box">
             <input
-              id="file-input"
-              type="file"
-              multiple
-              @change="handleFileUpload"
-              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-              class="hidden-input"
+              type="text"
+              v-model="agentSearchQuery"
+              placeholder="Search agents by name or email"
+              class="form-control"
             >
-          </label>
+          </div>
+          <div class="agent-list">
+            <div
+              v-for="agent in filteredAgents"
+              :key="agent.id"
+              class="agent-item"
+              :class="{ 'selected': document.associatedAgents?.some(a => a.id === agent.id) }"
+              @click="handleAgentSelect(agent)"
+            >
+              <img :src="agent.avatar" :alt="agent.name" class="agent-avatar">
+              <div class="agent-details">
+                <span class="agent-name">{{ agent.name }}</span>
+                <span class="agent-experience">{{ agent.experience }}</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -84,507 +250,997 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { useDocumentStore } from '@/stores/documents'
-import DocumentForm from '@/components/documents/DocumentForm.vue'
-import Loader from "@/components/Loader.vue"
+import { ref, onMounted, computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useDocumentStore } from '@/stores/documents';
 
-const route = useRoute()
-const router = useRouter()
-const documentStore = useDocumentStore()
-const document = ref(null)
-const hasUnsavedChanges = ref(false)
-const isLoading = ref(true)
+const route = useRoute();
+const router = useRouter();
+const documentStore = useDocumentStore();
+const documentId = route.params.id;
+const showConfirmModal = ref(false);
+const fileInput = ref(null);
+const uploadedFiles = ref([]); // New uploads during this session
+const existingFiles = ref([]); // Files loaded from existing document
 
-// Load document data
-onMounted(() => {
-  const documentId = route.params.id
-  const foundDocument = documentStore.getDocument(documentId)
+// Combined files for display
+const allFiles = computed(() => [...existingFiles.value, ...uploadedFiles.value]);
 
-  if (!foundDocument) {
-    console.error('Document not found')
-    router.push('/receipts-docs')
-    return
+const document = ref({
+  id: documentId || '',
+  type: route.query.type || 'buyer-rep',
+  title: '',
+  description: '',
+  associatedAgents: [],
+  files: [],
+  buyerName: '',
+  buyerEmail: '',
+  phoneNumber: '',
+  propertyType: '',
+  budgetRange: '',
+  additionalNotes: '',
+  sellerName: '',
+  sellerEmail: '',
+  propertyAddress: '',
+  listingPrice: '',
+  squareFootage: '',
+  bedrooms: '',
+  bathrooms: '',
+  propertyDescription: ''
+});
+
+const showAgentModal = ref(false);
+const agentSearchQuery = ref('');
+
+const allAgents = ref([
+  { id: 1, name: 'John Doe', email: 'john@example.com', avatar: '/avatars/john.jpg', experience: '5 years' },
+  { id: 2, name: 'Jane Smith', email: 'jane@example.com', avatar: '/avatars/jane.jpg', experience: '8 years' },
+  { id: 3, name: 'Mike Johnson', email: 'mike@example.com', avatar: '/avatars/mike.jpg', experience: '3 years' },
+]);
+
+const filteredAgents = computed(() => {
+  const query = agentSearchQuery.value.toLowerCase();
+  return allAgents.value.filter(agent =>
+    agent.name.toLowerCase().includes(query) ||
+    agent.email.toLowerCase().includes(query)
+  );
+});
+
+const handleAgentSelect = (agent) => {
+  if (!document.value.associatedAgents) {
+    document.value.associatedAgents = [];
   }
+  if (!document.value.associatedAgents.some(a => a.id === agent.id)) {
+    document.value.associatedAgents.push(agent);
+  }
+  showAgentModal.value = false;
+  agentSearchQuery.value = '';
+};
 
-  // Store the actual document data
-  document.value = foundDocument
+const removeAgent = (agentId) => {
+  document.value.associatedAgents = document.value.associatedAgents.filter(a => a.id !== agentId);
+};
+
+const getClientName = () => {
+  if (document.value.type === 'buyer-rep') {
+    return document.value.buyerName || 'Buyer';
+  } else if (document.value.type === 'seller-rep') {
+    return document.value.sellerName || 'Seller';
+  } else {
+    return document.value.title || 'Client';
+  }
+};
+
+const triggerFileInput = () => {
+  fileInput.value.click();
+};
+
+const handleFileSelect = (event) => {
+  const files = Array.from(event.target.files);
+  files.forEach(handleFile);
+};
+
+const handleFileDrop = (event) => {
+  const files = Array.from(event.dataTransfer.files);
+  files.forEach(handleFile);
+};
+
+const handleFile = async (file) => {
+  try {
+    const fileObject = {
+      name: file.name,
+      type: file.type,
+      size: file.size,
+      content: null,
+      preview: null
+    };
+
+    if (isImage(file.type)) {
+      fileObject.preview = URL.createObjectURL(file);
+      fileObject.content = await readFileAsDataURL(file);
+    } else if (isDocument(file.type)) {
+      if (file.type === 'application/pdf') {
+        fileObject.content = await readPDFContent(file);
+      } else {
+        fileObject.content = await readFileAsText(file);
+      }
+    }
+
+    uploadedFiles.value.push(fileObject);
+  } catch (error) {
+    addNotification(`Error reading file ${file.name}: ${error.message}`, 'error');
+  }
+};
+
+const removeFile = (index) => {
+  if (index < existingFiles.value.length) {
+    existingFiles.value.splice(index, 1);
+    document.value.files.splice(index, 1);
+  } else {
+    uploadedFiles.value.splice(index - existingFiles.value.length, 1);
+  }
+};
+
+const isDocument = (type) => {
+  return type.includes('pdf') ||
+         type.includes('doc') ||
+         type.includes('xls') ||
+         type.includes('ppt');
+};
+
+const isImage = (type) => {
+  return type.includes('image/');
+};
+
+const readFileAsText = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsText(file);
+  });
+};
+
+const readFileAsDataURL = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
+
+const readPDFContent = async (file) => {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve('PDF content preview (requires pdf.js for full text)');
+    reader.readAsArrayBuffer(file);
+  });
+};
+
+const notifications = ref([]);
+const notificationId = ref(0);
+
+const addNotification = (message, type = 'success') => {
+  const id = notificationId.value++;
+  notifications.value.push({
+    id,
+    message,
+    type,
+    timestamp: Date.now()
+  });
 
   setTimeout(() => {
-    isLoading.value = false
-  }, 1000)
-})
+    removeNotification(id);
+  }, 5000);
+};
 
-// Handle unsaved changes
-const handleBeforeUnload = (e) => {
-  if (hasUnsavedChanges.value) {
-    e.preventDefault()
-    e.returnValue = ''
+const removeNotification = (id) => {
+  const index = notifications.value.findIndex(n => n.id === id);
+  if (index !== -1) {
+    notifications.value.splice(index, 1);
   }
-}
+};
 
-onMounted(() => {
-  window.addEventListener('beforeunload', handleBeforeUnload)
-})
-
-onBeforeUnmount(() => {
-  window.removeEventListener('beforeunload', handleBeforeUnload)
-})
-
-// Compute form fields based on document type
-const formFields = computed(() => {
-  if (!document.value) return []
+const documentFields = computed(() => {
+  const type = document.value.type;
 
   const commonFields = [
-    {
-      name: 'status',
-      label: 'Status',
-      type: 'select',
-      options: ['draft', 'active', 'archived']
+    { name: 'title', label: 'Document Title', type: 'text', required: true },
+    { name: 'description', label: 'Description', type: 'textarea', required: false }
+  ];
+
+  const typeSpecificFields = {
+    'buyer-rep': [
+      { name: 'buyerName', label: 'Buyer name', type: 'text', required: true, placeholder: "Enter buyer's full name" },
+      { name: 'buyerEmail', label: 'Buyer Email', type: 'email', required: true, placeholder: 'johndoe@gmail.com' },
+      { name: 'phoneNumber', label: 'Phone Number', type: 'tel', required: true, placeholder: '555-123-4567' },
+      {
+        name: 'propertyType',
+        label: 'Property Type',
+        type: 'select',
+        required: true,
+        options: [
+          'Single Family Home',
+          'Condo',
+          'Townhouse',
+          'Multi-Family',
+          'Land',
+          'Commercial'
+        ]
+      },
+      { name: 'budgetRange', label: 'Budget Range', type: 'text', required: true, placeholder: '$200,000-$500,000' },
+      { name: 'additionalNotes', label: 'Additional Notes/Requirements', type: 'textarea', required: false, placeholder: 'Any specific requirements?' }
+    ],
+    'seller-rep': [
+      { name: 'sellerName', label: 'Seller name', type: 'text', required: true, placeholder: "Enter seller's full name" },
+      { name: 'sellerEmail', label: 'Seller Email', type: 'email', required: true, placeholder: 'johndoe@gmail.com' },
+      { name: 'phoneNumber', label: 'Phone Number', type: 'tel', required: true, placeholder: '555-123-4567' },
+      {
+        name: 'propertyType',
+        label: 'Property Type',
+        type: 'select',
+        required: true,
+        options: [
+          'Single Family Home',
+          'Condo',
+          'Townhouse',
+          'Multi-Family',
+          'Land',
+          'Commercial'
+        ]
+      },
+      { name: 'propertyAddress', label: 'Property Address', type: 'text', required: true, placeholder: 'e.g., 123 Main St, City, State, ZIP' },
+      { name: 'listingPrice', label: 'Desired Listing Price', type: 'text', required: true, placeholder: 'e.g., $500,000' },
+      { name: 'additionalNotes', label: 'Additional Notes/Requirements', type: 'textarea', required: false, placeholder: 'Any specific requirements or details about the property?' }
+    ],
+    'mls': [
+      { name: 'propertyAddress', label: 'Property Address', type: 'text', required: true, placeholder: 'e.g., 123 Main St, City, State, ZIP' },
+      { name: 'listingPrice', label: 'Listing Price', type: 'text', required: true, placeholder: 'e.g., $500,000' },
+      { name: 'bedrooms', label: 'Bedrooms', type: 'number', required: true, placeholder: 'e.g., 3' },
+      { name: 'bathrooms', label: 'Bathrooms', type: 'number', required: true, placeholder: 'e.g., 2' },
+      { name: 'squareFootage', label: 'Square Footage', type: 'text', required: true, placeholder: 'e.g., 2,000 sq ft' },
+      { name: 'propertyDescription', label: 'Property Description', type: 'textarea', required: true, placeholder: 'Describe the property features and amenities' }
+    ]
+  };
+
+  return [...commonFields, ...(typeSpecificFields[type] || [])];
+});
+
+onMounted(async () => {
+  addNotification('Loading document...', 'info');
+
+  if (documentId) {
+    try {
+      const existingDoc = documentStore.getDocument(documentId);
+      if (existingDoc) {
+        document.value = { ...existingDoc };
+        // Load existing files separately
+        existingFiles.value = existingDoc.files ? [...existingDoc.files] : [];
+        addNotification('Document loaded successfully', 'success');
+      } else {
+        addNotification('Document not found', 'error');
+        router.push('/profile/documents');
+      }
+    } catch (error) {
+      console.error('Error loading document:', error);
+      addNotification('Error loading document: ' + error.message, 'error');
     }
-  ]
-
-  switch (document.value.type) {
-    case 'buyer-rep':
-      return [
-        {
-          name: 'buyerName',
-          label: 'Buyer name',
-          type: 'text',
-          placeholder: "Enter buyer's full name",
-          required: true
-        },
-        {
-          name: 'buyerEmail',
-          label: 'Buyer Email',
-          type: 'email',
-          placeholder: 'johndoe@gmail.com',
-          required: true
-        },
-        {
-          name: 'phoneNumber',
-          label: 'Phone Number',
-          type: 'tel',
-          placeholder: '555-123-4567',
-          required: true
-        },
-        {
-          name: 'propertyType',
-          label: 'Property Type',
-          type: 'select',
-          options: [
-            'Single Family Home',
-            'Condo',
-            'Townhouse',
-            'Multi-Family',
-            'Land',
-            'Commercial'
-          ],
-          required: true
-        },
-        {
-          name: 'budgetRange',
-          label: 'Budget Range',
-          type: 'text',
-          placeholder: '$200,000-$500,000',
-          required: true
-        },
-        {
-          name: 'additionalNotes',
-          label: 'Additional Notes/Requirements',
-          type: 'textarea',
-          placeholder: 'Any specific requirements?'
-        },
-        ...commonFields
-      ]
-    case 'seller-rep':
-      return [
-        {
-          name: 'sellerName',
-          label: 'Seller name',
-          type: 'text',
-          placeholder: "Enter seller's full name",
-          required: true
-        },
-        {
-          name: 'sellerEmail',
-          label: 'Seller Email',
-          type: 'email',
-          placeholder: 'johndoe@gmail.com',
-          required: true
-        },
-        {
-          name: 'phoneNumber',
-          label: 'Phone Number',
-          type: 'tel',
-          placeholder: '555-123-4567',
-          required: true
-        },
-        {
-          name: 'propertyType',
-          label: 'Property Type',
-          type: 'select',
-          options: [
-            'Single Family Home',
-            'Condo',
-            'Townhouse',
-            'Multi-Family',
-            'Land',
-            'Commercial'
-          ],
-          required: true
-        },
-        {
-          name: 'propertyAddress',
-          label: 'Property Address',
-          type: 'text',
-          placeholder: 'e.g., 123 Main St, City, State, ZIP',
-          required: true
-        },
-        {
-          name: 'listingPrice',
-          label: 'Desired Listing Price',
-          type: 'text',
-          placeholder: 'e.g., $500,000',
-          required: true
-        },
-        {
-          name: 'additionalNotes',
-          label: 'Additional Notes/Requirements',
-          type: 'textarea',
-          placeholder: 'Any specific requirements or details about the property?'
-        },
-        ...commonFields
-      ]
-    case 'mls':
-      return [
-        {
-          name: 'propertyAddress',
-          label: 'Property Address',
-          type: 'text',
-          placeholder: 'e.g., 123 Main St, City, State, ZIP',
-          required: true
-        },
-        {
-          name: 'listingPrice',
-          label: 'Listing Price',
-          type: 'text',
-          placeholder: 'e.g., $500,000',
-          required: true
-        },
-        {
-          name: 'bedrooms',
-          label: 'Bedrooms',
-          type: 'number',
-          placeholder: 'e.g., 3',
-          required: true
-        },
-        {
-          name: 'bathrooms',
-          label: 'Bathrooms',
-          type: 'number',
-          placeholder: 'e.g., 2',
-          required: true
-        },
-        {
-          name: 'squareFootage',
-          label: 'Square Footage',
-          type: 'text',
-          placeholder: 'e.g., 2,000 sq ft',
-          required: true
-        },
-        {
-          name: 'propertyDescription',
-          label: 'Property Description',
-          type: 'textarea',
-          placeholder: 'Describe the property features and amenities',
-          required: true
-        },
-        ...commonFields
-      ]
-    default:
-      return commonFields
   }
-})
+});
 
-const handleInput = (field, value) => {
-  if (document.value) {
-    document.value[field] = value
-    hasUnsavedChanges.value = true
-  }
-}
-
-const handleSubmit = async (formData) => {
-  try {
-    const updatedDocument = {
-      ...document.value,
-      ...formData,
-      updatedAt: new Date().toISOString(),
-      activities: [
-        ...document.value.activities || [],
-        {
-          id: Date.now().toString(),
-          type: 'modified',
-          description: 'Document updated',
-          date: new Date().toISOString()
-        }
-      ]
+const formErrors = ref({});
+const validateForm = () => {
+  const errors = {};
+  documentFields.value.forEach(field => {
+    if (field.required && !document.value[field.name]) {
+      errors[field.name] = `${field.label} is required`;
     }
-
-    const result = await documentStore.updateDocument(updatedDocument)
-    if (result) {
-      hasUnsavedChanges.value = false
-      router.push(`/receipts-docs/document/${document.value.id}`)
-    } else {
-      console.error('Failed to update document')
-    }
-  } catch (error) {
-    console.error('Error updating document:', error)
-  }
-}
+  });
+  formErrors.value = errors;
+  return Object.keys(errors).length === 0;
+};
 
 const handleBack = () => {
-  if (hasUnsavedChanges.value) {
-    if (confirm('You have unsaved changes. Do you want to leave without saving?')) {
-      router.back()
-    }
-  } else {
-    router.back()
+  router.push('/profile/documents');
+};
+
+const handleSave = () => {
+  if (!validateForm()) {
+    addNotification('Please fill in all required fields', 'error');
+    return;
   }
-}
+  showConfirmModal.value = true;
+};
 
-// Watch for changes in the form
-watch(() => document.value, () => {
-  hasUnsavedChanges.value = true
-}, { deep: true })
-
-const formatFileSize = (bytes) => {
-  if (!bytes) return '0 B'
-  const sizes = ['B', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(1024))
-  return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`
-}
-
-const isValidFileUrl = (url) => {
-  if (!url) return false
+const confirmSave = async () => {
   try {
-    new URL(url)
-    return true
-  } catch {
-    return false
+    const documentToSave = {
+      ...document.value,
+      files: [...existingFiles.value, ...uploadedFiles.value]
+    };
+
+    if (documentId) {
+      await documentStore.updateDocument(documentToSave);
+    } else {
+      if (document.value.type === 'buyer-rep') {
+        await documentStore.saveBuyerRepDocument(documentToSave);
+      } else if (document.value.type === 'seller-rep') {
+        await documentStore.saveSellerRepDocument(documentToSave);
+      } else {
+        await documentStore.saveMLSDocument(documentToSave);
+      }
+    }
+    addNotification('Document saved successfully', 'success');
+    router.push('/profile/documents');
+  } catch (error) {
+    console.error('Error saving document:', error);
+    addNotification('Error saving document: ' + error.message, 'error');
   }
-}
-
-const handleFileUpload = async (event) => {
-  const files = Array.from(event.target.files)
-  if (!files.length) return
-
-  // Process each file
-  const newFiles = files.map(file => ({
-    id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-    name: file.name,
-    size: file.size,
-    type: file.type.includes('pdf') ? 'pdf' : 'image',
-    url: URL.createObjectURL(file)
-  }))
-
-  // Update document with new files
-  document.value.files = [...(document.value.files || []), ...newFiles]
-  hasUnsavedChanges.value = true
-}
-
-const removeFile = (fileToRemove) => {
-  document.value.files = document.value.files.filter(file => file.id !== fileToRemove.id)
-  hasUnsavedChanges.value = true
-}
+  showConfirmModal.value = false;
+};
 </script>
 
 <style scoped>
-.document-edit {
-  background-color: #F8FAFC;
+.document-edit-container {
+  padding: 32px;
   min-height: 100vh;
+  background-color: #F3F4F6;
 }
 
-.document-header {
-  background-color: white;
-  border-bottom: 1px solid #E5E7EB;
-  padding: 2rem 0;
-  margin-bottom: 2rem;
+.page-header {
+  margin-bottom: 24px;
 }
 
-.header-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem;
+.header-top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 8px;
 }
 
 .back-button {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  font-weight: 500;
+  gap: 8px;
+  padding: 8px 12px;
+  background: white;
   border: 1px solid #E5E7EB;
-  background-color: white;
-  color: #374151;
+  border-radius: 6px;
+  color: #4B5563;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .back-button:hover {
-  background-color: #F9FAFB;
-  border-color: #D1D5DB;
+  background: #F3F4F6;
 }
 
-.button-icon {
-  width: 1.25rem;
-  height: 1.25rem;
+.page-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #111827;
 }
 
-.edit-content {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 0 2rem 2rem;
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.content-section {
-  background-color: white;
-  border-radius: 0.5rem;
-  border: 1px solid #E5E7EB;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
+.breadcrumb-link {
+  color: #2563EB;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.breadcrumb-separator {
+  color: #6B7280;
+  font-size: 14px;
+}
+
+.breadcrumb-current {
+  color: #6B7280;
+  font-size: 14px;
+}
+
+.content-layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.upload-container {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.upload-area {
+  border: 2px dashed #D1D5DB;
+  border-radius: 8px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.upload-icon {
+  width: 48px;
+  height: 48px;
+  background: #F3F4F6;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.upload-text {
+  font-size: 14px;
+  color: #4B5563;
+}
+
+.browse-link {
+  color: #2563EB;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.upload-formats {
+  font-size: 12px;
+  color: #9CA3AF;
+}
+
+.files-section {
+  margin-top: 24px;
+}
+
+.no-files {
+  color: #6B7280;
+  font-size: 14px;
+  text-align: center;
+  padding: 16px;
+}
+
+.edit-section {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.section-header {
+  margin-bottom: 24px;
 }
 
 .section-title {
-  font-size: 1.25rem;
+  font-size: 18px;
   font-weight: 600;
   color: #111827;
-  margin-bottom: 1.5rem;
+  margin-bottom: 4px;
 }
 
-.files-list {
+.section-description {
+  font-size: 14px;
+  color: #6B7280;
+}
+
+.form-list {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
+  gap: 24px;
 }
 
-.file-item {
-  padding: 1rem;
-  background-color: #F9FAFB;
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.form-control {
+  padding: 10px 12px;
   border: 1px solid #E5E7EB;
-  border-radius: 0.5rem;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #111827;
+  background: white;
+  width: 100%;
+  height: 40px;
+  transition: all 0.2s;
 }
 
-.file-row {
+.form-control::placeholder {
+  color: #9CA3AF;
+}
+
+select.form-control {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 8L10 12L14 8' stroke='%236B7280' stroke-width='1.67' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 40px;
+}
+
+select.form-control option {
+  color: #111827;
+  padding: 8px;
+}
+
+select.form-control option:disabled {
+  color: #9CA3AF;
+}
+
+.form-control:hover:not(.error) {
+  border-color: #D1D5DB;
+}
+
+.form-control:focus:not(.error) {
+  border-color: #2563EB;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+  outline: none;
+}
+
+textarea.form-control {
+  height: auto;
+  min-height: 80px;
+  resize: vertical;
+  line-height: 1.5;
+  padding: 12px;
+}
+
+.form-control.error {
+  border-color: #EF4444;
+  background-color: #FEF2F2;
+}
+
+.form-control.error:focus {
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.1);
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.required {
+  color: #EF4444;
+}
+
+.error-message {
+  font-size: 12px;
+  color: #EF4444;
+  margin-top: 2px;
+}
+
+.sidebar {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  height: fit-content;
+}
+
+.agents-section {
+  margin-bottom: 16px;
+}
+
+.agents-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 16px;
+}
+
+.agents-list {
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.agent-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+}
+
+.agent-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.agent-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.agent-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.agent-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.agent-email {
+  font-size: 12px;
+  color: #6B7280;
+}
+
+.agent-experience {
+  font-size: 12px;
+  color: #6B7280;
+}
+
+.remove-agent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  background: none;
+  border: none;
+  color: #EF4444;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.remove-agent:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.search-box {
+  margin-bottom: 16px;
+}
+
+.agent-list {
+  max-height: 300px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.agent-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.agent-item:hover {
+  background: #F3F4F6;
+}
+
+.agent-item.selected {
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+}
+
+.modal-body {
+  padding: 24px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.add-agent-button {
+  width: 100%;
+  padding: 8px;
+  background: #F3F4F6;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  color: #4B5563;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.add-agent-button:hover {
+  background: #E5E7EB;
+}
+
+.plus-icon {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal-container {
+  background: white;
+  border-radius: 8px;
+  width: 400px;
+  max-width: 90vw;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid #E5E7EB;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.file-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+.modal-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
 }
 
-.file-name-container {
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #E5E7EB;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.uploaded-files {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.file-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: space-between;
+  padding: 12px;
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+}
+
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .file-icon {
-  width: 1.25rem;
-  height: 1.25rem;
   color: #6B7280;
 }
 
 .file-name {
-  font-weight: 500;
+  font-size: 14px;
   color: #111827;
 }
 
-.file-size {
-  font-size: 0.875rem;
+.file-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.file-type {
+  font-size: 12px;
   color: #6B7280;
 }
 
-.file-actions {
+.file-remove {
   display: flex;
-  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  background: none;
+  border: none;
+  color: #EF4444;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
 }
 
-.view-button,
-.delete-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
+.file-remove:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.file-content-section {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-top: 24px;
+}
+
+.file-content {
+  margin-bottom: 24px;
+}
+
+.file-content h4 {
+  font-size: 16px;
+  font-weight: 500;
+  color: #111827;
+  margin-bottom: 12px;
+}
+
+.image-preview {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.full-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+.text-content {
+  background: #F9FAFB;
+  padding: 16px;
+  border-radius: 6px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.text-content pre {
+  margin: 0;
+  font-size: 14px;
+  color: #374151;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.page-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 24px;
+  border-top: 1px solid #E5E7EB;
+}
+
+.btn-primary {
+  padding: 9px 17px;
+  background: #2563EB;
+  border: 1px solid #2563EB;
+  border-radius: 6px;
+  color: white;
+  font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
 }
 
-.view-button {
-  background-color: #EFF6FF;
-  color: #1E40AF;
-  border: 1px solid #BFDBFE;
-  text-decoration: none;
+.btn-primary:hover {
+  background: #1D4ED8;
 }
 
-.view-button:hover {
-  background-color: #DBEAFE;
-  border-color: #93C5FD;
-}
-
-.delete-button {
-  background-color: #FEF2F2;
-  color: #DC2626;
-  border: 1px solid #FECACA;
-}
-
-.delete-button:hover {
-  background-color: #FEE2E2;
-  border-color: #FCA5A5;
-}
-
-.file-upload {
-  border: 2px dashed #E5E7EB;
-  border-radius: 0.5rem;
-  padding: 2rem;
-  text-align: center;
-}
-
-.upload-label {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
+.btn-secondary {
+  padding: 9px 17px;
+  background: white;
+  border: 1px solid #D1D5DB;
+  border-radius: 6px;
+  color: #4B5563;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
-  color: #6B7280;
+  transition: all 0.2s;
 }
 
-.upload-icon {
-  width: 2rem;
-  height: 2rem;
+.btn-secondary:hover {
+  background: #F3F4F6;
 }
 
-.hidden-input {
+.hidden {
   display: none;
 }
 
-.edit-loader {
+.notifications-container {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 50;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding: 1rem;
-  max-width: 800px;
-  margin: 0 auto;
+  gap: 8px;
+}
+
+.notification {
+  padding: 12px 16px;
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 300px;
+}
+
+.notification.success {
+  border-left: 4px solid #10B981;
+}
+
+.notification.error {
+  border-left: 4px solid #EF4444;
+}
+
+.notification.info {
+  border-left: 4px solid #3B82F6;
+}
+
+.notification-message {
+  font-size: 14px;
+  color: #374151;
+}
+
+.notification-close {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #6B7280;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.notification-close:hover {
+  background: #F3F4F6;
+}
+
+.file-preview {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  object-fit: cover;
 }
 </style>
+

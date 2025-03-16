@@ -92,6 +92,7 @@
               type="date"
               id="startDate"
               v-model="taskData.startDate"
+              :min="todayDate"
               class="task-create__input"
               required
               aria-required="true"
@@ -118,6 +119,7 @@
               type="date"
               id="endDate"
               v-model="taskData.endDate"
+              :min="taskData.startDate || todayDate"
               class="task-create__input"
               required
               aria-required="true"
@@ -304,15 +306,19 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted, computed, watch, onBeforeUnmount } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useRoleGuard } from '@/composables/useRoleGuard'
+import { useDateValidation } from '@/composables/useDateValidation'
+import { useLayoutStore } from '@/stores/layout'
 import AgentModal from './AgentModal.vue'
 import ClientModal from './ClientModal.vue'
 
 const router = useRouter()
 const route = useRoute()
 const { checkAccess } = useRoleGuard()
+const layoutStore = useLayoutStore()
+const { todayDate, ensureFutureDate, isValidFutureDateTime, isValidDateTimeRange } = useDateValidation()
 
 // Loading state
 const loading = ref(true)
@@ -326,9 +332,9 @@ const taskDescription = ref('')
 
 const taskData = reactive({
   name: '',
-  startDate: '',
+  startDate: todayDate.value,
   startTime: '09:00',
-  endDate: '',
+  endDate: todayDate.value,
   endTime: '21:00',
   priority: 'medium',
   agents: [],
@@ -337,7 +343,7 @@ const taskData = reactive({
   clientDetails: [],
   status: 'in_progress',
   attachments: [],
-  description: [] // Add description as an array
+  description: []
 })
 
 // Modal states
@@ -398,13 +404,19 @@ const removeClient = (client) => {
 }
 
 const handleBack = () => {
-  // Check if there are unsaved changes in either mode
+  // Only show confirmation if there are unsaved changes
   if (hasFormData() && hasChanges()) {
     showDraftConfirm.value = true;
   } else {
-    // No changes, just go back
+    // No changes, just go back without confirmation
     if (route.query.draftId) {
-      router.push('/tasks/drafts');
+      if (route.query.mode === 'edit') {
+        // If we're editing a task, go back to the task detail
+        router.push(`/tasks/${route.query.draftId}`);
+      } else {
+        // Otherwise go to drafts
+        router.push('/tasks/drafts');
+      }
     } else {
       router.push('/tasks');
     }
@@ -416,12 +428,18 @@ const saveDraftChanges = () => {
   const draftId = parseInt(route.query.draftId)
   const draftIndex = tasks.findIndex(t => t.id === draftId)
   if (draftIndex !== -1) {
+    // Ensure dates are not in the past when saving
+    const startDate = ensureFutureDate(taskData.startDate)
+    const endDate = ensureFutureDate(taskData.endDate)
+
     const descriptionArray = taskDescription.value
       ? taskDescription.value.split('##').map(item => `- ${item.trim()}`).filter(item => item !== '- ')
       : tasks[draftIndex].description || [];
     const updatedDraft = {
       ...tasks[draftIndex],
       ...taskData,
+      startDate,
+      endDate,
       title: taskData.name || tasks[draftIndex].title,
       updatedAt: new Date().toISOString(),
       lastEditedAt: new Date().toISOString(),
@@ -446,18 +464,24 @@ const hasFormData = () => {
     taskDescription.value
 }
 
-const handleDraftSave = async () => {
+const handleDraftSave = () => {
   try {
     if (route.query.draftId) {
       // If editing an existing draft, save changes to it
       saveDraftChanges();
     } else {
       // Creating a new draft
+      // Ensure dates are not in the past
+      const startDate = ensureFutureDate(taskData.startDate)
+      const endDate = ensureFutureDate(taskData.endDate)
+
       const descriptionArray = taskDescription.value
         ? taskDescription.value.split('##').map(item => `- ${item.trim()}`).filter(item => item !== '- ')
         : [];
       const draftData = {
         ...taskData,
+        startDate,
+        endDate,
         id: Date.now(),
         title: taskData.name || 'Untitled Task',
         createdAt: new Date().toISOString(),
@@ -486,14 +510,21 @@ const handleDraftCancel = () => {
   router.push('/tasks')
 }
 
-const handleSubmit = async () => {
+const handleSubmit = () => {
   try {
     const startDateTime = new Date(`${taskData.startDate} ${taskData.startTime}`)
-    const endDateTime = new Date(`${taskData.endDate} ${taskData.endTime}`)
-    if (endDateTime <= startDateTime) {
+
+    // Validate dates using the composable
+    if (!isValidFutureDateTime(taskData.startDate, taskData.startTime)) {
+      alert('Start date cannot be in the past')
+      return
+    }
+
+    if (!isValidDateTimeRange(taskData.startDate, taskData.startTime, taskData.endDate, taskData.endTime)) {
       alert('End date/time must be after start date/time')
       return
     }
+
     if (taskData.agents.length === 0) {
       alert('Please select at least one agent')
       return
@@ -503,7 +534,8 @@ const handleSubmit = async () => {
       return
     }
     const now = new Date()
-    const taskId = route.query.draftId ? parseInt(route.query.draftId) : Date.now()
+    // Ensure taskId is a number
+    const taskId = route.query.draftId ? Number(route.query.draftId) : Number(Date.now())
     const descriptionArray = taskDescription.value
       ? taskDescription.value.split('##').map(item => `- ${item.trim()}`).filter(item => item !== '- ')
       : [];
@@ -513,26 +545,35 @@ const handleSubmit = async () => {
       title: taskData.name,
       createdAt: now.toISOString(),
       updatedAt: now.toISOString(),
-      startedAt: now.toISOString(),
-      status: 'in_progress',
+      startedAt: null,
+      status: 'scheduled',
       agentDetails: selectedAgents.value,
       clientDetails: selectedClients.value,
       formattedStartDate: startDateTime.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-      formattedStartTime: startDateTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+      formattedStartTime: startDateTime.toISOString(),
       attachments: taskData.attachments,
       description: descriptionArray
     }
+
+    // Debug log
+    console.log('Creating task with ID:', taskId, 'and type:', typeof taskId);
+
     const tasks = JSON.parse(localStorage.getItem('tasks') || '[]')
     if (route.query.draftId) {
-      const draftId = parseInt(route.query.draftId)
-      const taskIndex = tasks.findIndex(t => t.id === draftId)
+      const draftId = Number(route.query.draftId)
+      const taskIndex = tasks.findIndex(t => Number(t.id) === draftId)
       if (taskIndex !== -1) {
         tasks.splice(taskIndex, 1)
       }
     }
     tasks.push(completeTaskData)
     localStorage.setItem('tasks', JSON.stringify(tasks))
-    router.push('/tasks/in-progress')
+
+    // Store the current task in localStorage for immediate access
+    localStorage.setItem('currentTaskDetail', JSON.stringify(completeTaskData))
+
+    // Redirect to the scheduled tasks list page instead of the task detail page
+    router.push('/tasks/scheduled')
   } catch (error) {
     console.error('Failed to create task:', error)
     alert('Failed to create task. Please try again.')
@@ -543,59 +584,88 @@ const handleSubmit = async () => {
 const hasChanges = () => {
   if (!originalTaskData.value) return true; // If no original data, assume changes
 
-  // Compare current form data with original data
-  const currentData = {
-    name: taskData.name,
-    startDate: taskData.startDate,
-    startTime: taskData.startTime,
-    endDate: taskData.endDate,
-    endTime: taskData.endTime,
-    priority: taskData.priority,
-    agents: taskData.agents,
-    clients: taskData.clients,
-    attachments: taskData.attachments,
-    description: taskDescription.value
-  };
+  // Check each field individually for more accurate change detection
+  if (taskData.name !== originalTaskData.value.name) return true;
+  if (taskData.startDate !== originalTaskData.value.startDate) return true;
+  if (taskData.startTime !== originalTaskData.value.startTime) return true;
+  if (taskData.endDate !== originalTaskData.value.endDate) return true;
+  if (taskData.endTime !== originalTaskData.value.endTime) return true;
+  if (taskData.priority !== originalTaskData.value.priority) return true;
+  if (taskDescription.value !== originalTaskData.value.description) return true;
 
-  // Simple comparison of stringified objects
-  return JSON.stringify(currentData) !== JSON.stringify(originalTaskData.value);
+  // Check arrays by comparing lengths and contents
+  if (taskData.agents.length !== originalTaskData.value.agents.length) return true;
+  if (taskData.clients.length !== originalTaskData.value.clients.length) return true;
+  if (taskData.attachments.length !== originalTaskData.value.attachments.length) return true;
+
+  // Deep check for agents
+  for (let i = 0; i < taskData.agents.length; i++) {
+    if (!originalTaskData.value.agents.includes(taskData.agents[i])) return true;
+  }
+
+  // Deep check for clients
+  for (let i = 0; i < taskData.clients.length; i++) {
+    if (!originalTaskData.value.clients.includes(taskData.clients[i])) return true;
+  }
+
+  // Deep check for attachments (by id)
+  for (let i = 0; i < taskData.attachments.length; i++) {
+    const attachment = taskData.attachments[i];
+    const originalAttachment = originalTaskData.value.attachments.find(a => a.id === attachment.id);
+    if (!originalAttachment) return true;
+  }
+
+  // No changes detected
+  return false;
 }
 
 // Update loadDraftData to save original state
-const loadDraftData = async (draftId) => {
-  const tasks = JSON.parse(localStorage.getItem('tasks') || '[]')
-  const draft = tasks.find(task => task.id === draftId)
-  if (draft) {
-    taskData.name = draft.title
-    taskData.startDate = draft.startDate
-    taskData.startTime = draft.startTime
-    taskData.endDate = draft.endDate
-    taskData.endTime = draft.endTime
-    taskData.priority = draft.priority
-    taskData.agents = draft.agents
-    taskData.agentDetails = draft.agentDetails
-    taskData.clients = draft.clients
-    taskData.clientDetails = draft.clientDetails
-    taskData.attachments = draft.attachments
-    taskData.description = draft.description || []
-    taskDescription.value = draft.description ? draft.description.map(item => item.replace('- ', '')).join(' ## ') : ''
-    selectedAgents.value = draft.agentDetails
-    selectedClients.value = draft.clientDetails
+const loadDraftData = (draftId) => {
+  return new Promise((resolve, reject) => {
+    try {
+      const tasks = JSON.parse(localStorage.getItem('tasks') || '[]')
+      const draft = tasks.find(task => task.id === draftId)
+      if (draft) {
+        taskData.name = draft.title
 
-    // Save original state for change detection
-    originalTaskData.value = {
-      name: draft.title,
-      startDate: draft.startDate,
-      startTime: draft.startTime,
-      endDate: draft.endDate,
-      endTime: draft.endTime,
-      priority: draft.priority,
-      agents: [...draft.agents],
-      clients: [...draft.clients],
-      attachments: JSON.parse(JSON.stringify(draft.attachments)),
-      description: taskDescription.value
+        // Ensure dates are not in the past
+        taskData.startDate = ensureFutureDate(draft.startDate)
+        taskData.startTime = draft.startTime
+        taskData.endDate = ensureFutureDate(draft.endDate)
+        taskData.endTime = draft.endTime
+
+        taskData.priority = draft.priority
+        taskData.agents = draft.agents
+        taskData.agentDetails = draft.agentDetails
+        taskData.clients = draft.clients
+        taskData.clientDetails = draft.clientDetails
+        taskData.attachments = draft.attachments
+        taskData.description = draft.description || []
+        taskDescription.value = draft.description ? draft.description.map(item => item.replace('- ', '')).join(' ## ') : ''
+        selectedAgents.value = draft.agentDetails
+        selectedClients.value = draft.clientDetails
+
+        // Save original state for change detection
+        originalTaskData.value = {
+          name: draft.title,
+          startDate: taskData.startDate, // Use the potentially updated date
+          startTime: draft.startTime,
+          endDate: taskData.endDate, // Use the potentially updated date
+          endTime: draft.endTime,
+          priority: draft.priority,
+          agents: [...draft.agents],
+          clients: [...draft.clients],
+          attachments: JSON.parse(JSON.stringify(draft.attachments)),
+          description: taskDescription.value
+        }
+        resolve()
+      } else {
+        reject(new Error('Draft not found'))
+      }
+    } catch (error) {
+      reject(error)
     }
-  }
+  })
 }
 
 const triggerFileInput = () => {
@@ -625,38 +695,79 @@ const getFileExtension = (filename) => {
   return filename.slice((filename.lastIndexOf(".") - 1 >>> 0) + 2).toUpperCase()
 }
 
-onMounted(async () => {
+// Watch startDate changes to update endDate if needed
+watch(() => taskData.startDate, (newStartDate) => {
+  // If endDate is before startDate, update endDate to match startDate
+  if (taskData.endDate < newStartDate) {
+    taskData.endDate = newStartDate
+  }
+})
+
+onMounted(() => {
+  // Set layout to hide header and sidebar after a slight delay
+  // This prevents the layout from changing before navigation completes
+  setTimeout(() => {
+    layoutStore.setLayout({
+      hideSidebar: true,
+      hideHeader: true,
+      background: '#f9fafb'
+    });
+  }, 50);
+
   loading.value = true; // Set loading to true at the start
 
-  const hasAccess = await checkAccess(['agent', 'admin'])
-  if (!hasAccess) {
-    router.push('/unauthorized')
-    return
-  }
-
-  const draftId = route.query.draftId
-  if (draftId) {
-    await loadDraftData(parseInt(draftId))
-  } else {
-    // Initialize original data for new tasks
-    originalTaskData.value = {
-      name: '',
-      startDate: '',
-      startTime: '09:00',
-      endDate: '',
-      endTime: '21:00',
-      priority: 'medium',
-      agents: [],
-      clients: [],
-      attachments: [],
-      description: ''
+  checkAccess(['agent', 'admin']).then(hasAccess => {
+    if (!hasAccess) {
+      router.push('/unauthorized')
+      return
     }
-  }
 
-  // Add a slight delay to show the skeleton loader
-  setTimeout(() => {
-    loading.value = false; // Set loading to false after data is loaded
-  }, 800);
+    const draftId = route.query.draftId
+    if (draftId) {
+      loadDraftData(parseInt(draftId))
+        .then(() => {
+          loading.value = false
+        })
+        .catch(error => {
+          console.error('Error loading draft data:', error)
+          loading.value = false
+        })
+    } else {
+      // Initialize original data for new tasks
+      const today = new Date().toISOString().split('T')[0]
+      originalTaskData.value = {
+        name: '',
+        startDate: today,
+        startTime: '09:00',
+        endDate: today,
+        endTime: '17:00',
+        priority: 'medium',
+        agents: [],
+        clients: [],
+        attachments: []
+      }
+
+      // Copy to taskData
+      Object.assign(taskData, originalTaskData.value)
+
+      // Add a slight delay to show the skeleton loader
+      setTimeout(() => {
+        loading.value = false // Set loading to false after data is loaded
+      }, 800)
+    }
+  }).catch(error => {
+    console.error('Error checking access:', error)
+    loading.value = false
+  })
+})
+
+onBeforeUnmount(() => {
+  // Reset layout when component is unmounted
+  layoutStore.setLayout({
+    hideSidebar: false,
+    hideHeader: false,
+    background: '#F9FAFB'
+  })
 })
 </script>
 

@@ -24,12 +24,12 @@
           </svg>
           Back
         </button>
-        <h1 class="page-title">Currently editing: Legal documentation for {{ getClientName() }}</h1>
+        <h1 class="page-title">Currently editing: {{ document.title || 'Legal documentation' }} for {{ getClientName() }}</h1>
       </div>
       <div class="breadcrumb">
         <router-link to="/profile/documents" class="breadcrumb-link">Documents</router-link>
         <span class="breadcrumb-separator">/</span>
-        <span class="breadcrumb-current">Legal documentation</span>
+        <span class="breadcrumb-current">{{ document.title || 'Legal documentation' }}</span>
       </div>
     </div>
 
@@ -62,21 +62,72 @@
             />
           </div>
 
-          <!-- Uploaded Files -->
-          <div v-if="uploadedFiles.length > 0" class="uploaded-files">
-            <div v-for="(file, index) in uploadedFiles" :key="index" class="file-item">
-              <div class="file-info">
-                <svg v-if="isDocument(file.type)" class="file-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M7.5 9.16667H12.5M7.5 12.5H10.8333M6.66667 2.5H13.3333L17.5 6.66667V15.8333C17.5 16.2754 17.3244 16.6993 17.0118 17.0118C16.6993 17.3244 16.2754 17.5 15.8333 17.5H4.16667C3.72464 17.5 3.30072 17.3244 2.98816 17.0118C2.67559 16.6993 2.5 16.2754 2.5 15.8333V4.16667C2.5 3.72464 2.67559 3.30072 2.98816 2.98816C3.30072 2.67559 3.72464 2.5 4.16667 2.5H6.66667ZM13.3333 2.5V6.66667H17.5L13.3333 2.5Z" stroke="#6B7280" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                <img v-else-if="isImage(file.type)" :src="getFilePreview(file)" class="file-preview" :alt="file.name" />
-                <span class="file-name">{{ file.name }}</span>
+          <!-- Existing and Uploaded Files -->
+          <div class="files-section">
+            <h3 class="section-title">Attached Files</h3>
+            <div v-if="allFiles.length > 0" class="uploaded-files">
+              <div v-for="(file, index) in allFiles" :key="index" class="file-item">
+                <div class="file-info">
+                  <svg v-if="isDocument(file.type)" class="file-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M7.5 9.16667H12.5M7.5 12.5H10.8333M6.66667 2.5H13.3333L17.5 6.66667V15.8333C17.5 16.2754 17.3244 16.6993 17.0118 17.0118C16.6993 17.3244 16.2754 17.5 15.8333 17.5H4.16667C3.72464 17.5 3.30072 17.3244 2.98816 17.0118C2.67559 16.6993 2.5 16.2754 2.5 15.8333V4.16667C2.5 3.72464 2.67559 3.30072 2.98816 2.98816C3.30072 2.67559 3.72464 2.5 4.16667 2.5H6.66667ZM13.3333 2.5V6.66667H17.5L13.3333 2.5Z" stroke="#6B7280" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  <img v-else-if="isImage(file.type) && (file.preview || file.path)" :src="file.preview || file.path" class="file-preview" :alt="file.name" />
+                  <svg v-else class="file-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M6.66667 2.5H13.3333L17.5 6.66667V15.8333C17.5 16.2754 17.3244 16.6993 17.0118 17.0118C16.6993 17.3244 16.2754 17.5 15.8333 17.5H4.16667C3.72464 17.5 3.30072 17.3244 2.98816 17.0118C2.67559 16.6993 2.5 16.2754 2.5 15.8333V4.16667C2.5 3.72464 2.67559 3.30072 2.98816 2.98816C3.30072 2.67559 3.72464 2.5 4.16667 2.5H6.66667Z" stroke="#6B7280" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  <div class="file-details">
+                    <span class="file-name">{{ file.name || 'Unnamed file' }}</span>
+                    <span class="file-type">{{ file.type || 'Unknown type' }}</span>
+                  </div>
+                </div>
+                <button @click="removeFile(index)" class="file-remove">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M13.3333 5L6.66667 11.6667M6.66667 5L13.3333 11.6667" stroke="#EF4444" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
               </div>
-              <button @click="removeFile(index)" class="file-remove">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M13.3333 5L6.66667 11.6667M6.66667 5L13.3333 11.6667" stroke="#EF4444" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </button>
+            </div>
+            <div v-else class="no-files">
+              No files attached yet
+            </div>
+          </div>
+
+          <!-- File Content Display Section -->
+          <div v-if="allFiles.length > 0" class="file-content-section">
+            <h3 class="section-title">Document Contents</h3>
+            <div v-for="(file, index) in allFiles" :key="index" class="file-content">
+              <div class="file-header">
+                <h4>{{ file.name || 'Unnamed file' }}</h4>
+                <div class="file-actions">
+                  <a v-if="file.path && file.path !== '#'" :href="file.path" target="_blank" class="file-action-btn view-btn">
+                    <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+                      <path d="M10.0003 4.16667C5.83366 4.16667 2.27533 6.94751 0.833664 10.8333C2.27533 14.7192 5.83366 17.5 10.0003 17.5C14.167 17.5 17.7253 14.7192 19.167 10.8333C17.7253 6.94751 14.167 4.16667 10.0003 4.16667Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="M10 14.1667C11.841 14.1667 13.3333 12.6743 13.3333 10.8333C13.3333 8.99238 11.841 7.5 10 7.5C8.15905 7.5 6.66667 8.99238 6.66667 10.8333C6.66667 12.6743 8.15905 14.1667 10 14.1667Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    View
+                  </a>
+                  <button @click="removeFile(index)" class="file-action-btn delete-btn">
+                    <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+                      <path d="M13.3333 5L6.66667 11.6667M6.66667 5L13.3333 11.6667" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Delete
+                  </button>
+                </div>
+              </div>
+              <div class="file-details">
+                <span class="file-type">Type: {{ file.type || 'Unknown type' }}</span>
+                <span class="file-size" v-if="file.size">Size: {{ formatFileSize(file.size) }}</span>
+                <span v-if="file.path && file.path !== '#'" class="file-path">Path: {{ file.path }}</span>
+              </div>
+              <div v-if="isImage(file.type) && (file.content || file.preview || file.path)" class="image-preview">
+                <img :src="file.content || file.preview || file.path" :alt="file.name || 'Image preview'" class="full-image" />
+              </div>
+              <div v-else-if="file.content" class="text-content">
+                <pre>{{ file.content }}</pre>
+              </div>
+              <div v-else class="text-content">
+                <pre>File content not available for preview</pre>
+              </div>
             </div>
           </div>
         </div>
@@ -237,46 +288,45 @@ const documentStore = useDocumentStore();
 const documentId = route.params.id;
 const showConfirmModal = ref(false);
 const fileInput = ref(null);
-const uploadedFiles = ref([]);
+const uploadedFiles = ref([]); // New uploads during this session
+const existingFiles = ref([]); // Files loaded from existing document
+const isLoading = ref(true); // Add isLoading ref
 
-// Initialize document with default values
+// Combined files for display
+const allFiles = computed(() => [...existingFiles.value, ...uploadedFiles.value]);
+
 const document = ref({
   id: documentId || '',
   type: route.query.type || 'buyer-rep',
   title: '',
   description: '',
   associatedAgents: [],
-  // Buyer Rep specific fields
+  files: [],
   buyerName: '',
   buyerEmail: '',
   phoneNumber: '',
   propertyType: '',
   budgetRange: '',
   additionalNotes: '',
-  // Seller Rep specific fields
   sellerName: '',
   sellerEmail: '',
   propertyAddress: '',
   listingPrice: '',
-  // MLS specific fields
   squareFootage: '',
   bedrooms: '',
   bathrooms: '',
   propertyDescription: ''
 });
 
-// Add agent modal state
 const showAgentModal = ref(false);
 const agentSearchQuery = ref('');
 
-// Mock agents data (replace with your actual agent data source)
 const allAgents = ref([
   { id: 1, name: 'John Doe', email: 'john@example.com', avatar: '/avatars/john.jpg', experience: '5 years' },
   { id: 2, name: 'Jane Smith', email: 'jane@example.com', avatar: '/avatars/jane.jpg', experience: '8 years' },
   { id: 3, name: 'Mike Johnson', email: 'mike@example.com', avatar: '/avatars/mike.jpg', experience: '3 years' },
 ]);
 
-// Computed property for filtered agents
 const filteredAgents = computed(() => {
   const query = agentSearchQuery.value.toLowerCase();
   return allAgents.value.filter(agent =>
@@ -285,7 +335,6 @@ const filteredAgents = computed(() => {
   );
 });
 
-// Handle agent selection
 const handleAgentSelect = (agent) => {
   if (!document.value.associatedAgents) {
     document.value.associatedAgents = [];
@@ -297,12 +346,10 @@ const handleAgentSelect = (agent) => {
   agentSearchQuery.value = '';
 };
 
-// Remove associated agent
 const removeAgent = (agentId) => {
   document.value.associatedAgents = document.value.associatedAgents.filter(a => a.id !== agentId);
 };
 
-// Get client name for header
 const getClientName = () => {
   if (document.value.type === 'buyer-rep') {
     return document.value.buyerName || 'Buyer';
@@ -313,7 +360,6 @@ const getClientName = () => {
   }
 };
 
-// File handling functions
 const triggerFileInput = () => {
   fileInput.value.click();
 };
@@ -328,19 +374,62 @@ const handleFileDrop = (event) => {
   files.forEach(handleFile);
 };
 
-const handleFile = (file) => {
-  uploadedFiles.value.push({
-    name: file.name,
-    size: file.size,
-    type: file.type
-  });
+const handleFile = async (file) => {
+  try {
+    const fileObject = {
+      name: file.name,
+      type: file.type,
+      size: file.size,
+      content: null,
+      preview: null,
+      path: URL.createObjectURL(file),
+      file: file
+    };
+
+    if (isImage(file.type)) {
+      fileObject.preview = URL.createObjectURL(file);
+      fileObject.content = await readFileAsDataURL(file);
+    } else if (isDocument(file.type)) {
+      if (file.type === 'application/pdf') {
+        fileObject.content = await readPDFContent(file);
+      } else {
+        fileObject.content = await readFileAsText(file);
+      }
+    }
+
+    uploadedFiles.value.push(fileObject);
+    addNotification(`File "${file.name}" added successfully`, 'success');
+  } catch (error) {
+    addNotification(`Error reading file ${file.name}: ${error.message}`, 'error');
+  }
 };
 
 const removeFile = (index) => {
-  uploadedFiles.value.splice(index, 1);
+  console.log('Removing file at index:', index);
+  console.log('Current files:', { existingFiles: existingFiles.value, uploadedFiles: uploadedFiles.value });
+
+  if (index < existingFiles.value.length) {
+    // Removing from existing files
+    existingFiles.value.splice(index, 1);
+
+    // Also update the document's files array if it exists
+    if (document.value.files && Array.isArray(document.value.files)) {
+    document.value.files.splice(index, 1);
+    }
+
+    addNotification('Existing file removed', 'success');
+  } else {
+    // Removing from newly uploaded files
+    const uploadedIndex = index - existingFiles.value.length;
+    uploadedFiles.value.splice(uploadedIndex, 1);
+    addNotification('Uploaded file removed', 'success');
+  }
+
+  console.log('Files after removal:', { existingFiles: existingFiles.value, uploadedFiles: uploadedFiles.value });
 };
 
 const isDocument = (type) => {
+  if (!type) return false;
   return type.includes('pdf') ||
          type.includes('doc') ||
          type.includes('xls') ||
@@ -348,18 +437,36 @@ const isDocument = (type) => {
 };
 
 const isImage = (type) => {
+  if (!type) return false;
   return type.includes('image/');
 };
 
-const getFilePreview = (file) => {
-  if (file.preview) return file.preview;
-  if (isImage(file.type)) {
-    return URL.createObjectURL(file);
-  }
-  return null;
+const readFileAsText = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsText(file);
+  });
 };
 
-// Add notification system
+const readFileAsDataURL = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
+
+const readPDFContent = async (file) => {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve('PDF content preview (requires pdf.js for full text)');
+    reader.readAsArrayBuffer(file);
+  });
+};
+
 const notifications = ref([]);
 const notificationId = ref(0);
 
@@ -384,7 +491,6 @@ const removeNotification = (id) => {
   }
 };
 
-// Computed property for document fields based on type
 const documentFields = computed(() => {
   const type = document.value.type;
 
@@ -450,15 +556,56 @@ const documentFields = computed(() => {
   return [...commonFields, ...(typeSpecificFields[type] || [])];
 });
 
-// Load document data if editing existing document
-onMounted(() => {
+onMounted(async () => {
   addNotification('Loading document...', 'info');
 
   if (documentId) {
     try {
+      // Get document from store
       const existingDoc = documentStore.getDocument(documentId);
+
       if (existingDoc) {
+        // Log document data for debugging
+        console.log('Loaded document:', existingDoc);
+
+        // Assign document data
         document.value = { ...existingDoc };
+
+        // Process existing files to ensure they have paths and are properly loaded
+        if (existingDoc.files && existingDoc.files.length > 0) {
+          console.log('Document has files:', existingDoc.files);
+
+          existingFiles.value = existingDoc.files.map(file => {
+            // Create a proper file object with all necessary properties
+            const fileObj = { ...file };
+
+            // Ensure path exists - use preview or create a placeholder
+            if (!fileObj.path && fileObj.preview) {
+              fileObj.path = fileObj.preview;
+            } else if (!fileObj.path) {
+              // If no path or preview, create a placeholder for display purposes
+              fileObj.path = '#';
+            }
+
+            // Ensure type is set
+            if (!fileObj.type) {
+              // Try to determine type from name or set a default
+              const ext = fileObj.name?.split('.').pop()?.toLowerCase();
+              if (ext === 'pdf') fileObj.type = 'application/pdf';
+              else if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) fileObj.type = `image/${ext}`;
+              else if (['doc', 'docx'].includes(ext)) fileObj.type = 'application/msword';
+              else fileObj.type = 'application/octet-stream';
+            }
+
+            return fileObj;
+          });
+
+          console.log('Processed files:', existingFiles.value);
+        } else {
+          console.log('No files found in document');
+          existingFiles.value = [];
+        }
+
         addNotification('Document loaded successfully', 'success');
       } else {
         addNotification('Document not found', 'error');
@@ -469,9 +616,13 @@ onMounted(() => {
       addNotification('Error loading document: ' + error.message, 'error');
     }
   }
+
+  // Check if files are loaded correctly
+  console.log('All files after loading:', allFiles.value);
+
+  isLoading.value = false;
 });
 
-// Form validation
 const formErrors = ref({});
 const validateForm = () => {
   const errors = {};
@@ -484,12 +635,10 @@ const validateForm = () => {
   return Object.keys(errors).length === 0;
 };
 
-// Handle back button and cancel
 const handleBack = () => {
   router.push('/profile/documents');
 };
 
-// Handle save button
 const handleSave = () => {
   if (!validateForm()) {
     addNotification('Please fill in all required fields', 'error');
@@ -498,18 +647,45 @@ const handleSave = () => {
   showConfirmModal.value = true;
 };
 
-// Confirm save
 const confirmSave = async () => {
   try {
+    // Log current files for debugging
+    console.log('Files before saving:', [...existingFiles.value, ...uploadedFiles.value]);
+
+    // Create a new object with file metadata but without the actual file content
+    // to avoid circular references when storing in localStorage
+    const filesToSave = [...existingFiles.value, ...uploadedFiles.value].map(file => {
+      // Create a clean file object for storage
+      const cleanFile = {
+        name: file.name || 'Unnamed file',
+        type: file.type || 'application/octet-stream',
+        size: file.size || 0,
+        path: file.path || null,
+        preview: file.preview || null,
+      };
+
+      // Don't include the actual file object or large content strings
+      // These would be handled by a real backend
+      return cleanFile;
+    });
+
+    const documentToSave = {
+      ...document.value,
+      files: filesToSave,
+      updatedAt: new Date().toISOString()
+    };
+
+    console.log('Saving document:', documentToSave);
+
     if (documentId) {
-      await documentStore.updateDocument(document.value);
+      await documentStore.updateDocument(documentToSave);
     } else {
       if (document.value.type === 'buyer-rep') {
-        await documentStore.saveBuyerRepDocument(document.value);
+        await documentStore.saveBuyerRepDocument(documentToSave);
       } else if (document.value.type === 'seller-rep') {
-        await documentStore.saveSellerRepDocument(document.value);
+        await documentStore.saveSellerRepDocument(documentToSave);
       } else {
-        await documentStore.saveMLSDocument(document.value);
+        await documentStore.saveMLSDocument(documentToSave);
       }
     }
     addNotification('Document saved successfully', 'success');
@@ -519,6 +695,20 @@ const confirmSave = async () => {
     addNotification('Error saving document: ' + error.message, 'error');
   }
   showConfirmModal.value = false;
+};
+
+const formatFileSize = (bytes) => {
+  if (!bytes) return '0 KB';
+
+  if (bytes < 1024) {
+    return bytes + ' B';
+  } else if (bytes < 1024 * 1024) {
+    return (bytes / 1024).toFixed(2) + ' KB';
+  } else if (bytes < 1024 * 1024 * 1024) {
+    return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+  } else {
+    return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
+  }
 };
 </script>
 
@@ -648,6 +838,17 @@ const confirmSave = async () => {
   color: #9CA3AF;
 }
 
+.files-section {
+  margin-top: 24px;
+}
+
+.no-files {
+  color: #6B7280;
+  font-size: 14px;
+  text-align: center;
+  padding: 16px;
+}
+
 .edit-section {
   background: white;
   border-radius: 8px;
@@ -688,14 +889,6 @@ const confirmSave = async () => {
   position: relative;
   display: flex;
   align-items: center;
-}
-
-.input-suffix {
-  position: absolute;
-  right: 12px;
-  color: #6B7280;
-  font-size: 14px;
-  pointer-events: none;
 }
 
 .form-control {
@@ -1004,6 +1197,22 @@ textarea.form-control {
   color: #111827;
 }
 
+.file-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 12px 16px;
+  background: #F9FAFB;
+  border-bottom: 1px solid #E5E7EB;
+  font-size: 12px;
+  color: #6B7280;
+}
+
+.file-type {
+  font-size: 12px;
+  color: #6B7280;
+}
+
 .file-remove {
   display: flex;
   align-items: center;
@@ -1019,6 +1228,121 @@ textarea.form-control {
 
 .file-remove:hover {
   background: rgba(239, 68, 68, 0.1);
+}
+
+.file-content-section {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-top: 24px;
+}
+
+.file-content {
+  margin-bottom: 24px;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.file-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #F9FAFB;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.file-header h4 {
+  font-size: 16px;
+  font-weight: 500;
+  color: #111827;
+  margin: 0;
+}
+
+.file-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.file-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.view-btn {
+  background: #EFF6FF;
+  color: #2563EB;
+  border: 1px solid #BFDBFE;
+}
+
+.view-btn:hover {
+  background: #DBEAFE;
+}
+
+.delete-btn {
+  background: #FEF2F2;
+  color: #EF4444;
+  border: 1px solid #FECACA;
+}
+
+.delete-btn:hover {
+  background: #FEE2E2;
+}
+
+.file-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 12px 16px;
+  background: #F9FAFB;
+  border-bottom: 1px solid #E5E7EB;
+  font-size: 12px;
+  color: #6B7280;
+}
+
+.file-path {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.image-preview {
+  max-width: 100%;
+  overflow: hidden;
+  padding: 16px;
+}
+
+.full-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  display: block;
+  margin: 0 auto;
+}
+
+.text-content {
+  background: #F9FAFB;
+  padding: 16px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.text-content pre {
+  margin: 0;
+  font-size: 14px;
+  color: #374151;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
 .page-footer {
@@ -1065,7 +1389,6 @@ textarea.form-control {
   display: none;
 }
 
-/* Notification styles */
 .notifications-container {
   position: fixed;
   top: 24px;
@@ -1118,12 +1441,6 @@ textarea.form-control {
   background: #F3F4F6;
 }
 
-.form-list {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
 .file-preview {
   width: 32px;
   height: 32px;
@@ -1131,4 +1448,3 @@ textarea.form-control {
   object-fit: cover;
 }
 </style>
-

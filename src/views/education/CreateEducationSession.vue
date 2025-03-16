@@ -173,6 +173,7 @@
                   type="date"
                   id="date"
                   v-model="sessionData.date"
+                  :min="todayDate"
                   class="form-control"
                 >
                 <div class="select-arrow">
@@ -398,6 +399,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useDateValidation } from '@/composables/useDateValidation'
 
 const router = useRouter();
 
@@ -544,8 +546,20 @@ const formatDate = (dateString) => {
   return date.toLocaleDateString('en-US', options).toUpperCase();
 };
 
+// Add this inside the setup function or at the script setup level
+const { todayDate, ensureFutureDate } = useDateValidation()
+
 // Save session
 const saveSession = () => {
+  // Validate session date
+  if (!sessionData.value.date) {
+    alert('Please select a session date')
+    return
+  }
+
+  // Ensure the date is not in the past
+  sessionData.value.date = ensureFutureDate(sessionData.value.date)
+
   // In a real app, you would send this data to your backend
   console.log('Saving session:', sessionData.value);
 

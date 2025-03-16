@@ -250,6 +250,7 @@ import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useLayoutStore } from '@/stores/layout';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
+import { useDateValidation } from '@/composables/useDateValidation'
 
 // State management
 const route = useRoute();
@@ -317,10 +318,8 @@ const isEditing = computed(() => route.params.id !== undefined);
 const isFormValid = computed(() => postData.value.content.trim() !== '' && postData.value.accounts.length > 0);
 
 // New computed properties
-const minDate = computed(() => {
-  const today = new Date();
-  return today.toISOString().split('T')[0];
-});
+const { todayDate, isValidFutureDateTime } = useDateValidation()
+const minDate = todayDate
 
 const isReadyToPublish = computed(() => {
   if (!isFormValid.value) return false;
@@ -493,17 +492,8 @@ function saveDraft() {
 }
 
 function submitPost() {
-  if (!isFormValid.value) return;
-  if (publishingOption.value === 'scheduled' && (!scheduledDate.value || !scheduledTime.value)) {
-    modalConfig.value = {
-      title: 'Missing Schedule',
-      message: 'Please select both date and time for scheduling.',
-      type: 'error',
-      confirmText: 'OK',
-      action: null
-    };
-    showModal.value = true;
-    return;
+  if (publishingOption.value === 'scheduled' && !validateScheduledDateTime()) {
+    return
   }
 
   postData.value.status = publishingOption.value === 'now' ? 'published' : 'scheduled';
@@ -537,6 +527,16 @@ function deleteImage(index) {
 
 function triggerFileInput() {
   fileInput.value.click();
+}
+
+function validateScheduledDateTime() {
+  if (publishingOption.value === 'scheduled') {
+    if (!isValidFutureDateTime(scheduledDate.value, scheduledTime.value)) {
+      alert('Scheduled date and time cannot be in the past')
+      return false
+    }
+  }
+  return true
 }
 </script>
 

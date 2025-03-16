@@ -161,10 +161,11 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useLayoutStore } from '@/stores/layout';
 
 const route = useRoute();
+const router = useRouter();
 const layoutStore = useLayoutStore();
 const task = ref(null);
 const loading = ref(true);
@@ -186,8 +187,21 @@ const goBack = () => {
     background: '#F9FAFB'
   });
 
-  // Use browser history to go back
-  window.history.back();
+  // Determine where to go back based on task status
+  if (task.value && task.value.status) {
+    if (task.value.status === 'completed') {
+      router.push('/tasks/completed');
+    } else if (task.value.status === 'draft') {
+      router.push('/tasks/drafts');
+    } else if (task.value.status === 'scheduled') {
+      router.push('/tasks/scheduled');
+    } else {
+      router.push('/tasks/in-progress');
+    }
+  } else {
+    // Fallback to in-progress tasks if no status is found
+    router.push('/tasks/in-progress');
+  }
 };
 
 const formatDate = (date) => {
@@ -219,6 +233,16 @@ const capitalizeFirst = (str) => {
 
 onMounted(async () => {
   loading.value = true;
+
+  // Set layout to hide header and sidebar after a slight delay
+  // This prevents the layout from changing before navigation completes
+  setTimeout(() => {
+    layoutStore.setLayout({
+      hideSidebar: true,
+      hideHeader: true,
+      background: '#f9fafb'
+    });
+  }, 50);
 
   setTimeout(() => {
     const taskId = route.params.id;

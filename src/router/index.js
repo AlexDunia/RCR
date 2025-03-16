@@ -55,22 +55,39 @@ const routes = [
         component: () => import('@/views/tasks/DraftTasks.vue')
       },
       {
+        path: 'scheduled',
+        name: 'ScheduledTasks',
+        component: () => import('@/views/tasks/ScheduledTasks.vue')
+      },
+      {
         path: 'completed',
         component: () => import('@/views/tasks/CompletedTasks.vue')
       },
       {
         path: 'create',
-        component: () => import('@/components/task/TaskCreate.vue')
+        component: () => import('@/components/task/TaskCreate.vue'),
+        meta: {
+          hideSidebar: true,
+          hideHeader: true
+        }
       },
       {
         path: ':id',
         name: 'TaskDetail',
-        component: () => import('@/components/task/TaskDetail.vue')
+        component: () => import('@/components/task/TaskDetail.vue'),
+        meta: {
+          hideSidebar: true,
+          hideHeader: true
+        }
       },
       {
         path: 'completed/:id',
         name: 'CompletedTaskDetail',
-        component: () => import('@/components/task/TaskDetail.vue')
+        component: () => import('@/components/task/TaskDetail.vue'),
+        meta: {
+          hideSidebar: true,
+          hideHeader: true
+        }
       }
     ]
   },
@@ -298,7 +315,7 @@ const router = createRouter({
   }
 });
 
-// Navigation guard for role-based access control and layout
+// Navigation guard for role-based access control
 router.beforeEach(async (to, from, next) => {
   // Authentication and role checks
   if (to.meta.requiresAuth) {
@@ -319,6 +336,11 @@ router.beforeEach(async (to, from, next) => {
     }
   }
 
+  next();
+});
+
+// Handle layout changes after navigation completes to prevent flicker
+router.afterEach((to) => {
   // Set layout based on route
   const layoutStore = useLayoutStore();
 
@@ -342,8 +364,6 @@ router.beforeEach(async (to, from, next) => {
   } else {
     layoutStore.setHeaderVisibility(true);
   }
-
-  next();
 });
 
 export default router;

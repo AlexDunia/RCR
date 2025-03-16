@@ -31,6 +31,7 @@
             type="datetime-local"
             id="dueDate"
             v-model="checklist.dueDate"
+            :min="todayDate.replace(/T.*$/, 'T00:00')"
           >
         </div>
 
@@ -96,6 +97,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useDateValidation } from '@/composables/useDateValidation'
 
 const router = useRouter();
 
@@ -110,6 +112,8 @@ const checklist = ref({
   completed: false
 });
 
+const { todayDate, isValidFutureDateTime } = useDateValidation()
+
 const addItem = () => {
   checklist.value.items.push({ text: '', completed: false });
 };
@@ -121,7 +125,22 @@ const removeItem = (index) => {
   }
 };
 
+const validateDueDate = () => {
+  if (checklist.value.dueDate) {
+    const [date, time] = checklist.value.dueDate.split('T')
+    if (!isValidFutureDateTime(date, time)) {
+      alert('Due date cannot be in the past')
+      return false
+    }
+  }
+  return true
+}
+
 const saveChecklist = () => {
+  if (!validateDueDate()) {
+    return
+  }
+
   try {
     // Log the current state before saving
     console.log('Current checklist to save:', checklist.value);

@@ -58,7 +58,61 @@
         ]"
       ></div>
       <template v-else>
-        <template v-if="field.type === 'textarea'">
+        <template v-if="field.type === 'file'">
+          <div class="file-upload-container">
+            <div class="file-upload-area"
+                 @drop.prevent="handleFileDrop($event, field.name)"
+                 @dragover.prevent
+                 @dragenter.prevent="() => isDragging = true"
+                 @dragleave.prevent="() => isDragging = false"
+                 :class="{ 'dragging': isDragging }">
+              <div class="upload-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 12V19M12 12L15 15M12 12L9 15M20 16.7428C21.2215 15.734 22 14.2079 22 12.5C22 9.46243 19.5376 7 16.5 7C16.2815 7 16.0771 7.01349 15.8767 7.03857C14.9827 4.67583 12.6997 3 10 3C6.13401 3 3 6.13401 3 10C3 12.2501 4.07741 14.2509 5.75 15.4805" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div class="upload-text">
+                <span>Drag & drop files here or</span>
+                <button type="button" class="browse-button" @click="triggerFileInput(field.name)">Browse files</button>
+              </div>
+              <div class="upload-formats">
+                Supported formats: PDF, DOC, XLS, PPT, JPG, PNG, GIF, TIFF, HEIC
+              </div>
+              <input
+                :id="field.name"
+                type="file"
+                @change="handleFileSelect($event, field.name)"
+                :accept="field.accept"
+                multiple
+                class="hidden"
+              >
+            </div>
+
+            <!-- Selected Files List -->
+            <div v-if="formData[field.name]?.length > 0" class="selected-files">
+              <div v-for="(file, index) in formData[field.name]" :key="index" class="file-item">
+                <div class="file-info">
+                  <div class="file-icon" :class="getFileIconClass(file.type)">
+                    <svg v-if="isDocument(file.type)" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                      <path d="M7.5 9.16667H12.5M7.5 12.5H10.8333M6.66667 2.5H13.3333L17.5 6.66667V15.8333C17.5 16.2754 17.3244 16.6993 17.0118 17.0118C16.6993 17.3244 16.2754 17.5 15.8333 17.5H4.16667C3.72464 17.5 3.30072 17.3244 2.98816 17.0118C2.67559 16.6993 2.5 16.2754 2.5 15.8333V4.16667C2.5 3.72464 2.67559 3.30072 2.98816 2.98816C3.30072 2.67559 3.72464 2.5 4.16667 2.5H6.66667ZM13.3333 2.5V6.66667H17.5L13.3333 2.5Z" stroke="currentColor" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <img v-else-if="isImage(file.type)" :src="getFilePreview(file)" class="file-preview" :alt="file.name">
+                  </div>
+                  <div class="file-details">
+                    <span class="file-name">{{ file.name }}</span>
+                    <span class="file-size">{{ formatFileSize(file.size) }}</span>
+                  </div>
+                </div>
+                <button type="button" @click="removeFile(field.name, index)" class="remove-file">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M13.3333 5L6.66667 11.6667M6.66667 5L13.3333 11.6667" stroke="#EF4444" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </template>
+        <template v-else-if="field.type === 'textarea'">
           <textarea
             v-model="formData[field.name]"
             :placeholder="field.placeholder"
@@ -145,6 +199,16 @@ const formErrors = ref({})
 const showAgentModal = ref(false)
 const agentSearchQuery = ref('')
 const selectedAgents = ref([])
+const isDragging = ref(false)
+
+// Initialize form data with empty arrays for file fields
+props.fields.forEach(field => {
+  if (field.type === 'file') {
+    formData[field.name] = []
+  } else {
+    formData[field.name] = ''
+  }
+})
 
 // Mock agents data - replace with your actual agents data
 const allAgents = [
@@ -204,6 +268,82 @@ const handleSubmit = () => {
     ...formData,
     agents: selectedAgents.value
   })
+}
+
+const triggerFileInput = (fieldName) => {
+  document.getElementById(fieldName).click()
+}
+
+const handleFileSelect = (event, fieldName) => {
+  const files = Array.from(event.target.files)
+  if (!formData[fieldName]) {
+    formData[fieldName] = []
+  }
+  addFiles(files, fieldName)
+}
+
+const handleFileDrop = (event, fieldName) => {
+  event.preventDefault()
+  isDragging.value = false
+  const files = Array.from(event.dataTransfer.files)
+  if (!formData[fieldName]) {
+    formData[fieldName] = []
+  }
+  addFiles(files, fieldName)
+}
+
+const addFiles = (files, fieldName) => {
+  if (!formData[fieldName]) {
+    formData[fieldName] = []
+  }
+
+  files.forEach(file => {
+    const fileObj = {
+      file,
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      preview: isImage(file.type) ? URL.createObjectURL(file) : null
+    }
+    formData[fieldName].push(fileObj)
+  })
+}
+
+const removeFile = (fieldName, index) => {
+  const file = formData[fieldName][index]
+  if (file.preview) {
+    URL.revokeObjectURL(file.preview)
+  }
+  formData[fieldName].splice(index, 1)
+}
+
+const isDocument = (type) => {
+  return type.includes('pdf') ||
+         type.includes('doc') ||
+         type.includes('xls') ||
+         type.includes('ppt')
+}
+
+const isImage = (type) => {
+  return type.includes('image/')
+}
+
+const getFilePreview = (file) => {
+  return file.preview
+}
+
+const getFileIconClass = (type) => {
+  if (isDocument(type)) return 'document-icon'
+  if (isImage(type)) return 'image-icon'
+  return 'generic-icon'
+}
+
+const formatFileSize = (bytes) => {
+  if (bytes === 0) return '0 Bytes'
+  const k = 1024
+  const sizes = ['Bytes', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 </script>
 
@@ -472,5 +612,175 @@ select {
 
 .input-skeleton {
   height: 42px;
+}
+
+.file-upload-container {
+  width: 100%;
+}
+
+.file-upload-area {
+  border: 2px dashed #E5E7EB;
+  border-radius: 8px;
+  padding: 32px 24px;
+  text-align: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  background: #F9FAFB;
+}
+
+.file-upload-area:hover {
+  border-color: #2563EB;
+  background: #F3F4F6;
+}
+
+.file-upload-area.dragging {
+  border-color: #2563EB;
+  background-color: #EFF6FF;
+  transform: scale(1.01);
+}
+
+.upload-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 16px;
+  color: #6B7280;
+  background: #F3F4F6;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.file-upload-area:hover .upload-icon,
+.file-upload-area.dragging .upload-icon {
+  color: #2563EB;
+  background: #EFF6FF;
+}
+
+.upload-text {
+  color: #4B5563;
+  font-size: 14px;
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.upload-formats {
+  color: #9CA3AF;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+.browse-button {
+  color: #2563EB;
+  background: none;
+  border: none;
+  padding: 0;
+  margin-left: 4px;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.browse-button:hover {
+  color: #1D4ED8;
+}
+
+.selected-files {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.file-item:hover {
+  background: #F3F4F6;
+  border-color: #D1D5DB;
+}
+
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.file-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6B7280;
+  background: #F3F4F6;
+  border-radius: 4px;
+}
+
+.file-preview {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.file-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.file-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 300px;
+}
+
+.file-size {
+  font-size: 12px;
+  color: #6B7280;
+}
+
+.remove-file {
+  padding: 6px;
+  background: none;
+  border: none;
+  color: #EF4444;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 8px;
+}
+
+.remove-file:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.remove-file:active {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.hidden {
+  display: none;
 }
 </style>

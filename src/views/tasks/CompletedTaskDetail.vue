@@ -184,30 +184,41 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useLayoutStore } from '@/stores/layout';
 
 const route = useRoute();
 const router = useRouter();
+const layoutStore = useLayoutStore();
 const task = ref(null);
 const loading = ref(true);
 const originalTask = ref(null); // Store the original task data
 const showConfirmDialog = ref(false); // Control the confirmation dialog visibility
 const isModified = ref(false); // Track if the task has been modified
 
+// Reset layout when component is unmounted
+onBeforeUnmount(() => {
+  layoutStore.setLayout({
+    hideSidebar: false,
+    hideHeader: false,
+    background: '#F9FAFB'
+  });
+});
+
 const goBack = () => {
   // Check if there are unsaved changes
   if (checkForChanges()) {
     showConfirmDialog.value = true;
   } else {
-    // No changes, just go back
-    window.history.back();
+    // No changes, navigate to completed tasks
+    router.push('/tasks/completed');
   }
 };
 
 const confirmDiscard = () => {
   showConfirmDialog.value = false;
-  window.history.back();
+  router.push('/tasks/completed');
 };
 
 const saveAsDraft = () => {
@@ -271,7 +282,17 @@ const checkForChanges = () => {
   return hasChanged;
 };
 
-onMounted(async () => {
+onMounted(() => {
+  // Set layout to hide header and sidebar after a slight delay
+  // This prevents the layout from changing before navigation completes
+  setTimeout(() => {
+    layoutStore.setLayout({
+      hideSidebar: true,
+      hideHeader: true,
+      background: '#f9fafb'
+    });
+  }, 50);
+
   loading.value = true;
   console.log('CompletedTaskDetail mounted');
 

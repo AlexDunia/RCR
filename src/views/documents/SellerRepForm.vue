@@ -102,29 +102,31 @@ const formFields = [
 
 const handleSubmit = async (formData) => {
   try {
-    // Create FormData to handle file uploads
-    const submitData = new FormData();
+    // Create clean file metadata objects for storage in localStorage
+    const fileMetadata = [];
 
-    // Add all form fields
-    Object.keys(formData).forEach(key => {
-      if (key !== 'documents') {
-        submitData.append(key, formData[key]);
-      }
-    });
-
-    // Add files if any
-    if (formData.documents) {
-      Array.from(formData.documents).forEach((file, index) => {
-        submitData.append(`documents[${index}]`, file);
+    // Process files if any
+    if (formData.documents && formData.documents.length > 0) {
+      formData.documents.forEach(fileObj => {
+        // Create a clean file object with just the metadata
+        fileMetadata.push({
+          name: fileObj.name || 'Unnamed file',
+          type: fileObj.type || 'application/octet-stream',
+          size: fileObj.size || 0,
+          lastModified: fileObj.file?.lastModified || Date.now(),
+          preview: fileObj.preview || null
+        });
       });
     }
 
+    // Save document with file metadata instead of FormData
     await documentStore.saveSellerRepDocument({
       ...formData,
       type: 'seller-rep',
       createdAt: new Date().toISOString(),
-      files: submitData
+      files: fileMetadata
     });
+
     router.push('/receipts-docs/view-docs');
   } catch (error) {
     console.error('Error saving seller rep document:', error);

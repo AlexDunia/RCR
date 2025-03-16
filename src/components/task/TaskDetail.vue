@@ -79,6 +79,15 @@
             Start task
           </button>
         </template>
+        <template v-else-if="taskData.status === 'scheduled'">
+          <button
+            class="task-detail__action-btn task-detail__action-btn--start"
+            @click="handleStartTask"
+            aria-label="Start task"
+          >
+            Start task
+          </button>
+        </template>
       </div>
     </div>
   </header>
@@ -427,6 +436,7 @@
 import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useRoleGuard } from '@/composables/useRoleGuard';
+import { useLayoutStore } from '@/stores/layout';
 import AgentModal from './AgentModal.vue';
 import ClientModal from './ClientModal.vue';
 import ReminderModal from './ReminderModal.vue';
@@ -434,6 +444,7 @@ import ReminderModal from './ReminderModal.vue';
 // Router and Route Setup
 const router = useRouter();
 const route = useRoute();
+const layoutStore = useLayoutStore();
 const { checkAccess } = useRoleGuard();
 
 // Loading State
@@ -634,20 +645,34 @@ const handleEndTask = async () => {
 
 const handleStartTask = async () => {
   try {
-    if (!isTaskComplete()) {
+    // Check if the task is in 'scheduled' or 'draft' status
+    if (taskData.status !== 'scheduled' && taskData.status !== 'draft') {
+      alert('This task cannot be started from its current status.');
+      return;
+    }
+
+    // For draft tasks, check if all required fields are filled
+    if (taskData.status === 'draft' && !isTaskComplete()) {
       router.push(`/tasks/${taskData.id}/edit`);
       return;
     }
+
+    // Update task status to in_progress
     taskData.status = 'in_progress';
     taskData.isPaused = false;
+
+    // Set the startedAt date to now
     taskData.startedAt = new Date().toISOString();
     startTime.value = Date.now();
     startTimer();
+
+    // Persist changes to localStorage
     await persistTaskData({
       status: 'in_progress',
       isPaused: false,
       startedAt: taskData.startedAt
     });
+
     console.log('Task started successfully:', taskData);
   } catch (error) {
     console.error('Failed to start task:', error);
@@ -1014,6 +1039,16 @@ onMounted(async () => {
   try {
     loading.value = true; // Set loading to true at the start
 
+    // Set layout to hide header and sidebar after a slight delay
+    // This prevents the layout from changing before navigation completes
+    setTimeout(() => {
+      layoutStore.setLayout({
+        hideSidebar: true,
+        hideHeader: true,
+        background: '#f9fafb'
+      });
+    }, 50);
+
     const hasAccess = await checkAccess(['agent', 'admin']);
     if (!hasAccess) {
       router.push('/unauthorized');
@@ -1071,9 +1106,12 @@ const loadTaskData = async () => {
 
     // If not found in currentTaskDetail, try to find it in the tasks list
     const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-    const task = tasks.find(task => task.id === taskId);
+    // Convert task IDs to numbers for comparison
+    const task = tasks.find(task => Number(task.id) === taskId);
 
     if (!task) {
+      console.error('Task not found with ID:', taskId);
+      console.log('Available tasks:', tasks.map(t => ({ id: t.id, title: t.title })));
       alert('Task not found');
       router.push('/tasks');
       return;
@@ -1112,17 +1150,26 @@ onUnmounted(() => {
   if (timerInterval.value) {
     clearInterval(timerInterval.value);
   }
+
+  // Reset layout when component is unmounted
+  layoutStore.setLayout({
+    hideSidebar: false,
+    hideHeader: false,
+    background: '#F9FAFB'
+  });
 });
 
 const goBack = () => {
   // Determine which page to go back to based on task status
   if (taskData.status === 'completed') {
-    router.push({ name: 'CompletedTasks' });
+    router.push('/tasks/completed');
   } else if (taskData.status === 'draft') {
-    router.push({ name: 'DraftTasks' });
+    router.push('/tasks/drafts');
+  } else if (taskData.status === 'scheduled') {
+    router.push('/tasks/scheduled');
   } else {
     // Default to in-progress tasks
-    router.push({ name: 'InProgressTasks' });
+    router.push('/tasks/in-progress');
   }
 };
 </script>
