@@ -1,7 +1,7 @@
 <template>
   <div class="social-graphs-section">
     <h2 class="text-xl font-semibold mb-6">Social Media Insights</h2>
-    
+
     <!-- Loading state -->
     <div v-if="isLoading" class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <div v-for="i in 3" :key="i" class="bg-white rounded-lg p-6 border border-gray-200 animate-pulse">
@@ -9,44 +9,44 @@
         <div class="h-40 bg-gray-100 rounded"></div>
       </div>
     </div>
-    
+
     <!-- Error state -->
     <div v-else-if="error" class="bg-red-50 p-4 rounded-lg text-red-600">
       {{ error }}
     </div>
-    
+
     <!-- Graphs grid -->
     <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div 
-        v-for="platform in socialPlatforms" 
-        :key="platform.id" 
+      <div
+        v-for="platform in socialPlatforms"
+        :key="platform.id"
         class="bg-white rounded-lg p-6 border border-gray-200"
       >
         <!-- Card header -->
         <div class="flex justify-between items-center mb-6">
           <div class="flex items-center">
             <!-- Platform icon -->
-            <div class="w-8 h-8 rounded flex items-center justify-center mr-3" 
+            <div class="w-8 h-8 rounded flex items-center justify-center mr-3"
                 :class="getPlatformColor(platform.id)">
               <component :is="getPlatformIcon(platform.id)" class="w-5 h-5 text-white" />
             </div>
-            
+
             <!-- Platform name -->
             <h3 class="font-semibold text-gray-900">{{ platform.name }}</h3>
           </div>
-          
+
           <!-- View all link -->
           <a href="#" class="text-xs text-gray-500 hover:text-gray-700">view all</a>
         </div>
-        
+
         <!-- Filter dropdown -->
         <div class="flex justify-between items-center mb-6">
           <div class="text-sm text-gray-500">
             {{ platform.totalFollowers }} followers
           </div>
-          
+
           <div class="relative">
-            <button 
+            <button
               class="text-sm text-gray-700 border border-gray-200 rounded px-3 py-1 flex items-center"
               @click="toggleDropdown(platform.id)"
             >
@@ -55,9 +55,9 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
               </svg>
             </button>
-            
+
             <!-- Dropdown menu (hidden by default) -->
-            <div 
+            <div
               v-if="activeDropdown === platform.id"
               class="absolute right-0 mt-1 bg-white border border-gray-200 rounded shadow-lg z-10 w-36"
             >
@@ -70,7 +70,7 @@
             </div>
           </div>
         </div>
-        
+
         <!-- Graph -->
         <div class="relative h-40">
           <!-- Y-axis labels -->
@@ -81,7 +81,7 @@
             <div>25</div>
             <div>0</div>
           </div>
-          
+
           <!-- Graph grid lines -->
           <div class="absolute left-6 right-0 top-0 h-full">
             <div class="h-full flex flex-col justify-between">
@@ -92,32 +92,34 @@
               <div class="border-t border-gray-100 h-0"></div>
             </div>
           </div>
-          
+
           <!-- Bars container -->
           <div class="absolute left-8 right-0 top-0 bottom-5 flex items-end justify-between">
-            <div 
-              v-for="(value, index) in platform.data" 
-              :key="index" 
+            <div
+              v-for="(value, index) in platform.data"
+              :key="index"
               class="relative flex flex-col items-center"
               style="width: 14%;"
             >
               <!-- Tooltip -->
-              <div 
+              <div
                 v-if="activeTooltip === `${platform.id}-${index}`"
                 class="absolute bottom-full mb-2 bg-gray-800 text-white text-xs rounded py-1 px-2"
               >
                 {{ value }}
               </div>
-              
+
               <!-- Bar -->
-              <div 
+              <div
                 class="w-1/2 rounded-t transition-all duration-300"
-                :class="getPlatformColor(platform.id)"
-                :style="`height: ${value}%;`"
+                :style="{
+                  height: `${value}%`,
+                  backgroundColor: getPlatformBgColor(platform.id)
+                }"
                 @mouseenter="activeTooltip = `${platform.id}-${index}`"
                 @mouseleave="activeTooltip = null"
               ></div>
-              
+
               <!-- X-axis label -->
               <div class="text-xs text-gray-400 mt-1">
                 {{ getDayLabel(index) }}
@@ -125,10 +127,10 @@
             </div>
           </div>
         </div>
-        
+
         <!-- Expand button -->
         <div class="mt-4 text-center">
-          <button 
+          <button
             class="text-indigo-600 text-sm font-medium hover:text-indigo-800"
             @click="openModal(platform)"
           >
@@ -140,9 +142,9 @@
         </div>
       </div>
     </div>
-    
+
     <!-- Expanded graph modal -->
-    <div 
+    <div
       v-if="activeModal"
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
       @click.self="closeModal"
@@ -150,20 +152,20 @@
       <div class="bg-white rounded-lg p-6 max-w-3xl w-full max-h-[90vh] overflow-auto">
         <div class="flex justify-between items-center mb-6">
           <div class="flex items-center">
-            <div class="w-10 h-10 rounded flex items-center justify-center mr-3" 
+            <div class="w-10 h-10 rounded flex items-center justify-center mr-3"
                 :class="getPlatformColor(activeModalData?.id || '')">
               <component :is="getPlatformIcon(activeModalData?.id || '')" class="w-6 h-6 text-white" />
             </div>
             <h3 class="text-xl font-semibold">{{ activeModalData?.name }} Insights</h3>
           </div>
-          
+
           <button @click="closeModal" class="text-gray-500 hover:text-gray-700">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>
           </button>
         </div>
-        
+
         <!-- Expanded graph -->
         <div class="relative h-64 mt-8 mb-8">
           <!-- Y-axis labels -->
@@ -174,7 +176,7 @@
             <div>25</div>
             <div>0</div>
           </div>
-          
+
           <!-- Graph grid lines -->
           <div class="absolute left-10 right-0 top-0 h-full">
             <div class="h-full flex flex-col justify-between">
@@ -185,32 +187,34 @@
               <div class="border-t border-gray-100 h-0"></div>
             </div>
           </div>
-          
+
           <!-- Bars container -->
           <div class="absolute left-12 right-0 top-0 bottom-8 flex items-end justify-between">
-            <div 
-              v-for="(value, index) in activeModalData?.data" 
-              :key="index" 
+            <div
+              v-for="(value, index) in activeModalData?.data"
+              :key="index"
               class="relative flex flex-col items-center"
               style="width: 14%;"
             >
               <!-- Tooltip -->
-              <div 
+              <div
                 v-if="activeTooltip === `modal-${index}`"
                 class="absolute bottom-full mb-2 bg-gray-800 text-white text-xs rounded py-1 px-2"
               >
                 {{ value }}
               </div>
-              
+
               <!-- Bar -->
-              <div 
+              <div
                 class="w-1/2 rounded-t transition-all duration-300"
-                :class="getPlatformColor(activeModalData?.id || '')"
-                :style="`height: ${value}%;`"
+                :style="{
+                  height: `${value}%`,
+                  backgroundColor: getPlatformBgColor(activeModalData?.id || '')
+                }"
                 @mouseenter="activeTooltip = `modal-${index}`"
                 @mouseleave="activeTooltip = null"
               ></div>
-              
+
               <!-- X-axis label -->
               <div class="text-sm text-gray-400 mt-2">
                 {{ getDayLabel(index, true) }}
@@ -218,7 +222,7 @@
             </div>
           </div>
         </div>
-        
+
         <!-- Additional insights -->
         <div class="border-t border-gray-200 pt-6">
           <h4 class="font-semibold mb-4">Additional Insights</h4>
@@ -288,18 +292,27 @@ const getPlatformIcon = (platformId) => {
 
 const getPlatformColor = (platformId) => {
   switch (platformId) {
-    case 'X': return 'bg-indigo-500';
-    case 'Facebook': return 'bg-blue-600';
-    case 'LinkedIn': return 'bg-blue-700';
+    case 'X': return 'bg-[#000000]';
+    case 'Facebook': return 'bg-[#1877F2]';
+    case 'LinkedIn': return 'bg-[#0A66C2]';
     default: return 'bg-gray-500';
   }
 };
 
+const getPlatformBgColor = (platformId) => {
+  switch (platformId) {
+    case 'X': return '#000000';
+    case 'Facebook': return '#1877F2';
+    case 'LinkedIn': return '#0A66C2';
+    default: return '#6B7280';
+  }
+};
+
 const getDayLabel = (index, fullName = false) => {
-  const days = fullName 
+  const days = fullName
     ? ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
     : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  
+
   // Calculate the day of week based on today
   const today = new Date();
   const dayIndex = (today.getDay() - (6 - index)) % 7;
@@ -309,9 +322,9 @@ const getDayLabel = (index, fullName = false) => {
 const formatDate = (dateString) => {
   if (!dateString) return '';
   const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', { 
-    month: 'short', 
-    day: 'numeric', 
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit'
@@ -343,16 +356,16 @@ const closeModal = () => {
 onMounted(() => {
   // Fetch data when component mounts
   fetchSocialMediaData();
-  
+
   // Close dropdowns when clicking outside
   const handleClickOutside = (event) => {
     if (activeDropdown.value && !event.target.closest('.relative')) {
       activeDropdown.value = null;
     }
   };
-  
+
   document.addEventListener('click', handleClickOutside);
-  
+
   // Cleanup
   return () => {
     document.removeEventListener('click', handleClickOutside);
@@ -377,4 +390,4 @@ onMounted(() => {
 .animate-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
-</style> 
+</style>
