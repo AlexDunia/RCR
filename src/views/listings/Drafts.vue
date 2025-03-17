@@ -1,11 +1,18 @@
 <!-- eslint-disable vue/multi-word-component-names -->
-// eslint-disable-next-line vue/multi-word-component-names
 <script setup name="DraftsView">
 import { useHeaderStore } from "@/stores/headerStore";
 
+// import { computed } from "vue";
+// import { useRoute } from "vue-router";
+
+// const route = useRoute();
+
+// Define which tab is active based on the route
+// const activeTab = computed(() => route.path);
+
 // Set the header title for this page
 const headerStore = useHeaderStore();
-headerStore.setTitle("Drafts");
+headerStore.setTitle("Draft Listings");
 </script>
 
 <template>
@@ -16,14 +23,13 @@ headerStore.setTitle("Drafts");
         <i class="fas fa-plus-circle"></i> Add Listing
       </router-link>
 
-      <router-link to="/view-listings">
-        <i class="fas fa-home"></i> View Listings
+      <router-link to="/view-listings" >
+        <i class="fas fa-home" ></i> View Listings
       </router-link>
 
-           <router-link to="/pending-approvals" class="pend">
-          <i class="fas fa-clock"></i> Pending Approvals
-        </router-link>
-
+      <router-link to="/pending-approvals" class="pend">
+        <i class="fas fa-clock"></i> Pending Approvals
+      </router-link>
 
       <div class="tab-item">
         <router-link to="/drafts" class="special drafts">
@@ -31,17 +37,18 @@ headerStore.setTitle("Drafts");
         </router-link>
         <div class="special-underline"></div>
       </div>
-
-
       <div class="tab-underline"></div>
     </div>
-    <br/>
-
-
+    <br />
     <div class="second-special-underline"></div>
 
-    <!-- Search Bar -->
-    <div class="search-bar-container">
+    <!-- Add Property & Search -->
+    <div class="add-property-container">
+      <div class="add-property">
+        <h2>Saved Drafts</h2>
+        <p>Continue working on your saved listing drafts</p>
+      </div>
+      <!-- Search Bar -->
       <div class="search-bar">
         <svg class="search-icon" viewBox="0 0 24 24">
           <circle cx="11" cy="11" r="8" stroke="black" stroke-width="1.5" fill="none" />
@@ -59,7 +66,7 @@ headerStore.setTitle("Drafts");
           <div class="edit-icon">
             <i class="fas fa-pen"></i>
           </div>
-          <p>Wilson Creek Villa </p>
+          <p>Draft<br>Property</p>
         </div>
       </div>
 
@@ -69,7 +76,7 @@ headerStore.setTitle("Drafts");
           <div class="edit-icon">
             <i class="fas fa-pen"></i>
           </div>
-          <p>Wilson Creek Villa</p>
+          <p>Draft<br>Property</p>
         </div>
       </div>
     </div>
@@ -83,6 +90,30 @@ headerStore.setTitle("Drafts");
   margin: 0 auto;
 }
 
+.tab-navigation .special{
+  background:#F0EFEF;
+  color:#0A397B;
+  font-weight:500;
+  border: 1px solid rgba(0, 102, 255, 0.3);
+}
+.tab-navigation #special{
+
+  color:#0A397B;
+
+}
+
+
+.tab-navigation .pend{
+  padding-left:15px;
+  padding-right:15px;
+}
+
+.tab-navigation .drafts{
+  padding-left:0px;
+  padding-right:0px;
+}
+
+
 /* Tab Navigation */
 .tab-navigation {
   display: flex;
@@ -90,25 +121,18 @@ headerStore.setTitle("Drafts");
   margin-bottom: 10px;
 }
 
-.tab-navigation .special {
-  background: #F0EFEF;
-  color: #0A397B;
-  font-weight: 500;
-  border: 1px solid rgba(0, 102, 255, 0.3);
+.tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
 }
 
-.tab-navigation #special {
-  color: #0A397B;
-}
-
-.tab-navigation .pend {
-  padding-left: 15px;
-  padding-right: 15px;
-}
-
-.tab-navigation .drafts {
-  padding-left: 0px;
-  padding-right: 0px;
+.property-options{
+    display: flex
+;
+    gap: 15px;
+    margin-top: 30px;
 }
 
 .tab-navigation a {
@@ -133,92 +157,128 @@ headerStore.setTitle("Drafts");
   gap: 8px;
 }
 
+/* Icons */
 .tab-navigation a i {
   font-size: 14px;
   color: rgba(0, 0, 0, 0.4);
 }
 
+/* Special Underline */
 .special-underline {
   position: absolute;
   bottom: -6px;
   left: 50%;
-  top: 125%;
+  top:125%;
   width: 60%;
   height: 0.4px;
-  background: #074F90;
+  background: #074F90; /* Removed gradient */
   transform: translateX(-50%);
   border-radius: 2px;
 }
 
+
 .second-special-underline {
   width: 100%;
   height: 1px;
-  background: rgba(7, 79, 144, 0.1);
+  background: rgba(7, 79, 144, 0.1); /* Removed gradient */
   border-radius: 1px;
-  margin-bottom: 10px;
+  margin-bottom:10px;
   box-shadow: 0px 1px 3px rgba(10, 57, 123, 0.1);
 }
 
+/* Styled Line */
 .styled-line {
   width: 100%;
   height: 2px;
-  background: #074F90;
+  background: #074F90; /* Removed gradient */
   margin-top: 10px;
   border-radius: 2px;
 }
 
-/* Search Bar Container */
-.search-bar-container {
+/* Add Property & Search Container */
+.add-property-container {
   display: flex;
-  justify-content: flex-end;
-  margin: 20px 0;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap; /* Prevents wrapping */
+  gap: 20px; /* Space between elements */
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* Add Property Section */
+.add-property {
+  flex-grow: 1; /* Ensures it takes available space without forcing a new line */
+  min-width: 200px;
+}
+
+.add-property h2 {
+  font-size:22px;
+  color: rgb(57, 57, 57);
+  font-weight:600;
+  margin-bottom:-10px;
+  letter-spacing: -0.9px;
+}
+
+.add-property p {
+  font-size:13px;
+  color: black;
+  font-weight:500;
 }
 
 .search-bar {
   display: flex;
   align-items: center;
   background: #EAE8E8;
+  /* No background */
   border-radius: 8px;
-  color: rgba(0, 0, 0, 0.4);
+  color:rgba(0, 0, 0, 0.4);
+  /* Rounded corners */
   padding: 12px 16px;
   width: 430px;
   transition: border 0.2s ease-in-out;
 }
 
+/* Apply stroke to the search bar container when focused */
 .search-bar:focus-within {
   border: 1.5px solid rgba(0, 102, 255, 0.3);
+  /* Soft, light blue */
 }
 
+/* Input field: No background, no border */
 input {
   border: none;
   outline: none;
   background: transparent;
   flex: 1;
-  padding-left: 8px;
+  padding-left:8px;
   font-size: 13px;
 }
 
+/* Search Text */
 input::placeholder {
-  color: rgba(0, 0, 0, 0.3);
-  font-weight: 500;
+  color: rgba(0, 0, 0, 0.3); /* Adjust color */
+  font-weight: 500; /* Adjust weight */
 }
 
+/* If the text is typed in */
 input {
-  color: rgba(0, 0, 0, 0.8);
-  font-weight: 400;
+  color: rgba(0, 0, 0, 0.8); /* Adjust color */
+  font-weight: 400; /* Adjust weight */
 }
 
+/* SVG Search Icon */
 .search-icon {
   width: 16px;
   height: 16px;
-  font-size: 8px;
+  font-size:8px;
   color: rgba(0, 0, 0, 0.2);
-  font-weight: bold;
+  font-weight: bold; /* Increase weight */
 }
 
 br {
-  line-height: 0.1;
-  opacity: 0.5;
+  line-height: 0.1; /* Reduce space between lines */
+  opacity: 0.5; /* Lower visibility */
 }
 
 /* Property Options */
@@ -228,6 +288,13 @@ br {
   margin-top: 30px;
 }
 
+.propertystatus p{
+  font-weight:600;
+  font-size:15px;
+  color: rgba(0, 0, 0, 0.8);
+}
+
+/* Property Cards */
 .property-card {
   width: 170px;
   height: 160px;
@@ -245,8 +312,8 @@ br {
 
 .property-card i {
   font-size: 18px;
-  margin: auto;
-  color: #0A397B;
+    margin: auto;
+    color: #0A397B;
 }
 
 .property-card p {
@@ -259,10 +326,11 @@ br {
   color: #777;
 }
 
+/* Saved Draft */
 .saved-draft {
   position: relative;
-  width: 190px;
-  height: 170px;
+  width: 190px; /* Set exact width */
+  height: 170px; /* Set exact height */
   border-radius: 10px;
   overflow: hidden;
 }
@@ -270,17 +338,18 @@ br {
 .saved-draft img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: cover; /* Ensures full image visibility */
   border-radius: 10px;
 }
 
+/* Overlay */
 .draft-overlay {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.4); /* Slight dark overlay */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -291,6 +360,14 @@ br {
   text-align: center;
 }
 
+
+.property-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px 100px; /* Increase the row gap */
+}
+
+/* Edit Icon */
 .edit-icon {
   position: absolute;
   top: 12px;
@@ -302,8 +379,9 @@ br {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #074F90;
+  border:1px solid #074F90;
   color: #074F90;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
 }
+
 </style>

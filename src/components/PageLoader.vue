@@ -1,60 +1,109 @@
 <template>
-  <div class="page-loader" :class="{ 'fade-out': !isLoading }">
-    <div v-for="n in 3" :key="n" class="skeleton-item" :style="{ animationDelay: `${(n - 1) * 0.2}s` }"></div>
+  <div class="page-container">
+    <transition name="fade">
+      <div v-if="isLoading || props.externalLoading" class="loader-overlay">
+        <div class="loader"></div>
+      </div>
+    </transition>
+    <div class="page-content" :class="{ 'content-loaded': contentVisible && !props.externalLoading }">
+      <slot></slot>
+    </div>
   </div>
 </template>
 
 <script setup>
-defineProps({
-  isLoading: {
+import { ref, onMounted, onBeforeUnmount } from 'vue';
+
+// Prop to allow parent component to control loading
+const props = defineProps({
+  externalLoading: {
     type: Boolean,
-    required: true
+    default: false
   }
+});
+
+const isLoading = ref(true);
+const contentVisible = ref(false);
+
+onMounted(() => {
+  console.log('PageLoader mounted, starting load sequence');
+  
+  // Use a more efficient approach - just enough time for initial render
+  setTimeout(() => {
+    isLoading.value = false;
+    console.log('PageLoader spinner hidden');
+    
+    // Small delay before showing content for smooth transition
+    setTimeout(() => {
+      contentVisible.value = true;
+      console.log('PageLoader content shown');
+    }, 50);
+  }, 300); // Reduced from 600ms for faster initial load
+});
+
+onBeforeUnmount(() => {
+  // Reset loading state when component is unmounted
+  // This ensures a clean state if the component is reused
+  isLoading.value = true;
+  contentVisible.value = false;
 });
 </script>
 
 <style scoped>
-.page-loader {
+.page-container {
+  position: relative;
+  min-height: 100%;
   width: 100%;
-  padding: 20px;
-  opacity: 1;
+}
+
+.loader-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #f5f5f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.loader {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #3498db;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+
+.page-content {
+  position: relative;
   transition: opacity 0.3s ease-out;
-}
-
-.page-loader.fade-out {
   opacity: 0;
-  pointer-events: none;
 }
 
-.skeleton-item {
-  width: 100%;
-  height: 80px;
-  background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 35%, #e0e0e0 45%);
-  background-size: 200% 100%;
-  animation: skeleton-loading 2s infinite, fade-slide-in 0.5s ease-in-out forwards;
+.content-loaded {
+  opacity: 1;
+}
+
+/* Fade transition for loader */
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s;
+}
+.fade-enter-from, .fade-leave-to {
   opacity: 0;
-  transform: translateY(20px);
-  border-radius: 8px;
-  margin-bottom: 16px;
 }
 
-@keyframes skeleton-loading {
+@keyframes rotation {
   0% {
-    background-position: 200% 0;
+    transform: rotate(0deg);
   }
   100% {
-    background-position: -200% 0;
-  }
-}
-
-@keyframes fade-slide-in {
-  0% {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
+    transform: rotate(360deg);
   }
 }
 </style>

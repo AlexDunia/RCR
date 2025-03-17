@@ -30,7 +30,7 @@
         class="session-card"
         @click="viewSessionDetails(session)"
       >
-        <div class="session-icon" :style="{ backgroundColor: getRandomColor(session.id) }">
+        <div class="session-icon">
           {{ getInitial(session.title) }}
         </div>
         <div class="session-info">
@@ -38,9 +38,9 @@
           <p class="session-date">Creation date: {{ formatDate(session.createdAt) }}</p>
         </div>
         <button class="view-button" @click.stop="viewSessionDetails(session)">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12C23 12 19 20 12 20C5 20 1 12 1 12Z" stroke="#0F172A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="#0F172A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2 12C2 12 5 5 12 5C19 5 22 12 22 12C22 12 19 19 12 19C5 19 2 12 2 12Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
           View schedule and modules
         </button>
@@ -82,24 +82,7 @@ const formatDate = (dateString) => {
 
 // Get initial letter for icon
 const getInitial = (title) => {
-  return title ? title.charAt(0).toUpperCase() : 'E';
-};
-
-// Generate random color for session icon
-const getRandomColor = (id) => {
-  const colors = [
-    '#FF0000', // Red
-    '#4CAF50', // Green
-    '#2196F3', // Blue
-    '#FF9800', // Orange
-    '#9C27B0', // Purple
-    '#00BCD4', // Cyan
-    '#795548', // Brown
-    '#607D8B'  // Blue Grey
-  ];
-
-  // Use the id to deterministically select a color
-  return colors[id % colors.length];
+  return title ? title.charAt(0).toUpperCase() : 'M';
 };
 
 // Navigate to session details
@@ -121,23 +104,23 @@ onMounted(() => {
 
 <style scoped>
 .education-training-container {
-  padding: 20px;
-  max-width: 1200px;
+  padding: 0;
+  max-width: 960px;
   margin: 0 auto;
 }
 
 .education-actions {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .create-button {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 16px;
-  background-color: #0F4C81;
+  padding: 8px 14px;
+  background-color: #1a73e8;
   color: white;
   border: none;
   border-radius: 6px;
@@ -149,7 +132,11 @@ onMounted(() => {
 }
 
 .create-button:hover {
-  background-color: #0D3F6A;
+  background-color: #1765cc;
+}
+
+.create-button svg {
+  stroke: white;
 }
 
 .no-sessions {
@@ -203,77 +190,90 @@ onMounted(() => {
 }
 
 .sessions-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 16px;
+  margin-top: 4px;
 }
 
 .session-card {
   background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  padding: 16px;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  padding: 16px 24px;
+  height: 76px;
   display: flex;
-  flex-direction: column;
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  border: 1px solid #E2E8F0;
+  align-items: center;
+  cursor: default;
+  transition: box-shadow 0.1s ease;
+  border: none;
+  box-sizing: border-box;
 }
 
 .session-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transform: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .session-icon {
   width: 48px;
   height: 48px;
-  border-radius: 8px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 600;
   color: white;
-  margin-bottom: 12px;
+  background-color: #ff3b30 !important;
+  margin-right: 20px;
+  flex-shrink: 0;
 }
 
 .session-info {
   flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .session-title {
   font-size: 16px;
   font-weight: 600;
-  color: #0F172A;
+  color: #2d3748;
   margin: 0 0 4px 0;
+  line-height: 1.3;
 }
 
 .session-date {
-  font-size: 14px;
-  color: #64748B;
-  margin: 0 0 16px 0;
+  font-size: 13px;
+  color: #718096;
+  margin: 0;
+  line-height: 1.3;
 }
 
 .view-button {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 8px;
-  padding: 8px 0;
-  background-color: #F1F5F9;
-  color: #0F172A;
+  padding: 8px 14px;
+  background-color: #edf2f7;
+  color: #3182ce;
   border: none;
   border-radius: 6px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  width: 100%;
+  margin-left: auto;
+  white-space: nowrap;
+  height: 36px;
 }
 
-.view-button:hover {
-  background-color: #E2E8F0;
+.view-button svg {
+  width: 18px;
+  height: 18px;
+  stroke: #3182ce;
+  stroke-width: 1.5px;
 }
 
 @media (max-width: 768px) {

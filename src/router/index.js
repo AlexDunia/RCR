@@ -330,6 +330,15 @@ const routes = [
     path: '/profile/edit',
     name: 'profile-edit',
     component: UserProfileEdit
+  },
+  {
+    path: '/property/:id',
+    name: 'PropertyDetail',
+    component: () => import('@/views/listings/PropertyDetail.vue'),
+    meta: {
+      title: 'Property Details',
+      hideSidebar: false // Explicitly set sidebar to remain visible
+    }
   }
 ];
 
@@ -364,6 +373,14 @@ router.beforeEach(async (to, from, next) => {
         return;
       }
     }
+  }
+
+  // Get the layout store
+  const layoutStore = useLayoutStore();
+  
+  // Reset layout when navigating to dashboard or main navigation routes
+  if (to.path === '/' || to.path === '/manage-listings' || to.path === '/view-listings') {
+    layoutStore.resetLayout();
   }
 
   next();

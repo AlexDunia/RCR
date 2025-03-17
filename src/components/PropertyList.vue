@@ -241,15 +241,17 @@ const scrollPrev = () => {
   background: white;
   border-radius: 6px;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 3px rgba(102, 102, 102, 0.04);
   transition: all 0.2s ease;
   width: 100%;
+  margin-bottom:25px;
   border: 1px solid #f0f0f0;
 }
 
 .property-list-item:hover {
+  cursor: pointer;
   transform: translateY(-2px);
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 3px rgba(102, 102, 102, 0.07);
   border-color: #e0e0e0;
 }
 

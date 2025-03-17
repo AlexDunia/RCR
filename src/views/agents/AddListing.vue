@@ -24,8 +24,8 @@ headerStore.setTitle("Add Listing");
         <div class="special-underline"></div>
       </div>
       <router-link to="/view-listings">
-  <i class="fas fa-home"></i> View Listings
-</router-link>
+        <i class="fas fa-home"></i> View Listings
+      </router-link>
 
       <router-link to="/pending-approvals" class="pend">
         <i class="fas fa-clock"></i> Pending Approvals
@@ -35,7 +35,7 @@ headerStore.setTitle("Add Listing");
       </router-link>
       <div class="tab-underline"></div>
     </div>
-   <br/>
+    <br/>
     <div class="second-special-underline"></div>
 
     <!-- Add Property & Search -->
@@ -45,17 +45,17 @@ headerStore.setTitle("Add Listing");
       </div>
       <!-- Search Bar -->
       <div class="search-bar">
-      <svg class="search-icon" viewBox="0 0 24 24">
-        <circle cx="11" cy="11" r="8" stroke="black" stroke-width="1.5" fill="none" />
-        <line x1="16" y1="16" x2="22" y2="22" stroke="black" stroke-width="1.5" />
-      </svg>
-      <input type="text" placeholder="Search..." />
-    </div>
+        <svg class="search-icon" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8" stroke="black" stroke-width="1.5" fill="none" />
+          <line x1="16" y1="16" x2="22" y2="22" stroke="black" stroke-width="1.5" />
+        </svg>
+        <input type="text" placeholder="Search..." />
+      </div>
     </div>
 
     <div class='propertystatus'>
       <p>You currently have no properties on your profile.</p>
-      </div>
+    </div>
 
     <!-- Property Options -->
     <div class="property-options">
@@ -67,17 +67,15 @@ headerStore.setTitle("Add Listing");
       </div>
 
       <!-- Saved Draft -->
-    <!-- Saved Draft -->
-<div class="property-card saved-draft">
-  <img src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png" alt="Saved Draft" />
-  <div class="draft-overlay">
-    <div class="edit-icon">
-      <i class="fas fa-pen"></i>
-    </div>
-    <p>Saved Draft</p>
-  </div>
-</div>
-
+      <div class="property-card saved-draft">
+        <img src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png" alt="Saved Draft" />
+        <div class="draft-overlay">
+          <div class="edit-icon">
+            <i class="fas fa-pen"></i>
+          </div>
+          <p>Saved Draft</p>
+        </div>
+      </div>
     </div>
   </div>
 </template>

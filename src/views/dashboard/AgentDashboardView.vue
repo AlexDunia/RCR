@@ -1,72 +1,167 @@
-<!-- eslint-disable vue/no-unused-vars -->
+re<!-- eslint-disable vue/no-unused-vars -->
 <!-- eslint-disable vue/no-unused-vars -->
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { useLayoutStore } from '@/stores/layout';
 import PropertyList from "@/components/PropertyList.vue";
-import Loader from "@/components/Loader.vue";
+import SkeletonLoader from "@/components/SkeletonLoader.vue";
+
+const router = useRouter();
+const layoutStore = useLayoutStore();
+
+// Single loading state for the entire dashboard
+const isLoading = ref(true);
 
 // Metrics Data
 const metrics = ref([
-  { label: 'GROSS COMMISSION', value: '350,897', color: '#5aa6f9' },
-  { label: 'ACTIVE LISTINGS', value: '20', color: '#ff6b6b' },
-  { label: 'RECENT SALES', value: '20', color: '#f7d154' },
-  { label: 'UPCOMING TASK', value: '20', color: '#2ec4b6' },
+  { label: 'GROSS COMMISSION', value: '350,897', subtext: 'Since last month', color: '#86c1ff' },
+  { label: 'ACTIVE LISTINGS', value: '20', subtext: 'view', color: '#ff6b51' },
+  { label: 'RECENT SALES', value: '20', subtext: 'view', color: '#ffd43b' },
+  { label: 'UPCOMING TASK', value: '20', subtext: 'view', color: '#00d4d4' },
 ]);
 
-// Loading state
-const isLoaded = ref(false);
+// Marketing tools data
+const marketingTools = ref([
+  { title: 'Social Media Posts', description: 'Create and schedule engaging content', icon: 'fa-hashtag' },
+  { title: 'Email Templates', description: 'Professional templates for client outreach', icon: 'fa-envelope' },
+  { title: 'Listing Flyers', description: 'Generate beautiful property flyers', icon: 'fa-file-alt' }
+]);
+
+// Handle metric card clicks to prevent default behavior if they're links
+const handleMetricClick = (metric, event) => {
+  // Prevent default navigation/refresh
+  if (event) event.preventDefault();
+  
+  // Navigate to appropriate page based on metric type
+  if (metric.label === 'ACTIVE LISTINGS') {
+    router.push('/view-listings');
+  } else if (metric.label === 'RECENT SALES') {
+    // Navigate to sales page
+  } else if (metric.label === 'UPCOMING TASK') {
+    router.push('/tasks');
+  }
+};
+
+// Handle marketing tool click
+const handleMarketingToolClick = (tool) => {
+  if (tool.title === 'Social Media Posts') {
+    router.push('/marketing-tools/social-platforms');
+  } else if (tool.title === 'Email Templates') {
+    router.push('/marketing-tools/done-for-you');
+  } else if (tool.title === 'Listing Flyers') {
+    router.push('/marketing-tools/done-for-you');
+  }
+};
 
 onMounted(() => {
+  // Ensure layout is properly set
+  layoutStore.resetLayout();
+  
+  // Force immediate layout update
+  layoutStore.$patch({
+    hideSidebar: false,
+    hideHeader: false,
+    background: '#F4F4F4'
+  });
+  
+  // Simulate one-time loading rather than staggered loading
   setTimeout(() => {
-    isLoaded.value = true;
-  }, 2000); // Simulated loading time
+    isLoading.value = false;
+  }, 600);
 });
 </script>
 
 <template>
   <div class="dashboard-container">
-    <div v-if="!isLoaded" class="loader-container">
-      <Loader />
-    </div>
-    <div v-else class="dashboard-content">
-      <!-- Greetings Section -->
-      <div class="greetings" :class="{ 'animate-metric': isLoaded }">
-        <Loader v-if="!isLoaded" />
-        <div v-else>
-          <div class="greetings-data">
-            <h1>Hi, Alex!</h1>
-            <p>Here's an overview of your account</p>
-          </div>
+    <div v-if="isLoading" class="dashboard-skeleton">
+      <!-- Greeting skeleton -->
+      <div class="skeleton-container">
+        <SkeletonLoader type="text" height="30px" width="180px" />
+        <SkeletonLoader type="text" height="16px" width="240px" />
+      </div>
+      
+      <!-- Metrics skeleton -->
+      <div class="skeleton-container metrics-skeleton">
+        <SkeletonLoader v-for="i in 4" :key="i" type="card" height="110px" width="100%" />
+      </div>
+      
+      <!-- Marketing tools skeleton -->
+      <div class="skeleton-container">
+        <div class="section-header-skeleton">
+          <SkeletonLoader type="text" height="24px" width="200px" />
+          <SkeletonLoader type="text" height="16px" width="300px" />
+        </div>
+        <div class="marketing-tools-skeleton">
+          <SkeletonLoader v-for="i in 3" :key="i" type="card" height="120px" width="100%" />
         </div>
       </div>
-      <br/>
+      
+      <!-- Property list skeleton -->
+      <div class="skeleton-container">
+        <SkeletonLoader type="rectangle" height="300px" width="100%" />
+      </div>
+    </div>
+    
+    <div v-else class="dashboard-content">
+      <!-- Greetings Section -->
+      <div class="greetings">
+        <div class="greetings-data">
+          <h1>Hi, Alex!</h1>
+          <p>Here's an overview of your account</p>
+        </div>
+      </div>
 
-      <div class="metricsloader" :class="{ 'animate-metric': isLoaded }" :style="{ animationDelay: `${index * 0.2}s` }">
-        <div class="metrics">
-          <div v-for="(metric) in metrics" :key="metric.label" class="metric-card">
-            <Loader v-if="!isLoaded" />
-            <div v-else>
-              <div class="metric-header">
-                <div class="metric-content">
-                  <div class="metrics-title">
-                    <h3>{{ metric.label }}</h3>
-                    <br />
-                    <p>{{ metric.value }}</p>
-                    <a href="#">view</a>
-                  </div>
-                  <div class="metrics-circle" :style="{ background: metric.color }"></div>
+      <!-- Metrics Cards Section -->
+      <div class="metrics-container">
+        <div class="metrics-row">
+          <div class="metrics-group">
+            <div 
+              v-for="metric in metrics" 
+              :key="metric.label"
+              class="metric-card"
+              @click="(e) => handleMetricClick(metric, e)"
+            >
+              <div class="metric-content">
+                <div class="metric-info">
+                  <div class="metric-label">{{ metric.label }}</div>
+                  <div class="metric-value">{{ metric.value }}</div>
+                  <div class="metric-subtext">{{ metric.subtext }}</div>
                 </div>
+                <div class="metric-circle" :style="{ backgroundColor: metric.color }"></div>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      <div class="property-list-section">
-        <Loader v-if="!isLoaded" />
-        <div v-else>
-          <PropertyList />
+      
+      <!-- Marketing Tools Section -->
+      <div class="marketing-tools-container">
+        <div class="section-header">
+          <h2>Marketing Tools</h2>
+          <p>Boost your business with these powerful marketing solutions</p>
         </div>
+        <div class="marketing-tools-grid">
+          <div 
+            v-for="tool in marketingTools" 
+            :key="tool.title" 
+            class="marketing-tool-card"
+            @click="() => handleMarketingToolClick(tool)"
+          >
+            <div class="tool-icon">
+              <i :class="['fas', tool.icon]"></i>
+            </div>
+            <div class="tool-content">
+              <h3>{{ tool.title }}</h3>
+              <p>{{ tool.description }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Property List Section -->
+      <div class="property-list-section">
+        <PropertyList />
       </div>
     </div>
   </div>
@@ -76,38 +171,56 @@ onMounted(() => {
 .dashboard-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px 25px;
+  padding: 20px;
+  min-height: calc(100vh - 80px);
 }
 
-/* Metric Animation - Smooth Left to Right Reveal */
-.animate-metric {
-  opacity: 0;
-  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-  transform: translateX(-20px);
-  animation: fade-slide-left 0.5s ease-in-out forwards;
+.dashboard-skeleton,
+.dashboard-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-@keyframes fade-slide-left {
-  0% {
-    opacity: 0;
-    transform: translateX(-1px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-/* Original UI Styles */
+.skeleton-container {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0px 2px 5px rgba(99, 98, 98, 0.1);
+}
+
+.section-header-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.metrics-skeleton {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.marketing-tools-skeleton {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+
 .greetings {
-  margin-top: 10px;
   background-color: white;
   box-shadow: 0px 2px 5px rgba(99, 98, 98, 0.1);
   border-radius: 8px;
-}
-
-.greetings:hover {
-  transform: scale(1.02);
 }
 
 .greetings-data {
@@ -125,103 +238,162 @@ onMounted(() => {
   font-size: 14px;
 }
 
-.metrics {
+/* Metrics Section */
+.metrics-container {
+  width: 100%;
+}
+
+.metrics-row {
+  width: 100%;
+}
+
+.metrics-group {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 20px;
-  margin-top: 15px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  width: 100%;
 }
 
 .metric-card {
-  padding: 16px 20px;
   background: white;
   border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  height: 110px;
+  cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .metric-card:hover {
-  transform: scale(1.02);
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .metric-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 24px;
+  height: 100%;
+  box-sizing: border-box;
 }
 
-.metric-content h3 {
-  font-size: 14px;
-  letter-spacing: -0.02em;
-  color: #8898AA;
+.metric-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
-.metric-content p {
-  font-size: 16px;
-  margin-top: -30px;
+.metric-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #718096;
+  margin-bottom: 6px;
+}
+
+.metric-value {
+  font-size: 24px;
+  font-weight: 500;
+  color: #2D3748;
   margin-bottom: 8px;
-  color: #32325D;
-  font-weight: 400;
 }
 
-.metric-content a {
+.metric-subtext {
+  font-size: 14px;
+  color: #718096;
+}
+
+.metric-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+}
+
+/* Marketing Tools Section */
+.marketing-tools-container {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0px 2px 5px rgba(99, 98, 98, 0.1);
+}
+
+.section-header {
+  margin-bottom: 20px;
+}
+
+.section-header h2 {
+  font-size: 20px;
   color: #074F90;
-  text-decoration: none;
-  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.section-header p {
+  font-size: 14px;
+  color: #718096;
   margin: 0;
 }
 
-.metrics-circle {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
+.marketing-tools-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.marketing-tool-card {
+  border-radius: 8px;
+  border: 1px solid #E2E8F0;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.marketing-tool-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  border-color: #CBD5E0;
+}
+
+.tool-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: #EBF4FF;
   display: flex;
   align-items: center;
   justify-content: center;
-  text-align: center;
-  color: white;
-  box-shadow: 0 4px 12px rgba(74, 74, 74, 0.05);
+  color: #3182CE;
+  font-size: 18px;
+}
+
+.tool-content h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #2D3748;
+  margin-bottom: 4px;
+}
+
+.tool-content p {
+  margin: 0;
+  font-size: 14px;
+  color: #718096;
 }
 
 .property-list-section {
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
-/* Debug section styles */
-.debug-section {
-  background-color: #f8fafc;
-  border: 1px dashed #94a3b8;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 24px;
+/* Responsive */
+@media (max-width: 1024px) {
+  .metrics-group, .metrics-skeleton, .marketing-tools-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
-.debug-section h3 {
-  color: #334155;
-  margin-top: 0;
-  margin-bottom: 12px;
-}
-
-.debug-buttons {
-  display: flex;
-  gap: 12px;
-}
-
-.debug-button {
-  display: inline-block;
-  background-color: #3b82f6;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 6px;
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
-  transition: background-color 0.2s ease;
-}
-
-.debug-button:hover {
-  background-color: #2563eb;
+@media (max-width: 640px) {
+  .metrics-group, .metrics-skeleton, .marketing-tools-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

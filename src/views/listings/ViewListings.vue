@@ -19,22 +19,22 @@ headerStore.setTitle("View Listings");
   <div class="manage-listings">
     <!-- Tab Navigation -->
     <div class="tab-navigation">
-        <router-link to="/add-listing">
+        <router-link to="/add-listing" replace>
           <i class="fas fa-plus-circle"></i> Add Listing
         </router-link>
 
       <div class="tab-item">
-        <router-link to="/view-listings" class="special">
-          <i class="fas fa-home"  id="special"></i> View Listings
+        <router-link to="/view-listings" class="special" replace>
+          <i class="fas fa-home" id="special"></i> View Listings
         </router-link>
         <div class="special-underline"></div>
       </div>
 
 
-      <router-link to="/pending-approvals" class="pend">
+      <router-link to="/pending-approvals" class="pend" replace>
         <i class="fas fa-clock"></i> Pending Approvals
       </router-link>
-      <router-link to="/drafts" class="drafts">
+      <router-link to="/drafts" class="drafts" replace>
         <i class="fas fa-file-alt"></i> Drafts
       </router-link>
       <div class="tab-underline"></div>

@@ -14,7 +14,7 @@ headerStore.setTitle("Manage Listings");
 onMounted(() => {
   setTimeout(() => {
     isLoading.value = false;
-  }, 1000);
+  }, 800); // Slightly faster loading for better UX
 });
 
 const navigateToAddListing = () => {
@@ -27,74 +27,101 @@ const navigateToAddListing = () => {
     <div v-if="isLoading" class="loader-container">
       <Loader />
     </div>
-    <template v-else>
+    <div v-else class="manage-listings-content">
       <!-- Tab Navigation -->
-      <div class="tab-navigation">
-        <div class="tab-item">
-          <router-link to="/add-listing" class="special">
-            <i class="fas fa-plus-circle"></i> Add Listing
+      <transition name="fade-slide" appear>
+        <div class="tab-navigation">
+          <div class="tab-item">
+            <router-link to="/add-listing" class="special">
+              <i class="fas fa-plus-circle"></i> Add Listing
+            </router-link>
+            <div class="special-underline"></div>
+          </div>
+          <router-link to="/view-listings">
+            <i class="fas fa-home"></i> View Listings
           </router-link>
-          <div class="special-underline"></div>
-        </div>
-        <router-link to="/view-listings">
-          <i class="fas fa-home"></i> View Listings
-        </router-link>
 
-        <router-link to="/pending-approvals" class="pend">
-          <i class="fas fa-clock"></i> Pending Approvals
-        </router-link>
-        <router-link to="/drafts" class="drafts">
-          <i class="fas fa-file-alt"></i> Drafts
-        </router-link>
-        <div class="tab-underline"></div>
-      </div>
+          <router-link to="/pending-approvals" class="pend">
+            <i class="fas fa-clock"></i> Pending Approvals
+          </router-link>
+          <router-link to="/drafts" class="drafts">
+            <i class="fas fa-file-alt"></i> Drafts
+          </router-link>
+          <div class="tab-underline"></div>
+        </div>
+      </transition>
       <br/>
       <div class="second-special-underline"></div>
 
       <!-- Add Property & Search -->
-      <div class="add-property-container">
-        <div class="add-property">
-          <h2>Add a property</h2>
+      <transition name="fade-slide" appear>
+        <div class="add-property-container" style="transition-delay: 80ms;">
+          <div class="add-property">
+            <h2>Add a property</h2>
+          </div>
+          <!-- Search Bar -->
+          <div class="search-bar">
+            <svg class="search-icon" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8" stroke="black" stroke-width="1.5" fill="none" />
+              <line x1="16" y1="16" x2="22" y2="22" stroke="black" stroke-width="1.5" />
+            </svg>
+            <input type="text" placeholder="Search..." />
+          </div>
         </div>
-        <!-- Search Bar -->
-        <div class="search-bar">
-          <svg class="search-icon" viewBox="0 0 24 24">
-            <circle cx="11" cy="11" r="8" stroke="black" stroke-width="1.5" fill="none" />
-            <line x1="16" y1="16" x2="22" y2="22" stroke="black" stroke-width="1.5" />
-          </svg>
-          <input type="text" placeholder="Search..." />
-        </div>
-      </div>
+      </transition>
 
-      <div class='propertystatus'>
-        <p>You currently have no properties on your profile.</p>
-      </div>
+      <transition name="fade-slide" appear>
+        <div class='propertystatus' style="transition-delay: 160ms;">
+          <p>You currently have no properties on your profile.</p>
+        </div>
+      </transition>
 
       <!-- Property Options -->
       <div class="property-options">
         <!-- Create Listing -->
-        <div class="property-card create-listing" @click="navigateToAddListing">
-          <i class="fas fa-cloud-upload-alt"></i>
-          <p>Create listing</p>
-          <span>Take the first step to your success</span>
-        </div>
+        <transition name="fade-slide" appear>
+          <div class="property-card create-listing" style="transition-delay: 240ms;" @click="navigateToAddListing">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <p>Create listing</p>
+            <span>Take the first step to your success</span>
+          </div>
+        </transition>
 
         <!-- Saved Draft -->
-        <div class="property-card saved-draft">
-          <img src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png" alt="Saved Draft" />
-          <div class="draft-overlay">
-            <div class="edit-icon">
-              <i class="fas fa-pen"></i>
+        <transition name="fade-slide" appear>
+          <div class="property-card saved-draft" style="transition-delay: 320ms;">
+            <img src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png" alt="Saved Draft" />
+            <div class="draft-overlay">
+              <div class="edit-icon">
+                <i class="fas fa-pen"></i>
+              </div>
+              <p>Saved Draft</p>
             </div>
-            <p>Saved Draft</p>
           </div>
-        </div>
+        </transition>
       </div>
-    </template>
+    </div>
   </div>
 </template>
 
 <style scoped>
+/* Airbnb-inspired smooth animations */
+.fade-slide-enter-active {
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition-delay: var(--delay, 0s);
+}
+
+.fade-slide-leave-active {
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.fade-slide-enter-from, 
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+/* Keeping all existing styles */
 .manage-listings {
   padding: 35px;
   max-width: 1000px;
