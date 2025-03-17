@@ -1,4 +1,5 @@
 <script setup>
+import { useHeaderStore } from "@/stores/headerStore";
 
 // import { computed } from "vue";
 // import { useRoute } from "vue-router";
@@ -7,6 +8,10 @@
 
 // Define which tab is active based on the route
 // const activeTab = computed(() => route.path);
+
+// Set the header title for this page
+const headerStore = useHeaderStore();
+headerStore.setTitle("Pending Approvals");
 </script>
 
 <template>

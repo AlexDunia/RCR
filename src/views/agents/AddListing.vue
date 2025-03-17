@@ -1,11 +1,16 @@
 <script setup>
 // import { computed } from "vue";
 // import { useRoute } from "vue-router";
+import { useHeaderStore } from "@/stores/headerStore";
 
 // const route = useRoute();
 
 // Define which tab is active based on the route
 // const activeTab = computed(() => route.path);
+
+// Set the header title for this page
+const headerStore = useHeaderStore();
+headerStore.setTitle("Add Listing");
 </script>
 
 <template>

@@ -2,9 +2,14 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import Loader from '@/components/Loader.vue';
+import { useHeaderStore } from "@/stores/headerStore";
 
 const router = useRouter();
 const isLoading = ref(true);
+
+// Set the header title for this page
+const headerStore = useHeaderStore();
+headerStore.setTitle("Manage Listings");
 
 onMounted(() => {
   setTimeout(() => {

@@ -1,17 +1,5 @@
 <template>
   <div class="education-training-container">
-    <div class="education-header">
-      <div class="back-button" @click="$router.go(-1)">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M15 18L9 12L15 6" stroke="#0F172A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <div class="header-content">
-        <h1 class="header-title">Education & Training</h1>
-        <p class="header-subtitle">Get informed about the business and modern trends on real estate</p>
-      </div>
-    </div>
-
     <div class="education-actions">
       <router-link to="/education-training/create" class="create-button">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -64,9 +52,14 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useHeaderStore } from "@/stores/headerStore";
 
 const router = useRouter();
 const sessions = ref([]);
+
+// Set the header title for this page
+const headerStore = useHeaderStore();
+headerStore.setTitle("Education & Training");
 
 // Load sessions from localStorage
 const loadSessions = () => {
@@ -131,46 +124,6 @@ onMounted(() => {
   padding: 20px;
   max-width: 1200px;
   margin: 0 auto;
-}
-
-.education-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 24px;
-}
-
-.back-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  background-color: #E5EDF9;
-  border-radius: 50%;
-  cursor: pointer;
-  margin-right: 16px;
-  transition: background-color 0.2s ease;
-}
-
-.back-button:hover {
-  background-color: #D1E0F6;
-}
-
-.header-content {
-  flex: 1;
-}
-
-.header-title {
-  font-size: 24px;
-  font-weight: 600;
-  color: #0F172A;
-  margin: 0 0 4px 0;
-}
-
-.header-subtitle {
-  font-size: 16px;
-  color: #64748B;
-  margin: 0;
 }
 
 .education-actions {
@@ -251,23 +204,19 @@ onMounted(() => {
 
 .sessions-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 16px;
 }
 
-@media (min-width: 768px) {
-  .sessions-grid {
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  }
-}
-
 .session-card {
-  background-color: #FFFFFF;
+  background-color: white;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   padding: 16px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
   cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   border: 1px solid #E2E8F0;
 }
 
@@ -279,22 +228,22 @@ onMounted(() => {
 .session-icon {
   width: 48px;
   height: 48px;
-  border-radius: 50%;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
-  font-weight: bold;
+  font-size: 24px;
+  font-weight: 600;
   color: white;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .session-info {
-  margin-bottom: 16px;
+  flex: 1;
 }
 
 .session-title {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: #0F172A;
   margin: 0 0 4px 0;
@@ -303,30 +252,33 @@ onMounted(() => {
 .session-date {
   font-size: 14px;
   color: #64748B;
-  margin: 0;
+  margin: 0 0 16px 0;
 }
 
 .view-button {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  padding: 8px 16px;
+  gap: 8px;
+  padding: 8px 0;
   background-color: #F1F5F9;
+  color: #0F172A;
   border: none;
   border-radius: 6px;
   font-size: 14px;
   font-weight: 500;
-  color: #0F172A;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  width: 100%;
 }
 
 .view-button:hover {
   background-color: #E2E8F0;
 }
 
-.view-button svg {
-  margin-right: 8px;
+@media (max-width: 768px) {
+  .sessions-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

@@ -1,14 +1,11 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 // eslint-disable-next-line vue/multi-word-component-names
 <script setup name="DraftsView">
+import { useHeaderStore } from "@/stores/headerStore";
 
-// import { computed } from "vue";
-// import { useRoute } from "vue-router";
-
-// const route = useRoute();
-
-// Define which tab is active based on the route
-// const activeTab = computed(() => route.path);
+// Set the header title for this page
+const headerStore = useHeaderStore();
+headerStore.setTitle("Drafts");
 </script>
 
 <template>
@@ -43,13 +40,8 @@
 
     <div class="second-special-underline"></div>
 
-    <!-- Add Property & Search -->
-    <div class="add-property-container">
-      <div class="add-property">
-        <h2>Saved Drafts </h2>
-        <p>Review and edit your saved drafts anytime</p>
-      </div>
-      <!-- Search Bar -->
+    <!-- Search Bar -->
+    <div class="search-bar-container">
       <div class="search-bar">
         <svg class="search-icon" viewBox="0 0 24 24">
           <circle cx="11" cy="11" r="8" stroke="black" stroke-width="1.5" fill="none" />
@@ -82,15 +74,7 @@
       </div>
     </div>
   </div>
-
-  <div class="drafts">
-    <h1>Drafts</h1>
-    <p>This is the Drafts page.</p>
-  </div>
 </template>
-
-<script setup>
-</script>
 
 <style scoped>
 .manage-listings {
@@ -183,34 +167,11 @@
   border-radius: 2px;
 }
 
-/* Add Property & Search Container */
-.add-property-container {
+/* Search Bar Container */
+.search-bar-container {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: nowrap;
-  gap: 20px;
-  max-width: 100%;
-  overflow: hidden;
-}
-
-.add-property {
-  flex-grow: 1;
-  min-width: 200px;
-}
-
-.add-property h2 {
-  font-size: 22px;
-  color: rgb(57, 57, 57);
-  font-weight: 600;
-  margin-bottom: -10px;
-  letter-spacing: -0.9px;
-}
-
-.add-property p {
-  font-size: 13px;
-  color: black;
-  font-weight: 500;
+  justify-content: flex-end;
+  margin: 20px 0;
 }
 
 .search-bar {
@@ -344,9 +305,5 @@ br {
   border: 1px solid #074F90;
   color: #074F90;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.drafts {
-  padding: 20px;
 }
 </style>

@@ -1,5 +1,6 @@
 <script setup>
 import PropertyList from "@/components/AgentPersonalListingsView.vue";
+import { useHeaderStore } from "@/stores/headerStore";
 
 // import { computed } from "vue";
 // import { useRoute } from "vue-router";
@@ -8,6 +9,10 @@ import PropertyList from "@/components/AgentPersonalListingsView.vue";
 
 // Define which tab is active based on the route
 // const activeTab = computed(() => route.path);
+
+// Set the header title for this page
+const headerStore = useHeaderStore();
+headerStore.setTitle("View Listings");
 </script>
 
 <template>

@@ -1,35 +1,167 @@
 <script setup>
 import { computed } from "vue";
-import { useHeaderStore } from "@/stores/headerStore";
 import { useRoute } from "vue-router";
 
-const headerStore = useHeaderStore();
 const route = useRoute();
 
-const title = computed(() => headerStore.title);
+// Check if the current route is the PostDetail page
 const isPostDetailPage = computed(() => {
-  // Check if the current route is the PostDetail page
-  // This covers all possible paths that might lead to the PostDetail component
-  return route.path.includes('/social-platforms/post/') || 
-         route.path.includes('/marketing-tools/social-platforms/post/') || 
+  return route.path.includes('/social-platforms/post/') ||
+         route.path.includes('/marketing-tools/social-platforms/post/') ||
          route.path.includes('/marketing/post/') ||
-         (route.matched && route.matched.some(record => 
-           record.components && record.components.default && 
+         (route.matched && route.matched.some(record =>
+           record.components && record.components.default &&
            record.components.default.name === 'PostDetail'));
 });
+
+// Check if the current route matches a specific route path or pattern
+const isRoutePath = (path) => {
+  if (Array.isArray(path)) {
+    return path.some(p => route.path === p || route.path.startsWith(p + '/'));
+  }
+  return route.path === path || route.path.startsWith(path + '/');
+};
+
+// Routes with custom headers
+const isDraftsPage = computed(() => isRoutePath('/drafts'));
+const isEducationTrainingPage = computed(() => isRoutePath('/education-training'));
+const isManageListingsPage = computed(() => {
+  return isRoutePath(['/manage-listings', '/add-listing', '/view-listings', '/pending-approvals']);
+});
+const isDashboardPage = computed(() => isRoutePath('/'));
+const isAnalyticsPage = computed(() => isRoutePath('/analytics'));
+const isCalendarPage = computed(() => isRoutePath('/calendar'));
+const isMessagesPage = computed(() => isRoutePath('/messages'));
+const isSettingsPage = computed(() => isRoutePath('/settings'));
+const isTasksPage = computed(() => isRoutePath('/tasks'));
+const isReceiptsDocsPage = computed(() => isRoutePath('/receipts-docs'));
+const isMarketingToolsPage = computed(() => isRoutePath('/marketing-tools'));
+const isProfilePage = computed(() => isRoutePath('/profile'));
+const isAgentProfilePage = computed(() => isRoutePath('/agent-profile'));
+const isChatPage = computed(() => isRoutePath(['/chat/admin', '/chat/client']));
+const isAboutPage = computed(() => isRoutePath('/about'));
+const isSuccessPlanPage = computed(() => isRoutePath('/marketing-tools/success-plan'));
+const isChecklistPage = computed(() => isRoutePath('/marketing-tools/checklist'));
+const isDoneForYouPage = computed(() => isRoutePath('/marketing-tools/done-for-you'));
+const isSocialPlatformsPage = computed(() => isRoutePath('/marketing-tools/social-platforms'));
+const isEducationSessionPage = computed(() => 
+  isRoutePath(['/education-training/session', '/education-training/module']));
+const isEducationTestPage = computed(() => isRoutePath('/education-training/test'));
 </script>
 
 <template>
-  <!-- Do something where its like... if its not dashboard, show title,
-   if its dashboard, do not show title -->
   <header class="header">
-    <h1 v-if="title != 'Dashboard'">{{ title }}</h1>
-
-    <!-- Show marketing header on post detail page, otherwise show search bar -->
-    <div v-if="isPostDetailPage" class="marketing-header">
+    <!-- Show marketing header on post detail page -->
+    <div v-if="isPostDetailPage" class="custom-header">
       <h1>Marketing Tools</h1>
       <p>Link your social media accounts to reach a wider audience.</p>
     </div>
+    <!-- Show drafts header -->
+    <div v-else-if="isDraftsPage" class="custom-header">
+      <h1>Saved Drafts</h1>
+      <p>Review and edit your saved drafts anytime</p>
+    </div>
+    <!-- Show education & training header -->
+    <div v-else-if="isEducationTrainingPage" class="custom-header">
+      <h1>Education & Training</h1>
+      <p>Get informed about the business and modern trends on real estate</p>
+    </div>
+    <!-- Show education session header -->
+    <div v-else-if="isEducationSessionPage" class="custom-header">
+      <h1>Session Details</h1>
+      <p>Review your current session materials and progress</p>
+    </div>
+    <!-- Show education test header -->
+    <div v-else-if="isEducationTestPage" class="custom-header">
+      <h1>Knowledge Assessment</h1>
+      <p>Complete this test to verify your understanding of the material</p>
+    </div>
+    <!-- Show manage listings header -->
+    <div v-else-if="isManageListingsPage" class="custom-header">
+      <h1>Manage Listings</h1>
+      <p>How you can add, remove, and edit properties on your profile</p>
+    </div>
+    <!-- Show dashboard header -->
+    <div v-else-if="isDashboardPage" class="custom-header">
+      <h1>Dashboard</h1>
+      <p>View your performance metrics and important updates</p>
+    </div>
+    <!-- Show analytics header -->
+    <div v-else-if="isAnalyticsPage" class="custom-header">
+      <h1>Analytics</h1>
+      <p>Track and analyze your business performance</p>
+    </div>
+    <!-- Show calendar header -->
+    <div v-else-if="isCalendarPage" class="custom-header">
+      <h1>Calendar</h1>
+      <p>Manage your schedule and appointments</p>
+    </div>
+    <!-- Show messages header -->
+    <div v-else-if="isMessagesPage" class="custom-header">
+      <h1>Messages</h1>
+      <p>Communicate with clients and team members</p>
+    </div>
+    <!-- Show settings header -->
+    <div v-else-if="isSettingsPage" class="custom-header">
+      <h1>Settings</h1>
+      <p>Customize your account preferences and profile</p>
+    </div>
+    <!-- Show tasks header -->
+    <div v-else-if="isTasksPage" class="custom-header">
+      <h1>Tasks</h1>
+      <p>Manage and track your daily activities and to-dos</p>
+    </div>
+    <!-- Show documents header -->
+    <div v-else-if="isReceiptsDocsPage" class="custom-header">
+      <h1>Documents</h1>
+      <p>Organize and access all your important files and forms</p>
+    </div>
+    <!-- Show marketing tools header -->
+    <div v-else-if="isMarketingToolsPage" class="custom-header">
+      <h1>Marketing Tools</h1>
+      <p>Promote your business and reach more potential clients</p>
+    </div>
+    <!-- Show success plan header -->
+    <div v-else-if="isSuccessPlanPage" class="custom-header">
+      <h1>Success Plan</h1>
+      <p>Create and track your marketing success plan</p>
+    </div>
+    <!-- Show checklist header -->
+    <div v-else-if="isChecklistPage" class="custom-header">
+      <h1>Marketing Checklists</h1>
+      <p>Stay organized with customizable marketing checklists</p>
+    </div>
+    <!-- Show done for you header -->
+    <div v-else-if="isDoneForYouPage" class="custom-header">
+      <h1>Done For You</h1>
+      <p>Ready-to-use marketing materials for your business</p>
+    </div>
+    <!-- Show social platforms header -->
+    <div v-else-if="isSocialPlatformsPage" class="custom-header">
+      <h1>Social Platforms</h1>
+      <p>Manage and schedule your social media content</p>
+    </div>
+    <!-- Show profile header -->
+    <div v-else-if="isProfilePage" class="custom-header">
+      <h1>My Profile</h1>
+      <p>Manage your personal information and preferences</p>
+    </div>
+    <!-- Show agent profile header -->
+    <div v-else-if="isAgentProfilePage" class="custom-header">
+      <h1>Agent Profile</h1>
+      <p>Customize how clients see your professional profile</p>
+    </div>
+    <!-- Show chat header -->
+    <div v-else-if="isChatPage" class="custom-header">
+      <h1>Messages</h1>
+      <p>Chat with clients and team members in real-time</p>
+    </div>
+    <!-- Show about header -->
+    <div v-else-if="isAboutPage" class="custom-header">
+      <h1>About</h1>
+      <p>Learn more about our platform and services</p>
+    </div>
+    <!-- Default search bar for other pages -->
     <div v-else class="search-bar">
       <svg class="search-icon" viewBox="0 0 24 24">
         <circle cx="11" cy="11" r="8" stroke="black" stroke-width="1.5" fill="none" />
@@ -69,11 +201,6 @@ const isPostDetailPage = computed(() => {
         <path d="M7 10l5 5 5-5z" />
       </svg>
     </div>
-
-    <!-- <div class="actions">
-      <button>🔔 Notifications</button>
-      <button>⚙️ Settings</button>
-    </div> -->
   </header>
 </template>
 
@@ -82,7 +209,7 @@ const isPostDetailPage = computed(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 30px 20px;
+  padding: 30px 38px;
   background: white;
   border-bottom: 1px solid #ddd;
   position: sticky;
@@ -110,14 +237,14 @@ h1 {
 }
 
 /* Marketing Header */
-.marketing-header {
+.marketing-header, .custom-header {
   width: 500px;
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
-.marketing-header h1 {
+.marketing-header h1, .custom-header h1 {
   font-size: 1.25rem;
   font-weight: 600;
   margin: 0 0 4px 0;
@@ -125,7 +252,7 @@ h1 {
   line-height: 1.2;
 }
 
-.marketing-header p {
+.marketing-header p, .custom-header p {
   font-size: 0.875rem;
   color: #666;
   margin: 0;

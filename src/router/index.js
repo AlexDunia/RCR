@@ -18,23 +18,38 @@ const routes = [
   // Manage Listings routes
   {
     path: '/manage-listings',
-    component: () => import('@/views/agents/ManageListings.vue')
+    component: () => import('@/views/agents/ManageListings.vue'),
+    meta: {
+      title: 'Manage Listings'
+    }
   },
   {
     path: '/add-listing',
-    component: () => import('@/views/agents/AddListing.vue')
+    component: () => import('@/views/agents/AddListing.vue'),
+    meta: {
+      title: 'Add Listing'
+    }
   },
   {
     path: '/view-listings',
-    component: () => import('@/views/listings/ViewListings.vue')
+    component: () => import('@/views/listings/ViewListings.vue'),
+    meta: {
+      title: 'View Listings'
+    }
   },
   {
     path: '/pending-approvals',
-    component: () => import('@/views/listings/PendingApprovals.vue')
+    component: () => import('@/views/listings/PendingApprovals.vue'),
+    meta: {
+      title: 'Pending Approvals'
+    }
   },
   {
     path: '/drafts',
-    component: () => import('@/views/listings/Drafts.vue')
+    component: () => import('@/views/listings/Drafts.vue'),
+    meta: {
+      title: 'Drafts'
+    }
   },
 
   // Tasks routes
@@ -242,29 +257,44 @@ const routes = [
       {
         path: '',
         name: 'EducationTraining',
-        component: () => import('@/views/education/EducationTrainingView.vue')
+        component: () => import('@/views/education/EducationTrainingView.vue'),
+        meta: {
+          title: 'Education & Training'
+        }
       },
       {
         path: 'create',
         name: 'CreateEducationSession',
-        component: () => import('@/views/education/CreateEducationSession.vue')
+        component: () => import('@/views/education/CreateEducationSession.vue'),
+        meta: {
+          title: 'Create Education Session'
+        }
       },
       {
         path: 'session/:id',
         name: 'SessionDetails',
         component: () => import('@/views/education/SessionDetailsView.vue'),
-        props: true
+        props: true,
+        meta: {
+          title: 'Session Details'
+        }
       },
       {
         path: 'module/:id',
         name: 'ModuleDetails',
         component: () => import('@/views/education/ModuleDetailsView.vue'),
-        props: true
+        props: true,
+        meta: {
+          title: 'Module Details'
+        }
       },
       {
         path: 'test',
         name: 'EducationTest',
-        component: () => import('@/views/education/TestView.vue')
+        component: () => import('@/views/education/TestView.vue'),
+        meta: {
+          title: 'Education Test'
+        }
       }
     ]
   },
