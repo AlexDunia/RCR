@@ -1,18 +1,62 @@
 <template>
   <div class="post-detail">
-    <!-- Header -->
-    <div class="marketing-header">
-      <h1>Marketing Tools</h1>
-      <p>Link your social media accounts to reach a wider audience.</p>
-    </div>
-
     <!-- Post Preview Card -->
     <div class="post-preview-card">
-      <div class="post-details">
-        <h2>Post details</h2>
-        <p>Here's my review on the 2025 real estate thing thi...</p>
+      <div class="post-header">
+        <div class="post-meta">
+          <h2>Post details</h2>
+          <span class="publish-date">Published {{ formatDate(post?.creationDate) }}</span>
+          <div class="platform-icons">
+            <div class="platform-icon-wrapper bg-[#000000]">
+              <svg viewBox="0 0 24 24" fill="currentColor" class="icon text-white">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+            </div>
+            <div class="platform-icon-wrapper bg-[#1877F2]">
+              <svg viewBox="0 0 24 24" fill="currentColor" class="icon text-white">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+              </svg>
+            </div>
+            <div class="platform-icon-wrapper bg-[#0A66C2]">
+              <svg viewBox="0 0 24 24" fill="currentColor" class="icon text-white">
+                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+        <div class="engagement-summary">
+          <div class="engagement-item">
+            <span class="icon-wrapper text-blue-600">❤️</span>
+            <span class="count">100</span>
+          </div>
+          <div class="engagement-item">
+            <span class="icon-wrapper text-gray-600">💬</span>
+            <span class="count">100</span>
+          </div>
+          <div class="engagement-item">
+            <span class="icon-wrapper text-gray-600">✖️</span>
+          </div>
+        </div>
       </div>
-      <button class="view-more-btn" @click="handleViewMore">View more</button>
+
+      <div class="post-content">
+        <p v-if="!isExpanded" class="truncated-content">{{ post?.content.substring(0, 100) }}...</p>
+        <div v-else class="expanded-content">
+          <p class="mb-4">{{ post?.content }}</p>
+          <div class="images-grid">
+            <div v-for="(image, index) in post?.images" :key="index" class="image-container">
+              <img :src="image" :alt="'Post image ' + (index + 1)" class="post-image" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button
+        class="view-more-btn"
+        @click="toggleExpand"
+      >
+        {{ isExpanded ? 'Show less' : 'View more' }}
+      </button>
     </div>
 
     <!-- Filter Buttons -->
@@ -20,137 +64,40 @@
       <span class="filter-label">Filter Insights</span>
       <div class="filter-buttons">
         <button
+          v-for="platform in ['All', 'X', 'Facebook', 'LinkedIn']"
+          :key="platform"
           class="filter-btn"
-          :class="{ active: activeFilter === 'All' }"
-          @click="handleFilterClick('All')"
-        >All</button>
-        <button
-          class="filter-btn"
-          :class="{ active: activeFilter === 'X' }"
-          @click="handleFilterClick('X')"
+          :class="{ active: activeFilter === platform }"
+          @click="handleFilterClick(platform)"
         >
-          <svg viewBox="0 0 24 24" fill="currentColor" class="platform-icon">
-            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-        </svg>
-          X
-      </button>
-        <button
-          class="filter-btn"
-          :class="{ active: activeFilter === 'Facebook' }"
-          @click="handleFilterClick('Facebook')"
-        >
-          <svg viewBox="0 0 24 24" fill="currentColor" class="platform-icon">
-            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-          </svg>
-          Facebook
-        </button>
-        <button
-          class="filter-btn"
-          :class="{ active: activeFilter === 'LinkedIn' }"
-          @click="handleFilterClick('LinkedIn')"
-        >
-          <svg viewBox="0 0 24 24" fill="currentColor" class="platform-icon">
-            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-          </svg>
-          LinkedIn
+          <component
+            v-if="platform !== 'All'"
+            :is="getPlatformIcon(platform)"
+            class="platform-icon"
+          />
+          {{ platform }}
         </button>
       </div>
     </div>
 
     <!-- Post Overview Section -->
     <div class="post-overview" v-if="activeFilter !== 'All'">
-      <div class="overview-header">
-        <div class="platform-icon-container" :class="getPlatformColor(activeFilter)">
-          <component :is="getPlatformIcon(activeFilter)" class="w-6 h-6 text-white" />
-        </div>
-        <div class="overview-title">
-          <h3>{{ activeFilter }} Statistics</h3>
-          <p class="text-sm text-gray-600">for @alexdunia_</p>
+      <div class="platform-header" :class="activeFilter.toLowerCase()">
+        <div class="platform-info">
+          <component :is="getPlatformIcon(activeFilter)" class="platform-icon" />
+          <div>
+            <h3>{{ activeFilter }} Statistics</h3>
+            <p>for @alexdunia_</p>
+          </div>
         </div>
       </div>
 
       <!-- Platform Specific Stats -->
       <div class="stats-grid">
-        <template v-if="activeFilter === 'X'">
-          <div class="stat-card">
-            <span class="stat-label">Likes on post</span>
-            <span class="stat-value">{{ currentStats.likes }}</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-label">Retweets on post</span>
-            <span class="stat-value">{{ currentStats.retweets }}</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-label">Comments on post</span>
-            <span class="stat-value">{{ currentStats.comments }}</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-label">Impressions on post</span>
-            <span class="stat-value">{{ currentStats.impressions }}</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-label">Link clicks</span>
-            <span class="stat-value">{{ currentStats.linkClicks }}</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-label">Quotes on post</span>
-            <span class="stat-value">{{ currentStats.quotes }}</span>
-          </div>
-        </template>
-
-        <template v-else-if="activeFilter === 'Facebook'">
-          <div class="stat-card">
-            <span class="stat-label">Likes on post</span>
-            <span class="stat-value">{{ currentStats.likes }}</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-label">Comments on post</span>
-            <span class="stat-value">{{ currentStats.comments }}</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-label">Post shares</span>
-            <span class="stat-value">{{ currentStats.shares }}</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-label">Impressions on post</span>
-            <span class="stat-value">{{ currentStats.impressions }}</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-label">Total video views</span>
-            <span class="stat-value">{{ currentStats.videoViews }}</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-label">Average watch time</span>
-            <span class="stat-value">{{ currentStats.avgWatchTime }}</span>
-          </div>
-        </template>
-
-        <template v-else-if="activeFilter === 'LinkedIn'">
-          <div class="stat-card">
-            <span class="stat-label">Likes on post</span>
-            <span class="stat-value">{{ currentStats.likes }}</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-label">Comments on post</span>
-            <span class="stat-value">{{ currentStats.comments }}</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-label">Post shares</span>
-            <span class="stat-value">{{ currentStats.shares }}</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-label">Impressions on post</span>
-            <span class="stat-value">{{ currentStats.impressions }}</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-label">Total video views</span>
-            <span class="stat-value">{{ currentStats.videoViews }}</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-label">Average watch time</span>
-            <span class="stat-value">{{ currentStats.avgWatchTime }}</span>
-          </div>
-        </template>
+        <div v-for="(stat, key) in currentStats" :key="key" class="stat-card">
+          <span class="stat-label">{{ formatStatLabel(key) }}</span>
+          <span class="stat-value">{{ stat }}</span>
+        </div>
       </div>
     </div>
 
@@ -197,15 +144,9 @@
       <div v-for="platform in socialPlatforms" :key="platform.id" class="graph-card" v-show="activeFilter === 'All' || activeFilter === platform.id">
         <div class="graph-header">
           <div class="platform-info">
-            <svg v-if="platform.id === 'X'" viewBox="0 0 24 24" fill="currentColor" class="platform-icon x-icon">
-              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-            </svg>
-            <svg v-if="platform.id === 'Facebook'" viewBox="0 0 24 24" fill="currentColor" class="platform-icon facebook-icon">
-              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-          </svg>
-            <svg v-if="platform.id === 'LinkedIn'" viewBox="0 0 24 24" fill="currentColor" class="platform-icon linkedin-icon">
-              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-            </svg>
+            <div class="platform-icon-container" :class="`bg-${platform.id.toLowerCase()}`">
+              <component :is="getPlatformIcon(platform.id)" class="w-8 h-8 text-white" />
+            </div>
             <span class="platform-name">{{ platform.name }}</span>
           </div>
           <div class="graph-actions">
@@ -298,6 +239,7 @@ import SocialMediaGraphs from '@/components/SocialMediaGraphs.vue';
 const route = useRoute();
 const post = ref(null);
 const activeFilter = ref('All');
+const isExpanded = ref(false);
 
 // Days of the week for x-axis
 const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -384,10 +326,15 @@ onMounted(() => {
     post.value = {
       id: Number(postId),
       title: 'Real Estate Market Trends 2025',
-      content: "Here's my review on the 2025 real estate thing that's coming up. The market is expected to see significant changes...",
+      content: "Here's my review on the 2025 real estate thing Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. hdtknsh ksusnl proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
       status: 'published',
       creationDate: new Date().toISOString(),
-      lastEdited: new Date().toISOString()
+      lastEdited: new Date().toISOString(),
+      images: [
+        '/images/house1.jpg',
+        '/images/house2.jpg',
+        '/images/house3.jpg'
+      ]
     };
   }
 
@@ -396,25 +343,19 @@ onMounted(() => {
 });
 
 // Event handlers
-const handleViewMore = () => {
-  console.log('View more clicked');
-};
-
 const handleFilterClick = (filter) => {
   activeFilter.value = filter;
 
-  // Update displayed stats based on filter
-  if (filter === 'X') {
-    updateStats({
+  const statsMap = {
+    X: {
       likes: 200,
       retweets: 500,
       comments: 1002,
       impressions: 5000,
       linkClicks: 'No links found',
       quotes: 60
-    });
-  } else if (filter === 'Facebook') {
-    updateStats({
+    },
+    Facebook: {
       likes: 200,
       comments: 500,
       shares: 1002,
@@ -422,9 +363,8 @@ const handleFilterClick = (filter) => {
       reach: 60,
       videoViews: 'No videos posted',
       avgWatchTime: 'Null'
-    });
-  } else if (filter === 'LinkedIn') {
-    updateStats({
+    },
+    LinkedIn: {
       likes: 200,
       comments: 500,
       shares: 1002,
@@ -432,10 +372,8 @@ const handleFilterClick = (filter) => {
       reach: 60,
       videoViews: 'No videos posted',
       avgWatchTime: 'Null'
-    });
-  } else {
-    // Show combined stats for 'All'
-    updateStats({
+    },
+    All: {
       likes: 600,
       comments: 1500,
       shares: 3006,
@@ -443,12 +381,10 @@ const handleFilterClick = (filter) => {
       reach: 180,
       videoViews: 'No videos posted',
       avgWatchTime: 'Null'
-    });
-  }
-};
+    }
+  };
 
-const updateStats = (stats) => {
-  currentStats.value = stats;
+  currentStats.value = statsMap[filter];
 };
 
 const handleViewAll = (platform) => {
@@ -505,44 +441,54 @@ const getExpandedPlatformLastUpdated = () => {
   });
 };
 
-const getPlatformColor = (platform) => {
-  switch (platform) {
-    case 'X': return 'bg-[#000000]';
-    case 'Facebook': return 'bg-[#1877F2]';
-    case 'LinkedIn': return 'bg-[#0A66C2]';
-    default: return 'bg-gray-500';
-  }
+const getPlatformIcon = (platform) => {
+  const icons = {
+    X: {
+      template: `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+        </svg>
+      `
+    },
+    Facebook: {
+      template: `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+        </svg>
+      `
+    },
+    LinkedIn: {
+      template: `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+        </svg>
+      `
+    }
+  };
+
+  return icons[platform];
 };
 
-const getPlatformIcon = (platform) => {
-  switch (platform) {
-    case 'X':
-      return {
-        template: `
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M13.6823 10.6218L20.2391 3H18.6854L12.9921 9.61788L8.44486 3H3.2002L10.0765 13.0074L3.2002 21H4.75404L10.7663 14.0113L15.5549 21H20.7996L13.6819 10.6218H13.6823ZM11.5541 13.0956L10.8574 12.0991L5.31391 4.16971H7.70053L12.1742 10.5689L12.8709 11.5655L18.6861 19.8835H16.2995L11.5541 13.096V13.0956Z"/>
-          </svg>
-        `
-      };
-    case 'Facebook':
-      return {
-        template: `
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-          </svg>
-        `
-      };
-    case 'LinkedIn':
-      return {
-        template: `
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-          </svg>
-        `
-      };
-    default:
-      return null;
-  }
+const toggleExpand = () => {
+  isExpanded.value = !isExpanded.value;
+};
+
+const formatDate = (dateString) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  });
+};
+
+const formatStatLabel = (key) => {
+  return key
+    .replace(/([A-Z])/g, ' $1')
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
 };
 </script>
 
@@ -557,51 +503,107 @@ const getPlatformIcon = (platform) => {
   background-color: #fff;
 }
 
-/* Marketing Header */
-.marketing-header {
+/* Post Preview Card */
+.post-preview-card {
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
   margin-bottom: 2rem;
 }
 
-.marketing-header h1 {
-  font-size: 1.5rem;
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.post-meta h2 {
+  font-size: 0.875rem;
   font-weight: 600;
-  margin-bottom: 0.25rem;
+  color: #111827;
+  margin: 0 0 0.5rem 0;
+}
+
+.publish-date {
+  font-size: 0.75rem;
+  color: #6B7280;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.platform-icons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.platform-icon-wrapper {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.375rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.engagement-summary {
+  display: flex;
+  gap: 1rem;
+}
+
+.engagement-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.count {
+  font-size: 0.875rem;
+  font-weight: 500;
   color: #111827;
 }
 
-.marketing-header p {
-  font-size: 0.875rem;
-  color: #6B7280;
-  margin: 0;
+.post-content {
+  margin-bottom: 1rem;
 }
 
-/* Post Preview Card */
-.post-preview-card {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem;
-  background: #F9FAFB;
+.truncated-content,
+.expanded-content {
+  font-size: 0.875rem;
+  color: #111827;
+  line-height: 1.5;
+}
+
+.images-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.image-container {
+  aspect-ratio: 16/9;
   border-radius: 0.5rem;
-  margin-bottom: 2rem;
+  overflow: hidden;
   border: 1px solid #E5E7EB;
 }
 
-.post-details h2 {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #111827;
-  margin: 0 0 0.25rem 0;
-}
-
-.post-details p {
-  font-size: 0.875rem;
-  color: #111827;
-  margin: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 700px;
+.post-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .view-more-btn {
@@ -612,12 +614,12 @@ const getPlatformIcon = (platform) => {
   border: none;
   cursor: pointer;
   padding: 0;
-  transition: color 0.2s;
-  text-transform: capitalize;
+  margin-left: auto;
+  display: block;
 }
 
 .view-more-btn:hover {
-  color: #1D4ED8;
+  color: #2563EB;
 }
 
 /* Filter Section */
@@ -625,26 +627,23 @@ const getPlatformIcon = (platform) => {
   display: flex;
   align-items: center;
   margin-bottom: 2rem;
-  flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
 .filter-label {
   font-size: 0.875rem;
   color: #6B7280;
-  margin-right: 1rem;
 }
 
 .filter-buttons {
   display: flex;
   gap: 0.75rem;
-  flex-wrap: wrap;
 }
 
 .filter-btn {
   display: flex;
   align-items: center;
-  gap: 0.375rem;
+  gap: 0.5rem;
   padding: 0.5rem 1rem;
   border-radius: 9999px;
   font-size: 0.875rem;
@@ -654,7 +653,6 @@ const getPlatformIcon = (platform) => {
   border: none;
   cursor: pointer;
   transition: all 0.2s;
-  height: 2.25rem;
 }
 
 .filter-btn:hover {
@@ -669,6 +667,79 @@ const getPlatformIcon = (platform) => {
 .platform-icon {
   width: 1rem;
   height: 1rem;
+}
+
+/* Platform Stats */
+.platform-stats {
+  background: #fff;
+  border-radius: 0.5rem;
+  border: 1px solid #E5E7EB;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.platform-header {
+  padding: 1.5rem;
+  color: #fff;
+}
+
+.platform-header.x {
+  background-color: #000000;
+}
+
+.platform-header.facebook {
+  background-color: #1877F2;
+}
+
+.platform-header.linkedin {
+  background-color: #0A66C2;
+}
+
+.platform-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.platform-info h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem 0;
+}
+
+.platform-info p {
+  font-size: 0.875rem;
+  margin: 0;
+  opacity: 0.9;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.stat-card {
+  background: #F9FAFB;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #E5E7EB;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: #6B7280;
+  display: block;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.stat-value {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
 }
 
 /* Post Overview Section */
@@ -790,16 +861,25 @@ const getPlatformIcon = (platform) => {
   gap: 0.5rem;
 }
 
-.x-icon {
-  color: #000000;
+.platform-icon-container {
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
 }
 
-.facebook-icon {
-  color: #1877F2;
+.platform-icon-container.bg-x {
+  background-color: #000000;
 }
 
-.linkedin-icon {
-  color: #0A66C2;
+.platform-icon-container.bg-facebook {
+  background-color: #1877F2;
+}
+
+.platform-icon-container.bg-linkedin {
+  background-color: #0A66C2;
 }
 
 .platform-name {
@@ -902,18 +982,6 @@ const getPlatformIcon = (platform) => {
   width: 60%;
   border-radius: 4px 4px 0 0;
   transition: height 0.3s ease;
-}
-
-.x-bar {
-  background-color: #000000;
-}
-
-.facebook-bar {
-  background-color: #1877F2;
-}
-
-.linkedin-bar {
-  background-color: #0A66C2;
 }
 
 .x-label {
@@ -1108,5 +1176,30 @@ const getPlatformIcon = (platform) => {
   .stats-grid {
     grid-template-columns: repeat(3, 1fr);
   }
+}
+
+/* Platform header styles */
+.platform-header {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  color: white;
+}
+
+.platform-header.x {
+  background-color: #000000;
+}
+
+.platform-header.facebook {
+  background-color: #1877F2;
+}
+
+.platform-header.linkedin {
+  background-color: #0A66C2;
+}
+
+.platform-icon {
+  width: 1rem;
+  height: 1rem;
 }
 </style>

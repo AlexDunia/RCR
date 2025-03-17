@@ -1,10 +1,22 @@
 <script setup>
 import { computed } from "vue";
 import { useHeaderStore } from "@/stores/headerStore";
+import { useRoute } from "vue-router";
 
 const headerStore = useHeaderStore();
+const route = useRoute();
 
 const title = computed(() => headerStore.title);
+const isPostDetailPage = computed(() => {
+  // Check if the current route is the PostDetail page
+  // This covers all possible paths that might lead to the PostDetail component
+  return route.path.includes('/social-platforms/post/') || 
+         route.path.includes('/marketing-tools/social-platforms/post/') || 
+         route.path.includes('/marketing/post/') ||
+         (route.matched && route.matched.some(record => 
+           record.components && record.components.default && 
+           record.components.default.name === 'PostDetail'));
+});
 </script>
 
 <template>
@@ -13,7 +25,12 @@ const title = computed(() => headerStore.title);
   <header class="header">
     <h1 v-if="title != 'Dashboard'">{{ title }}</h1>
 
-    <div class="search-bar">
+    <!-- Show marketing header on post detail page, otherwise show search bar -->
+    <div v-if="isPostDetailPage" class="marketing-header">
+      <h1>Marketing Tools</h1>
+      <p>Link your social media accounts to reach a wider audience.</p>
+    </div>
+    <div v-else class="search-bar">
       <svg class="search-icon" viewBox="0 0 24 24">
         <circle cx="11" cy="11" r="8" stroke="black" stroke-width="1.5" fill="none" />
         <line x1="16" y1="16" x2="22" y2="22" stroke="black" stroke-width="1.5" />
@@ -90,6 +107,29 @@ h1 {
   padding: 15px 16px;
   width:500px;
   transition: border 0.2s ease-in-out;
+}
+
+/* Marketing Header */
+.marketing-header {
+  width: 500px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.marketing-header h1 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+  color: #333;
+  line-height: 1.2;
+}
+
+.marketing-header p {
+  font-size: 0.875rem;
+  color: #666;
+  margin: 0;
+  font-weight: normal;
 }
 
 /* Apply stroke to the search bar container when focused */
