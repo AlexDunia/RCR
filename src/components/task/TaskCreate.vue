@@ -410,12 +410,15 @@ const handleBack = () => {
   } else {
     // No changes, just go back without confirmation
     if (route.query.draftId) {
-      if (route.query.mode === 'edit') {
+      if (route.query.from) {
+        // If we have a 'from' parameter, use it to navigate back
+        router.push(`/tasks/${route.query.from}`);
+      } else if (route.query.mode === 'edit') {
         // If we're editing a task, go back to the task detail
         router.push(`/tasks/${route.query.draftId}`);
       } else {
         // Otherwise go to drafts
-        router.push('/tasks/drafts');
+      router.push('/tasks/drafts');
       }
     } else {
       router.push('/tasks');
@@ -455,13 +458,23 @@ const saveDraftChanges = () => {
 }
 
 const hasFormData = () => {
-  return taskData.name ||
-    taskData.startDate ||
-    taskData.endDate ||
-    taskData.agents.length > 0 ||
-    taskData.clients.length > 0 ||
-    taskData.attachments.length > 0 ||
-    taskDescription.value
+  // Check if any field has been filled out
+  if (taskData.name.trim() !== '') return true;
+  if (taskData.agents.length > 0) return true;
+  if (taskData.clients.length > 0) return true;
+  if (taskData.attachments.length > 0) return true;
+  if (taskDescription.value.trim() !== '') return true;
+
+  // Check if dates/times have been changed from default values
+  const today = new Date().toISOString().split('T')[0];
+  if (taskData.startDate !== today) return true;
+  if (taskData.startTime !== '09:00') return true;
+  if (taskData.endDate !== today) return true;
+  if (taskData.endTime !== '21:00' && taskData.endTime !== '17:00') return true;
+  if (taskData.priority !== 'medium') return true;
+
+  // No data has been entered
+  return false;
 }
 
 const handleDraftSave = () => {
@@ -498,7 +511,13 @@ const handleDraftSave = () => {
       tasks.push(draftData)
       localStorage.setItem('tasks', JSON.stringify(tasks))
     }
+
+    // Navigate back based on the 'from' parameter if available
+    if (route.query.from) {
+      router.push(`/tasks/${route.query.from}`)
+    } else {
     router.push('/tasks/drafts')
+    }
   } catch (error) {
     console.error('Failed to save draft:', error)
     alert('Failed to save draft. Please try again.')
@@ -507,7 +526,13 @@ const handleDraftSave = () => {
 
 const handleDraftCancel = () => {
   showDraftConfirm.value = false
+
+  // Navigate back based on the 'from' parameter if available
+  if (route.query.from) {
+    router.push(`/tasks/${route.query.from}`)
+  } else {
   router.push('/tasks')
+  }
 }
 
 const handleSubmit = () => {
@@ -533,6 +558,8 @@ const handleSubmit = () => {
       alert('Please select at least one client')
       return
     }
+
+    // No confirmation needed - proceed directly to save
     const now = new Date()
     // Ensure taskId is a number
     const taskId = route.query.draftId ? Number(route.query.draftId) : Number(Date.now())
@@ -623,45 +650,45 @@ const hasChanges = () => {
 const loadDraftData = (draftId) => {
   return new Promise((resolve, reject) => {
     try {
-      const tasks = JSON.parse(localStorage.getItem('tasks') || '[]')
-      const draft = tasks.find(task => task.id === draftId)
-      if (draft) {
-        taskData.name = draft.title
+  const tasks = JSON.parse(localStorage.getItem('tasks') || '[]')
+  const draft = tasks.find(task => task.id === draftId)
+  if (draft) {
+    taskData.name = draft.title
 
         // Ensure dates are not in the past
         taskData.startDate = ensureFutureDate(draft.startDate)
-        taskData.startTime = draft.startTime
+    taskData.startTime = draft.startTime
         taskData.endDate = ensureFutureDate(draft.endDate)
-        taskData.endTime = draft.endTime
+    taskData.endTime = draft.endTime
 
-        taskData.priority = draft.priority
-        taskData.agents = draft.agents
-        taskData.agentDetails = draft.agentDetails
-        taskData.clients = draft.clients
-        taskData.clientDetails = draft.clientDetails
-        taskData.attachments = draft.attachments
-        taskData.description = draft.description || []
-        taskDescription.value = draft.description ? draft.description.map(item => item.replace('- ', '')).join(' ## ') : ''
-        selectedAgents.value = draft.agentDetails
-        selectedClients.value = draft.clientDetails
+    taskData.priority = draft.priority
+    taskData.agents = draft.agents
+    taskData.agentDetails = draft.agentDetails
+    taskData.clients = draft.clients
+    taskData.clientDetails = draft.clientDetails
+    taskData.attachments = draft.attachments
+    taskData.description = draft.description || []
+    taskDescription.value = draft.description ? draft.description.map(item => item.replace('- ', '')).join(' ## ') : ''
+    selectedAgents.value = draft.agentDetails
+    selectedClients.value = draft.clientDetails
 
-        // Save original state for change detection
-        originalTaskData.value = {
-          name: draft.title,
+    // Save original state for change detection
+    originalTaskData.value = {
+      name: draft.title,
           startDate: taskData.startDate, // Use the potentially updated date
-          startTime: draft.startTime,
+      startTime: draft.startTime,
           endDate: taskData.endDate, // Use the potentially updated date
-          endTime: draft.endTime,
-          priority: draft.priority,
-          agents: [...draft.agents],
-          clients: [...draft.clients],
-          attachments: JSON.parse(JSON.stringify(draft.attachments)),
-          description: taskDescription.value
-        }
+      endTime: draft.endTime,
+      priority: draft.priority,
+      agents: [...draft.agents],
+      clients: [...draft.clients],
+      attachments: JSON.parse(JSON.stringify(draft.attachments)),
+      description: taskDescription.value
+    }
         resolve()
       } else {
         reject(new Error('Draft not found'))
-      }
+  }
     } catch (error) {
       reject(error)
     }
@@ -717,13 +744,13 @@ onMounted(() => {
   loading.value = true; // Set loading to true at the start
 
   checkAccess(['agent', 'admin']).then(hasAccess => {
-    if (!hasAccess) {
-      router.push('/unauthorized')
-      return
-    }
+  if (!hasAccess) {
+    router.push('/unauthorized')
+    return
+  }
 
-    const draftId = route.query.draftId
-    if (draftId) {
+  const draftId = route.query.draftId
+  if (draftId) {
       loadDraftData(parseInt(draftId))
         .then(() => {
           loading.value = false
@@ -732,26 +759,27 @@ onMounted(() => {
           console.error('Error loading draft data:', error)
           loading.value = false
         })
-    } else {
-      // Initialize original data for new tasks
+  } else {
+    // Initialize original data for new tasks
       const today = new Date().toISOString().split('T')[0]
-      originalTaskData.value = {
-        name: '',
+    originalTaskData.value = {
+      name: '',
         startDate: today,
-        startTime: '09:00',
+      startTime: '09:00',
         endDate: today,
-        endTime: '17:00',
-        priority: 'medium',
-        agents: [],
-        clients: [],
-        attachments: []
-      }
+        endTime: taskData.endTime, // Use the same default as taskData
+      priority: 'medium',
+      agents: [],
+      clients: [],
+      attachments: [],
+      description: ''
+  }
 
       // Copy to taskData
       Object.assign(taskData, originalTaskData.value)
 
-      // Add a slight delay to show the skeleton loader
-      setTimeout(() => {
+  // Add a slight delay to show the skeleton loader
+  setTimeout(() => {
         loading.value = false // Set loading to false after data is loaded
       }, 800)
     }

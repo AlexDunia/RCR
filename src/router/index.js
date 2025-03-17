@@ -83,7 +83,7 @@ const routes = [
       {
         path: 'completed/:id',
         name: 'CompletedTaskDetail',
-        component: () => import('@/components/task/TaskDetail.vue'),
+        component: () => import('@/views/tasks/CompletedTaskDetail.vue'),
         meta: {
           hideSidebar: true,
           hideHeader: true

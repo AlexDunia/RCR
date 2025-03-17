@@ -215,7 +215,9 @@ const handleTaskClick = (task) => {
 
 const handleEditClick = (task) => {
   event.stopPropagation();
-  router.push(`/tasks/create?draftId=${task.id}&mode=edit`);
+  // Add a 'from' parameter to track where the user is coming from
+  const currentPath = route.path.split('/').pop();
+  router.push(`/tasks/create?draftId=${task.id}&mode=edit&from=${currentPath}`);
 };
 
 const formatDate = (date) => {

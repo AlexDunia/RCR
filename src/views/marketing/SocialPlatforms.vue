@@ -28,6 +28,7 @@
             v-for="post in filteredPosts"
             :key="post.id"
             :class="['post-card', { 'post-card--grid': currentTab === 'published' }]"
+            @click="viewPostDetails(post)"
           >
             <div :class="['post-card__thumbnail', { 'post-card__thumbnail--grid': currentTab === 'published' }]">
               <img :src="post.image" :alt="post.title">
@@ -320,6 +321,11 @@ const handleModalCancel = () => {
   showModal.value = false;
   selectedPost.value = null;
 };
+
+const viewPostDetails = (post) => {
+  console.log('Navigating to post detail page', post.id);
+  router.push(`/marketing-tools/social-platforms/post/${post.id}`);
+};
 </script>
 
 <style scoped>
@@ -417,6 +423,7 @@ const handleModalCancel = () => {
   border: 1px solid #e0e0e0;
   border-radius: 4px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
 }
 
 .post-card--grid {
