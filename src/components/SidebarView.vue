@@ -173,7 +173,7 @@ const menuItems = Object.freeze([
       <h2 class="logo">Real City</h2>
       <p class="tagline">realty inc brokerage</p>
     </div>
-    <nav>
+    <nav class="sidebar-nav">
       <ul>
         <li
           v-for="item in menuItems"
@@ -201,11 +201,58 @@ const menuItems = Object.freeze([
   width: 240px;
   background: #004080;
   color: white;
-  padding: 0;
+  padding: 25px;
+  padding-right: 15px;
   display: flex;
   flex-direction: column;
   height: 100vh;
   font-family: 'Poppins', sans-serif;
+  overflow: hidden;
+}
+
+.sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 20px;
+  scrollbar-width: none; /* Hide scrollbar by default for Firefox */
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+.sidebar-nav:hover {
+  scrollbar-width: thin; /* Show scrollbar on hover for Firefox */
+}
+
+/* Custom scrollbar styling */
+.sidebar-nav::-webkit-scrollbar {
+  width: 3px;
+  background: transparent;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  transition: background-color 0.3s ease;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Hide scrollbar for webkit browsers by default */
+.sidebar-nav::-webkit-scrollbar {
+  display: none;
+}
+
+/* Show scrollbar on hover for webkit browsers */
+.sidebar-nav:hover::-webkit-scrollbar {
+  display: block;
 }
 
 .logo-container {
@@ -240,6 +287,7 @@ nav ul {
 nav ul li {
   margin: 0;
   cursor: pointer;
+  margin-bottom: 10px;
   transition: all 0.3s ease;
 }
 
@@ -250,13 +298,16 @@ nav ul li a {
   font-size: 14px;
   align-items: center;
   width: 100%;
-  padding: 12px 20px;
+  padding: 10px 20px;
   font-weight: 400;
   transition: all 0.3s ease;
 }
 
 nav ul li.active {
   background: white;
+  padding: 1px;
+  border-radius: 10px;
+  margin-right: 5px;
 }
 
 nav ul li.active a {
