@@ -9,7 +9,7 @@ const activeMenu = ref('');
 const getActiveMenuFromPath = (path) => {
   // Sanitize path input
   const sanitizedPath = path.replace(/[^a-zA-Z0-9-/]/g, '');
-  
+
   // Remove /RCR prefix if it exists
   const normalizedPath = sanitizedPath.replace('/RCR', '');
 
@@ -62,7 +62,7 @@ const menuItems = Object.freeze([
   },
   {
     name: 'Manage Listing',
-    key: 'manage-listing', 
+    key: 'manage-listing',
     path: '/manage-listings',
     icon: `
       <svg class="menu-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -72,18 +72,18 @@ const menuItems = Object.freeze([
       </svg>
     `
   },
-  {
-    name: 'Create offer',
-    key: 'create-offer',
-    path: '/create-offer',
-    icon: `
-      <svg class="menu-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.5"/>
-        <path d="M12 8V16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        <path d="M8 12H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
-    `
-  },
+  // {
+  //   name: 'Create offer',
+  //   key: 'create-offer',
+  //   path: '/create-offer',
+  //   icon: `
+  //     <svg class="menu-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  //       <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.5"/>
+  //       <path d="M12 8V16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  //       <path d="M8 12H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  //     </svg>
+  //   `
+  // },
   {
     name: 'Receipts and documents',
     key: 'receipts-docs',
@@ -198,11 +198,11 @@ const menuItems = Object.freeze([
 
 <style scoped>
 .sidebar {
-  width: 240px;
+  width: 230px;
   background: #004080;
   color: white;
   padding: 25px;
-  padding-right: 15px;
+  padding-right: 35px;
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -212,52 +212,10 @@ const menuItems = Object.freeze([
 
 .sidebar-nav {
   flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding-right: 20px;
-  scrollbar-width: none; /* Hide scrollbar by default for Firefox */
-  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
-}
-
-.sidebar-nav:hover {
-  scrollbar-width: thin; /* Show scrollbar on hover for Firefox */
-}
-
-/* Custom scrollbar styling */
-.sidebar-nav::-webkit-scrollbar {
-  width: 3px;
-  background: transparent;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.sidebar-nav::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.sidebar-nav::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  transition: background-color 0.3s ease;
-}
-
-.sidebar-nav::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
-/* Hide scrollbar for webkit browsers by default */
-.sidebar-nav::-webkit-scrollbar {
-  display: none;
-}
-
-/* Show scrollbar on hover for webkit browsers */
-.sidebar-nav:hover::-webkit-scrollbar {
-  display: block;
 }
 
 .logo-container {
-  padding: 18px 20px 18px 20px;
-  margin-bottom: 10px;
+  padding: 1px 1px 18px 20px;
 }
 
 .logo {
@@ -306,8 +264,8 @@ nav ul li a {
 nav ul li.active {
   background: white;
   padding: 1px;
+  padding-right:5px;
   border-radius: 10px;
-  margin-right: 5px;
 }
 
 nav ul li.active a {
