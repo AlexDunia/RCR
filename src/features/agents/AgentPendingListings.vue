@@ -2,18 +2,18 @@
 import { ref } from 'vue';
 import AnimationWrapper from "@/components/AnimationWrapper.vue";
 
-const drafts = ref([
+const pendingListings = ref([
   {
     id: 1,
     title: 'Wilson Creek Villa',
     image: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png',
-    createdAt: new Date('2023-03-15')
+    submittedAt: new Date('2023-03-18')
   },
   {
     id: 2,
-    title: 'Sunset Heights Apartment',
+    title: 'Lakefront Property',
     image: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png',
-    createdAt: new Date('2023-03-10')
+    submittedAt: new Date('2023-03-15')
   }
 ]);
 
@@ -25,33 +25,34 @@ const formatDate = (date) => {
   }).format(date);
 };
 
-const editDraft = (id) => {
-  console.log('Editing draft with ID:', id);
+const viewDetails = (id) => {
+  console.log('Viewing details for pending listing with ID:', id);
 };
 </script>
 
 <template>
-  <div class="drafts-container">
+  <div class="pending-listings-container">
     <AnimationWrapper :delay="50">
-      <div v-if="drafts.length === 0" class="no-drafts">
-        <p>You have no saved drafts.</p>
+      <div v-if="pendingListings.length === 0" class="no-listings">
+        <p>You have no pending listings.</p>
       </div>
     </AnimationWrapper>
     
-    <div v-if="drafts.length > 0" class="property-options">
+    <div v-if="pendingListings.length > 0" class="property-options">
       <AnimationWrapper 
-        v-for="(draft, index) in drafts" 
-        :key="draft.id" 
-        :delay="100 + (index * 50)"
+        v-for="(listing, index) in pendingListings" 
+        :key="listing.id" 
+        :delay="100 + (index * 50)" 
         :distance="20">
-        <div class="property-card saved-draft" @click="editDraft(draft.id)">
-          <img :src="draft.image" :alt="draft.title" />
-          <div class="draft-overlay">
-            <div class="edit-icon">
-              <i class="fas fa-pen"></i>
+        <div class="property-card" @click="viewDetails(listing.id)">
+          <img :src="listing.image" :alt="listing.title" />
+          <div class="pending-overlay">
+            <div class="status-badge">
+              <i class="fas fa-clock"></i>
             </div>
-            <p>{{ draft.title }}</p>
-            <span class="draft-date">Saved on {{ formatDate(draft.createdAt) }}</span>
+            <p>{{ listing.title }}</p>
+            <span class="pending-date">Submitted on {{ formatDate(listing.submittedAt) }}</span>
+            <div class="status-label">Awaiting Approval</div>
           </div>
         </div>
       </AnimationWrapper>
@@ -60,18 +61,18 @@ const editDraft = (id) => {
 </template>
 
 <style scoped>
-.drafts-container {
+.pending-listings-container {
   margin-top: 20px;
 }
 
-.no-drafts {
+.no-listings {
   text-align: center;
   padding: 30px;
   background-color: #f7f7f7;
   border-radius: 8px;
 }
 
-.no-drafts p {
+.no-listings p {
   color: #666;
   font-size: 16px;
   font-weight: 500;
@@ -106,7 +107,7 @@ const editDraft = (id) => {
   border-radius: 10px;
 }
 
-.draft-overlay {
+.pending-overlay {
   position: absolute;
   top: 0;
   left: 0;
@@ -122,18 +123,19 @@ const editDraft = (id) => {
   padding: 10px;
 }
 
-.draft-overlay p {
+.pending-overlay p {
   font-size: 18px;
   font-weight: 600;
   margin-bottom: 8px;
 }
 
-.draft-date {
+.pending-date {
   font-size: 14px;
   opacity: 0.9;
+  margin-bottom: 10px;
 }
 
-.edit-icon {
+.status-badge {
   position: absolute;
   top: 10px;
   right: 10px;
@@ -147,8 +149,19 @@ const editDraft = (id) => {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
 }
 
-.edit-icon i {
-  color: #074F90;
+.status-badge i {
+  color: #f0ad4e;
   font-size: 16px;
+}
+
+.status-label {
+  background-color: rgba(240, 173, 78, 0.8);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 </style> 

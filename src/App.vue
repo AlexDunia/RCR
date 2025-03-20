@@ -3,15 +3,17 @@ import { useRoute } from 'vue-router';
 import { useHeaderStore } from '@/stores/headerStore';
 import { useLayoutStore } from '@/stores/layout';
 import { watch, computed, onMounted } from 'vue';
-import Sidebar from './components/SidebarView.vue';
-import Header from './components/HeaderView.vue';
-import PageTransition from './components/PageTransition.vue';
+import { useAuth } from '@/auth/useAuth';
+import Sidebar from '@/components/SidebarView.vue';
+import Header from '@/components/HeaderView.vue';
+import PageTransition from '@/components/PageTransition.vue';
 import '@fontsource/poppins'; // Defaults to 400 weight
 import '@fontsource/poppins/700.css'; // If you need bold
 
 const route = useRoute();
 const headerStore = useHeaderStore();
 const layoutStore = useLayoutStore();
+const { initialize: initAuth } = useAuth();
 
 // Computed properties for better reactivity
 const hideSidebar = computed(() => layoutStore.hideSidebar);
@@ -21,6 +23,9 @@ const background = computed(() => layoutStore.background);
 // Force layout update on mount
 onMounted(() => {
   console.log('App.vue mounted - Forcing initial layout update');
+
+  // Initialize authentication
+  initAuth();
 
   // Apply route meta settings
   if (route.meta) {

@@ -3,8 +3,28 @@ import { useLayoutStore } from '@/stores/layout';
 import DocumentLayout from '@/layouts/DocumentLayout.vue'
 import TasksLayout from '@/layouts/TasksLayout.vue'
 import EducationLayout from '@/layouts/EducationLayout.vue'
-import UserProfile from '../views/Profile.vue'
-import UserProfileEdit from '../views/ProfileEdit.vue'
+import UserProfile from '@/features/profile/ProfilePage.vue'
+import UserProfileEdit from '@/features/profile/ProfileEdit.vue'
+import PendingApprovals from '@/features/listings/PendingApprovals.vue';
+import Drafts from '@/features/listings/Drafts.vue';
+import InProgressTasks from '@/features/tasks/InProgressTasks.vue';
+import ScheduledTasks from '@/features/tasks/ScheduledTasks.vue';
+import CompletedTasks from '@/features/tasks/CompletedTasks.vue';
+import TaskCreate from '@/features/tasks/TaskCreate.vue';
+import TaskDetail from '@/features/tasks/TaskDetail.vue';
+import CompletedTaskDetail from '@/features/tasks/CompletedTaskDetail.vue';
+import AgentProfile from '@/features/agents/AgentProfile.vue';
+import DocumentEdit from '@/features/profile/DocumentEdit.vue';
+import MarketingTools from '@/views/marketing/MarketingTools.vue';
+import SuccessPlan from '@/views/marketing/SuccessPlan.vue';
+import CreateSuccessPlan from '@/views/CreateSuccessPlan.vue';
+import MarketingPlanDetail from '@/views/marketing/MarketingPlanDetail.vue';
+import MyChecklist from '@/views/marketing/MyChecklist.vue';
+import ChecklistCreate from '@/views/marketing/ChecklistCreate.vue';
+import ChecklistDetail from '@/views/marketing/ChecklistDetail.vue';
+import ChecklistEdit from '@/views/marketing/ChecklistEdit.vue';
+import DoneForYou from '@/views/marketing/DoneForYou.vue';
+import SocialPlatforms from '@/views/marketing/SocialPlatforms.vue';
 
 // Lazy-loaded route components
 const routes = [
@@ -12,41 +32,48 @@ const routes = [
   {
     path: '/',
     name: 'AgentDashboardView',
-    component: () => import('@/views/dashboard/AgentDashboardView.vue')
+    component: () => import('@/features/dashboard/DashboardPage.vue')
   },
 
   // Manage Listings routes
   {
     path: '/manage-listings',
-    component: () => import('@/views/agents/ManageListings.vue'),
+    component: () => import('@/features/agents/ManageListings.vue'),
     meta: {
       title: 'Manage Listings'
     }
   },
   {
     path: '/add-listing',
-    component: () => import('@/views/agents/AddListing.vue'),
+    component: () => import('@/features/agents/AddListing.vue'),
     meta: {
       title: 'Add Listing'
     }
   },
   {
+    path: '/edit-listing/:id',
+    component: () => import('@/features/agents/EditListing.vue'),
+    meta: {
+      title: 'Edit Listing'
+    }
+  },
+  {
     path: '/view-listings',
-    component: () => import('@/views/listings/ViewListings.vue'),
+    component: () => import('@/features/listings/ListingsPage.vue'),
     meta: {
       title: 'View Listings'
     }
   },
   {
     path: '/pending-approvals',
-    component: () => import('@/views/listings/PendingApprovals.vue'),
+    component: PendingApprovals,
     meta: {
       title: 'Pending Approvals'
     }
   },
   {
     path: '/drafts',
-    component: () => import('@/views/listings/Drafts.vue'),
+    component: Drafts,
     meta: {
       title: 'Drafts'
     }
@@ -59,28 +86,28 @@ const routes = [
     children: [
       {
         path: '',
-        redirect: '/tasks/in-progress' // Default redirect
+        redirect: '/tasks/in-progress'
       },
       {
         path: 'in-progress',
-        component: () => import('@/views/tasks/InProgressTasks.vue')
+        component: InProgressTasks
       },
       {
         path: 'drafts',
-        component: () => import('@/views/tasks/DraftTasks.vue')
+        component: () => import('@/features/tasks/DraftTasks.vue')
       },
       {
         path: 'scheduled',
         name: 'ScheduledTasks',
-        component: () => import('@/views/tasks/ScheduledTasks.vue')
+        component: ScheduledTasks
       },
       {
         path: 'completed',
-        component: () => import('@/views/tasks/CompletedTasks.vue')
+        component: CompletedTasks
       },
       {
         path: 'create',
-        component: () => import('@/components/task/TaskCreate.vue'),
+        component: TaskCreate,
         meta: {
           hideSidebar: true,
           hideHeader: true
@@ -89,7 +116,7 @@ const routes = [
       {
         path: ':id',
         name: 'TaskDetail',
-        component: () => import('@/components/task/TaskDetail.vue'),
+        component: TaskDetail,
         meta: {
           hideSidebar: true,
           hideHeader: true
@@ -98,7 +125,7 @@ const routes = [
       {
         path: 'completed/:id',
         name: 'CompletedTaskDetail',
-        component: () => import('@/views/tasks/CompletedTaskDetail.vue'),
+        component: CompletedTaskDetail,
         meta: {
           hideSidebar: true,
           hideHeader: true
@@ -111,7 +138,7 @@ const routes = [
   {
     path: '/agent-profile',
     name: 'AgentProfile',
-    component: () => import('@/views/agents/AgentProfile.vue')
+    component: AgentProfile
   },
 
   // Document management routes
@@ -159,28 +186,28 @@ const routes = [
   // Marketing routes
   {
     path: '/marketing-tools',
-    component: () => import('@/views/marketing/MarketingTools.vue'),
+    component: MarketingTools,
     children: [
       {
         path: '',
-        component: () => import('@/views/marketing/SuccessPlan.vue')
+        component: SuccessPlan
       },
       {
         path: 'success-plan',
-        component: () => import('@/views/marketing/SuccessPlan.vue')
+        component: SuccessPlan
       },
       {
         path: 'create',
-        component: () => import('@/views/marketing/CreateSuccessPlan.vue')
+        component: CreateSuccessPlan
       },
       {
         path: 'plan/:id',
-        component: () => import('@/views/marketing/MarketingPlanDetail.vue')
+        component: MarketingPlanDetail
       },
       {
         path: 'checklist',
         name: 'ChecklistList',
-        component: () => import('@/views/marketing/MyChecklist.vue'),
+        component: MyChecklist,
         meta: {
           keepAlive: true
         }
@@ -188,12 +215,12 @@ const routes = [
       {
         path: 'checklist/create',
         name: 'ChecklistCreate',
-        component: () => import('@/views/marketing/ChecklistCreate.vue')
+        component: ChecklistCreate
       },
       {
         path: 'checklist/:id',
         name: 'ChecklistDetail',
-        component: () => import('@/views/marketing/ChecklistDetail.vue'),
+        component: ChecklistDetail,
         props: true,
         meta: {
           keepAlive: true
@@ -202,15 +229,15 @@ const routes = [
       {
         path: 'checklist/:id/edit',
         name: 'ChecklistEdit',
-        component: () => import('@/views/marketing/ChecklistEdit.vue')
+        component: ChecklistEdit
       },
       {
         path: 'done-for-you',
-        component: () => import('@/views/marketing/DoneForYou.vue')
+        component: DoneForYou
       },
       {
         path: 'social-platforms',
-        component: () => import('@/views/marketing/SocialPlatforms.vue')
+        component: SocialPlatforms
       },
       {
         path: 'social-platforms/create',
@@ -312,17 +339,17 @@ const routes = [
       {
         path: 'listings',
         name: 'profile-listings',
-        component: () => import('@/views/profile/ProfileListings.vue')
+        component: () => import('@/features/profile/ProfileListings.vue')
       },
       {
         path: 'documents',
         name: 'profile-documents',
-        component: () => import('@/views/profile/ProfileDocuments.vue')
+        component: () => import('@/features/profile/ProfileDocuments.vue')
       },
       {
         path: 'documents/edit/:id',
         name: 'profile-document-edit',
-        component: () => import('@/views/profile/DocumentEdit.vue')
+        component: DocumentEdit
       }
     ]
   },
@@ -334,10 +361,19 @@ const routes = [
   {
     path: '/property/:id',
     name: 'PropertyDetail',
-    component: () => import('@/views/listings/PropertyDetail.vue'),
+    component: () => import('@/features/listings/PropertyDetail.vue'),
     meta: {
       title: 'Property Details',
-      hideSidebar: false // Explicitly set sidebar to remain visible
+      hideSidebar: false
+    }
+  },
+  {
+    path: '/listing/:id',
+    name: 'ListingDetail',
+    component: () => import('@/features/listings/ListingDetail.vue'),
+    meta: {
+      title: 'Listing Details',
+      hideSidebar: false
     }
   }
 ];
@@ -377,7 +413,7 @@ router.beforeEach(async (to, from, next) => {
 
   // Get the layout store
   const layoutStore = useLayoutStore();
-  
+
   // Reset layout when navigating to dashboard or main navigation routes
   if (to.path === '/' || to.path === '/manage-listings' || to.path === '/view-listings') {
     layoutStore.resetLayout();
