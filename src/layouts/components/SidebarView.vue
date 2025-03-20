@@ -23,6 +23,7 @@ const getActiveMenuFromPath = (path) => {
       normalizedPath.startsWith('/pending-approvals') ||
       normalizedPath.startsWith('/drafts')) return 'manage-listing';
   if (normalizedPath.startsWith('/education-training')) return 'education-training';
+  if (normalizedPath.startsWith('/profile')) return 'profile';
 
   // For other routes, find the matching menu item
   const matchingItem = menuItems.find(item => {
@@ -183,6 +184,7 @@ const menuItems = Object.freeze([
           <router-link
             :to="item.path"
             :class="{ active: activeMenu === item.key }"
+            @click="updateActiveMenu"
           >
             <span class="icon" v-html="item.icon"></span>
             {{ item.name }}
