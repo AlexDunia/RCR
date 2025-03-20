@@ -45,8 +45,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import MarketingNavigation from '@/components/marketing/MarketingNavigation.vue';
-import Loader from '@/components/Loader.vue';
+import MarketingNavigation from '@/features/marketing/MarketingNavigation.vue';
+import Loader from '@/ui/Loader.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -108,13 +108,13 @@ const getFirstLetter = (title) => {
 // Get a random color based on the plan title (but consistent for the same title)
 const getRandomColor = (title) => {
   if (!title) return contrastColors[0];
-  
+
   // Use the sum of character codes as a seed for consistent color selection
   let sum = 0;
   for (let i = 0; i < title.length; i++) {
     sum += title.charCodeAt(i);
   }
-  
+
   // Use the sum to select a color from the array
   const colorIndex = sum % contrastColors.length;
   return contrastColors[colorIndex];
@@ -132,11 +132,11 @@ const formatTime = (date) => {
   let hours = date.getHours();
   const minutes = date.getMinutes();
   const ampm = hours >= 12 ? 'pm' : 'am';
-  
+
   hours = hours % 12;
   hours = hours ? hours : 12; // the hour '0' should be '12'
   const minutesStr = minutes < 10 ? '0' + minutes : minutes;
-  
+
   return `${hours}:${minutesStr}${ampm}`;
 };
 </script>
@@ -150,7 +150,7 @@ const formatTime = (date) => {
 
 .content-area {
   background: #FFFFFF;
-  padding: 120px 2rem 2rem; 
+  padding: 120px 2rem 2rem;
   max-width: 1200px;
   margin: 0 auto;
 }

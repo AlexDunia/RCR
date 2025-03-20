@@ -7,9 +7,9 @@
 </template>
 
 <script setup>
-import TaskHeader from '../../components/task/TaskHeader.vue'
-import TaskNavigation from '../../components/task/TaskNavigation.vue'
-import TaskList from '../../components/task/TaskList.vue'
+import TaskHeader from '@/features/task/TaskHeader.vue'
+import TaskNavigation from '@/features/task/TaskNavigation.vue'
+import TaskList from '@/features/task/TaskList.vue'
 </script>
 
 <style scoped>

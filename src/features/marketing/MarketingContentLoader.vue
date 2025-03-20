@@ -11,7 +11,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import Loader from '@/components/Loader.vue';
+import Loader from '@/ui/Loader.vue';
 
 const props = defineProps({
   loaderCount: {
@@ -43,4 +43,4 @@ onMounted(() => {
   flex-direction: column;
   gap: 1rem;
 }
-</style> 
+</style>

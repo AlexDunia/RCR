@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import AnimationWrapper from "@/components/AnimationWrapper.vue";
+import AnimationWrapper from "@/ui/AnimationWrapper.vue";
 
 const drafts = ref([
   {
@@ -37,11 +37,11 @@ const editDraft = (id) => {
         <p>You have no saved drafts.</p>
       </div>
     </AnimationWrapper>
-    
+
     <div v-if="drafts.length > 0" class="property-options">
-      <AnimationWrapper 
-        v-for="(draft, index) in drafts" 
-        :key="draft.id" 
+      <AnimationWrapper
+        v-for="(draft, index) in drafts"
+        :key="draft.id"
         :delay="100 + (index * 50)"
         :distance="20">
         <div class="property-card saved-draft" @click="editDraft(draft.id)">
@@ -151,4 +151,4 @@ const editDraft = (id) => {
   color: #074F90;
   font-size: 16px;
 }
-</style> 
+</style>

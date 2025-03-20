@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import AnimationWrapper from "@/components/AnimationWrapper.vue";
+import AnimationWrapper from "@/ui/AnimationWrapper.vue";
 
 const pendingListings = ref([
   {
@@ -37,12 +37,12 @@ const viewDetails = (id) => {
         <p>You have no pending listings.</p>
       </div>
     </AnimationWrapper>
-    
+
     <div v-if="pendingListings.length > 0" class="property-options">
-      <AnimationWrapper 
-        v-for="(listing, index) in pendingListings" 
-        :key="listing.id" 
-        :delay="100 + (index * 50)" 
+      <AnimationWrapper
+        v-for="(listing, index) in pendingListings"
+        :key="listing.id"
+        :delay="100 + (index * 50)"
         :distance="20">
         <div class="property-card" @click="viewDetails(listing.id)">
           <img :src="listing.image" :alt="listing.title" />
@@ -164,4 +164,4 @@ const viewDetails = (id) => {
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-</style> 
+</style>

@@ -21,8 +21,8 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDocumentStore } from '@/stores/documents'
-import DocumentForm from '@/components/documents/DocumentForm.vue'
-import Loader from '@/components/Loader.vue'
+import DocumentForm from '@/features/documents/DocumentForm.vue'
+import Loader from '@/ui/Loader.vue'
 
 const router = useRouter()
 const documentStore = useDocumentStore()

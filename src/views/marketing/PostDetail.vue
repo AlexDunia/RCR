@@ -234,7 +234,7 @@
 <script setup>
 import { ref, onMounted, reactive } from 'vue';
 import { useRoute } from 'vue-router';
-import SocialMediaGraphs from '@/components/SocialMediaGraphs.vue';
+import SocialMediaGraphs from '@/features/marketing/SocialMediaGraphs.vue';
 
 const route = useRoute();
 const post = ref(null);

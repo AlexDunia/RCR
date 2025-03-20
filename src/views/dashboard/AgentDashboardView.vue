@@ -4,8 +4,8 @@ re<!-- eslint-disable vue/no-unused-vars -->
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useLayoutStore } from '@/stores/layout';
-import PropertyList from "@/components/PropertyList.vue";
-import SkeletonLoader from "@/components/SkeletonLoader.vue";
+import PropertyList from "@/features/property/PropertyList.vue";
+import SkeletonLoader from "@/ui/SkeletonLoader.vue";
 
 const router = useRouter();
 const layoutStore = useLayoutStore();
@@ -32,7 +32,7 @@ const marketingTools = ref([
 const handleMetricClick = (metric, event) => {
   // Prevent default navigation/refresh
   if (event) event.preventDefault();
-  
+
   // Navigate to appropriate page based on metric type
   if (metric.label === 'ACTIVE LISTINGS') {
     router.push('/view-listings');
@@ -57,14 +57,14 @@ const handleMarketingToolClick = (tool) => {
 onMounted(() => {
   // Ensure layout is properly set
   layoutStore.resetLayout();
-  
+
   // Force immediate layout update
   layoutStore.$patch({
     hideSidebar: false,
     hideHeader: false,
     background: '#F4F4F4'
   });
-  
+
   // Simulate one-time loading rather than staggered loading
   setTimeout(() => {
     isLoading.value = false;
@@ -80,12 +80,12 @@ onMounted(() => {
         <SkeletonLoader type="text" height="30px" width="180px" />
         <SkeletonLoader type="text" height="16px" width="240px" />
       </div>
-      
+
       <!-- Metrics skeleton -->
       <div class="skeleton-container metrics-skeleton">
         <SkeletonLoader v-for="i in 4" :key="i" type="card" height="110px" width="100%" />
       </div>
-      
+
       <!-- Marketing tools skeleton -->
       <div class="skeleton-container">
         <div class="section-header-skeleton">
@@ -96,13 +96,13 @@ onMounted(() => {
           <SkeletonLoader v-for="i in 3" :key="i" type="card" height="120px" width="100%" />
         </div>
       </div>
-      
+
       <!-- Property list skeleton -->
       <div class="skeleton-container">
         <SkeletonLoader type="rectangle" height="300px" width="100%" />
       </div>
     </div>
-    
+
     <div v-else class="dashboard-content">
       <!-- Greetings Section -->
       <div class="greetings">
@@ -116,8 +116,8 @@ onMounted(() => {
       <div class="metrics-container">
         <div class="metrics-row">
           <div class="metrics-group">
-            <div 
-              v-for="metric in metrics" 
+            <div
+              v-for="metric in metrics"
               :key="metric.label"
               class="metric-card"
               @click="(e) => handleMetricClick(metric, e)"
@@ -134,7 +134,7 @@ onMounted(() => {
           </div>
         </div>
       </div>
-      
+
       <!-- Marketing Tools Section -->
       <div class="marketing-tools-container">
         <div class="section-header">
@@ -142,9 +142,9 @@ onMounted(() => {
           <p>Boost your business with these powerful marketing solutions</p>
         </div>
         <div class="marketing-tools-grid">
-          <div 
-            v-for="tool in marketingTools" 
-            :key="tool.title" 
+          <div
+            v-for="tool in marketingTools"
+            :key="tool.title"
             class="marketing-tool-card"
             @click="() => handleMarketingToolClick(tool)"
           >

@@ -41,7 +41,7 @@
 </template>
 
 <script setup>
-import PropertyList from "@/components/AgentPersonalListingsView.vue";
+import PropertyList from "@/features/agents/AgentPersonalListingsView.vue";
 </script>
 
 <style scoped>

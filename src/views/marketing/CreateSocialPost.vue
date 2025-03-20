@@ -249,7 +249,7 @@
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useLayoutStore } from '@/stores/layout';
-import ConfirmationModal from '@/components/ConfirmationModal.vue';
+import ConfirmationModal from '@/ui/ConfirmationModal.vue';
 import { useDateValidation } from '@/composables/useDateValidation'
 
 // State management

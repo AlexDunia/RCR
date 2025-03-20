@@ -41,7 +41,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useDocumentStore } from '@/stores/documents'
-import Loader from "@/components/Loader.vue";
+import Loader from "@/ui/Loader.vue";
 
 const documentStore = useDocumentStore()
 const isLoading = ref(true)

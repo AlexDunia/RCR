@@ -1,7 +1,7 @@
 <script setup>
 import { useHeaderStore } from "@/stores/headerStore";
 import AddListingForm from "@/components/AddListingForm.vue";
-import PageLoader from "@/components/PageLoader.vue";
+import PageLoader from "@/ui/PageLoader.vue";
 
 const headerStore = useHeaderStore();
 headerStore.setTitle("Add Listing");

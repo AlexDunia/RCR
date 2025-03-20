@@ -244,7 +244,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useSocialMediaStore } from '../stores/socialMediaStore';
+import { useSocialMediaStore } from '@/stores/socialMediaStore';
 
 // Icons components
 const XIcon = {

@@ -93,8 +93,8 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import ConfirmationModal from '@/components/ConfirmationModal.vue';
-import MarketingContentLoader from '@/components/marketing/MarketingContentLoader.vue';
+import ConfirmationModal from '@/ui/ConfirmationModal.vue';
+import MarketingContentLoader from '@/features/marketing/MarketingContentLoader.vue';
 
 const router = useRouter();
 const currentTab = ref('scheduled');

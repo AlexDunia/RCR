@@ -3,9 +3,9 @@ import { useRoute } from 'vue-router';
 import { useHeaderStore } from '@/stores/headerStore';
 import { useLayoutStore } from '@/stores/layout';
 import { watch, computed, onMounted } from 'vue';
-import Sidebar from './components/SidebarView.vue';
-import Header from './components/HeaderView.vue';
-import PageTransition from './components/PageTransition.vue';
+import Sidebar from './layouts/components/SidebarView.vue';
+import Header from './layouts/components/HeaderView.vue';
+import PageTransition from './ui/PageTransition.vue';
 import '@fontsource/poppins'; // Defaults to 400 weight
 import '@fontsource/poppins/700.css'; // If you need bold
 

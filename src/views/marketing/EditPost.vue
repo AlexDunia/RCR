@@ -102,7 +102,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import ConfirmationModal from '@/components/ConfirmationModal.vue';
+import ConfirmationModal from '@/ui/ConfirmationModal.vue';
 
 const router = useRouter();
 const route = useRoute();

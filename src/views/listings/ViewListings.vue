@@ -1,5 +1,5 @@
 <script setup>
-import PropertyList from "@/components/AgentPersonalListingsView.vue";
+import PropertyList from "@/features/agents/AgentPersonalListingsView.vue";
 import { useHeaderStore } from "@/stores/headerStore";
 
 // import { computed } from "vue";

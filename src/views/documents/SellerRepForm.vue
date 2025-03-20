@@ -20,7 +20,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import DocumentForm from '@/components/documents/DocumentForm.vue'
+import DocumentForm from '@/features/documents/DocumentForm.vue'
 import { useDocumentStore } from '@/stores/documents'
 
 const router = useRouter()

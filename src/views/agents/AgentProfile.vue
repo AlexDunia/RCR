@@ -2,8 +2,8 @@
 <!-- eslint-disable vue/no-unused-vars -->
 <script setup>
 import { ref, onMounted } from 'vue';
-import PropertyList from "@/components/PropertyList.vue";
-import Loader from "@/components/Loader.vue";
+import PropertyList from "@/features/property/PropertyList.vue";
+import Loader from "@/ui/Loader.vue";
 
 // Metrics Data
 const metrics = ref([
@@ -31,7 +31,7 @@ onMounted(() => {
       <div v-else>
         <div class="greetings-data">
           <h1>Hi, Alex!</h1>
-          <p>Here’s an overview of your account</p>
+          <p>Here's an overview of your account</p>
         </div>
       </div>
     </div>

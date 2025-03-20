@@ -89,7 +89,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useDocumentStore } from '@/stores/documents';
-import Loader from "@/components/Loader.vue";
+import Loader from "@/ui/Loader.vue";
 
 const router = useRouter();
 const documentStore = useDocumentStore();

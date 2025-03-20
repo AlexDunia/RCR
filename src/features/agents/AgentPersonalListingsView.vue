@@ -2,7 +2,7 @@
 import { usePropertyStore } from "@/stores/propertyStore";
 import { computed } from "vue";
 import { useRouter } from "vue-router";
-import AnimationWrapper from "@/components/AnimationWrapper.vue";
+import AnimationWrapper from "@/ui/AnimationWrapper.vue";
 
 const propertyStore = usePropertyStore();
 const router = useRouter();
@@ -22,10 +22,10 @@ const viewProperty = (propertyId) => {
         <p>You currently have no properties listed.</p>
       </div>
     </AnimationWrapper>
-    
+
     <div v-if="properties.length > 0" class="property-grid">
-      <AnimationWrapper v-for="(property, index) in properties" 
-                       :key="property.id" 
+      <AnimationWrapper v-for="(property, index) in properties"
+                       :key="property.id"
                        :delay="100 + (index * 50)"
                        :distance="20">
         <div class="property-card">

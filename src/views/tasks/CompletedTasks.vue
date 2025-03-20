@@ -70,8 +70,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import TaskHeader from '@/components/task/TaskHeader.vue';
-import TaskNavigation from '@/components/task/TaskNavigation.vue';
+import TaskHeader from '@/features/task/TaskHeader.vue';
+import TaskNavigation from '@/features/task/TaskNavigation.vue';
 
 const router = useRouter();
 const completedTasks = ref([]);

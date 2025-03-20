@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import Loader from '@/components/Loader.vue';
+import Loader from '@/ui/Loader.vue';
 import { useHeaderStore } from "@/stores/headerStore";
 
 const router = useRouter();
@@ -115,7 +115,7 @@ const navigateToAddListing = () => {
   transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.fade-slide-enter-from, 
+.fade-slide-enter-from,
 .fade-slide-leave-to {
   opacity: 0;
   transform: translateY(10px);
