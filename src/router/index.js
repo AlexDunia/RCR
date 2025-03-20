@@ -80,7 +80,7 @@ const routes = [
       },
       {
         path: 'create',
-        component: () => import('@/components/task/TaskCreate.vue'),
+        component: () => import('@/features/task/TaskCreate.vue'),
         meta: {
           hideSidebar: true,
           hideHeader: true
@@ -89,7 +89,7 @@ const routes = [
       {
         path: ':id',
         name: 'TaskDetail',
-        component: () => import('@/components/task/TaskDetail.vue'),
+        component: () => import('@/features/task/TaskDetail.vue'),
         meta: {
           hideSidebar: true,
           hideHeader: true
@@ -377,7 +377,7 @@ router.beforeEach(async (to, from, next) => {
 
   // Get the layout store
   const layoutStore = useLayoutStore();
-  
+
   // Reset layout when navigating to dashboard or main navigation routes
   if (to.path === '/' || to.path === '/manage-listings' || to.path === '/view-listings') {
     layoutStore.resetLayout();
