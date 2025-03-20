@@ -201,6 +201,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useDocumentStore } from '@/stores/documents'
 import Loader from "@/components/Loader.vue"
+import { formatDocumentDate, getDocumentTitle } from '@/features/documents/DocumentService'
 
 const route = useRoute()
 const router = useRouter()
@@ -266,16 +267,7 @@ onMounted(async () => {
   }, 1000)
 })
 
-const formatDate = (dateString) => {
-  if (!dateString) return ''
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-}
+const formatDate = formatDocumentDate
 
 const formatStatus = (status) => {
   if (!status) return ''
@@ -287,20 +279,6 @@ const formatFileSize = (bytes) => {
   const sizes = ['B', 'KB', 'MB', 'GB']
   const i = Math.floor(Math.log(bytes) / Math.log(1024))
   return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`
-}
-
-const getDocumentTitle = (doc) => {
-  if (!doc) return ''
-  switch (doc.type) {
-    case 'buyer-rep':
-      return `${doc.buyerName}'s Buyer Rep Agreement`
-    case 'seller-rep':
-      return `${doc.sellerName}'s Seller Rep Agreement`
-    case 'mls':
-      return `MLS Listing - ${doc.propertyAddress}`
-    default:
-      return 'Untitled Document'
-  }
 }
 
 const isValidFileUrl = (url) => {

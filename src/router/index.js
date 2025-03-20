@@ -1,8 +1,12 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
 import { useLayoutStore } from '@/stores/layout';
+
+// Layout components
 import DocumentLayout from '@/layouts/DocumentLayout.vue'
 import TasksLayout from '@/layouts/TasksLayout.vue'
 import EducationLayout from '@/layouts/EducationLayout.vue'
+
+// Feature components - business logic and domain-specific functionality
 import UserProfile from '@/features/profile/ProfilePage.vue'
 import UserProfileEdit from '@/features/profile/ProfileEdit.vue'
 import PendingApprovals from '@/features/listings/PendingApprovals.vue';
@@ -15,6 +19,8 @@ import TaskDetail from '@/features/tasks/TaskDetail.vue';
 import CompletedTaskDetail from '@/features/tasks/CompletedTaskDetail.vue';
 import AgentProfile from '@/features/agents/AgentProfile.vue';
 import DocumentEdit from '@/features/profile/DocumentEdit.vue';
+
+// View components - page compositions and layouts
 import MarketingTools from '@/views/marketing/MarketingTools.vue';
 import SuccessPlan from '@/views/marketing/SuccessPlan.vue';
 import CreateSuccessPlan from '@/views/CreateSuccessPlan.vue';
@@ -28,14 +34,14 @@ import SocialPlatforms from '@/views/marketing/SocialPlatforms.vue';
 
 // Lazy-loaded route components
 const routes = [
-  // Dashboard route
+  // Dashboard route - Business feature for dashboard functionality
   {
     path: '/',
     name: 'AgentDashboardView',
     component: () => import('@/features/dashboard/DashboardPage.vue')
   },
 
-  // Manage Listings routes
+  // Manage Listings routes - Business features for agent functionality
   {
     path: '/manage-listings',
     component: () => import('@/features/agents/ManageListings.vue'),
