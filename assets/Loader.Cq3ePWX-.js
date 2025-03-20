@@ -1,0 +1,1 @@
+import{c as o,b as e}from"./vendor.DdoMJLSt.js";import{_ as a}from"./index.BmnaAo9h.js";const c={name:"AppLoader"},r={class:"app-loader"};function s(t,p,n,_,d,f){return e(),o("div",r)}const l=a(c,[["render",s],["__scopeId","data-v-8ac8f965"]]);export{l as L};
