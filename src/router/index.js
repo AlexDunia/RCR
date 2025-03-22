@@ -306,33 +306,32 @@ const routes = [
   {
     path: '/profile',
     component: () => import('@/views/profile/ProfileLayout.vue'),
+    meta: {
+      hideHeader: true,
+      background: '#f9fafb'
+    },
     children: [
       {
         path: '',
-        name: 'profile-bio',
-        component: () => import('@/features/profile/AgentProfileBio.vue')
+        name: 'Profile',
+        component: () => import('@/views/profile/ProfileLayout.vue'),
+      },
+      {
+        path: 'edit',
+        name: 'ProfileEdit',
+        component: () => import('@/views/profile/ProfileEdit.vue'),
       },
       {
         path: 'listings',
-        name: 'profile-listings',
-        component: () => import('@/views/profile/ProfileListings.vue')
+        name: 'ProfileListings',
+        component: () => import('@/views/profile/ProfileListings.vue'),
       },
       {
         path: 'documents',
-        name: 'profile-documents',
-        component: () => import('@/views/profile/ProfileDocuments.vue')
-      },
-      {
-        path: 'documents/edit/:id',
-        name: 'profile-document-edit',
-        component: () => import('@/views/profile/DocumentEdit.vue')
+        name: 'ProfileDocuments',
+        component: () => import('@/views/profile/ProfileDocuments.vue'),
       }
     ]
-  },
-  {
-    path: '/profile/edit',
-    name: 'profile-edit',
-    component: () => import('@/views/profile/ProfileEdit.vue')
   },
   {
     path: '/property/:id',

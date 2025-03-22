@@ -28,7 +28,7 @@ export const useProfileStore = defineStore('profile', () => {
     trebbNumber: '97639377946139476',
     yearsExperience: '5',
     specialties: 'Luxury homes, Waterfront properties',
-    avatar: '/path-to-avatar.jpg'
+    avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739408381/Screenshot_2025-02-13_015617_mhjgby.png'
   };
 
   const mockAdminData = {
@@ -42,7 +42,7 @@ export const useProfileStore = defineStore('profile', () => {
     accessLevel: 'Full access',
     lastLogin: '2023-03-15 14:30',
     createdAt: '2022-01-10',
-    avatar: '/path-to-admin-avatar.jpg'
+    avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739408381/Screenshot_2025-02-13_015617_mhjgby.png'
   };
 
   const mockClientData = {
@@ -61,7 +61,7 @@ export const useProfileStore = defineStore('profile', () => {
       phone: '08108725914',
       avatar: '/path-to-avatar.jpg'
     },
-    avatar: '/path-to-client-avatar.jpg'
+    avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739408381/Screenshot_2025-02-13_015617_mhjgby.png'
   };
 
   // Actions

@@ -22,16 +22,16 @@
         <router-link to="/profile/documents" class="breadcrumb-link">Documents</router-link>
         <span class="breadcrumb-separator">></span>
         <span class="breadcrumb-current">{{ document?.name || 'Legal documentation' }}</span>
+        </div>
       </div>
-    </div>
 
     <!-- Main content -->
-    <div v-if="isLoading" class="loading-indicator">
-      <p>Loading document...</p>
-    </div>
-    <div v-else-if="!document" class="error-state">
-      <h3>Document not found</h3>
-      <p>The document you're trying to edit doesn't exist or has been removed.</p>
+        <div v-if="isLoading" class="loading-indicator">
+          <p>Loading document...</p>
+        </div>
+        <div v-else-if="!document" class="error-state">
+          <h3>Document not found</h3>
+          <p>The document you're trying to edit doesn't exist or has been removed.</p>
       <button class="btn-primary" @click="navigateBack">Go Back</button>
     </div>
     <div v-else class="content-layout">
@@ -67,18 +67,18 @@
           <div class="edit-subtitle">Here you can edit your saved files and document</div>
 
           <form @submit.prevent="saveDocument" class="edit-form">
-            <div class="form-group">
+          <div class="form-group">
               <label for="documentTitle" class="form-label">Document Title</label>
-              <input
-                id="documentTitle"
-                v-model="document.name"
-                type="text"
-                class="form-control"
+            <input
+              id="documentTitle"
+              v-model="document.name"
+              type="text"
+              class="form-control"
                 placeholder="Document name here"
-              />
-            </div>
+            />
+          </div>
 
-            <div class="form-group">
+          <div class="form-group">
               <label for="documentDescription" class="form-label">Description</label>
               <textarea
                 id="documentDescription"
@@ -377,7 +377,7 @@ const confirmSave = () => {
 
     // Navigate back to documents list
     setTimeout(() => {
-      router.push('/profile/documents');
+    router.push('/profile/documents');
     }, 1000);
   }, 500);
 

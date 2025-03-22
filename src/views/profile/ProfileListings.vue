@@ -1,110 +1,201 @@
 <template>
   <div class="listings-container">
-    <!-- Tab Navigation -->
-    <div class="tab-navigation">
-      <router-link to="/add-listing" class="tab-link">
-        <span class="icon">+</span> Add Listing
-      </router-link>
-
-      <router-link to="/view-listings" class="tab-link active">
-        <span class="icon">🏠</span> View Listings
-      </router-link>
-
-      <router-link to="/pending-approvals" class="tab-link">
-        <span class="icon">⏱️</span> Pending Approvals
-      </router-link>
-
-      <router-link to="/drafts" class="tab-link">
-        <span class="icon">📄</span> Drafts
-      </router-link>
-    </div>
-
-    <div class="tab-indicator"></div>
-
-    <!-- Content Area -->
     <div class="content-area">
       <div class="header">
-        <div>
-          <h2>Your Properties</h2>
+        <div class="header-content">
+          <h2>Your properties</h2>
           <p>A list of all properties on your profile</p>
         </div>
-
         <div class="search">
-          <input type="text" placeholder="Search..." />
-          <span class="search-icon">🔍</span>
+          <input
+            type="search"
+            v-model="searchQuery"
+            placeholder="Search properties..."
+            @input="handleSearch"
+            @keydown.enter.prevent="handleSearch"
+            :disabled="isSearching"
+            maxlength="100"
+          />
+          <span class="search-icon" :class="{ 'searching': isSearching }">
+            {{ isSearching ? '⌛' : '⌘K' }}
+          </span>
         </div>
       </div>
 
-      <PropertyList />
+      <!-- Loading State -->
+      <div v-if="isSearching" class="search-loading">
+        <div class="loading-spinner"></div>
+        <p>Searching properties...</p>
+      </div>
+
+      <!-- No Results State -->
+      <div v-else-if="searchQuery && !filteredProperties.length" class="no-results">
+        <div class="no-results-content">
+          <span class="no-results-icon">🔍</span>
+          <h3>No properties found</h3>
+          <p>No properties match your search "{{ searchQuery }}"</p>
+        </div>
+      </div>
+
+      <!-- Property Grid -->
+      <div v-else class="property-grid">
+        <TransitionGroup name="property-list">
+          <div
+            v-for="property in filteredProperties"
+            :key="property.id"
+            class="property-card"
+          >
+            <div class="property-image">
+              <img :src="property.image" :alt="property.name" />
+              <button
+                class="edit-button"
+                @click="handleEdit(property.id)"
+                :title="'Edit ' + property.name"
+              >
+                ✏️
+              </button>
+            </div>
+            <div class="property-info">
+              <h3 class="property-name">{{ property.name }}</h3>
+              <p class="property-location">{{ property.location }}</p>
+            </div>
+          </div>
+        </TransitionGroup>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import PropertyList from "@/features/agents/AgentPersonalListingsView.vue";
+import { ref, computed, onMounted } from 'vue';
+import { useDebounce } from '@/composables/useDebounce';
+import { sanitizeInput } from '@/utils/security';
+
+// Mock data - Replace with API calls in production
+const properties = ref([
+  {
+    id: 1,
+    name: 'Cedar Grove Estates',
+    location: 'Austin, Texas',
+    image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2075&q=80'
+  },
+  {
+    id: 2,
+    name: 'Willow Creek Villa',
+    location: 'Boulder, Colorado',
+    image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2053&q=80'
+  },
+  {
+    id: 3,
+    name: 'Willow Creek Villa',
+    location: 'Boulder, Colorado',
+    image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2053&q=80'
+  }
+]);
+
+const searchQuery = ref('');
+const isSearching = ref(false);
+const searchError = ref(null);
+
+// Debounce search to prevent excessive API calls
+const debouncedSearch = useDebounce(async (query) => {
+  try {
+    if (!query.trim()) {
+      return;
+    }
+
+    isSearching.value = true;
+    searchError.value = null;
+
+    // Sanitize input to prevent XSS
+    const sanitizedQuery = sanitizeInput(query);
+
+    // In production, this would be an API call
+    // const response = await searchProperties(sanitizedQuery);
+
+    // For now, we're using client-side filtering
+    // The sanitizedQuery is used in the computed property
+    searchQuery.value = sanitizedQuery;
+
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+  } catch (error) {
+    searchError.value = 'An error occurred while searching';
+    console.error('Search error:', error);
+  } finally {
+    isSearching.value = false;
+  }
+}, 300);
+
+// Computed properties for filtered results
+const filteredProperties = computed(() => {
+  if (!searchQuery.value.trim()) {
+    return properties.value;
+  }
+
+  const query = searchQuery.value.toLowerCase();
+  return properties.value.filter(property =>
+    property.name.toLowerCase().includes(query) ||
+    property.location.toLowerCase().includes(query)
+  );
+});
+
+// Search handler with input validation
+const handleSearch = async () => {
+  const query = searchQuery.value.trim();
+
+  // Input validation
+  if (query.length > 100) {
+    searchError.value = 'Search query is too long';
+    return;
+  }
+
+  await debouncedSearch(query);
+};
+
+// Edit handler
+const handleEdit = (propertyId) => {
+  // Will be implemented when backend is ready
+  console.log('Edit property:', propertyId);
+};
+
+// Lifecycle hooks
+onMounted(() => {
+  // Future API call to fetch initial properties
+  // fetchProperties();
+});
 </script>
 
 <style scoped>
 .listings-container {
   padding: 24px;
-  max-width: 1200px;
   margin: 0 auto;
 }
 
-.tab-navigation {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 4px;
-}
-
-.tab-link {
-  padding: 8px 16px;
-  background-color: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  color: #6b7280;
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.2s ease;
-}
-
-.tab-link.active {
-  background-color: #f3f4f6;
-  color: #1d4ed8;
-  border-color: #c7d2fe;
-}
-
-.tab-indicator {
-  height: 1px;
-  background-color: #e5e7eb;
-  margin: 16px 0;
-}
-
 .content-area {
-  margin-top: 24px;
+  margin-top: 0;
+  max-width: 960px;
+  margin: 0 auto;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 32px;
 }
 
-.header h2 {
+.header-content h2 {
   font-size: 20px;
   font-weight: 600;
   color: #111827;
-  margin: 0 0 4px 0;
+  margin: 0 0 8px 0;
 }
 
-.header p {
+.header-content p {
   font-size: 14px;
-  color: #6b7280;
+  color: #0066FF;
   margin: 0;
 }
 
@@ -114,13 +205,17 @@ import PropertyList from "@/features/agents/AgentPersonalListingsView.vue";
 }
 
 .search input {
-  width: 100%;
-  padding: 8px 16px;
+  width: 85%;
+  padding: 10px 16px;
   padding-right: 40px;
   border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  background-color: #f9fafb;
+  border-radius: 8px;
+  background-color: #F5F5F5;
   font-size: 14px;
+}
+
+.search input::placeholder {
+  color: #6B7280;
 }
 
 .search-icon {
@@ -128,6 +223,180 @@ import PropertyList from "@/features/agents/AgentPersonalListingsView.vue";
   right: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: #9ca3af;
+  color: #6B7280;
+  font-size: 16px;
+}
+
+.property-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 24px;
+  margin-right: auto;
+}
+
+.property-card {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #E5E7EB;
+  position: relative;
+  max-width: 280px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.property-image {
+  position: relative;
+  width: 100%;
+  height: 160px;
+  overflow: hidden;
+}
+
+.property-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.edit-button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: white;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.property-info {
+  padding: 10px;
+}
+
+.property-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 6px 0;
+}
+
+.property-location {
+  font-size: 13px;
+  color: #6B7280;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .listings-container {
+    padding: 16px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .search {
+    width: 100%;
+  }
+
+  .property-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .property-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .property-card {
+    max-width: 320px;
+  }
+}
+
+/* New styles for search functionality */
+.search input:disabled {
+  background-color: #f3f4f6;
+  cursor: not-allowed;
+}
+
+.search-icon.searching {
+  animation: spin 1s infinite linear;
+}
+
+.search-loading {
+  text-align: center;
+  padding: 40px 0;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f4f6;
+  border-top-color: #0066FF;
+  border-radius: 50%;
+  margin: 0 auto 16px;
+  animation: spin 1s infinite linear;
+}
+
+.no-results {
+  text-align: center;
+  padding: 60px 0;
+}
+
+.no-results-content {
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.no-results-icon {
+  font-size: 32px;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.no-results h3 {
+  font-size: 18px;
+  color: #111827;
+  margin: 0 0 8px;
+}
+
+.no-results p {
+  font-size: 14px;
+  color: #6B7280;
+  margin: 0;
+}
+
+/* Transition animations */
+.property-list-enter-active,
+.property-list-leave-active {
+  transition: all 0.3s ease;
+}
+
+.property-list-enter-from,
+.property-list-leave-to {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Error state */
+.search-error {
+  color: #dc2626;
+  font-size: 14px;
+  margin-top: 8px;
 }
 </style>
