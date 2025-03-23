@@ -17,21 +17,22 @@
 
     <!-- Header -->
     <div class="page-header">
-      <h1 class="header-title">Currently editing: {{ document?.name || 'Legal documentation' }} for {{ clientName }}</h1>
+      <h1 class="header-title">{{ document?.name || 'Loading document...' }}</h1>
       <div class="breadcrumb">
         <router-link to="/profile/documents" class="breadcrumb-link">Documents</router-link>
         <span class="breadcrumb-separator">></span>
-        <span class="breadcrumb-current">{{ document?.name || 'Legal documentation' }}</span>
-        </div>
+        <span class="breadcrumb-current">{{ document?.name || 'Loading...' }}</span>
       </div>
+    </div>
 
     <!-- Main content -->
-        <div v-if="isLoading" class="loading-indicator">
-          <p>Loading document...</p>
-        </div>
-        <div v-else-if="!document" class="error-state">
-          <h3>Document not found</h3>
-          <p>The document you're trying to edit doesn't exist or has been removed.</p>
+    <div v-if="isLoading" class="loading-indicator">
+      <div class="loader"></div>
+      <p>Loading document...</p>
+    </div>
+    <div v-else-if="!document" class="error-state">
+      <h3>Document not found</h3>
+      <p>The document you're trying to edit doesn't exist or has been removed.</p>
       <button class="btn-primary" @click="navigateBack">Go Back</button>
     </div>
     <div v-else class="content-layout">
@@ -39,7 +40,7 @@
       <div class="main-content">
         <!-- Upload Section -->
         <div class="upload-container">
-          <div class="upload-area">
+          <div class="upload-area" @drop.prevent="handleFileDrop" @dragover.prevent>
             <svg class="upload-icon" width="24" height="24" viewBox="0 0 24 24" fill="none">
               <path d="M12 12V19M12 12L15 15M12 12L9 15M20 16.7428C21.2215 15.734 22 14.2079 22 12.5C22 9.46243 19.5376 7 16.5 7C16.2815 7 16.0771 7.01349 15.8767 7.03857C14.9827 4.67583 12.6997 3 10 3C6.13401 3 3 6.13401 3 10C3 12.2501 4.07741 14.2509 5.75 15.4805" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -63,49 +64,48 @@
 
         <!-- Edit Form -->
         <div class="edit-section">
-          <h2 class="edit-title">Edit file</h2>
-          <div class="edit-subtitle">Here you can edit your saved files and document</div>
+          <h2 class="edit-title">Edit document details</h2>
+          <div class="edit-subtitle">Update your document information below</div>
 
           <form @submit.prevent="saveDocument" class="edit-form">
-          <div class="form-group">
+            <div class="form-group">
               <label for="documentTitle" class="form-label">Document Title</label>
-            <input
-              id="documentTitle"
-              v-model="document.name"
-              type="text"
-              class="form-control"
-                placeholder="Document name here"
-            />
-          </div>
+              <input
+                id="documentTitle"
+                v-model="document.name"
+                type="text"
+                class="form-control"
+                placeholder="Enter document title"
+              />
+            </div>
 
-          <div class="form-group">
+            <div class="form-group">
               <label for="documentDescription" class="form-label">Description</label>
               <textarea
                 id="documentDescription"
                 v-model="document.description"
                 class="form-control description-control"
-                placeholder="Here, you can edit the description of your documents"
-                rows="6"
+                placeholder="Enter document description"
+                rows="4"
               ></textarea>
             </div>
           </form>
 
           <!-- File List -->
-          <div class="files-list">
-            <div v-for="(file, index) in documentFiles" :key="index" class="file-item">
+          <div v-if="documentFiles.length > 0" class="files-list">
+            <h3 class="files-title">Attached Files</h3>
+            <div v-for="(file, index) in documentFiles" :key="file.id" class="file-item">
               <div class="file-icon-wrapper">
                 <svg class="file-icon" width="20" height="20" viewBox="0 0 20 20" fill="none">
                   <path d="M7.5 9.16667H12.5M7.5 12.5H10.8333M6.66667 2.5H13.3333L17.5 6.66667V15.8333C17.5 16.2754 17.3244 16.6993 17.0118 17.0118C16.6993 17.3244 16.2754 17.5 15.8333 17.5H4.16667C3.72464 17.5 3.30072 17.3244 2.98816 17.0118C2.67559 16.6993 2.5 16.2754 2.5 15.8333V4.16667C2.5 3.72464 2.67559 3.30072 2.98816 2.98816C3.30072 2.67559 3.72464 2.5 4.16667 2.5H6.66667ZM13.3333 2.5V6.66667H17.5L13.3333 2.5Z" stroke="#6B7280" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               </div>
-              <div class="file-name">{{ file.name }}</div>
+              <div class="file-info">
+                <div class="file-name">{{ file.name }}</div>
+                <div class="file-size">{{ formatFileSize(file.size) }}</div>
+              </div>
               <div class="file-actions">
-                <button class="file-edit-btn" @click="editFile(file)">
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <path d="M13.3333 2.5L17.5 6.66667M2.5 17.5L7.08333 16.1833C7.25635 16.1328 7.41749 16.0515 7.55833 15.9433L17.5 6L14 2.5L4.05833 12.4417C3.95017 12.5825 3.86886 12.7437 3.81833 12.9167L2.5 17.5Z" stroke="#6B7280" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </button>
-                <button class="file-delete-btn" @click="deleteFile(index)">
+                <button class="file-delete-btn" @click="deleteFile(index)" title="Delete file">
                   <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                     <path d="M13.3333 5L6.66667 11.6667M6.66667 5L13.3333 11.6667" stroke="#EF4444" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
@@ -119,9 +119,9 @@
       <!-- Right Sidebar -->
       <div class="sidebar">
         <div class="agents-section">
-          <h3 class="agents-title">Associated agents</h3>
+          <h3 class="agents-title">Associated Agents</h3>
           <div v-if="associatedAgents.length > 0" class="agents-list">
-            <div v-for="(agent, index) in associatedAgents" :key="index" class="agent-card">
+            <div v-for="(agent, index) in associatedAgents" :key="agent.id" class="agent-card">
               <div class="agent-info">
                 <img :src="agent.avatar" :alt="agent.name" class="agent-avatar" />
                 <div class="agent-details">
@@ -129,7 +129,7 @@
                   <div class="agent-email">{{ agent.email }}</div>
                 </div>
               </div>
-              <button class="agent-remove-btn" @click="removeAgent(index)">
+              <button class="agent-remove-btn" @click="removeAgent(index)" title="Remove agent">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                   <path d="M13.3333 5L6.66667 11.6667M6.66667 5L13.3333 11.6667" stroke="#EF4444" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
@@ -146,12 +146,14 @@
 
     <!-- Footer -->
     <div class="page-footer">
-      <button class="exit-btn" @click="navigateBack">Exit</button>
-      <button class="save-btn" @click="saveDocument">Save</button>
+      <button class="exit-btn" @click="navigateBack">Cancel</button>
+      <button class="save-btn" @click="saveDocument" :disabled="isLoading">
+        {{ isLoading ? 'Saving...' : 'Save Changes' }}
+      </button>
     </div>
 
     <!-- Agent Selection Modal -->
-    <div v-if="showAgentModal" class="modal-overlay">
+    <div v-if="showAgentModal" class="modal-overlay" @click.self="showAgentModal = false">
       <div class="modal-container">
         <div class="modal-header">
           <h3>Select Agent</h3>
@@ -162,7 +164,7 @@
             <input
               type="text"
               v-model="agentSearchQuery"
-              placeholder="Search agents by name or email"
+              placeholder="Search agents..."
               class="form-control"
             />
           </div>
@@ -185,19 +187,19 @@
       </div>
     </div>
 
-    <!-- Confirmation Modal -->
-    <div v-if="showConfirmModal" class="modal-overlay">
+    <!-- Save Confirmation Modal -->
+    <div v-if="showConfirmModal" class="modal-overlay" @click.self="showConfirmModal = false">
       <div class="modal-container">
         <div class="modal-header">
-          <h3>Confirm Changes</h3>
+          <h3>Save Changes</h3>
           <button @click="showConfirmModal = false" class="modal-close">×</button>
         </div>
         <div class="modal-body">
-          <p>Do you wish to make changes to this document?</p>
+          <p>Are you sure you want to save these changes?</p>
         </div>
         <div class="modal-footer">
-          <button class="cancel-modal-btn" @click="showConfirmModal = false">No</button>
-          <button class="confirm-modal-btn" @click="confirmSave">Yes</button>
+          <button class="cancel-modal-btn" @click="showConfirmModal = false">Cancel</button>
+          <button class="confirm-modal-btn" @click="confirmSave">Save</button>
         </div>
       </div>
     </div>
@@ -205,76 +207,55 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, computed, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { useDocumentStore } from '@/stores/documents';
 
 const router = useRouter();
+const route = useRoute();
+const documentStore = useDocumentStore();
+
 const isLoading = ref(true);
 const document = ref(null);
 const fileInput = ref(null);
-const clientName = ref('Lucas Belmar');
+const showAgentModal = ref(false);
+const agentSearchQuery = ref('');
 const notifications = ref([]);
 const notificationId = ref(0);
 const showConfirmModal = ref(false);
-const showAgentModal = ref(false);
-const agentSearchQuery = ref('');
 
-// Mock document data
-const mockDocument = {
-  id: 1,
-  name: 'Legal documentation',
-  date: 'March 15, 2023',
-  description: 'Standard buyer representation agreement outlining terms and conditions.',
-  type: 'PDF'
-};
+// Document files state
+const documentFiles = ref([]);
 
-// Mock document files
-const documentFiles = ref([
-  {
-    id: 1,
-    name: 'Strategy-Pitch-Final.pptx',
-    type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-    size: 1024 * 1024 * 2.5 // 2.5MB
-  }
-]);
+// Associated agents state
+const associatedAgents = ref([]);
 
-// Associated agents
-const associatedAgents = ref([
-  {
-    id: 1,
-    name: 'Pristia Candra',
-    email: 'lincoln@ripixel.com',
-    avatar: '/img/avatars/pristia.jpg',
-    experience: '3y experiences'
-  }
-]);
-
-// Available agents for selection
+// Available agents data
 const availableAgents = ref([
   {
     id: 1,
     name: 'Pristia Candra',
-    email: 'lincoln@ripixel.com',
+    email: 'pristia@example.com',
     avatar: '/img/avatars/pristia.jpg',
     experience: '3y experiences'
   },
   {
     id: 2,
     name: 'John Smith',
-    email: 'john.smith@realestate.com',
+    email: 'john@example.com',
     avatar: '/img/avatars/john.jpg',
     experience: '5y experiences'
   },
   {
     id: 3,
     name: 'Sarah Johnson',
-    email: 'sarah.j@properties.com',
+    email: 'sarah@example.com',
     avatar: '/img/avatars/sarah.jpg',
     experience: '7y experiences'
   }
 ]);
 
-// Filter agents based on search query
+// Filter agents based on search
 const filteredAgents = computed(() => {
   const query = agentSearchQuery.value.toLowerCase();
   return availableAgents.value.filter(agent =>
@@ -283,34 +264,41 @@ const filteredAgents = computed(() => {
   );
 });
 
-onMounted(() => {
-  // Simulate API call to fetch document by ID
-  setTimeout(() => {
-    document.value = { ...mockDocument };
+// Load document data
+onMounted(async () => {
+  console.log('DocumentEdit component mounted');
+  console.log('Route params:', route.params);
+  try {
+    const id = route.params.id;
+    console.log('Document ID:', id);
+    if (!id) {
+      throw new Error('No document ID provided');
+    }
+
+    const docData = await documentStore.getDocument(id);
+    console.log('Document data received:', docData);
+    if (docData) {
+      document.value = docData;
+      documentFiles.value = docData.files || [];
+      associatedAgents.value = docData.agents || [];
+      addNotification('Document loaded successfully', 'success');
+    } else {
+      console.error('Document not found');
+      addNotification('Document not found', 'error');
+    }
+  } catch (error) {
+    console.error('Error loading document:', error);
+    addNotification('Error loading document', 'error');
+  } finally {
     isLoading.value = false;
-    addNotification('Document loaded successfully', 'success');
-  }, 500);
+  }
 });
 
-const addNotification = (message, type = 'success') => {
-  const id = notificationId.value++;
-  notifications.value.push({
-    id,
-    message,
-    type,
-    timestamp: Date.now()
-  });
-
-  setTimeout(() => {
-    removeNotification(id);
-  }, 5000);
-};
-
-const removeNotification = (id) => {
-  const index = notifications.value.findIndex(n => n.id === id);
-  if (index !== -1) {
-    notifications.value.splice(index, 1);
-  }
+// File handling
+const handleFileDrop = (event) => {
+  event.preventDefault();
+  const files = Array.from(event.dataTransfer.files);
+  handleFiles(files);
 };
 
 const triggerFileInput = () => {
@@ -319,15 +307,28 @@ const triggerFileInput = () => {
 
 const handleFileSelect = (event) => {
   const files = Array.from(event.target.files);
+  handleFiles(files);
+};
+
+const handleFiles = (files) => {
   files.forEach(file => {
-    documentFiles.value.push({
-      id: Date.now() + Math.random().toString(36).substring(2, 9),
+    const newFile = {
+      id: Date.now() + Math.random().toString(36).substr(2, 9),
       name: file.name,
       type: file.type,
       size: file.size
-    });
+    };
+    documentFiles.value.push(newFile);
     addNotification(`File "${file.name}" added successfully`, 'success');
   });
+};
+
+const formatFileSize = (bytes) => {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
 const deleteFile = (index) => {
@@ -336,11 +337,7 @@ const deleteFile = (index) => {
   addNotification(`File "${fileName}" removed`, 'success');
 };
 
-const editFile = (file) => {
-  // Placeholder for file editing functionality
-  addNotification(`Editing file "${file.name}"`, 'info');
-};
-
+// Agent handling
 const removeAgent = (index) => {
   const agentName = associatedAgents.value[index].name;
   associatedAgents.value.splice(index, 1);
@@ -362,26 +359,51 @@ const selectAgent = (agent) => {
   showAgentModal.value = false;
 };
 
+// Notifications
+const addNotification = (message, type = 'success') => {
+  const id = notificationId.value++;
+  notifications.value.push({
+    id,
+    message,
+    type,
+    timestamp: Date.now()
+  });
+
+  setTimeout(() => removeNotification(id), 5000);
+};
+
+const removeNotification = (id) => {
+  const index = notifications.value.findIndex(n => n.id === id);
+  if (index !== -1) {
+    notifications.value.splice(index, 1);
+  }
+};
+
+// Save and navigation
 const saveDocument = () => {
   showConfirmModal.value = true;
 };
 
-const confirmSave = () => {
-  // Simulate API call to save document
-  isLoading.value = true;
-  addNotification('Saving document...', 'info');
+const confirmSave = async () => {
+  try {
+    isLoading.value = true;
+    addNotification('Saving document...', 'info');
 
-  setTimeout(() => {
-    isLoading.value = false;
+    await documentStore.updateDocument({
+      ...document.value,
+      files: documentFiles.value,
+      agents: associatedAgents.value
+    });
+
     addNotification('Document saved successfully', 'success');
-
-    // Navigate back to documents list
-    setTimeout(() => {
-    router.push('/profile/documents');
-    }, 1000);
-  }, 500);
-
-  showConfirmModal.value = false;
+    setTimeout(() => router.push('/profile/documents'), 1000);
+  } catch (error) {
+    console.error('Error saving document:', error);
+    addNotification('Error saving document', 'error');
+  } finally {
+    isLoading.value = false;
+    showConfirmModal.value = false;
+  }
 };
 
 const navigateBack = () => {
@@ -390,6 +412,39 @@ const navigateBack = () => {
 </script>
 
 <style scoped>
+.loader {
+  border: 3px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 3px solid #3498db;
+  width: 24px;
+  height: 24px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 8px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.files-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 12px 0;
+}
+
+.file-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.file-size {
+  font-size: 12px;
+  color: #6B7280;
+}
+
 .document-edit-container {
   padding: 32px;
   background-color: #F3F4F6;
@@ -607,7 +662,7 @@ const navigateBack = () => {
   gap: 8px;
 }
 
-.file-edit-btn, .file-delete-btn {
+.file-delete-btn {
   background: none;
   border: none;
   padding: 4px;
@@ -616,14 +671,6 @@ const navigateBack = () => {
   justify-content: center;
   cursor: pointer;
   border-radius: 4px;
-}
-
-.file-edit-btn:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-}
-
-.file-delete-btn {
-  color: #EF4444;
 }
 
 .file-delete-btn:hover {

@@ -1,88 +1,76 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-export const useDocumentStore = defineStore('documents', () => {
-  const documents = ref([])
+export const useDocumentStore = defineStore('documents', {
+  state: () => ({
+    documents: [
+      {
+        id: '1',
+        name: 'Buyer Rep Agreement',
+        type: 'buyer-rep',
+        buyerName: 'Lucas Belmar',
+        description: 'Standard buyer representation agreement outlining terms and conditions.',
+        createdAt: '2024-03-15',
+        files: [
+          {
+            id: '1',
+            name: 'BuyerRepAgreement-Final.pdf',
+            type: 'application/pdf',
+            size: 1024 * 1024 * 1.5
+          }
+        ],
+        agents: [
+          {
+            id: 1,
+            name: 'Pristia Candra',
+            email: 'pristia@example.com',
+            avatar: '/img/avatars/pristia.jpg',
+            experience: '3y experiences'
+          }
+        ]
+      },
+      {
+        id: '2',
+        name: 'Seller Rep Agreement',
+        type: 'seller-rep',
+        sellerName: 'Sarah Wilson',
+        description: 'Seller representation agreement for property listing.',
+        createdAt: '2024-03-14',
+        files: [],
+        agents: []
+      }
+    ]
+  }),
 
-  // Load documents from localStorage on store initialization
-  const storedDocs = localStorage.getItem('documents')
-  if (storedDocs) {
-    documents.value = JSON.parse(storedDocs)
-  }
+  actions: {
+    async getDocument(id) {
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      return this.documents.find(doc => doc.id === id);
+    },
 
-  // Save documents to localStorage whenever they change
-  const saveToLocalStorage = () => {
-    localStorage.setItem('documents', JSON.stringify(documents.value))
-  }
+    async updateDocument(updatedDoc) {
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 500));
 
-  const generateId = () => {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2)
-  }
+      const index = this.documents.findIndex(doc => doc.id === updatedDoc.id);
+      if (index !== -1) {
+        this.documents[index] = { ...updatedDoc };
+        return true;
+      }
+      return false;
+    },
 
-  const saveBuyerRepDocument = (doc) => {
-    const document = {
-      id: generateId(),
-      ...doc
+    async deleteDocument(id) {
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      const index = this.documents.findIndex(doc => doc.id === id);
+      if (index !== -1) {
+        this.documents.splice(index, 1);
+        return true;
+      }
+      return false;
     }
-    documents.value.push(document)
-    saveToLocalStorage()
-    return document
-  }
-
-  const saveSellerRepDocument = (doc) => {
-    const document = {
-      id: generateId(),
-      ...doc
-    }
-    documents.value.push(document)
-    saveToLocalStorage()
-    return document
-  }
-
-  const saveMLSDocument = (doc) => {
-    const document = {
-      id: generateId(),
-      ...doc
-    }
-    documents.value.push(document)
-    saveToLocalStorage()
-    return document
-  }
-
-  const deleteDocument = (id) => {
-    const index = documents.value.findIndex(doc => doc.id === id)
-    if (index !== -1) {
-      documents.value.splice(index, 1)
-      saveToLocalStorage()
-    }
-  }
-
-  const getDocument = (id) => {
-    return documents.value.find(doc => doc.id === id)
-  }
-
-  const getDocumentsByType = (type) => {
-    return documents.value.filter(doc => doc.type === type)
-  }
-
-  const updateDocument = (updatedDoc) => {
-    const index = documents.value.findIndex(doc => doc.id === updatedDoc.id)
-    if (index !== -1) {
-      documents.value[index] = updatedDoc
-      saveToLocalStorage()
-      return updatedDoc
-    }
-    return null
-  }
-
-  return {
-    documents,
-    saveBuyerRepDocument,
-    saveSellerRepDocument,
-    saveMLSDocument,
-    deleteDocument,
-    getDocument,
-    getDocumentsByType,
-    updateDocument
   }
 })

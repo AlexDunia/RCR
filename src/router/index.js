@@ -330,6 +330,11 @@ const routes = [
         path: 'documents',
         name: 'ProfileDocuments',
         component: () => import('@/views/profile/ProfileDocuments.vue'),
+      },
+      {
+        path: 'documents/edit/:id',
+        name: 'ProfileDocumentEdit',
+        component: () => import('@/views/profile/DocumentEdit.vue'),
       }
     ]
   },

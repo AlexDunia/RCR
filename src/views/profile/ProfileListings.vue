@@ -169,49 +169,63 @@ onMounted(() => {
 
 <style scoped>
 .listings-container {
-  padding: 24px;
+  padding: 32px 24px;
   margin: 0 auto;
+  background-color: #F9FAFB;
+  min-height: 100vh;
 }
 
 .content-area {
   margin-top: 0;
   max-width: 960px;
   margin: 0 auto;
+  padding: 0 16px;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 32px;
+  margin-bottom: 40px;
+  padding: 0 8px;
 }
 
 .header-content h2 {
   font-size: 20px;
-  font-weight: 600;
+  font-weight: 500;
   color: #111827;
   margin: 0 0 8px 0;
+  letter-spacing: -0.2px;
 }
 
 .header-content p {
   font-size: 14px;
   color: #0066FF;
   margin: 0;
+  letter-spacing: -0.1px;
 }
 
 .search {
   position: relative;
-  width: 300px;
+  width: 320px;
 }
 
 .search input {
-  width: 85%;
-  padding: 10px 16px;
-  padding-right: 40px;
+  width: 100%;
+  padding: 12px 16px;
+  padding-right: 44px;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   background-color: #F5F5F5;
   font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.search input:focus {
+  outline: none;
+  border-color: #0066FF;
+  background-color: #FFFFFF;
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
 }
 
 .search input::placeholder {
@@ -230,20 +244,26 @@ onMounted(() => {
 .property-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  gap: 24px;
   margin-top: 24px;
-  margin-right: auto;
+  padding: 8px;
 }
 
 .property-card {
   background: white;
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
   border: 1px solid #E5E7EB;
   position: relative;
   max-width: 280px;
   margin: 0 auto;
   width: 100%;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.property-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .property-image {
@@ -276,31 +296,38 @@ onMounted(() => {
 }
 
 .property-info {
-  padding: 10px;
+  padding: 16px;
 }
 
 .property-name {
   font-size: 15px;
   font-weight: 600;
   color: #111827;
-  margin: 0 0 6px 0;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.1px;
 }
 
 .property-location {
   font-size: 13px;
   color: #6B7280;
   margin: 0;
+  letter-spacing: -0.1px;
 }
 
 @media (max-width: 768px) {
   .listings-container {
-    padding: 16px;
+    padding: 24px 16px;
+  }
+
+  .content-area {
+    padding: 0 8px;
   }
 
   .header {
     flex-direction: column;
     align-items: stretch;
-    gap: 16px;
+    gap: 24px;
+    margin-bottom: 32px;
   }
 
   .search {
@@ -309,17 +336,28 @@ onMounted(() => {
 
   .property-grid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+    gap: 20px;
+    padding: 4px;
   }
 }
 
 @media (max-width: 640px) {
+  .listings-container {
+    padding: 16px 12px;
+  }
+
   .property-grid {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
 
   .property-card {
-    max-width: 320px;
+    max-width: 100%;
+  }
+
+  .no-results, .search-loading {
+    margin: 16px 4px;
+    padding: 60px 0;
   }
 }
 
@@ -335,7 +373,11 @@ onMounted(() => {
 
 .search-loading {
   text-align: center;
-  padding: 40px 0;
+  padding: 80px 0;
+  background: #FFFFFF;
+  border-radius: 12px;
+  margin: 24px 8px;
+  border: 1px solid #E5E7EB;
 }
 
 .loading-spinner {
@@ -350,7 +392,11 @@ onMounted(() => {
 
 .no-results {
   text-align: center;
-  padding: 60px 0;
+  padding: 80px 0;
+  background: #FFFFFF;
+  border-radius: 12px;
+  margin: 24px 8px;
+  border: 1px solid #E5E7EB;
 }
 
 .no-results-content {

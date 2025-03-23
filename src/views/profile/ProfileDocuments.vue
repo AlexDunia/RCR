@@ -178,7 +178,10 @@ const getDocumentTitle = (doc) => {
 
 // Edit document function
 const editDocument = (id) => {
-  router.push(`/profile/documents/edit/${id}`);
+  router.push({
+    name: 'ProfileDocumentEdit',
+    params: { id }
+  });
 };
 
 // Delete confirmation
@@ -214,35 +217,41 @@ const truncateText = (text, maxLength) => {
 
 <style scoped>
 .documents-container {
-  padding: 24px 32px;
-  max-width: 1200px;
+  padding: 40px 32px;
   margin: 0 auto;
-  position: relative;
+  background-color: #F9FAFB;
+  min-height: 100vh;
 }
 
 .documents-header {
-  margin-bottom: 24px;
+  max-width: 960px;
+  margin: 0 auto 40px;
+  padding: 0 24px;
 }
 
 .documents-header h2 {
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 20px;
+  font-weight: 500;
   color: #111827;
-  margin: 0 0 8px 0;
+  margin: 0 0 12px 0;
+  letter-spacing: -0.2px;
 }
 
 .documents-header p {
-  font-size: 16px;
-  color: #4b5563;
+  font-size: 14px;
+  color: #0066FF;
   margin: 0;
+  letter-spacing: -0.1px;
 }
 
 .documents-table {
+  max-width: 960px;
+  margin: 0 auto 32px;
+  padding: 4px 0;
   background-color: white;
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  margin-bottom: 24px;
 }
 
 .table-header {
@@ -253,7 +262,7 @@ const truncateText = (text, maxLength) => {
 }
 
 .header-cell {
-  padding: 16px;
+  padding: 16px 20px;
   font-weight: 500;
   color: #374151;
   font-size: 14px;
@@ -268,6 +277,8 @@ const truncateText = (text, maxLength) => {
 
 .table-row {
   display: grid;
+  align-items:center;
+  padding:2px;
   grid-template-columns: 2fr 3fr 1fr 1fr;
   border-bottom: 1px solid #e5e7eb;
 }
@@ -277,13 +288,17 @@ const truncateText = (text, maxLength) => {
 }
 
 .cell {
-  padding: 16px;
+  padding: 16px 20px;
   font-size: 14px;
   color: #111827;
 }
 
 .cell.title {
-  font-weight: 500;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
 }
 
 .cell.description {
@@ -329,10 +344,12 @@ const truncateText = (text, maxLength) => {
 }
 
 .pagination {
+  max-width: 960px;
+  margin: 40px auto;
+  padding: 0 24px;
   display: flex;
   justify-content: center;
-  gap: 4px;
-  margin-top: 24px;
+  gap: 6px;
 }
 
 .pagination-btn {
@@ -379,11 +396,12 @@ const truncateText = (text, maxLength) => {
 
 .modal-container {
   background-color: white;
-  border-radius: 8px;
+  border-radius: 12px;
   width: 400px;
   max-width: 90%;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+  margin: 0 16px;
 }
 
 .modal-header {
@@ -455,7 +473,7 @@ const truncateText = (text, maxLength) => {
 .title-container {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .document-badge {
@@ -471,13 +489,6 @@ const truncateText = (text, maxLength) => {
   font-weight: 500;
   color: #111827;
   cursor: help;
-}
-
-.cell.title {
-  padding: 12px 16px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
 }
 
 /* Update existing badge styles */
@@ -497,17 +508,66 @@ const truncateText = (text, maxLength) => {
 }
 
 .documents-loader {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1rem;
+  max-width: 960px;
+  margin: 0 auto 32px;
+  padding: 24px;
   background-color: white;
-  border-radius: 8px;
+  border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .pagination-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .documents-container {
+    padding: 32px 24px;
+  }
+
+  .documents-header {
+    margin-bottom: 32px;
+    padding: 0 16px;
+  }
+
+  .cell, .header-cell {
+    padding: 14px 16px;
+  }
+
+  .documents-loader {
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+
+  .pagination {
+    margin: 32px auto;
+    padding: 0 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .documents-container {
+    padding: 24px 16px;
+  }
+
+  .documents-header {
+    margin-bottom: 24px;
+    padding: 0 12px;
+  }
+
+  .cell, .header-cell {
+    padding: 12px;
+  }
+
+  .documents-loader {
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+
+  .pagination {
+    margin: 24px auto;
+    padding: 0 12px;
+  }
 }
 </style>

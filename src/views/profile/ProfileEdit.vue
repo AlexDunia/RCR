@@ -96,7 +96,7 @@
           <div class="profile-photo-section">
             <div class="profile-photo-container">
               <img
-                :src="profileData.largeAvatar || '/src/assets/images/default-avatar.jpg'"
+                :src="profileData.largeAvatar || defaultAvatar"
                 alt="Profile Photo"
                 class="profile-large-avatar"
               />
@@ -174,7 +174,7 @@
             <div class="connected-accounts">
               <div class="connected-account">
                 <div class="account-info">
-                  <img src="/src/assets/images/default-avatar.jpg" alt="Profile" class="account-avatar" />
+                  <img :src="defaultAvatar" alt="Profile" class="account-avatar" />
                   <div class="account-details">
                     <span class="account-handle">@alexandrealtor_</span>
                     <span class="account-platform">LinkedIn account</span>
@@ -185,7 +185,7 @@
 
               <div class="connected-account">
                 <div class="account-info">
-                  <img src="/src/assets/images/default-avatar.jpg" alt="Profile" class="account-avatar" />
+                  <img :src="defaultAvatar" alt="Profile" class="account-avatar" />
                   <div class="account-details">
                     <span class="account-handle">@alexandrealtor_</span>
                     <span class="account-platform">Facebook account</span>
@@ -196,7 +196,7 @@
 
               <div class="connected-account">
                 <div class="account-info">
-                  <img src="/src/assets/images/default-avatar.jpg" alt="Profile" class="account-avatar" />
+                  <img :src="defaultAvatar" alt="Profile" class="account-avatar" />
                   <div class="account-details">
                     <span class="account-handle">@alexandrealtor_</span>
                     <span class="account-platform">Instagram account</span>
@@ -227,6 +227,9 @@ const profileStore = useProfileStore();
 const isLoading = ref(true);
 const profileData = ref({});
 const selectedFile = ref(null);
+
+// Add the default avatar URL constant
+const defaultAvatar = 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739408381/Screenshot_2025-02-13_015617_mhjgby.png';
 
 onMounted(() => {
   // Load profile data when component mounts
@@ -281,7 +284,7 @@ const navigateBack = () => {
   padding: 0;
   background-color: #f9fafb;
   min-height: 100vh;
-  font-family: Inter, system-ui, -apple-system, sans-serif;
+  font-family: poppins;
 }
 
 .content-card {
