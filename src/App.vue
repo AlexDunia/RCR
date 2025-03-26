@@ -2,6 +2,7 @@
 import { useRoute } from 'vue-router';
 import { useHeaderStore } from '@/stores/headerStore';
 import { useLayoutStore } from '@/stores/layout';
+import { useRoleStore } from '@/stores/roleStore';
 import { watch, computed, onMounted } from 'vue';
 import { useAuth } from '@/auth/useAuth';
 import Sidebar from '@/components/SidebarView.vue';
@@ -13,12 +14,17 @@ import '@fontsource/poppins/700.css'; // If you need bold
 const route = useRoute();
 const headerStore = useHeaderStore();
 const layoutStore = useLayoutStore();
+<<<<<<< Updated upstream
 const { initialize: initAuth } = useAuth();
+=======
+const roleStore = useRoleStore();
+>>>>>>> Stashed changes
 
 // Computed properties for better reactivity
 const hideSidebar = computed(() => layoutStore.hideSidebar);
 const hideHeader = computed(() => layoutStore.hideHeader);
 const background = computed(() => layoutStore.background);
+const currentRole = computed(() => roleStore.currentRole);
 
 // Force layout update on mount
 onMounted(() => {
@@ -58,6 +64,11 @@ watch(route, (to) => {
     });
   }
 }, { immediate: true });
+
+// Watch for role changes
+watch(currentRole, (newRole) => {
+  console.log(`App.vue - Role changed to: ${newRole}`);
+});
 </script>
 
 <template>

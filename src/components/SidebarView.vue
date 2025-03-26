@@ -1,8 +1,13 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
+import { useNavigationStore } from '@/stores/navigation';
+import { useRoleStore } from '@/stores/roleStore';
 
 const route = useRoute();
+const router = useRouter();
+const navigationStore = useNavigationStore();
+const roleStore = useRoleStore();
 const activeMenu = ref('');
 
 // Function to determine which menu item should be active based on the current route
@@ -13,6 +18,7 @@ const getActiveMenuFromPath = (path) => {
   // Remove /RCR prefix if it exists
   const normalizedPath = sanitizedPath.replace('/RCR', '');
 
+<<<<<<< Updated upstream:src/components/SidebarView.vue
   // Use strict equality comparison
   if (normalizedPath === '/') return 'dashboard';
   if (normalizedPath.startsWith('/tasks')) return 'tasks';
@@ -28,6 +34,14 @@ const getActiveMenuFromPath = (path) => {
   const matchingItem = menuItems.find(item => {
     const itemPath = item.path.replace('/RCR', '');
     return normalizedPath.startsWith(itemPath) && itemPath !== '/';
+=======
+  // Find matching menu item by path
+  const currentMenuItems = navigationStore.menuItems;
+  const matchingItem = currentMenuItems.find(item => {
+    // Check if the path exactly matches or starts with the menu item path
+    return normalizedPath === item.path ||
+           (normalizedPath.startsWith(item.path) && item.path !== '/');
+>>>>>>> Stashed changes:src/layouts/components/SidebarView.vue
   });
 
   return matchingItem?.key || 'dashboard';
@@ -38,133 +52,40 @@ const updateActiveMenu = () => {
   activeMenu.value = getActiveMenuFromPath(route.path);
 };
 
+// Change role function
+const changeRole = (role) => {
+  roleStore.setRole(role);
+
+  // Redirect to the appropriate dashboard based on role
+  switch(role) {
+    case 'admin':
+      router.push('/admin/dashboard');
+      break;
+    case 'agent':
+      router.push('/agent/dashboard');
+      break;
+    case 'client':
+      router.push('/client/dashboard');
+      break;
+    default:
+      router.push('/');
+  }
+};
+
 // Watch for route changes and update active menu
 watch(() => route.path, () => {
   updateActiveMenu();
 }, { immediate: true });
 
+// Watch for role changes
+watch(() => roleStore.currentRole, () => {
+  updateActiveMenu();
+});
+
 // Initialize on component mount
 onMounted(() => {
   updateActiveMenu();
 });
-
-// Define menu items as a frozen constant to prevent modification
-const menuItems = Object.freeze([
-  {
-    name: 'Dashboard',
-    key: 'dashboard',
-    path: '/',
-    icon: `
-      <svg class="menu-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M3 9L12 2L21 9V20H14V14H10V20H3V9Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    `
-  },
-  {
-    name: 'Manage Listing',
-    key: 'manage-listing',
-    path: '/manage-listings',
-    icon: `
-      <svg class="menu-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.5"/>
-        <path d="M3 10H21" stroke="currentColor" stroke-width="1.5"/>
-        <path d="M8 15H16" stroke="currentColor" stroke-width="1.5"/>
-      </svg>
-    `
-  },
-  // {
-  //   name: 'Create offer',
-  //   key: 'create-offer',
-  //   path: '/create-offer',
-  //   icon: `
-  //     <svg class="menu-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-  //       <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.5"/>
-  //       <path d="M12 8V16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-  //       <path d="M8 12H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-  //     </svg>
-  //   `
-  // },
-  {
-    name: 'Receipts and documents',
-    key: 'receipts-docs',
-    path: '/receipts-docs',
-    icon: `
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="6" y="3" width="12" height="18" rx="2" stroke="currentColor" stroke-width="1.5"/>
-        <path d="M9 7H15" stroke="currentColor" stroke-width="1.5"/>
-        <path d="M9 11H15" stroke="currentColor" stroke-width="1.5"/>
-        <path d="M9 15H13" stroke="currentColor" stroke-width="1.5"/>
-      </svg>
-    `
-  },
-  {
-    name: 'Marketing Tools',
-    key: 'marketing-tools',
-    path: '/marketing-tools',
-    icon: `
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M20 5C20 6.65685 16.4183 8 12 8C7.58172 8 4 6.65685 4 5C4 3.34315 7.58172 2 12 2C16.4183 2 20 3.34315 20 5Z" stroke="currentColor" stroke-width="1.5"/>
-        <path d="M20 5V12C20 13.6569 16.4183 15 12 15C7.58172 15 4 13.6569 4 12V5" stroke="currentColor" stroke-width="1.5"/>
-        <path d="M20 12V19C20 20.6569 16.4183 22 12 22C7.58172 22 4 20.6569 4 19V12" stroke="currentColor" stroke-width="1.5"/>
-      </svg>
-    `
-  },
-  {
-    name: 'Education and Training',
-    key: 'education-training',
-    path: '/education-training',
-    icon: `
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="1.5"/>
-        <path d="M19 9.5V16.5C19 18.5 15.5 20 12 20C8.5 20 5 18.5 5 16.5V9.5" stroke="currentColor" stroke-width="1.5"/>
-      </svg>
-    `
-  },
-  {
-    name: 'Tasks',
-    key: 'tasks',
-    path: '/tasks',
-    icon: `
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.5"/>
-        <path d="M8 12L11 15L16 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    `
-  },
-  {
-    name: 'Tours',
-    key: 'tours',
-    path: '/tours',
-    icon: `
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M10 20.8L10 3.19999C10 2.53725 9.47032 2 8.81818 2L5.18182 2C4.52968 2 4 2.53726 4 3.2L4 20.8C4 21.4627 4.52968 22 5.18182 22L8.81818 22C9.47032 22 10 21.4627 10 20.8Z" stroke="currentColor" stroke-width="1.5"/>
-        <path d="M20 20.8L20 3.19999C20 2.53725 19.4703 2 18.8182 2L15.1818 2C14.5297 2 14 2.53726 14 3.2L14 20.8C14 21.4627 14.5297 22 15.1818 22L18.8182 22C19.4703 22 20 21.4627 20 20.8Z" stroke="currentColor" stroke-width="1.5"/>
-      </svg>
-    `
-  },
-  {
-    name: 'Profile',
-    key: 'profile',
-    path: '/profile',
-    icon: `
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/>
-        <path d="M5 20C5 16.6863 8.13401 14 12 14C15.866 14 19 16.6863 19 20" stroke="currentColor" stroke-width="1.5"/>
-      </svg>
-    `
-  },
-  {
-    name: 'Settings',
-    key: 'settings',
-    path: '/settings',
-    icon: `
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="currentColor" stroke-width="1.5"/>
-        <path d="M18.7273 14.5455C18.5909 14.8182 18.5909 15.1364 18.6818 15.4091L19.5 18.4091C19.5909 18.7273 19.5 19.0455 19.2727 19.2727L17.1818 21.3636C16.9545 21.5909 16.6364 21.6818 16.3182 21.5909L13.3182 20.7727C13.0455 20.6818 12.7273 20.6818 12.4545 20.8182L9.81818 22.0909C9.5 22.2273 9.09091 22.1364 8.90909 21.8636L6.81818 19.2727C6.63636 19 6.63636 18.6818 6.77273 18.4091L7.77273 15.5C7.86364 15.2273 7.86364 14.9091 7.72727 14.6364L6.45455 12C6.31818 11.7273 6.40909 11.3182 6.68182 11.1364L9.27273 9.04545C9.54545 8.86364 9.72727 8.59091 9.72727 8.27273L9.90909 5.18182C9.90909 4.86364 10.1818 4.59091 10.5 4.5L13.5 4.5C13.8182 4.5 14.0909 4.77273 14.0909 5.09091L14.2727 8.18182C14.2727 8.5 14.4545 8.77273 14.7273 8.95455L17.3182 11.0455C17.5909 11.2273 17.6818 11.6364 17.5455 11.9091L16.2727 14.5455C16.1364 14.8182 16.1364 15.1364 16.2727 15.4091L17.1818 18.5C17.2727 18.7727 17.1818 19.0909 16.9545 19.3182L14.5455 21.7273" stroke="currentColor" stroke-width="1.5"/>
-      </svg>
-    `
-  }
-]);
 </script>
 
 <template>
@@ -176,7 +97,7 @@ const menuItems = Object.freeze([
     <nav class="sidebar-nav">
       <ul>
         <li
-          v-for="item in menuItems"
+          v-for="item in navigationStore.menuItems"
           :key="item.key"
           :class="{ active: activeMenu === item.key }"
         >
@@ -192,6 +113,18 @@ const menuItems = Object.freeze([
     </nav>
     <div class="account-section">
       <h3>Account Management</h3>
+      <div class="role-switcher">
+        <div class="role-label">Current Role: {{ roleStore.currentRole }}</div>
+        <select
+          class="role-select"
+          v-model="roleStore.currentRole"
+          @change="changeRole(roleStore.currentRole)"
+        >
+          <option v-for="role in roleStore.availableRoles" :key="role" :value="role">
+            {{ role.charAt(0).toUpperCase() + role.slice(1) }}
+          </option>
+        </select>
+      </div>
     </div>
   </aside>
 </template>
@@ -301,17 +234,39 @@ nav ul li:not(.active):hover a {
 
 .account-section {
   margin-top: auto;
-  padding: 16px 20px;
+  padding: 20px 0;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .account-section h3 {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
-  margin: 0;
-  opacity: 0.7;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
+  margin-bottom: 10px;
+  padding-left: 20px;
+}
+
+.role-switcher {
+  padding: 0 20px;
+}
+
+.role-label {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-bottom: 8px;
+}
+
+.role-select {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 8px 10px;
+  border-radius: 4px;
+  width: 100%;
+  font-size: 14px;
+}
+
+.role-select option {
+  background: #004080;
 }
 
 /* Fade-in animation */

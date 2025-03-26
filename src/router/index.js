@@ -34,9 +34,422 @@ import SocialPlatforms from '@/views/marketing/SocialPlatforms.vue';
 
 // Lazy-loaded route components
 const routes = [
+<<<<<<< Updated upstream
   // Dashboard route - Business feature for dashboard functionality
+=======
+  // Default redirect to admin dashboard
+>>>>>>> Stashed changes
   {
     path: '/',
+    redirect: '/admin/dashboard'
+  },
+
+  // Admin routes
+  {
+    path: '/admin',
+    component: () => import('@/views/admin/AdminLayout.vue'),
+    children: [
+      {
+        path: 'dashboard',
+        name: 'AdminDashboard',
+        component: () => import('@/views/admin/AdminDashboard.vue'),
+        meta: {
+          title: 'Admin Dashboard'
+        }
+      },
+      // {
+      //   path: 'agents',
+      //   name: 'AdminAgents',
+      //   component: () => import('@/views/admin/AdminAgents.vue'),
+      //   meta: {
+      //     title: 'Manage Agents'
+      //   }
+      // },
+      // {
+      //   path: 'clients',
+      //   name: 'AdminClients',
+      //   component: () => import('@/views/admin/AdminClients.vue'),
+      //   meta: {
+      //     title: 'Clients'
+      //   }
+      // },
+      // {
+      //   path: 'properties',
+      //   name: 'AdminProperties',
+      //   component: () => import('@/views/admin/AdminProperties.vue'),
+      //   meta: {
+      //     title: 'Properties'
+      //   }
+      // },
+      // {
+      //   path: 'documents',
+      //   name: 'AdminDocuments',
+      //   component: () => import('@/views/admin/AdminDocuments.vue'),
+      //   meta: {
+      //     title: 'Documents'
+      //   }
+      // },
+      // {
+      //   path: 'marketing',
+      //   name: 'AdminMarketing',
+      //   component: () => import('@/views/admin/AdminMarketing.vue'),
+      //   meta: {
+      //     title: 'Marketing Tools'
+      //   }
+      // },
+      // {
+      //   path: 'settings',
+      //   name: 'AdminSettings',
+      //   component: () => import('@/views/admin/AdminSettings.vue'),
+      //   meta: {
+      //     title: 'Settings'
+      //   }
+      // }
+    ]
+  },
+
+  // Agent routes
+  {
+    path: '/agent',
+    component: () => import('@/views/agent/AgentLayout.vue'),
+    meta: {
+      allowedRoles: ['agent']
+    },
+    children: [
+      {
+        path: '',
+        redirect: '/agent/dashboard'
+      },
+      {
+        path: 'dashboard',
+        name: 'AgentDashboard',
+        component: () => import('@/views/dashboard/AgentDashboardView.vue'),
+        meta: {
+          title: 'Agent Dashboard',
+          allowedRoles: ['agent']
+        }
+      },
+      {
+        path: 'listings',
+        name: 'AgentListings',
+        component: () => import('@/views/agents/ManageListings.vue'),
+        meta: {
+          title: 'My Listings',
+          allowedRoles: ['agent']
+        }
+      },
+      {
+        path: 'listings/manage',
+        name: 'ManageListings',
+        component: () => import('@/views/agents/ManageListings.vue'),
+        meta: {
+          title: 'Manage Listings',
+          allowedRoles: ['agent']
+        }
+      },
+      {
+        path: 'listings/add',
+        name: 'AddListing',
+        component: () => import('@/views/agents/AddListing.vue'),
+        meta: {
+          title: 'Add Listing',
+          allowedRoles: ['agent']
+        }
+      },
+      {
+        path: 'listings/view',
+        name: 'ViewListings',
+        component: () => import('@/views/listings/ViewListings.vue'),
+        meta: {
+          title: 'View Listings',
+          allowedRoles: ['agent']
+        }
+      },
+      {
+        path: 'listings/pending',
+        name: 'PendingApprovals',
+        component: () => import('@/views/listings/PendingApprovals.vue'),
+        meta: {
+          title: 'Pending Approvals',
+          allowedRoles: ['agent']
+        }
+      },
+      {
+        path: 'listings/drafts',
+        name: 'Drafts',
+        component: () => import('@/views/listings/Drafts.vue'),
+        meta: {
+          title: 'Drafts',
+          allowedRoles: ['agent']
+        }
+      },
+      {
+        path: 'listings/:id',
+        name: 'PropertyDetail',
+        component: () => import('@/views/listings/PropertyDetail.vue'),
+        meta: {
+          title: 'Property Details',
+          allowedRoles: ['agent'],
+          hideSidebar: false
+        }
+      },
+      {
+        path: 'clients',
+        name: 'AgentClients',
+        component: () => import('@/views/agent/AgentClients.vue'),
+        meta: {
+          title: 'My Clients',
+          allowedRoles: ['agent']
+        }
+      },
+      {
+        path: 'calendar',
+        name: 'AgentCalendar',
+        component: () => import('@/views/agent/AgentCalendar.vue'),
+        meta: {
+          title: 'Calendar',
+          allowedRoles: ['agent']
+        }
+      },
+      {
+        path: 'documents',
+        name: 'AgentDocuments',
+        component: () => import('@/views/agent/AgentDocuments.vue'),
+        meta: {
+          title: 'Documents',
+          allowedRoles: ['agent']
+        }
+      },
+      {
+        path: 'profile',
+        name: 'AgentProfile',
+        component: () => import('@/views/agent/AgentProfile.vue'),
+        meta: {
+          title: 'My Profile',
+          allowedRoles: ['agent']
+        }
+      },
+      {
+        path: 'messages',
+        name: 'AgentMessages',
+        component: () => import('@/views/agent/AgentMessages.vue'),
+        meta: {
+          title: 'Messages',
+          allowedRoles: ['agent']
+        }
+      },
+      {
+        path: 'tasks',
+        component: TasksLayout,
+        meta: {
+          allowedRoles: ['agent']
+        },
+        children: [
+          {
+            path: '',
+            redirect: '/agent/tasks/in-progress'
+          },
+          {
+            path: 'in-progress',
+            component: () => import('@/views/tasks/InProgressTasks.vue')
+          },
+          {
+            path: 'drafts',
+            component: () => import('@/views/tasks/DraftTasks.vue')
+          },
+          {
+            path: 'scheduled',
+            name: 'ScheduledTasks',
+            component: () => import('@/views/tasks/ScheduledTasks.vue')
+          },
+          {
+            path: 'completed',
+            component: () => import('@/views/tasks/CompletedTasks.vue')
+          },
+          {
+            path: 'create',
+            component: () => import('@/features/task/TaskCreate.vue'),
+            meta: {
+              hideSidebar: true,
+              hideHeader: true
+            }
+          },
+          {
+            path: ':id',
+            name: 'TaskDetail',
+            component: () => import('@/features/task/TaskDetail.vue'),
+            meta: {
+              hideSidebar: true,
+              hideHeader: true
+            }
+          },
+          {
+            path: 'completed/:id',
+            name: 'CompletedTaskDetail',
+            component: () => import('@/views/tasks/CompletedTaskDetail.vue'),
+            meta: {
+              hideSidebar: true,
+              hideHeader: true
+            }
+          }
+        ]
+      },
+      {
+        path: 'marketing',
+        component: () => import('@/views/marketing/MarketingTools.vue'),
+        meta: {
+          allowedRoles: ['agent']
+        },
+        children: [
+          {
+            path: '',
+            component: () => import('@/views/marketing/SuccessPlan.vue')
+          },
+          {
+            path: 'success-plan',
+            component: () => import('@/views/marketing/SuccessPlan.vue')
+          },
+          {
+            path: 'create',
+            component: () => import('@/views/marketing/CreateSuccessPlan.vue')
+          },
+          {
+            path: 'plan/:id',
+            component: () => import('@/views/marketing/MarketingPlanDetail.vue')
+          },
+          {
+            path: 'checklist',
+            name: 'ChecklistList',
+            component: () => import('@/views/marketing/MyChecklist.vue'),
+            meta: {
+              keepAlive: true
+            }
+          },
+          {
+            path: 'checklist/create',
+            name: 'ChecklistCreate',
+            component: () => import('@/views/marketing/ChecklistCreate.vue')
+          },
+          {
+            path: 'checklist/:id',
+            name: 'ChecklistDetail',
+            component: () => import('@/views/marketing/ChecklistDetail.vue'),
+            props: true,
+            meta: {
+              keepAlive: true
+            }
+          },
+          {
+            path: 'checklist/:id/edit',
+            name: 'ChecklistEdit',
+            component: () => import('@/views/marketing/ChecklistEdit.vue')
+          },
+          {
+            path: 'done-for-you',
+            component: () => import('@/views/marketing/DoneForYou.vue')
+          },
+          {
+            path: 'social-platforms',
+            component: () => import('@/views/marketing/SocialPlatforms.vue')
+          },
+          {
+            path: 'social-platforms/create',
+            component: () => import('@/views/marketing/CreateSocialPost.vue'),
+            meta: {
+              hideSidebar: true,
+              hideHeader: true,
+              background: '#f9fafb'
+            }
+          },
+          {
+            path: 'social-platforms/edit/:id',
+            component: () => import('@/views/marketing/CreateSocialPost.vue'),
+            meta: {
+              hideSidebar: true,
+              hideHeader: true,
+              background: '#f9fafb'
+            }
+          },
+          {
+            path: 'social-platforms/post/:id',
+            component: () => import('@/views/marketing/PostDetail.vue')
+          }
+        ]
+      },
+      {
+        path: 'education',
+        component: EducationLayout,
+        meta: {
+          allowedRoles: ['agent']
+        },
+        children: [
+          {
+            path: '',
+            name: 'EducationTraining',
+            component: () => import('@/views/education/EducationTrainingView.vue'),
+            meta: {
+              title: 'Education & Training'
+            }
+          },
+          {
+            path: 'create',
+            name: 'CreateEducationSession',
+            component: () => import('@/views/education/CreateEducationSession.vue'),
+            meta: {
+              title: 'Create Education Session'
+            }
+          },
+          {
+            path: 'session/:id',
+            name: 'SessionDetails',
+            component: () => import('@/views/education/SessionDetailsView.vue'),
+            props: true,
+            meta: {
+              title: 'Session Details'
+            }
+          },
+          {
+            path: 'module/:id',
+            name: 'ModuleDetails',
+            component: () => import('@/views/education/ModuleDetailsView.vue'),
+            props: true,
+            meta: {
+              title: 'Module Details'
+            }
+          },
+          {
+            path: 'test',
+            name: 'EducationTest',
+            component: () => import('@/views/education/TestView.vue'),
+            meta: {
+              title: 'Education Test'
+            }
+          }
+        ]
+      }
+    ]
+  },
+
+  // Client routes
+  {
+    path: '/client',
+    component: () => import('@/views/client/ClientLayout.vue'),
+    children: [
+      {
+        path: 'dashboard',
+        name: 'ClientDashboard',
+        component: () => import('@/views/client/ClientDashboard.vue'),
+        meta: {
+          title: 'Client Dashboard'
+        }
+      }
+    ]
+  },
+
+  // Backward compatibility - keep old routes for now
+  // Dashboard route
+  {
+    path: '/dashboard',
     name: 'AgentDashboardView',
     component: () => import('@/features/dashboard/DashboardPage.vue')
   },
@@ -140,6 +553,7 @@ const routes = [
     ]
   },
 
+<<<<<<< Updated upstream
   // Agent Profile route
   {
     path: '/agent-profile',
@@ -147,6 +561,8 @@ const routes = [
     component: AgentProfile
   },
 
+=======
+>>>>>>> Stashed changes
   // Document management routes
   {
     path: '/receipts-docs',
