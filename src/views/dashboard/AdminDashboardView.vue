@@ -6,10 +6,12 @@ const roleStore = useRoleStore()
 
 // Sample data for the dashboard
 const stats = ref({
-  totalUsers: 1250,
-  activeAgents: 45,
-  totalRevenue: 125000,
-  pendingApprovals: 12
+  traffic: '350,897',
+  totalListings: '20',
+  grossCommission: '20',
+  listings: '20',
+  blogs: '350',
+  receipts: '350'
 })
 
 const recentActivity = ref([
@@ -40,105 +42,74 @@ onMounted(() => {
 <template>
   <div class="admin-dashboard">
     <div class="dashboard-header">
-      <h1>Admin Dashboard</h1>
-      <div class="date-filter">
-        <select>
-          <option>Today</option>
-          <option>This Week</option>
-          <option>This Month</option>
-          <option>This Year</option>
-        </select>
+      <div class="title-section">
+        <h1>Dashboard</h1>
+        <p class="subtitle">Real City admin dashboard</p>
+      </div>
+      <div class="header-actions">
+        <button class="notification-btn">
+          <span class="notification-dot"></span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M18 8A6 6 0 1 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="mail-btn">
+          <span class="mail-dot"></span>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="m22 6-10 7L2 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="user-profile">
+          <span class="profile-initial">PA</span>
+          <span class="profile-name">Precious Admin</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
       </div>
     </div>
 
-    <!-- Stats Cards -->
+    <div class="welcome-card">
+      <h2>Hi Admin, Welcome.</h2>
+      <p>Here, you get over view on how your app is doing, and what clients and agents are up to.</p>
+    </div>
+
     <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-icon users">
-          <i class="fas fa-users"></i>
-        </div>
-        <div class="stat-content">
-          <h3>Total Users</h3>
-          <p class="stat-value">{{ stats.totalUsers }}</p>
-        </div>
+      <div class="stat-group">
+        <div class="stat-label">TRAFFIC</div>
+        <div class="stat-value">{{ stats.traffic }}</div>
       </div>
 
-      <div class="stat-card">
-        <div class="stat-icon agents">
-          <i class="fas fa-user-tie"></i>
-        </div>
-        <div class="stat-content">
-          <h3>Active Agents</h3>
-          <p class="stat-value">{{ stats.activeAgents }}</p>
-        </div>
+      <div class="stat-group">
+        <div class="stat-label">TOTAL LISTINGS</div>
+        <div class="stat-value">{{ stats.totalListings }}</div>
+        <a href="#" class="stat-link">view</a>
       </div>
 
-      <div class="stat-card">
-        <div class="stat-icon revenue">
-          <i class="fas fa-dollar-sign"></i>
-        </div>
-        <div class="stat-content">
-          <h3>Total Revenue</h3>
-          <p class="stat-value">${{ stats.totalRevenue.toLocaleString() }}</p>
-        </div>
+      <div class="stat-group">
+        <div class="stat-label">GROSS COMMISSION</div>
+        <div class="stat-value">{{ stats.grossCommission }}</div>
+        <a href="#" class="stat-link">view</a>
       </div>
 
-      <div class="stat-card">
-        <div class="stat-icon approvals">
-          <i class="fas fa-check-circle"></i>
-        </div>
-        <div class="stat-content">
-          <h3>Pending Approvals</h3>
-          <p class="stat-value">{{ stats.pendingApprovals }}</p>
-        </div>
+      <div class="stat-group">
+        <div class="stat-label">Listings</div>
+        <div class="stat-value">{{ stats.listings }}</div>
+        <a href="#" class="stat-link">view</a>
       </div>
     </div>
 
-    <!-- Main Content Grid -->
-    <div class="dashboard-grid">
-      <!-- System Performance -->
-      <div class="dashboard-card performance">
-        <h2>System Performance</h2>
-        <div class="performance-grid">
-          <div class="metric">
-            <span class="metric-label">System Uptime</span>
-            <span class="metric-value">{{ performanceMetrics.systemUptime }}</span>
-          </div>
-          <div class="metric">
-            <span class="metric-label">Response Time</span>
-            <span class="metric-value">{{ performanceMetrics.averageResponseTime }}</span>
-          </div>
-          <div class="metric">
-            <span class="metric-label">Active Sessions</span>
-            <span class="metric-value">{{ performanceMetrics.activeSessions }}</span>
-          </div>
-          <div class="metric">
-            <span class="metric-label">Server Load</span>
-            <span class="metric-value">{{ performanceMetrics.serverLoad }}</span>
-          </div>
-        </div>
+    <div class="secondary-stats">
+      <div class="stat-group">
+        <div class="stat-label">BLOGS</div>
+        <div class="stat-value">{{ stats.blogs }}</div>
       </div>
 
-      <!-- Recent Activity -->
-      <div class="dashboard-card activity">
-        <h2>Recent Activity</h2>
-        <div class="activity-list">
-          <div v-for="activity in recentActivity" :key="activity.id" class="activity-item">
-            <div class="activity-icon" :class="activity.type">
-              <i class="fas" :class="{
-                'fa-user-plus': activity.type === 'user_registration',
-                'fa-cog': activity.type === 'system_update',
-                'fa-sign-in-alt': activity.type === 'agent_login',
-                'fa-money-bill-wave': activity.type === 'payment_processed',
-                'fa-file-alt': activity.type === 'report_generated'
-              }"></i>
-            </div>
-            <div class="activity-content">
-              <p>{{ activity.user }}</p>
-              <span class="activity-time">{{ activity.time }}</span>
-            </div>
-          </div>
-        </div>
+      <div class="stat-group">
+        <div class="stat-label">RECEIPTS</div>
+        <div class="stat-value">{{ stats.receipts }}</div>
       </div>
     </div>
   </div>
@@ -146,8 +117,8 @@ onMounted(() => {
 
 <style scoped>
 .admin-dashboard {
-  padding: 20px;
-  background: #f8f9fa;
+  padding: 20px 40px;
+  background: #F4F4F4;
   min-height: 100vh;
 }
 
@@ -158,153 +129,134 @@ onMounted(() => {
   margin-bottom: 30px;
 }
 
-.dashboard-header h1 {
-  margin: 0;
-  color: #2c3e50;
+.title-section h1 {
   font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
 }
 
-.date-filter select {
-  padding: 8px 16px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  background: white;
+.subtitle {
+  font-size: 14px;
+  color: #666;
+  margin: 4px 0 0 0;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.notification-btn, .mail-btn {
+  position: relative;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+}
+
+.notification-dot, .mail-dot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  background: #FF4444;
+  border-radius: 50%;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.profile-initial {
+  width: 36px;
+  height: 36px;
+  background: #004080;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+}
+
+.profile-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.welcome-card {
+  background: #E8F5E9;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 30px;
+}
+
+.welcome-card h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 8px 0;
+}
+
+.welcome-card p {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
 }
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 20px;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 
-.stat-card {
+.secondary-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.stat-group {
   background: white;
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 20px;
-  display: flex;
-  align-items: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  position: relative;
 }
 
-.stat-icon {
-  width: 50px;
-  height: 50px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 15px;
-  font-size: 24px;
-  color: white;
-}
-
-.stat-icon.users { background: #4CAF50; }
-.stat-icon.agents { background: #2196F3; }
-.stat-icon.revenue { background: #FF9800; }
-.stat-icon.approvals { background: #9C27B0; }
-
-.stat-content h3 {
-  margin: 0;
-  font-size: 14px;
+.stat-label {
+  font-size: 12px;
+  font-weight: 500;
   color: #666;
+  text-transform: uppercase;
+  margin-bottom: 8px;
 }
 
 .stat-value {
-  margin: 5px 0 0;
   font-size: 24px;
-  font-weight: bold;
-  color: #2c3e50;
+  font-weight: 600;
+  color: #333;
 }
 
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 20px;
-}
-
-.dashboard-card {
-  background: white;
-  border-radius: 10px;
-  padding: 20px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.dashboard-card h2 {
-  margin: 0 0 20px;
-  color: #2c3e50;
-  font-size: 18px;
-}
-
-.performance-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 15px;
-}
-
-.metric {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 15px;
-  background: #f8f9fa;
-  border-radius: 8px;
-}
-
-.metric-label {
+.stat-link {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  color: #004080;
+  text-decoration: none;
   font-size: 14px;
-  color: #666;
-  margin-bottom: 5px;
+  font-weight: 500;
 }
 
-.metric-value {
-  font-size: 20px;
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-.activity-list {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.activity-item {
-  display: flex;
-  align-items: center;
-  padding: 10px;
-  background: #f8f9fa;
-  border-radius: 8px;
-}
-
-.activity-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 15px;
-  color: white;
-}
-
-.activity-icon.user_registration { background: #4CAF50; }
-.activity-icon.system_update { background: #2196F3; }
-.activity-icon.agent_login { background: #FF9800; }
-.activity-icon.payment_processed { background: #9C27B0; }
-.activity-icon.report_generated { background: #607D8B; }
-
-.activity-content {
-  flex: 1;
-}
-
-.activity-content p {
-  margin: 0;
-  color: #2c3e50;
-}
-
-.activity-time {
-  font-size: 12px;
-  color: #666;
+.stat-link:hover {
+  text-decoration: underline;
 }
 </style>
