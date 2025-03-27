@@ -1,16 +1,38 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
 import { useLayoutStore } from '@/stores/layout';
+import { useRoleStore } from '@/stores/roleStore';
 import DocumentLayout from '@/layouts/DocumentLayout.vue'
 import TasksLayout from '@/layouts/TasksLayout.vue'
 import EducationLayout from '@/layouts/EducationLayout.vue'
 
 // Lazy-loaded route components
 const routes = [
-  // Dashboard route
+  // Dashboard route with role-based component
   {
     path: '/',
+    name: 'Dashboard',
+    component: () => import('@/views/dashboard/AdminDashboardView.vue'),
+    beforeEnter: (to, from, next) => {
+      const roleStore = useRoleStore();
+      if (roleStore.currentRole === 'admin') {
+        next();
+      } else {
+        next({ name: 'AgentDashboardView' });
+      }
+    }
+  },
+  {
+    path: '/agent-dashboard',
     name: 'AgentDashboardView',
-    component: () => import('@/views/dashboard/AgentDashboardView.vue')
+    component: () => import('@/views/dashboard/AgentDashboardView.vue'),
+    beforeEnter: (to, from, next) => {
+      const roleStore = useRoleStore();
+      if (roleStore.currentRole === 'agent') {
+        next();
+      } else {
+        next({ name: 'Dashboard' });
+      }
+    }
   },
 
   // Manage Listings routes
