@@ -27,7 +27,7 @@
         <h1 class="page-title">Currently editing: Legal documentation for {{ getClientName() }}</h1>
       </div>
       <div class="breadcrumb">
-        <router-link to="/profile/documents" class="breadcrumb-link">Documents</router-link>
+        <router-link to="/receipts-docs/view-docs" class="breadcrumb-link">Documents</router-link>
         <span class="breadcrumb-separator">/</span>
         <span class="breadcrumb-current">Legal documentation</span>
       </div>
@@ -90,17 +90,8 @@
           </div>
 
           <!-- File Content Display Section -->
-          <div v-if="allFiles.length > 0" class="file-content-section">
-            <h3 class="section-title">Document Contents</h3>
-            <div v-for="(file, index) in allFiles" :key="index" class="file-content">
-              <h4>{{ file.name }}</h4>
-              <div v-if="isImage(file.type)" class="image-preview">
-                <img :src="file.content" :alt="file.name" class="full-image" />
-              </div>
-              <div v-else class="text-content">
-                <pre>{{ file.content || 'Loading content...' }}</pre>
-              </div>
-            </div>
+          <div v-if="allFiles.length > 0" class="file-summary-section">
+            <h3 class="section-title">{{ allFiles.length }} {{ allFiles.length === 1 ? 'file' : 'files' }} attached</h3>
           </div>
         </div>
 
@@ -126,6 +117,7 @@
                   class="form-control"
                   :class="{ 'error': formErrors[field.name] }"
                   rows="4"
+                  @input="checkForChanges"
                 ></textarea>
               </template>
               <template v-else-if="field.type === 'select'">
@@ -134,6 +126,7 @@
                   v-model="document[field.name]"
                   class="form-control"
                   :class="{ 'error': formErrors[field.name] }"
+                  @change="checkForChanges"
                 >
                   <option value="" disabled selected>Select {{ field.label.toLowerCase() }}</option>
                   <option v-for="option in field.options" :key="option" :value="option">
@@ -150,6 +143,7 @@
                     :placeholder="field.placeholder"
                     class="form-control"
                     :class="{ 'error': formErrors[field.name] }"
+                    @input="checkForChanges"
                   >
                 </div>
               </template>
@@ -181,7 +175,7 @@
               </button>
             </div>
           </div>
-          <button class="add-agent-button" @click="showAgentModal = true">
+          <button class="add-agent-button" @click="openAgentModal">
             <span class="plus-icon">+</span>
             Add agent
           </button>
@@ -196,28 +190,28 @@
     </div>
 
     <!-- Confirmation Modal -->
-    <div v-if="showConfirmModal" class="modal-overlay">
+    <div v-if="showConfirmModal" class="modal-overlay" @click.self="showConfirmModal = false">
       <div class="modal-container">
         <div class="modal-header">
-          <h3>Confirm Changes</h3>
+          <h3>Unsaved Changes</h3>
           <button @click="showConfirmModal = false" class="modal-close">×</button>
         </div>
         <div class="modal-body">
-          <p>Do you wish to make changes to this document?</p>
+          <p>You have unsaved changes. What would you like to do?</p>
         </div>
         <div class="modal-footer">
-          <button class="btn-secondary" @click="showConfirmModal = false">No</button>
-          <button class="btn-primary" @click="confirmSave">Yes</button>
+          <button class="btn-secondary" @click="handleBack">Discard Changes</button>
+          <button class="btn-primary" @click="confirmSave">Save Changes</button>
         </div>
       </div>
     </div>
 
     <!-- Agent Modal -->
-    <div v-if="showAgentModal" class="modal-overlay">
+    <div v-if="showAgentModal" class="modal-overlay" @click.self="closeAgentModal(false)">
       <div class="modal-container">
         <div class="modal-header">
-          <h3>Select Agent</h3>
-          <button @click="showAgentModal = false" class="modal-close">×</button>
+          <h3>Select Agents</h3>
+          <button @click="closeAgentModal(false)" class="modal-close">×</button>
         </div>
         <div class="modal-body">
           <div class="search-box">
@@ -233,8 +227,8 @@
               v-for="agent in filteredAgents"
               :key="agent.id"
               class="agent-item"
-              :class="{ 'selected': document.associatedAgents?.some(a => a.id === agent.id) }"
-              @click="handleAgentSelect(agent)"
+              :class="{ 'selected': isAgentSelected(agent) }"
+              @click="selectAgent(agent)"
             >
               <img :src="agent.avatar" :alt="agent.name" class="agent-avatar">
               <div class="agent-details">
@@ -243,6 +237,9 @@
               </div>
             </div>
           </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-primary" @click="closeAgentModal(true)">Done</button>
         </div>
       </div>
     </div>
@@ -262,6 +259,7 @@ const showConfirmModal = ref(false);
 const fileInput = ref(null);
 const uploadedFiles = ref([]); // New uploads during this session
 const existingFiles = ref([]); // Files loaded from existing document
+const hasChanges = ref(false); // Track if changes have been made
 
 // Combined files for display
 const allFiles = computed(() => [...existingFiles.value, ...uploadedFiles.value]);
@@ -289,8 +287,14 @@ const document = ref({
   propertyDescription: ''
 });
 
+// Original document state for comparison
+const originalDocument = ref(null);
+
 const showAgentModal = ref(false);
 const agentSearchQuery = ref('');
+
+// Temporary agent selection state
+const tempSelectedAgents = ref([]);
 
 const allAgents = ref([
   { id: 1, name: 'John Doe', email: 'john@example.com', avatar: '/avatars/john.jpg', experience: '5 years' },
@@ -306,19 +310,101 @@ const filteredAgents = computed(() => {
   );
 });
 
-const handleAgentSelect = (agent) => {
+// Check if there are any changes compared to original
+const checkForChanges = () => {
+  if (!originalDocument.value) return;
+
+  // Compare document properties
+  if (JSON.stringify(document.value) !== JSON.stringify(originalDocument.value)) {
+    hasChanges.value = true;
+    return;
+  }
+
+  // Compare files
+  if (allFiles.value.length !== originalDocument.value.files?.length) {
+    hasChanges.value = true;
+    return;
+  }
+
+  hasChanges.value = false;
+};
+
+// Open agent modal and initialize temporary selections
+const openAgentModal = () => {
+  // Initialize temp selection with current selection
+  tempSelectedAgents.value = document.value.associatedAgents ?
+    JSON.parse(JSON.stringify(document.value.associatedAgents)) : [];
+  showAgentModal.value = true;
+};
+
+// Close agent modal with option to save or discard changes
+const closeAgentModal = (save = false) => {
+  if (save) {
+    // Only apply changes and notify if there are actual changes
   if (!document.value.associatedAgents) {
     document.value.associatedAgents = [];
   }
-  if (!document.value.associatedAgents.some(a => a.id === agent.id)) {
-    document.value.associatedAgents.push(agent);
+
+    const originalIds = document.value.associatedAgents.map(a => a.id).sort();
+    const newIds = tempSelectedAgents.value.map(a => a.id).sort();
+
+    if (JSON.stringify(originalIds) !== JSON.stringify(newIds)) {
+      // Find added and removed agents
+      const addedAgents = tempSelectedAgents.value.filter(
+        a => !document.value.associatedAgents.some(orig => orig.id === a.id)
+      );
+
+      const removedAgents = document.value.associatedAgents.filter(
+        a => !tempSelectedAgents.value.some(temp => temp.id === a.id)
+      );
+
+      // Update associated agents
+      document.value.associatedAgents = JSON.parse(JSON.stringify(tempSelectedAgents.value));
+
+      // Notify about changes
+      addedAgents.forEach(agent => {
+        addNotification(`Agent "${agent.name}" added`, 'success');
+      });
+
+      removedAgents.forEach(agent => {
+        addNotification(`Agent "${agent.name}" removed`, 'success');
+      });
+
+      // Check for changes in the document
+      checkForChanges();
+    }
   }
+
   showAgentModal.value = false;
-  agentSearchQuery.value = '';
+  tempSelectedAgents.value = []; // Clear temp selection
 };
 
+// Check if an agent is selected in the temporary selection
+const isAgentSelected = (agent) => {
+  return tempSelectedAgents.value.some(a => a.id === agent.id);
+};
+
+// Toggle agent selection in the temporary selection
+const selectAgent = (agent) => {
+  if (!isAgentSelected(agent)) {
+    tempSelectedAgents.value.push(agent);
+  } else {
+    const index = tempSelectedAgents.value.findIndex(a => a.id === agent.id);
+    if (index !== -1) {
+      tempSelectedAgents.value.splice(index, 1);
+    }
+  }
+};
+
+// Remove agent directly from document
 const removeAgent = (agentId) => {
+  const agentToRemove = document.value.associatedAgents.find(a => a.id === agentId);
+  if (agentToRemove) {
+    const agentName = agentToRemove.name;
   document.value.associatedAgents = document.value.associatedAgents.filter(a => a.id !== agentId);
+    addNotification(`Agent "${agentName}" removed`, 'success');
+    checkForChanges();
+  }
 };
 
 const getClientName = () => {
@@ -367,18 +453,25 @@ const handleFile = async (file) => {
     }
 
     uploadedFiles.value.push(fileObject);
+    checkForChanges();
+    addNotification(`File "${file.name}" added successfully`, 'success');
   } catch (error) {
     addNotification(`Error reading file ${file.name}: ${error.message}`, 'error');
   }
 };
 
 const removeFile = (index) => {
+  let fileName = '';
   if (index < existingFiles.value.length) {
+    fileName = existingFiles.value[index].name;
     existingFiles.value.splice(index, 1);
     document.value.files.splice(index, 1);
   } else {
+    fileName = uploadedFiles.value[index - existingFiles.value.length].name;
     uploadedFiles.value.splice(index - existingFiles.value.length, 1);
   }
+  checkForChanges();
+  addNotification(`File "${fileName}" removed`, 'success');
 };
 
 const isDocument = (type) => {
@@ -508,24 +601,26 @@ const documentFields = computed(() => {
 });
 
 onMounted(async () => {
-  addNotification('Loading document...', 'info');
-
+  // Silent loading, no notification
   if (documentId) {
     try {
-      const existingDoc = documentStore.getDocument(documentId);
+      const existingDoc = await documentStore.getDocument(documentId);
       if (existingDoc) {
-        document.value = { ...existingDoc };
-        // Load existing files separately
+        document.value = JSON.parse(JSON.stringify(existingDoc));
+        originalDocument.value = JSON.parse(JSON.stringify(existingDoc));
         existingFiles.value = existingDoc.files ? [...existingDoc.files] : [];
-        addNotification('Document loaded successfully', 'success');
+        // Don't show success notification on initial load
       } else {
         addNotification('Document not found', 'error');
-        router.push('/profile/documents');
+        router.push('/receipts-docs/view-docs');
       }
     } catch (error) {
       console.error('Error loading document:', error);
       addNotification('Error loading document: ' + error.message, 'error');
     }
+  } else {
+    // For new documents, initialize the original document
+    originalDocument.value = JSON.parse(JSON.stringify(document.value));
   }
 });
 
@@ -542,7 +637,11 @@ const validateForm = () => {
 };
 
 const handleBack = () => {
-  router.push('/profile/documents');
+  if (hasChanges.value) {
+    showConfirmModal.value = true;
+  } else {
+    router.push('/receipts-docs/view-docs');
+  }
 };
 
 const handleSave = () => {
@@ -550,11 +649,18 @@ const handleSave = () => {
     addNotification('Please fill in all required fields', 'error');
     return;
   }
+
+  if (hasChanges.value) {
   showConfirmModal.value = true;
+  } else {
+    // If no changes, just go back without confirmation
+    router.push('/receipts-docs/view-docs');
+  }
 };
 
 const confirmSave = async () => {
   try {
+    addNotification('Saving document...', 'info');
     const documentToSave = {
       ...document.value,
       files: [...existingFiles.value, ...uploadedFiles.value]
@@ -572,7 +678,7 @@ const confirmSave = async () => {
       }
     }
     addNotification('Document saved successfully', 'success');
-    router.push('/profile/documents');
+    setTimeout(() => router.push('/receipts-docs/view-docs'), 1000);
   } catch (error) {
     console.error('Error saving document:', error);
     addNotification('Error saving document: ' + error.message, 'error');
@@ -1095,6 +1201,14 @@ textarea.form-control {
 }
 
 .file-content-section {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-top: 24px;
+}
+
+.file-summary-section {
   background: white;
   border-radius: 8px;
   padding: 24px;
