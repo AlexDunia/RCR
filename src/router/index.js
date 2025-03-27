@@ -368,6 +368,14 @@ const routes = [
       title: 'Property Details',
       hideSidebar: false // Explicitly set sidebar to remain visible
     }
+  },
+  {
+    path: '/properties',
+    name: 'Properties',
+    component: () => import('@/views/listings/PropertiesView.vue'),
+    meta: {
+      title: 'All Properties'
+    }
   }
 ];
 

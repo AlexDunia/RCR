@@ -44,7 +44,7 @@ const isSuccessPlanPage = computed(() => isRoutePath('/marketing-tools/success-p
 const isChecklistPage = computed(() => isRoutePath('/marketing-tools/checklist'));
 const isDoneForYouPage = computed(() => isRoutePath('/marketing-tools/done-for-you'));
 const isSocialPlatformsPage = computed(() => isRoutePath('/marketing-tools/social-platforms'));
-const isEducationSessionPage = computed(() => 
+const isEducationSessionPage = computed(() =>
   isRoutePath(['/education-training/session', '/education-training/module']));
 const isEducationTestPage = computed(() => isRoutePath('/education-training/test'));
 </script>

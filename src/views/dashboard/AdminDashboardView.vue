@@ -41,36 +41,6 @@ onMounted(() => {
 
 <template>
   <div class="admin-dashboard">
-    <div class="dashboard-header">
-      <div class="title-section">
-        <h1>Dashboard</h1>
-        <p class="subtitle">Real City admin dashboard</p>
-      </div>
-      <div class="header-actions">
-        <button class="notification-btn">
-          <span class="notification-dot"></span>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M18 8A6 6 0 1 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M13.73 21a2 2 0 0 1-3.46 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-        <button class="mail-btn">
-          <span class="mail-dot"></span>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="m22 6-10 7L2 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-        <div class="user-profile">
-          <span class="profile-initial">PA</span>
-          <span class="profile-name">Precious Admin</span>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-      </div>
-    </div>
-
     <div class="welcome-card">
       <h2>Hi Admin, Welcome.</h2>
       <p>Here, you get over view on how your app is doing, and what clients and agents are up to.</p>
@@ -117,8 +87,8 @@ onMounted(() => {
 
 <style scoped>
 .admin-dashboard {
-  padding: 20px 40px;
-  background: #F4F4F4;
+  padding: 32px 40px;
+  background: #F8FAFC;
   min-height: 100vh;
 }
 
@@ -192,71 +162,118 @@ onMounted(() => {
 }
 
 .welcome-card {
-  background: #E8F5E9;
-  border-radius: 12px;
-  padding: 24px;
-  margin-bottom: 30px;
+  background: linear-gradient(to right, #E8F5E9, #E3F2FD);
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 36px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+
+.welcome-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .welcome-card h2 {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 600;
-  color: #333;
-  margin: 0 0 8px 0;
+  color: #1A237E;
+  margin: 0 0 12px 0;
 }
 
 .welcome-card p {
-  font-size: 14px;
-  color: #666;
+  font-size: 15px;
+  color: #546E7A;
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-  margin-bottom: 20px;
+  gap: 24px;
+  margin-bottom: 24px;
 }
 
 .secondary-stats {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
+  gap: 24px;
 }
 
 .stat-group {
   background: white;
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 16px;
+  padding: 24px;
   position: relative;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  animation: fadeIn 0.5s ease forwards;
+  cursor: pointer;
+}
+
+.stat-group:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 64, 128, 0.1);
 }
 
 .stat-label {
-  font-size: 12px;
-  font-weight: 500;
-  color: #666;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748B;
   text-transform: uppercase;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
 }
 
 .stat-value {
-  font-size: 24px;
-  font-weight: 600;
-  color: #333;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1E293B;
+  transition: color 0.2s ease;
+}
+
+.stat-group:hover .stat-value {
+  color: #004080;
 }
 
 .stat-link {
   position: absolute;
-  bottom: 20px;
-  right: 20px;
+  bottom: 24px;
+  right: 24px;
   color: #004080;
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  background: rgba(0, 64, 128, 0.05);
 }
 
 .stat-link:hover {
-  text-decoration: underline;
+  background: rgba(0, 64, 128, 0.1);
+  transform: translateY(-1px);
 }
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stats-grid .stat-group:nth-child(1) { animation-delay: 0.1s; }
+.stats-grid .stat-group:nth-child(2) { animation-delay: 0.2s; }
+.stats-grid .stat-group:nth-child(3) { animation-delay: 0.3s; }
+.stats-grid .stat-group:nth-child(4) { animation-delay: 0.4s; }
+.secondary-stats .stat-group:nth-child(1) { animation-delay: 0.5s; }
+.secondary-stats .stat-group:nth-child(2) { animation-delay: 0.6s; }
 </style>
