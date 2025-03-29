@@ -385,6 +385,15 @@ const routes = [
     meta: {
       title: 'Clients'
     }
+  },
+  // Client Profile route
+  {
+    path: '/clients/:id',
+    name: 'ClientProfile',
+    component: () => import('@/views/admin/ClientProfileView.vue'),
+    meta: {
+      title: 'Client Profile'
+    }
   }
 ];
 

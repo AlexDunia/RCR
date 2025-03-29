@@ -38,39 +38,58 @@
       </div>
     </div>
 
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-value">{{ clientStore.clients.length }}</div>
+        <div class="stat-label">Total Clients</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ activeClientsCount }}</div>
+        <div class="stat-label">Active Clients</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ clientsWithAgentsCount }}</div>
+        <div class="stat-label">With Assigned Agents</div>
+      </div>
+    </div>
+
     <div class="client-results">
-      <div class="client-card">
+      <div v-if="filteredClients.length === 0" class="no-results">
+        <p>No clients found matching your search criteria.</p>
+      </div>
+
+      <div v-for="client in filteredClients" :key="client.id" class="client-card">
         <div class="client-info">
-          <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Client avatar" class="client-avatar" />
+          <img :src="client.profilePicture || 'https://randomuser.me/api/portraits/men/32.jpg'" alt="Client avatar" class="client-avatar" />
           <div class="client-details">
-            <h3 class="client-name">Alex Dunia</h3>
+            <h3 class="client-name">{{ client.name }}</h3>
             <div class="client-meta">
               <div class="location">
                 <svg class="meta-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                   <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-                <span>Columbia, USA</span>
+                <span>{{ client.location || 'Columbia, USA' }}</span>
               </div>
               <div class="specialty">
                 <svg class="meta-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M12 15c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                   <path d="M8.21 13.89L7 23l5-3 5 3-1.21-9.12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-                <span>Luxury Real Estate</span>
+                <span>{{ client.specialty || (client.interests && client.interests.length ? client.interests[0] : 'Luxury Real Estate') }}</span>
               </div>
             </div>
           </div>
         </div>
         <div class="client-actions">
-          <button class="btn view-profile">
+          <button class="btn view-profile" @click="viewClientDetails(client.id)">
             <svg class="btn-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
               <circle cx="12" cy="7" r="4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             View profile
           </button>
-          <button class="btn deactivate">
+          <button class="btn deactivate" @click="toggleClientStatus(client.id)">
             <svg class="btn-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M18 6L6 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
               <path d="M6 6l12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -80,24 +99,152 @@
         </div>
       </div>
 
-      <div class="client-card empty-card">
-        <!-- Empty card to match the reference image -->
+      <div v-if="isAddingClient" class="client-card add-client-form">
+        <form @submit.prevent="saveNewClient">
+          <div class="form-group">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" v-model="newClient.name" required>
+          </div>
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" v-model="newClient.email" required>
+          </div>
+          <div class="form-group">
+            <label for="bio">Bio</label>
+            <textarea id="bio" v-model="newClient.bio" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="profilePicture">Profile Picture URL</label>
+            <input type="text" id="profilePicture" v-model="newClient.profilePicture">
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn cancel" @click="cancelAddClient">Cancel</button>
+            <button type="submit" class="btn save">Save Client</button>
+          </div>
+        </form>
       </div>
+
+      <button v-else class="add-client-btn" @click="isAddingClient = true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Add New Client
+      </button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import { useClientStore } from '@/stores/clientStore';
+import { useRouter } from 'vue-router';
+
+// Stores
+const clientStore = useClientStore();
+const router = useRouter();
 
 // State
 const searchQuery = ref('');
+const isAddingClient = ref(false);
+const newClient = ref({
+  name: '',
+  email: '',
+  bio: '',
+  profilePicture: '',
+  status: 'active'
+});
+
+// Computed properties
+const filteredClients = computed(() => {
+  if (!searchQuery.value) {
+    return clientStore.clients;
+  }
+
+  const query = searchQuery.value.toLowerCase();
+  return clientStore.clients.filter(client =>
+    client.name.toLowerCase().includes(query) ||
+    client.email.toLowerCase().includes(query) ||
+    (client.bio && client.bio.toLowerCase().includes(query))
+  );
+});
+
+const activeClientsCount = computed(() => {
+  return clientStore.clients.filter(client => client.status !== 'inactive').length;
+});
+
+const clientsWithAgentsCount = computed(() => {
+  let count = 0;
+  clientStore.clients.forEach(client => {
+    const interactions = clientStore.clientInteractions[client.id];
+    if (interactions && interactions.connectedAgents && interactions.connectedAgents.length > 0) {
+      count++;
+    }
+  });
+  return count;
+});
 
 // Methods
-const searchClients = () => {
-  // In a real app, this would call an API to search clients
+function searchClients() {
   console.log('Searching for:', searchQuery.value);
-};
+  // The filtering is handled by the computed property
+}
+
+function viewClientDetails(clientId) {
+  console.log('Viewing client details for ID:', clientId);
+
+  // Navigate to the client profile page
+  router.push(`/clients/${clientId}`);
+}
+
+function toggleClientStatus(clientId) {
+  const client = clientStore.getClientById(clientId);
+  if (client) {
+    const newStatus = client.status === 'inactive' ? 'active' : 'inactive';
+    clientStore.updateClient(clientId, { status: newStatus });
+  }
+}
+
+function saveNewClient() {
+  clientStore.addClient(newClient.value);
+
+  // Reset form
+  newClient.value = {
+    name: '',
+    email: '',
+    bio: '',
+    profilePicture: '',
+    status: 'active'
+  };
+
+  isAddingClient.value = false;
+}
+
+function cancelAddClient() {
+  isAddingClient.value = false;
+
+  // Reset form
+  newClient.value = {
+    name: '',
+    email: '',
+    bio: '',
+    profilePicture: '',
+    status: 'active'
+  };
+}
+
+// Lifecycle hooks
+onMounted(() => {
+  console.log('ClientsView mounted');
+  console.log('Clients from store:', clientStore.clients);
+  console.log('Client interactions:', clientStore.clientInteractions);
+
+  // Add status property to clients if they don't have it
+  clientStore.clients.forEach(client => {
+    if (!Object.prototype.hasOwnProperty.call(client, 'status')) {
+      clientStore.updateClient(client.id, { status: 'active' });
+    }
+  });
+});
 </script>
 
 <style scoped>
@@ -224,6 +371,33 @@ const searchClients = () => {
   color: #6b7280;
 }
 
+.stats-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.stat-card {
+  flex: 1;
+  background-color: white;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a4189;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+
 .client-results {
   display: flex;
   flex-direction: column;
@@ -233,29 +407,33 @@ const searchClients = () => {
 .client-card {
   background-color: white;
   border-radius: 0.5rem;
-  padding: 1rem 1.25rem;
+  padding: 1.25rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
 }
 
-.empty-card {
-  height: 5rem;
-  background-color: white;
+.no-results {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
 }
 
 .client-info {
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex: 1;
 }
 
 .client-avatar {
-  width: 3.5rem;
-  height: 3.5rem;
+  width: 4rem;
+  height: 4rem;
   border-radius: 50%;
   object-fit: cover;
+  border: 2px solid #f3f4f6;
 }
 
 .client-details {
@@ -264,15 +442,15 @@ const searchClients = () => {
 }
 
 .client-name {
-  font-size: 1rem;
+  font-size: 1.125rem;
   font-weight: 600;
-  margin: 0 0 0.375rem;
+  margin: 0 0 0.5rem;
   color: #111827;
 }
 
 .client-meta {
   display: flex;
-  gap: 1.25rem;
+  gap: 1.5rem;
   font-size: 0.875rem;
   color: #6b7280;
   font-weight: normal;
@@ -282,7 +460,7 @@ const searchClients = () => {
 .location, .specialty {
   display: flex;
   align-items: center;
-  gap: 0.375rem;
+  gap: 0.5rem;
 }
 
 .meta-icon {
@@ -294,21 +472,21 @@ const searchClients = () => {
 
 .client-actions {
   display: flex;
-  gap: 0.625rem;
+  gap: 0.75rem;
 }
 
 .btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.375rem;
-  padding: 0.4375rem 0.75rem;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
   border-radius: 0.375rem;
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  height: 2rem;
+  height: 2.25rem;
   white-space: nowrap;
 }
 
@@ -337,4 +515,72 @@ const searchClients = () => {
   align-items: center;
   justify-content: center;
 }
+
+.add-client-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  border: 2px dashed #d1d5db;
+  background-color: #f9fafb;
+  color: #6b7280;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.add-client-btn:hover {
+  border-color: #1a4189;
+  color: #1a4189;
+  background-color: #f3f4f6;
+}
+
+.add-client-form {
+  display: block;
+  padding: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.875rem;
+  color: #374151;
+  margin-bottom: 0.375rem;
+}
+
+.form-group input,
+.form-group textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.cancel {
+  background-color: white;
+  color: #6b7280;
+  border: 1px solid #d1d5db;
+}
+
+.save {
+  background-color: #1a4189;
+  color: white;
+  border: none;
+}
 </style>
+
+
