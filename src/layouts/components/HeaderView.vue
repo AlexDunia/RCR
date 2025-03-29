@@ -50,7 +50,7 @@ const isEducationTestPage = computed(() => isRoutePath('/education-training/test
 </script>
 
 <template>
-  <header class="header">
+  <header class="header" :class="{ 'below-modal': $root.modalOpen }">
     <!-- Show marketing header on post detail page -->
     <div v-if="isPostDetailPage" class="custom-header">
       <h1>Marketing Tools</h1>
@@ -215,9 +215,13 @@ const isEducationTestPage = computed(() => isRoutePath('/education-training/test
   position: sticky;
   top: 0;
   border:none;
-  z-index: 1000;
+  z-index: 100;
   box-shadow: 0px 2px 5px rgba(99, 98, 98, 0.1);
-  /* Ensure it stays on top */
+  /* Ensure it stays below modal overlays */
+}
+
+.header.below-modal {
+  z-index: 10;
 }
 
 h1 {

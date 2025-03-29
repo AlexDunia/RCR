@@ -17,6 +17,7 @@ const getActiveMenuFromPath = (path) => {
   if (normalizedPath === '/') return 'dashboard';
   if (normalizedPath.startsWith('/tasks')) return 'tasks';
   if (normalizedPath.startsWith('/completed-tasks')) return 'tasks';
+  if (normalizedPath.startsWith('/clients')) return 'clients';
   if (normalizedPath.startsWith('/manage-listings') ||
       normalizedPath.startsWith('/add-listing') ||
       normalizedPath.startsWith('/view-listings') ||
@@ -58,6 +59,17 @@ const menuItems = Object.freeze([
     icon: `
       <svg class="menu-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M3 9L12 2L21 9V20H14V14H10V20H3V9Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    `
+  },
+  {
+    name: 'Clients',
+    key: 'clients',
+    path: '/clients',
+    icon: `
+      <svg class="menu-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M20 21V19C20 16.7909 17.9853 15 15.5 15H8.5C6.01472 15 4 16.7909 4 19V21" stroke="currentColor" stroke-width="1.5"/>
       </svg>
     `
   },

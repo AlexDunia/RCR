@@ -376,6 +376,15 @@ const routes = [
     meta: {
       title: 'All Properties'
     }
+  },
+  // Clients route
+  {
+    path: '/clients',
+    name: 'Clients',
+    component: () => import('@/views/admin/ClientsView.vue'),
+    meta: {
+      title: 'Clients'
+    }
   }
 ];
 
