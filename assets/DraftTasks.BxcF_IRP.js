@@ -1,0 +1,1 @@
+import{c as s,g as a,b as t}from"./vendor.CzTvUCOe.js";import{T as o,a as e}from"./TaskNavigation.B0PO5afH.js";import{T as r}from"./TaskList.BmFRpu3G.js";import{_ as c}from"./index.D1ikSH8M.js";const _={class:"task-home"},m={__name:"DraftTasks",setup(p){return(i,n)=>(t(),s("div",_,[a(o),a(e),a(r)]))}},l=c(m,[["__scopeId","data-v-a1a972c2"]]);export{l as default};

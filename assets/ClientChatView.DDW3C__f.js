@@ -1,0 +1,1 @@
+import{k as o,c as r,g as t,b as c}from"./vendor.CzTvUCOe.js";import{u as n,C as i,a as l}from"./ChatWindow.zl_8Btll.js";import"./index.D1ikSH8M.js";const u={class:"client-view"},C={__name:"ClientChatView",setup(_){const s=n(),a=o(()=>s.users.filter(e=>e.role==="Agent"));return(e,m)=>(c(),r("div",u,[t(i,{users:a.value},null,8,["users"]),t(l)]))}};export{C as default};
