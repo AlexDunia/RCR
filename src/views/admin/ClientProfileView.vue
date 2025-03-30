@@ -104,7 +104,7 @@
         </div>
 
         <div v-if="filteredListings.length" class="property-list">
-          <div v-for="listing in filteredListings" :key="listing.id" class="property-item">
+          <div v-for="listing in filteredListings" :key="listing.id" class="property-item" @click="viewPropertyDetails(listing.id)">
             <div class="property-image-container">
               <img
                 :src="getPropertyImage(listing.id)"
@@ -113,7 +113,7 @@
               />
             </div>
             <div class="property-details">
-              <h3 class="property-title">St. Louis Residence, Columbia USA</h3>
+              <h3 class="property-title">{{ getPropertyTitle(listing.id) }}</h3>
             </div>
             <div class="view-count">
               <div class="view-icon">
@@ -252,6 +252,14 @@ function getViewCount(listingId) {
   return 20;
 }
 
+// Navigate to property details page
+function viewPropertyDetails(listingId) {
+  router.push({
+    name: 'PropertyDetail',
+    params: { propertyId: listingId }
+  });
+}
+
 // Filter listings based on active filter
 function filterListings(filter) {
   activeFilter.value = filter;
@@ -289,6 +297,12 @@ watch(() => route.query.tab, (newTab) => {
     activeTab.value = newTab;
   }
 });
+
+// Get property title based on ID
+function getPropertyTitle(listingId) {
+  const listing = listingStore.getListingById(listingId);
+  return listing ? listing.title : 'St. Louis Residence, Columbia USA';
+}
 </script>
 
 <style scoped>
@@ -514,6 +528,14 @@ watch(() => route.query.tab, (newTab) => {
   background-color: white;
   border: 1px solid #e5e7eb;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.property-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-color: #d1d5db;
 }
 
 .property-image-container {

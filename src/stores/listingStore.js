@@ -6,6 +6,7 @@ export const useListingStore = defineStore('listingStore', () => {
   const listings = ref([
     {
       id: 101,
+      agentId: 5, // Sarah Johnson
       title: 'Modern Downtown Apartment',
       address: '123 Main St, Downtown',
       price: 450000,
@@ -23,6 +24,7 @@ export const useListingStore = defineStore('listingStore', () => {
     },
     {
       id: 102,
+      agentId: 8, // Michael Chen
       title: 'Suburban Family Home',
       address: '456 Oak Street, Pleasantville',
       price: 650000,
@@ -40,6 +42,7 @@ export const useListingStore = defineStore('listingStore', () => {
     },
     {
       id: 103,
+      agentId: 5, // Sarah Johnson
       title: 'Luxury Waterfront Condo',
       address: '789 Harbor View, Bayfront',
       price: 1200000,
@@ -57,6 +60,7 @@ export const useListingStore = defineStore('listingStore', () => {
     },
     {
       id: 105,
+      agentId: 8, // Michael Chen
       title: 'Mountain Retreat Cabin',
       address: '241 Pine Ridge, Mountain View',
       price: 520000,
@@ -87,10 +91,16 @@ export const useListingStore = defineStore('listingStore', () => {
     return listings.value.slice(0, 3) // Return first 3 listings as featured
   }
 
+  // Get listings by agent ID
+  const getListingsByAgentId = (agentId) => {
+    return listings.value.filter(listing => listing.agentId === agentId)
+  }
+
   // Actions
   function addListing(listing) {
     const newListing = {
       id: generateListingId(),
+      agentId: listing.agentId || null, // Ensure agent ID is included
       ...listing
     }
 
@@ -136,6 +146,7 @@ export const useListingStore = defineStore('listingStore', () => {
     getListingById,
     getAllListings,
     getFeaturedListings,
+    getListingsByAgentId,
 
     // Actions
     addListing,

@@ -394,6 +394,24 @@ const routes = [
     meta: {
       title: 'Client Profile'
     }
+  },
+  // Admin Property Detail route
+  {
+    path: '/admin/property/:propertyId',
+    name: 'PropertyDetail',
+    component: () => import('@/views/admin/PropertyDetailView.vue'),
+    meta: {
+      title: 'Property Details'
+    }
+  },
+  // Agent Profile route
+  {
+    path: '/agent/:id',
+    name: 'AgentProfileDetail',
+    component: () => import('@/views/admin/AgentProfileView.vue'),
+    meta: {
+      title: 'Agent Profile'
+    }
   }
 ];
 
