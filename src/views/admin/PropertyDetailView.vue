@@ -5,7 +5,7 @@
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M19 12H5M12 19l-7-7 7-7"/>
         </svg>
-        <span>Manage Listings</span>
+        <span>Manage  my Listings</span>
       </button>
       <div class="header-subtitle">Real city admin</div>
 
@@ -42,14 +42,14 @@
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
                 <circle cx="12" cy="10" r="3"/>
               </svg>
-              <span>Columbia, USA</span>
+              <span>{{ formattedAgentLocation }}</span>
             </div>
             <div class="specialty-tag">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
                 <path d="M8 12h8M12 8v8"/>
               </svg>
-              <span>{{ agent?.specialties && agent.specialties.length > 0 ? agent.specialties[0] : 'Luxury Real Estate' }}</span>
+              <span>{{ formattedAgentSpecialty }}</span>
             </div>
           </div>
         </div>
@@ -136,13 +136,40 @@ const agent = computed(() => {
   return agentStore.getAgentById(property.value.agentId);
 });
 
+// Format agent location tag to show "Location, Specialty"
+const formattedAgentLocation = computed(() => {
+  if (!agent.value) return 'Unknown Location';
+  const location = agent.value.location || 'Unknown Location';
+  return `${location}`;
+});
+
+// Format agent specialty tag
+const formattedAgentSpecialty = computed(() => {
+  if (!agent.value) return 'Luxury Homes';
+  return agent.value.specialties && agent.value.specialties.length > 0
+    ? agent.value.specialties[0]
+    : 'Luxury Homes';
+});
+
 // Image to display - if property has photos use the first one, otherwise use default
 const propertyImage = computed(() => {
-  if (property.value?.photos && property.value.photos.length > 0) {
-    return property.value.photos[0];
+  // Check property value exists
+  if (!property.value) {
+    console.warn('Property not found');
+    return 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548284/Rectangle_227_ncwnmz.png';
   }
 
-  // Map specific listing IDs to the provided Cloudinary images
+  // First check if we have real photos in the property data
+  if (property.value.photos && property.value.photos.length > 0) {
+    // Check if the photo URL is a placeholder or example URL
+    const firstPhoto = property.value.photos[0];
+    if (!firstPhoto.includes('example') && !firstPhoto.includes('placeholder')) {
+      console.log('Using real photo from property data:', firstPhoto);
+      return firstPhoto;
+    }
+  }
+
+  // If no valid photos or using example URLs, use our Cloudinary image map
   const imageMap = {
     101: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548284/Rectangle_227_ncwnmz.png',
     102: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1743087291/Designer_8_1_fjvyi0.png',
@@ -150,6 +177,7 @@ const propertyImage = computed(() => {
     105: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1718259997/house1_eogyom.jpg'
   };
 
+  console.log('Using imageMap for property ID:', propertyId.value);
   return imageMap[propertyId.value] || 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548284/Rectangle_227_ncwnmz.png';
 });
 
@@ -191,6 +219,7 @@ onMounted(() => {
   font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   background-color: #f9fafb;
   color: #374151;
+  padding: 0 1.5rem;
 }
 
 .header {
@@ -198,6 +227,8 @@ onMounted(() => {
   align-items: center;
   padding: 1.5rem 0;
   position: relative;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .back-button {
@@ -224,6 +255,7 @@ onMounted(() => {
   align-items: center;
   gap: 1rem;
   margin-left: auto;
+  flex-wrap: wrap;
 }
 
 .icon-button {
@@ -272,12 +304,16 @@ onMounted(() => {
   border-radius: 0.5rem;
   margin-bottom: 1.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .agent-info {
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex: 1;
+  min-width: 280px;
 }
 
 .agent-avatar {
@@ -311,6 +347,7 @@ onMounted(() => {
 .agent-actions {
   display: flex;
   gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .action-button {
@@ -340,10 +377,13 @@ onMounted(() => {
 .property-content {
   display: flex;
   gap: 2rem;
+  flex-wrap: wrap;
 }
 
 .property-image-container {
   flex: 1;
+  min-width: 300px;
+  max-width: 500px;
   border-radius: 0.5rem;
   overflow: hidden;
 }
@@ -359,6 +399,7 @@ onMounted(() => {
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-width: 300px;
 }
 
 .property-title {
@@ -382,7 +423,7 @@ onMounted(() => {
 
 .property-specs {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 1rem;
   margin-bottom: 2rem;
 }

@@ -168,12 +168,34 @@ const routes = [
   {
     path: '/receipts-docs/document/:id',
     name: 'DocumentDetail',
-    component: () => import('@/views/documents/DocumentDetail.vue')
+    component: () => import('@/views/documents/DocumentDetail.vue'),
+    meta: {
+      title: 'Document Details'
+    }
   },
   {
     path: '/receipts-docs/document/:id/edit',
     name: 'DocumentEdit',
-    component: () => import('@/views/documents/DocumentEdit.vue')
+    component: () => import('@/views/documents/DocumentEdit.vue'),
+    meta: {
+      title: 'Edit Document'
+    }
+  },
+  {
+    path: '/receipts-docs/document/new',
+    name: 'DocumentCreate',
+    component: () => import('@/views/documents/DocumentEdit.vue'),
+    meta: {
+      title: 'Create Document'
+    }
+  },
+  {
+    path: '/receipts-docs/view-docs',
+    name: 'ViewDocs',
+    component: () => import('@/views/documents/ViewDocs.vue'),
+    meta: {
+      title: 'All Documents'
+    }
   },
 
   // Marketing routes

@@ -137,10 +137,34 @@
       <div v-if="activeTab === 'documents'" class="profile-section">
         <div class="section-header">
           <h2 class="section-title">{{ client?.name || 'Alex Dunia' }}'s Documents</h2>
-          <button class="edit-button">Upload Document</button>
+          <button class="edit-button" @click="uploadDocument">Upload Document</button>
         </div>
-        <div class="placeholder-content">
-          <p>Client's documents and files will be displayed here.</p>
+
+        <div v-if="isLoading" class="loading-state">
+          <p>Loading documents...</p>
+        </div>
+
+        <div v-else-if="clientDocuments.length > 0" class="documents-list">
+          <div class="table-header">
+            <div class="header-cell title">Title</div>
+          </div>
+          <div class="document-list-container">
+            <div v-for="doc in clientDocuments" :key="doc.id" class="document-card" @click="viewDocument(doc.id)">
+              <div class="doc-header">
+                <div class="doc-badge" :class="doc.type">{{ doc.type }}</div>
+                <div v-if="doc.agents && doc.agents.length > 0" class="doc-agent">
+                  {{ doc.agents[0].name }}
+                </div>
+              </div>
+              <div class="doc-name" :title="doc.name">{{ truncateText(doc.name, 25) }}</div>
+              <div class="doc-date">{{ formatDate(doc.createdAt) }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div v-else class="empty-state">
+          <p>No documents found for this client.</p>
+          <button class="add-document-btn" @click="uploadDocument">Upload New Document</button>
         </div>
       </div>
 
@@ -185,11 +209,13 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useClientStore } from '@/stores/clientStore';
 import { useListingStore } from '@/stores/listingStore';
+import { useDocumentStore } from '@/stores/documents';
 
 const route = useRoute();
 const router = useRouter();
 const clientStore = useClientStore();
 const listingStore = useListingStore();
+const documentStore = useDocumentStore();
 
 // Client ID from route params
 const clientId = computed(() => parseInt(route.params.id));
@@ -202,6 +228,28 @@ const activeFilter = ref('mostViewed');
 
 // Client data
 const clientDetails = ref(null);
+
+// Loading state
+const isLoading = ref(true);
+
+// Client documents
+const clientDocuments = computed(() => {
+  return documentStore.getDocumentsByClientId(clientId.value);
+});
+
+// View document function
+function viewDocument(docId) {
+  console.log('Editing document:', docId);
+  // Navigate to document edit page instead of view page
+  router.push(`/receipts-docs/document/${docId}/edit`);
+}
+
+// Upload document function
+function uploadDocument() {
+  console.log('Uploading document for client:', clientId.value);
+  // In a real app, you might open a modal or navigate to an upload page
+  router.push(`/receipts-docs/document/new?clientId=${clientId.value}`);
+}
 
 // Get client basic info
 const client = computed(() => {
@@ -288,6 +336,11 @@ onMounted(() => {
     if (route.query.tab) {
       activeTab.value = route.query.tab;
     }
+
+    // Set loading to false after a brief delay to simulate loading
+    setTimeout(() => {
+      isLoading.value = false;
+    }, 500);
   }
 });
 
@@ -302,6 +355,25 @@ watch(() => route.query.tab, (newTab) => {
 function getPropertyTitle(listingId) {
   const listing = listingStore.getListingById(listingId);
   return listing ? listing.title : 'St. Louis Residence, Columbia USA';
+}
+
+// Truncate text to specified character limit
+function truncateText(text, charLimit) {
+  if (!text) return '';
+
+  if (text.length <= charLimit) return text;
+
+  return text.substring(0, charLimit) + '...';
+}
+
+// Format date helper function
+function formatDate(dateString) {
+  if (!dateString) return '';
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
 }
 </script>
 
@@ -613,5 +685,140 @@ function getPropertyTitle(listingId) {
 
 .add-listing-btn:hover {
   background-color: #153471;
+}
+
+.loading-state {
+  padding: 2rem;
+  text-align: center;
+  color: #6b7280;
+}
+
+.empty-state {
+  padding: 2rem;
+  text-align: center;
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+  border: 1px dashed #e5e7eb;
+  color: #6b7280;
+  margin-top: 1rem;
+}
+
+.add-document-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: #1a4189;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.documents-list {
+  margin-top: 1rem;
+}
+
+.table-header {
+  background-color: #f9fafb;
+  padding: 0.75rem 1rem;
+  font-weight: 500;
+  color: #4b5563;
+  border-bottom: 1px solid #e5e7eb;
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+}
+
+.header-cell {
+  padding: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.document-list-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+  background-color: white;
+  border-radius: 0 0 0.5rem 0.5rem;
+  border: 1px solid #e5e7eb;
+  border-top: none;
+}
+
+.document-card {
+  padding: 1rem;
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.document-card:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.doc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 0.25rem;
+}
+
+.doc-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  font-weight: 500;
+  width: fit-content;
+}
+
+.doc-badge.buyer-rep {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.doc-badge.seller-rep {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.doc-badge.mls {
+  background-color: #e9d5ff;
+  color: #6b21a8;
+}
+
+.doc-agent {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  background-color: #f3f4f6;
+  border-radius: 0.375rem;
+  color: #4b5563;
+  font-weight: 500;
+}
+
+.doc-name {
+  font-weight: 500;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.doc-date {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
 }
 </style>

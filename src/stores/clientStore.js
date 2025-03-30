@@ -18,8 +18,9 @@ export const useClientStore = defineStore('clientStore', () => {
       profilePicture: 'https://randomuser.me/api/portraits/men/32.jpg',
       bio: 'Looking for luxury real estate properties.',
       status: 'active',
-      location: 'Columbia, USA',
-      specialty: 'Luxury Real Estate'
+      location: 'New York, USA',
+      specialty: 'Luxury Real Estate',
+      interests: ['Luxury Homes', 'Waterfront Properties']
     },
     {
       id: 2,
@@ -28,6 +29,8 @@ export const useClientStore = defineStore('clientStore', () => {
       profilePicture: 'https://randomuser.me/api/portraits/women/42.jpg',
       bio: 'Interested in investment properties in the downtown area.',
       status: 'active',
+      location: 'Columbia, USA',
+      specialty: 'Investment Properties',
       interests: ['Investment Properties', 'Downtown']
     },
     {
@@ -37,6 +40,8 @@ export const useClientStore = defineStore('clientStore', () => {
       profilePicture: 'https://randomuser.me/api/portraits/men/65.jpg',
       bio: 'Looking for luxury waterfront properties.',
       status: 'active',
+      location: 'Los Angeles, USA',
+      specialty: 'Luxury Homes',
       interests: ['Luxury Homes', 'Waterfront']
     },
     {
@@ -46,6 +51,8 @@ export const useClientStore = defineStore('clientStore', () => {
       profilePicture: 'https://randomuser.me/api/portraits/women/28.jpg',
       bio: 'First-time homebuyer looking for a condo.',
       status: 'active',
+      location: 'Miami, USA',
+      specialty: 'Condos',
       interests: ['Condos', 'First-Time Buyer']
     },
     {
@@ -55,6 +62,8 @@ export const useClientStore = defineStore('clientStore', () => {
       profilePicture: 'https://randomuser.me/api/portraits/men/55.jpg',
       bio: 'Relocating from out of state, looking for a quick move-in.',
       status: 'active',
+      location: 'Chicago, USA',
+      specialty: 'New Construction',
       interests: ['New Construction', 'Quick Move-in']
     },
     {
@@ -64,6 +73,8 @@ export const useClientStore = defineStore('clientStore', () => {
       profilePicture: 'https://randomuser.me/api/portraits/women/36.jpg',
       bio: 'Looking for a property with rental potential.',
       status: 'inactive',
+      location: 'San Francisco, USA',
+      specialty: 'Investment Properties',
       interests: ['Investment Properties', 'Rentals']
     }
   ])

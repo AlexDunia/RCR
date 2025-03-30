@@ -69,14 +69,14 @@
                   <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                   <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-                <span>{{ client.location || 'Columbia, USA' }}</span>
+                <span>{{ client.location || 'Not specified' }}</span>
               </div>
               <div class="specialty">
                 <svg class="meta-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M12 15c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                   <path d="M8.21 13.89L7 23l5-3 5 3-1.21-9.12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-                <span>{{ client.specialty || (client.interests && client.interests.length ? client.interests[0] : 'Luxury Real Estate') }}</span>
+                <span>{{ client.specialty || (client.interests && client.interests.length ? client.interests[0] : 'Not specified') }}</span>
               </div>
             </div>
           </div>
@@ -112,6 +112,14 @@
           <div class="form-group">
             <label for="bio">Bio</label>
             <textarea id="bio" v-model="newClient.bio" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="location">Location</label>
+            <input type="text" id="location" v-model="newClient.location" placeholder="City, Country">
+          </div>
+          <div class="form-group">
+            <label for="specialty">Specialty</label>
+            <input type="text" id="specialty" v-model="newClient.specialty" placeholder="E.g. Luxury Homes, Investment Properties">
           </div>
           <div class="form-group">
             <label for="profilePicture">Profile Picture URL</label>
@@ -151,6 +159,8 @@ const newClient = ref({
   email: '',
   bio: '',
   profilePicture: '',
+  location: '',
+  specialty: '',
   status: 'active'
 });
 
@@ -164,7 +174,11 @@ const filteredClients = computed(() => {
   return clientStore.clients.filter(client =>
     client.name.toLowerCase().includes(query) ||
     client.email.toLowerCase().includes(query) ||
-    (client.bio && client.bio.toLowerCase().includes(query))
+    (client.bio && client.bio.toLowerCase().includes(query)) ||
+    (client.location && client.location.toLowerCase().includes(query)) ||
+    (client.specialty && client.specialty.toLowerCase().includes(query)) ||
+    (client.interests &&
+      client.interests.some(interest => interest.toLowerCase().includes(query)))
   );
 });
 
@@ -213,6 +227,8 @@ function saveNewClient() {
     email: '',
     bio: '',
     profilePicture: '',
+    location: '',
+    specialty: '',
     status: 'active'
   };
 
@@ -228,6 +244,8 @@ function cancelAddClient() {
     email: '',
     bio: '',
     profilePicture: '',
+    location: '',
+    specialty: '',
     status: 'active'
   };
 }

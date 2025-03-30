@@ -290,6 +290,9 @@ const document = ref({
 // Original document state for comparison
 const originalDocument = ref(null);
 
+// Use ref for document type to help with reactivity
+const documentType = ref('buyer-rep');
+
 const showAgentModal = ref(false);
 const agentSearchQuery = ref('');
 
@@ -536,7 +539,7 @@ const removeNotification = (id) => {
 };
 
 const documentFields = computed(() => {
-  const type = document.value.type;
+  const type = documentType.value;
 
   const commonFields = [
     { name: 'title', label: 'Document Title', type: 'text', required: true },
@@ -605,11 +608,54 @@ onMounted(async () => {
   if (documentId) {
     try {
       const existingDoc = await documentStore.getDocument(documentId);
+      console.log('Fetched document:', existingDoc);
+
       if (existingDoc) {
-        document.value = JSON.parse(JSON.stringify(existingDoc));
-        originalDocument.value = JSON.parse(JSON.stringify(existingDoc));
+        // Set document type immediately to ensure proper field rendering
+        documentType.value = existingDoc.type || 'buyer-rep';
+        console.log('Document type set to:', documentType.value);
+
+        // Map document store fields to form fields
+        document.value = {
+          id: existingDoc.id,
+          type: documentType.value,
+          title: existingDoc.name || '',
+          description: existingDoc.description || '',
+          associatedAgents: existingDoc.agents || [],
+          files: existingDoc.files || [],
+          // Buyer Rep specific fields
+          buyerName: existingDoc.buyerName || '',
+          buyerEmail: existingDoc.buyerEmail || '',
+          phoneNumber: existingDoc.phoneNumber || '',
+          propertyType: existingDoc.propertyType || '',
+          budgetRange: existingDoc.budgetRange || '',
+          additionalNotes: existingDoc.additionalNotes || '',
+          // Seller Rep specific fields
+          sellerName: existingDoc.sellerName || '',
+          sellerEmail: existingDoc.sellerEmail || '',
+          propertyAddress: existingDoc.propertyAddress || '',
+          listingPrice: existingDoc.listingPrice || '',
+          // MLS specific fields
+          squareFootage: existingDoc.squareFootage || '',
+          bedrooms: existingDoc.bedrooms || '',
+          bathrooms: existingDoc.bathrooms || '',
+          propertyDescription: existingDoc.propertyDescription || '',
+          // Track client ID
+          clientId: existingDoc.clientId || null,
+          createdAt: existingDoc.createdAt || ''
+        };
+
+        // Force nextTick to ensure the documentFields computed property has updated
+        setTimeout(() => {
+          console.log('Mapped document form data:', document.value);
+          console.log('Document fields:', documentFields.value);
+        }, 0);
+
+        // Store original state for comparison
+        originalDocument.value = JSON.parse(JSON.stringify(document.value));
+
+        // Set existing files
         existingFiles.value = existingDoc.files ? [...existingDoc.files] : [];
-        // Don't show success notification on initial load
       } else {
         addNotification('Document not found', 'error');
         router.push('/receipts-docs/view-docs');
@@ -619,7 +665,9 @@ onMounted(async () => {
       addNotification('Error loading document: ' + error.message, 'error');
     }
   } else {
-    // For new documents, initialize the original document
+    // For new documents, initialize the document type from route query
+    documentType.value = route.query.type || 'buyer-rep';
+    // Initialize the original document
     originalDocument.value = JSON.parse(JSON.stringify(document.value));
   }
 });
@@ -661,22 +709,50 @@ const handleSave = () => {
 const confirmSave = async () => {
   try {
     addNotification('Saving document...', 'info');
+
+    // Map form fields back to document store fields
     const documentToSave = {
-      ...document.value,
-      files: [...existingFiles.value, ...uploadedFiles.value]
+      id: document.value.id,
+      name: document.value.title,
+      type: document.value.type,
+      description: document.value.description,
+      agents: document.value.associatedAgents,
+      files: [...existingFiles.value, ...uploadedFiles.value],
+      clientId: document.value.clientId,
+      createdAt: document.value.createdAt || new Date().toISOString().split('T')[0]
     };
 
-    if (documentId) {
-      await documentStore.updateDocument(documentToSave);
-    } else {
-      if (document.value.type === 'buyer-rep') {
-        await documentStore.saveBuyerRepDocument(documentToSave);
-      } else if (document.value.type === 'seller-rep') {
-        await documentStore.saveSellerRepDocument(documentToSave);
-      } else {
-        await documentStore.saveMLSDocument(documentToSave);
-      }
+    // Add type-specific fields
+    if (document.value.type === 'buyer-rep') {
+      documentToSave.buyerName = document.value.buyerName;
+      documentToSave.buyerEmail = document.value.buyerEmail;
+      documentToSave.phoneNumber = document.value.phoneNumber;
+      documentToSave.propertyType = document.value.propertyType;
+      documentToSave.budgetRange = document.value.budgetRange;
+      documentToSave.additionalNotes = document.value.additionalNotes;
+    } else if (document.value.type === 'seller-rep') {
+      documentToSave.sellerName = document.value.sellerName;
+      documentToSave.sellerEmail = document.value.sellerEmail;
+      documentToSave.phoneNumber = document.value.phoneNumber;
+      documentToSave.propertyType = document.value.propertyType;
+      documentToSave.propertyAddress = document.value.propertyAddress;
+      documentToSave.listingPrice = document.value.listingPrice;
+      documentToSave.additionalNotes = document.value.additionalNotes;
+    } else if (document.value.type === 'mls') {
+      documentToSave.propertyAddress = document.value.propertyAddress;
+      documentToSave.listingPrice = document.value.listingPrice;
+      documentToSave.bedrooms = document.value.bedrooms;
+      documentToSave.bathrooms = document.value.bathrooms;
+      documentToSave.squareFootage = document.value.squareFootage;
+      documentToSave.propertyDescription = document.value.propertyDescription;
     }
+
+    if (documentId) {
+      await documentStore.updateDocument(documentId, documentToSave);
+    } else {
+      await documentStore.addDocument(documentToSave);
+    }
+
     addNotification('Document saved successfully', 'success');
     setTimeout(() => router.push('/receipts-docs/view-docs'), 1000);
   } catch (error) {
