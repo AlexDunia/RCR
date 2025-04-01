@@ -18,15 +18,31 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDocumentStore } from '@/stores/documents'
 import DocumentForm from '@/features/documents/DocumentForm.vue'
 import Loader from '@/ui/Loader.vue'
+import { useRoleStore } from '@/stores/roleStore'
 
 const router = useRouter()
 const documentStore = useDocumentStore()
+const roleStore = useRoleStore()
 const isLoading = ref(true)
+
+// Add computed properties for role-based navigation
+const adminDocumentPath = computed(() => '/receipts-docs/view-docs')
+const agentDocumentPath = computed(() => '/profile/documents')
+const defaultDocumentPath = computed(() => '/')
+
+const getRoleBasedPath = computed(() => {
+  if (roleStore.currentRole === 'admin') {
+    return adminDocumentPath.value
+  } else if (roleStore.currentRole === 'agent') {
+    return agentDocumentPath.value
+  }
+  return defaultDocumentPath.value
+})
 
 // Initialize with loading state and turn it off after a delay
 setTimeout(() => {
@@ -121,7 +137,7 @@ const handleSubmit = async (formData) => {
       files: fileMetadata
     });
 
-    router.push('/receipts-docs/view-docs');
+    router.push(getRoleBasedPath.value);
   } catch (error) {
     console.error('Error saving buyer rep document:', error);
   }

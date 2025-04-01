@@ -18,14 +18,31 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import DocumentForm from '@/features/documents/DocumentForm.vue'
 import { useDocumentStore } from '@/stores/documents'
+import { useRoleStore } from '@/stores/roleStore'
 
 const router = useRouter()
 const documentStore = useDocumentStore()
+const roleStore = useRoleStore()
 const isLoading = ref(true)
+const isSubmitting = ref(false)
+
+// Add computed properties for role-based navigation
+const adminDocumentPath = computed(() => '/receipts-docs/view-docs')
+const agentDocumentPath = computed(() => '/profile/documents')
+const defaultDocumentPath = computed(() => '/')
+
+const getRoleBasedPath = computed(() => {
+  if (roleStore.currentRole === 'admin') {
+    return adminDocumentPath.value
+  } else if (roleStore.currentRole === 'agent') {
+    return agentDocumentPath.value
+  }
+  return defaultDocumentPath.value
+})
 
 // Initialize with loading state and turn it off after a delay
 setTimeout(() => {
@@ -101,37 +118,45 @@ const formFields = [
 ]
 
 const handleSubmit = async (formData) => {
-  try {
-    // Create clean file metadata objects for storage in localStorage
-    const fileMetadata = [];
+  if (validateForm()) {
+    try {
+      isSubmitting.value = true;
 
-    // Process files if any
-    if (formData.documents && formData.documents.length > 0) {
-      formData.documents.forEach(fileObj => {
-        // Create a clean file object with just the metadata
-        fileMetadata.push({
-          name: fileObj.name || 'Unnamed file',
-          type: fileObj.type || 'application/octet-stream',
-          size: fileObj.size || 0,
-          lastModified: fileObj.file?.lastModified || Date.now(),
-          preview: fileObj.preview || null
-        });
-      });
+      const documentData = {
+        type: 'seller-rep',
+        sellerName: formData.sellerName,
+        sellerEmail: formData.sellerEmail,
+        phoneNumber: formData.phoneNumber,
+        propertyType: formData.propertyType,
+        propertyAddress: formData.propertyAddress,
+        listingPrice: formData.listingPrice,
+        additionalNotes: formData.additionalNotes,
+        createdAt: new Date().toISOString().split('T')[0]
+      };
+
+      await documentStore.addDocument(documentData);
+
+      isSubmitting.value = false;
+      addNotification('Seller representation agreement saved successfully!', 'success');
+
+      router.push(getRoleBasedPath.value);
+    } catch (error) {
+      isSubmitting.value = false;
+      addNotification('Error saving document: ' + error.message, 'error');
     }
-
-    // Save document with file metadata instead of FormData
-    await documentStore.saveSellerRepDocument({
-      ...formData,
-      type: 'seller-rep',
-      createdAt: new Date().toISOString(),
-      files: fileMetadata
-    });
-
-    router.push('/receipts-docs/view-docs');
-  } catch (error) {
-    console.error('Error saving seller rep document:', error);
-    // Handle error (show notification, etc.)
+  } else {
+    addNotification('Please fill in all required fields.', 'error');
   }
+}
+
+const validateForm = () => {
+  // Implement form validation logic here
+  return true; // Placeholder return, actual implementation needed
+}
+
+const addNotification = (message, type) => {
+  console.log(`${type}: ${message}`);
+  // In a real implementation, this would show a UI notification
 }
 </script>
 

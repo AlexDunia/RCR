@@ -15,7 +15,7 @@ const stats = ref({
 })
 
 const recentActivity = ref([
-  { id: 1, type: 'user_registration', user: 'John Doe', time: '2 minutes ago' },
+  { id: 1, type: 'user_login', user: 'John Doe', time: '30 minutes ago' },
   { id: 2, type: 'system_update', user: 'System', time: '1 hour ago' },
   { id: 3, type: 'agent_login', user: 'Sarah Smith', time: '2 hours ago' },
   { id: 4, type: 'payment_processed', user: 'Mike Johnson', time: '3 hours ago' },

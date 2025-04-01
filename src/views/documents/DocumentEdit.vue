@@ -250,6 +250,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useDocumentStore } from '@/stores/documents';
+import { useRoleStore } from '@/stores/roleStore';
 
 const route = useRoute();
 const router = useRouter();
@@ -658,11 +659,28 @@ onMounted(async () => {
         existingFiles.value = existingDoc.files ? [...existingDoc.files] : [];
       } else {
         addNotification('Document not found', 'error');
-        router.push('/receipts-docs/view-docs');
+        // Role-based error redirection
+        const roleStore = useRoleStore();
+        if (roleStore.currentRole === 'admin') {
+          router.push('/receipts-docs/view-docs');
+        } else if (roleStore.currentRole === 'agent') {
+          router.push('/profile/documents');
+        } else {
+          router.push('/');
+        }
       }
     } catch (error) {
       console.error('Error loading document:', error);
       addNotification('Error loading document: ' + error.message, 'error');
+      // Role-based error redirection
+      const roleStore = useRoleStore();
+      if (roleStore.currentRole === 'admin') {
+        router.push('/receipts-docs/view-docs');
+      } else if (roleStore.currentRole === 'agent') {
+        router.push('/profile/documents');
+      } else {
+        router.push('/');
+      }
     }
   } else {
     // For new documents, initialize the document type from route query
@@ -684,11 +702,27 @@ const validateForm = () => {
   return Object.keys(errors).length === 0;
 };
 
+const roleStore = useRoleStore();
+
+// Add computed properties for role-based navigation
+const adminDocumentPath = computed(() => '/receipts-docs/view-docs');
+const agentDocumentPath = computed(() => documentId ? `/receipts-docs/document/${documentId}` : '/profile/documents');
+const defaultDocumentPath = computed(() => `/receipts-docs/document/${documentId}`);
+
+const getRoleBasedPath = computed(() => {
+  if (roleStore.currentRole === 'admin') {
+    return adminDocumentPath.value;
+  } else if (roleStore.currentRole === 'agent') {
+    return agentDocumentPath.value;
+  }
+  return defaultDocumentPath.value;
+});
+
 const handleBack = () => {
   if (hasChanges.value) {
     showConfirmModal.value = true;
   } else {
-    router.push('/receipts-docs/view-docs');
+    router.push(getRoleBasedPath.value);
   }
 };
 
@@ -699,10 +733,9 @@ const handleSave = () => {
   }
 
   if (hasChanges.value) {
-  showConfirmModal.value = true;
+    showConfirmModal.value = true;
   } else {
-    // If no changes, just go back without confirmation
-    router.push('/receipts-docs/view-docs');
+    router.push(getRoleBasedPath.value);
   }
 };
 
@@ -754,7 +787,10 @@ const confirmSave = async () => {
     }
 
     addNotification('Document saved successfully', 'success');
-    setTimeout(() => router.push('/receipts-docs/view-docs'), 1000);
+
+    setTimeout(() => {
+      router.push(getRoleBasedPath.value);
+    }, 1000);
   } catch (error) {
     console.error('Error saving document:', error);
     addNotification('Error saving document: ' + error.message, 'error');

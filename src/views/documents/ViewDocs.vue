@@ -1,6 +1,20 @@
 <!-- src/views/documents/ViewDocs.vue -->
 <template>
   <div class="view-docs">
+    <div class="page-header">
+      <div class="header-content">
+        <h1>Documents</h1>
+        <div class="header-actions">
+          <button @click="showCreateDocumentModal = true" class="create-button">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+            </svg>
+            Create Document
+          </button>
+        </div>
+      </div>
+    </div>
+
     <div class="filters">
       <div class="search-box">
         <input
@@ -79,16 +93,53 @@
         </div>
       </div>
     </div>
+
+    <!-- Create Document Modal -->
+    <div v-if="showCreateDocumentModal" class="modal-overlay" @click.self="showCreateDocumentModal = false">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h3>Create New Document</h3>
+          <button @click="showCreateDocumentModal = false" class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="document-type-grid">
+            <div
+              v-for="type in documentTypes"
+              :key="type"
+              class="document-type-card"
+              @click="createDocument(type)"
+            >
+              <div class="type-icon">
+                <svg v-if="type === 'buyer-rep'" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                <svg v-else-if="type === 'seller-rep'" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <h4>{{ formatDocumentType(type) }}</h4>
+              <p>{{ getTypeDescription(type) }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useDocumentStore } from '@/stores/documents'
 
+const router = useRouter()
 const documentStore = useDocumentStore()
 const searchQuery = ref('')
 const activeFilters = ref([])
+const showCreateDocumentModal = ref(false)
 
 const documentTypes = ['buyer-rep', 'seller-rep', 'mls']
 
@@ -180,11 +231,84 @@ const deleteDocument = async (doc) => {
     }
   }
 }
+
+const formatDocumentType = (type) => {
+  switch (type) {
+    case 'buyer-rep':
+      return 'Buyer Rep Agreement'
+    case 'seller-rep':
+      return 'Seller Rep Agreement'
+    case 'mls':
+      return 'MLS Listing'
+    default:
+      return type
+  }
+}
+
+const getTypeDescription = (type) => {
+  switch (type) {
+    case 'buyer-rep':
+      return 'Create a new buyer representation agreement'
+    case 'seller-rep':
+      return 'Create a new seller representation agreement'
+    case 'mls':
+      return 'Create a new MLS listing'
+    default:
+      return ''
+  }
+}
+
+const createDocument = (type) => {
+  showCreateDocumentModal.value = false
+  switch (type) {
+    case 'buyer-rep':
+      router.push('/receipts-docs/buyer-rep')
+      break
+    case 'seller-rep':
+      router.push('/receipts-docs/seller-rep')
+      break
+    case 'mls':
+      router.push('/receipts-docs/mls')
+      break
+  }
+}
 </script>
 
 <style scoped>
 .view-docs {
   padding: 1rem;
+}
+
+.page-header {
+  margin-bottom: 2rem;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-content h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.create-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #2563eb;
+  color: white;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.create-button:hover {
+  background-color: #1d4ed8;
 }
 
 .filters {
@@ -302,7 +426,6 @@ const deleteDocument = async (doc) => {
   color: #9ca3af;
 }
 
-
 .document-title {
   font-size: 1rem;
   font-weight: 600;
@@ -365,5 +488,87 @@ const deleteDocument = async (doc) => {
 
 .action-button.delete:hover {
   background-color: #fee2e2;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 50;
+}
+
+.modal-container {
+  background-color: white;
+  border-radius: 0.5rem;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.modal-close {
+  font-size: 1.5rem;
+  color: #6b7280;
+  cursor: pointer;
+}
+
+.modal-body {
+  padding: 1rem;
+}
+
+.document-type-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.document-type-card {
+  padding: 1.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.document-type-card:hover {
+  border-color: #2563eb;
+  background-color: #f8fafc;
+}
+
+.type-icon {
+  margin-bottom: 1rem;
+  color: #2563eb;
+}
+
+.document-type-card h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.5rem;
+}
+
+.document-type-card p {
+  font-size: 0.875rem;
+  color: #6b7280;
 }
 </style>

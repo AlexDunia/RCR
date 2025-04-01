@@ -1,9 +1,9 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
 import { useLayoutStore } from '@/stores/layout';
 import { useRoleStore } from '@/stores/roleStore';
-import DocumentLayout from '@/layouts/DocumentLayout.vue'
-import TasksLayout from '@/layouts/TasksLayout.vue'
-import EducationLayout from '@/layouts/EducationLayout.vue'
+import DocumentLayout from '@/layouts/DocumentLayout.vue';
+import TasksLayout from '@/layouts/TasksLayout.vue';
+import EducationLayout from '@/layouts/EducationLayout.vue';
 
 // Lazy-loaded route components
 const routes = [
@@ -19,7 +19,8 @@ const routes = [
       } else {
         next({ name: 'AgentDashboardView' });
       }
-    }
+    },
+    meta: { allowedRoles: ['admin'] } // Restrict to admin
   },
   {
     path: '/agent-dashboard',
@@ -32,50 +33,57 @@ const routes = [
       } else {
         next({ name: 'Dashboard' });
       }
-    }
+    },
+    meta: { allowedRoles: ['agent'] } // Restrict to agent
   },
 
-  // Manage Listings routes
+  // Manage Listings routes (Agent-only)
   {
     path: '/manage-listings',
     component: () => import('@/views/agents/ManageListings.vue'),
     meta: {
-      title: 'Manage Listings'
+      title: 'Manage Listings',
+      allowedRoles: ['agent']
     }
   },
   {
     path: '/add-listing',
     component: () => import('@/views/agents/AddListing.vue'),
     meta: {
-      title: 'Add Listing'
+      title: 'Add Listing',
+      allowedRoles: ['agent']
     }
   },
   {
     path: '/view-listings',
     component: () => import('@/views/listings/ViewListings.vue'),
     meta: {
-      title: 'View Listings'
+      title: 'View Listings',
+      allowedRoles: ['agent'] // Restricted to agents as per your request
     }
   },
   {
     path: '/pending-approvals',
     component: () => import('@/views/listings/PendingApprovals.vue'),
     meta: {
-      title: 'Pending Approvals'
+      title: 'Pending Approvals',
+      allowedRoles: ['agent'] // Restricted to agents as per your request
     }
   },
   {
     path: '/drafts',
     component: () => import('@/views/listings/Drafts.vue'),
     meta: {
-      title: 'Drafts'
+      title: 'Drafts',
+      allowedRoles: ['agent']
     }
   },
 
-  // Tasks routes
+  // Tasks routes (Agent-only)
   {
     path: '/tasks',
     component: TasksLayout,
+    meta: { allowedRoles: ['agent'] }, // Restrict parent route to agents
     children: [
       {
         path: '',
@@ -127,17 +135,19 @@ const routes = [
     ]
   },
 
-  // Agent Profile route
+  // Agent Profile route (Agent-only)
   {
     path: '/agent-profile',
     name: 'AgentProfile',
-    component: () => import('@/views/agents/AgentProfile.vue')
+    component: () => import('@/views/agents/AgentProfile.vue'),
+    meta: { allowedRoles: ['agent'] }
   },
 
-  // Document management routes
+  // Document management routes (Agent-only)
   {
     path: '/receipts-docs',
     component: DocumentLayout,
+    meta: { allowedRoles: ['agent'] }, // Restrict parent route to agents
     children: [
       {
         path: 'buyer-rep',
@@ -170,7 +180,8 @@ const routes = [
     name: 'DocumentDetail',
     component: () => import('@/views/documents/DocumentDetail.vue'),
     meta: {
-      title: 'Document Details'
+      title: 'Document Details',
+      allowedRoles: ['agent']
     }
   },
   {
@@ -178,7 +189,8 @@ const routes = [
     name: 'DocumentEdit',
     component: () => import('@/views/documents/DocumentEdit.vue'),
     meta: {
-      title: 'Edit Document'
+      title: 'Edit Document',
+      allowedRoles: ['agent']
     }
   },
   {
@@ -186,7 +198,8 @@ const routes = [
     name: 'DocumentCreate',
     component: () => import('@/views/documents/DocumentEdit.vue'),
     meta: {
-      title: 'Create Document'
+      title: 'Create Document',
+      allowedRoles: ['agent']
     }
   },
   {
@@ -194,14 +207,16 @@ const routes = [
     name: 'ViewDocs',
     component: () => import('@/views/documents/ViewDocs.vue'),
     meta: {
-      title: 'All Documents'
+      title: 'All Documents',
+      allowedRoles: ['agent']
     }
   },
 
-  // Marketing routes
+  // Marketing routes (Agent-only)
   {
     path: '/marketing-tools',
     component: () => import('@/views/marketing/MarketingTools.vue'),
+    meta: { allowedRoles: ['agent'] }, // Restrict parent route to agents
     children: [
       {
         path: '',
@@ -283,18 +298,21 @@ const routes = [
   {
     path: '/chat/admin',
     name: 'AdminChat',
-    component: () => import('@/views/chat/AdminChatView.vue')
+    component: () => import('@/views/chat/AdminChatView.vue'),
+    meta: { allowedRoles: ['admin'] } // Restrict to admin
   },
   {
     path: '/chat/client',
     name: 'ClientChat',
-    component: () => import('@/views/chat/ClientChatView.vue')
+    component: () => import('@/views/chat/ClientChatView.vue'),
+    meta: { allowedRoles: ['agent'] } // Restrict to agent
   },
 
-  // Education & Training routes
+  // Education & Training routes (Agent-only)
   {
     path: '/education-training',
     component: EducationLayout,
+    meta: { allowedRoles: ['agent'] }, // Restrict parent route to agents
     children: [
       {
         path: '',
@@ -341,18 +359,20 @@ const routes = [
     ]
   },
 
-  // Profile routes
+  // Profile routes (Agent-only)
   {
     path: '/profile-test',
     name: 'profile-test',
-    component: () => import('@/views/profile/ProfileTest.vue')
+    component: () => import('@/views/profile/ProfileTest.vue'),
+    meta: { allowedRoles: ['agent'] }
   },
   {
     path: '/profile',
     component: () => import('@/views/profile/ProfileLayout.vue'),
     meta: {
       hideHeader: true,
-      background: '#f9fafb'
+      background: '#f9fafb',
+      allowedRoles: ['agent']
     },
     children: [
       {
@@ -388,7 +408,8 @@ const routes = [
     component: () => import('@/views/listings/PropertyDetail.vue'),
     meta: {
       title: 'Property Details',
-      hideSidebar: false // Explicitly set sidebar to remain visible
+      hideSidebar: false,
+      allowedRoles: ['agent'] // Restricted to agents as per your request
     }
   },
   {
@@ -396,43 +417,68 @@ const routes = [
     name: 'Properties',
     component: () => import('@/views/listings/PropertiesView.vue'),
     meta: {
-      title: 'All Properties'
+      title: 'All Properties',
+      allowedRoles: ['agent'] // Restricted to agents as per your request
     }
   },
-  // Clients route
+  // Clients route (Admin-only)
   {
     path: '/clients',
     name: 'Clients',
     component: () => import('@/views/admin/ClientsView.vue'),
     meta: {
-      title: 'Clients'
+      title: 'Clients',
+      allowedRoles: ['admin']
     }
   },
-  // Client Profile route
+  // Client Profile route (Admin-only)
   {
     path: '/clients/:id',
     name: 'ClientProfile',
     component: () => import('@/views/admin/ClientProfileView.vue'),
     meta: {
-      title: 'Client Profile'
+      title: 'Client Profile',
+      allowedRoles: ['admin']
     }
   },
-  // Admin Property Detail route
+  // Admin Property Detail route (Admin-only)
   {
     path: '/admin/property/:propertyId',
     name: 'PropertyDetail',
     component: () => import('@/views/admin/PropertyDetailView.vue'),
     meta: {
-      title: 'Property Details'
+      title: 'Property Details',
+      allowedRoles: ['admin']
     }
   },
-  // Agent Profile route
+  // Agent Profile route (Admin-only)
   {
     path: '/agent/:id',
     name: 'AgentProfileDetail',
     component: () => import('@/views/admin/AgentProfileView.vue'),
     meta: {
-      title: 'Agent Profile'
+      title: 'Agent Profile',
+      allowedRoles: ['admin']
+    }
+  },
+  // Admin Document Edit route (Admin-only)
+  {
+    path: '/admin/document/:id/edit',
+    name: 'AdminDocumentEdit',
+    component: () => import('@/views/admin/AdminDocumentEdit.vue'),
+    meta: {
+      title: 'Edit Document',
+      allowedRoles: ['admin']
+    }
+  },
+  // Admin Document Create route (Admin-only)
+  {
+    path: '/admin/document/new',
+    name: 'AdminDocumentCreate',
+    component: () => import('@/views/admin/AdminDocumentEdit.vue'),
+    meta: {
+      title: 'Create Document',
+      allowedRoles: ['admin']
     }
   }
 ];
@@ -458,15 +504,15 @@ router.beforeEach(async (to, from, next) => {
       next('/login');
       return;
     }
+  }
 
-    if (to.meta.allowedRoles) {
-      const { useRoleGuard } = await import('@/composables/useRoleGuard');
-      const { checkAccess } = useRoleGuard();
-      const hasAccess = await checkAccess(to.meta.allowedRoles);
-      if (!hasAccess) {
-        next('/unauthorized');
-        return;
-      }
+  if (to.meta.allowedRoles) {
+    const { useRoleGuard } = await import('@/composables/useRoleGuard');
+    const { checkAccess } = useRoleGuard();
+    const hasAccess = await checkAccess(to.meta.allowedRoles);
+    if (!hasAccess) {
+      next('/unauthorized');
+      return;
     }
   }
 

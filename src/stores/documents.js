@@ -1,5 +1,10 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+// Axios is imported but not used yet - will be used for Laravel API integration
+// import axios from 'axios'
+
+// API base URL will be configured when connecting to Laravel backend
+// const API_BASE_URL = '/api'
 
 export const useDocumentStore = defineStore('documents', () => {
   // State
@@ -136,6 +141,10 @@ export const useDocumentStore = defineStore('documents', () => {
     }
   ])
 
+  // Loading state for API operations
+  const loading = ref(false)
+  const error = ref(null)
+
   // Getters
   const getDocument = (id) => {
     // Convert id to string if it's a number, to handle different ID formats
@@ -152,47 +161,286 @@ export const useDocumentStore = defineStore('documents', () => {
     return documents.value.filter(doc => doc.clientId === clientId)
   }
 
-  // Actions
-  function addDocument(document) {
-    const newDocument = {
-      id: generateDocumentId(),
-      createdAt: new Date().toISOString().split('T')[0],
-      files: [],
-      agents: [],
-      ...document
-    }
+  // API Actions
+  // Fetch all documents from API
+  async function fetchDocuments() {
+    loading.value = true
+    error.value = null
 
-    documents.value.push(newDocument)
-    return newDocument.id
+    try {
+      // When connecting to Laravel backend, uncomment and use this code:
+      //
+      // const response = await axios.get(`${API_BASE_URL}/documents`, {
+      //   headers: {
+      //     'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      //     'Accept': 'application/json'
+      //   }
+      // })
+      // documents.value = response.data.data // Adjust based on your API response format
+      // return documents.value
+
+      // For now, just simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 500))
+
+      // We're keeping the mock data for now
+      console.log('Fetched documents from mock data')
+      return documents.value
+    } catch (err) {
+      console.error('Error fetching documents:', err)
+      error.value = err.message || 'Failed to fetch documents'
+      return []
+    } finally {
+      loading.value = false
+    }
   }
 
-  function updateDocument(id, updates) {
-    // Convert id to string if it's a number
-    const docId = typeof id === 'number' ? id.toString() : id
-    const index = documents.value.findIndex(doc => doc.id === docId)
+  // Fetch a single document by ID
+  async function fetchDocument(id) {
+    loading.value = true
+    error.value = null
 
-    if (index !== -1) {
-      documents.value[index] = {
-        ...documents.value[index],
-        ...updates
+    try {
+      // When connecting to Laravel backend, uncomment and use this code:
+      //
+      // const response = await axios.get(`${API_BASE_URL}/documents/${id}`, {
+      //   headers: {
+      //     'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      //     'Accept': 'application/json'
+      //   }
+      // })
+      // return response.data.data // Adjust based on your API response format
+
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 300))
+
+      const document = getDocument(id)
+      console.log(`Fetched document ${id} from mock data`)
+      return document
+    } catch (err) {
+      console.error(`Error fetching document ${id}:`, err)
+      error.value = err.message || 'Failed to fetch document'
+      return null
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // Fetch documents by client ID
+  async function fetchDocumentsByClientId(clientId) {
+    loading.value = true
+    error.value = null
+
+    try {
+      // When connecting to Laravel backend, uncomment and use this code:
+      //
+      // const response = await axios.get(`${API_BASE_URL}/clients/${clientId}/documents`, {
+      //   headers: {
+      //     'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      //     'Accept': 'application/json'
+      //   }
+      // })
+      // return response.data.data // Adjust based on your API response format
+
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 300))
+
+      const clientDocuments = getDocumentsByClientId(clientId)
+      console.log(`Fetched documents for client ${clientId} from mock data`)
+      return clientDocuments
+    } catch (err) {
+      console.error(`Error fetching documents for client ${clientId}:`, err)
+      error.value = err.message || 'Failed to fetch client documents'
+      return []
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // Add document
+  async function addDocument(document) {
+    loading.value = true
+    error.value = null
+
+    try {
+      // When connecting to Laravel backend, uncomment and use this code:
+      //
+      // const formData = new FormData()
+      //
+      // // Add document fields to formData
+      // Object.keys(document).forEach(key => {
+      //   if (key !== 'files') {
+      //     formData.append(key, document[key])
+      //   }
+      // })
+      //
+      // // Add files if present
+      // if (document.files && document.files.length) {
+      //   document.files.forEach((file, index) => {
+      //     formData.append(`files[${index}]`, file)
+      //   })
+      // }
+      //
+      // const response = await axios.post(`${API_BASE_URL}/documents`, formData, {
+      //   headers: {
+      //     'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      //     'Content-Type': 'multipart/form-data',
+      //     'Accept': 'application/json'
+      //   }
+      // })
+      //
+      // // Get the new document from response
+      // const newDocument = response.data.data
+      // documents.value.push(newDocument)
+      // return newDocument.id
+
+      // For now, use the current implementation
+      const newId = generateDocumentId()
+      const newDocument = {
+        id: newId,
+        createdAt: new Date().toISOString().split('T')[0],
+        updatedAt: new Date().toISOString().split('T')[0],
+        files: [],
+        agents: [],
+        ...document
       }
-      return true
-    }
 
-    return false
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 500))
+
+      documents.value.push(newDocument)
+      console.log('Added document with mock implementation:', newDocument)
+      return newId
+    } catch (err) {
+      console.error('Error creating document:', err)
+      error.value = err.message || 'Failed to create document'
+      throw error.value
+    } finally {
+      loading.value = false
+    }
   }
 
-  function deleteDocument(id) {
-    // Convert id to string if it's a number
-    const docId = typeof id === 'number' ? id.toString() : id
-    const index = documents.value.findIndex(doc => doc.id === docId)
+  // Update document
+  async function updateDocument(id, updates) {
+    loading.value = true
+    error.value = null
 
-    if (index !== -1) {
-      documents.value.splice(index, 1)
-      return true
+    try {
+      // When connecting to Laravel backend, uncomment and use this code:
+      //
+      // const formData = new FormData()
+      //
+      // // Add update fields to formData
+      // Object.keys(updates).forEach(key => {
+      //   if (key !== 'files') {
+      //     formData.append(key, updates[key])
+      //   }
+      // })
+      //
+      // // Add _method field for Laravel to understand it's a PUT request
+      // formData.append('_method', 'PUT')
+      //
+      // // Add files if present
+      // if (updates.files && updates.files.length) {
+      //   updates.files.forEach((file, index) => {
+      //     // Only append file if it's not already on the server (no id)
+      //     if (!file.id) {
+      //       formData.append(`files[${index}]`, file)
+      //     }
+      //   })
+      // }
+      //
+      // const response = await axios.post(`${API_BASE_URL}/documents/${id}`, formData, {
+      //   headers: {
+      //     'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      //     'Content-Type': 'multipart/form-data',
+      //     'Accept': 'application/json'
+      //   }
+      // })
+      //
+      // // Get the updated document
+      // const updatedDocument = response.data.data
+      //
+      // // Update the document in the local store
+      // const index = documents.value.findIndex(doc => doc.id === updatedDocument.id)
+      // if (index !== -1) {
+      //   documents.value[index] = updatedDocument
+      // }
+      //
+      // return true
+
+      // For now, use current implementation
+      const docId = typeof id === 'number' ? id.toString() : id
+      const index = documents.value.findIndex(doc => doc.id === docId)
+
+      if (index !== -1) {
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 500))
+
+        documents.value[index] = {
+          ...documents.value[index],
+          ...updates,
+          updatedAt: new Date().toISOString().split('T')[0]
+        }
+
+        console.log(`Updated document ${id} with mock implementation`)
+        return true
+      }
+
+      return false
+    } catch (err) {
+      console.error(`Error updating document ${id}:`, err)
+      error.value = err.message || 'Failed to update document'
+      return false
+    } finally {
+      loading.value = false
     }
+  }
 
-    return false
+  // Delete document
+  async function deleteDocument(id) {
+    loading.value = true
+    error.value = null
+
+    try {
+      // When connecting to Laravel backend, uncomment and use this code:
+      //
+      // await axios.delete(`${API_BASE_URL}/documents/${id}`, {
+      //   headers: {
+      //     'Authorization': `Bearer ${localStorage.getItem('token')}`,
+      //     'Accept': 'application/json'
+      //   }
+      // })
+      //
+      // // If successful, remove from local store
+      // const docId = typeof id === 'number' ? id.toString() : id
+      // const index = documents.value.findIndex(doc => doc.id === docId)
+      // if (index !== -1) {
+      //   documents.value.splice(index, 1)
+      // }
+      //
+      // return true
+
+      // For now, use current implementation
+      const docId = typeof id === 'number' ? id.toString() : id
+      const index = documents.value.findIndex(doc => doc.id === docId)
+
+      if (index !== -1) {
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 500))
+
+        documents.value.splice(index, 1)
+        console.log(`Deleted document ${id} with mock implementation`)
+        return true
+      }
+
+      return false
+    } catch (err) {
+      console.error(`Error deleting document ${id}:`, err)
+      error.value = err.message || 'Failed to delete document'
+      return false
+    } finally {
+      loading.value = false
+    }
   }
 
   // Helper method to generate unique document ID
@@ -204,6 +452,8 @@ export const useDocumentStore = defineStore('documents', () => {
   return {
     // State
     documents,
+    loading,
+    error,
 
     // Getters
     getDocument,
@@ -213,6 +463,11 @@ export const useDocumentStore = defineStore('documents', () => {
     // Actions
     addDocument,
     updateDocument,
-    deleteDocument
+    deleteDocument,
+
+    // API Actions
+    fetchDocuments,
+    fetchDocument,
+    fetchDocumentsByClientId
   }
 })

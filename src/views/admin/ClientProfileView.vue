@@ -140,7 +140,7 @@
           <button class="edit-button" @click="uploadDocument">Upload Document</button>
         </div>
 
-        <div v-if="isLoading" class="loading-state">
+        <div v-if="isLoadingDocuments" class="loading-state">
           <p>Loading documents...</p>
         </div>
 
@@ -151,12 +151,12 @@
           <div class="document-list-container">
             <div v-for="doc in clientDocuments" :key="doc.id" class="document-card" @click="viewDocument(doc.id)">
               <div class="doc-header">
-                <div class="doc-badge" :class="doc.type">{{ doc.type }}</div>
+                <div class="doc-badge" :class="doc.type">{{ formatDocumentType(doc.type) }}</div>
                 <div v-if="doc.agents && doc.agents.length > 0" class="doc-agent">
                   {{ doc.agents[0].name }}
                 </div>
               </div>
-              <div class="doc-name" :title="doc.name">{{ truncateText(doc.name, 25) }}</div>
+              <div class="doc-name" :title="doc.name">{{ truncateText(doc.name || getDocumentTitle(doc), 25) }}</div>
               <div class="doc-date">{{ formatDate(doc.createdAt) }}</div>
             </div>
           </div>
@@ -165,6 +165,148 @@
         <div v-else class="empty-state">
           <p>No documents found for this client.</p>
           <button class="add-document-btn" @click="uploadDocument">Upload New Document</button>
+        </div>
+
+        <!-- Document Viewer Modal -->
+        <div v-if="showDocumentModal" class="modal-overlay" @click.self="showDocumentModal = false">
+          <div class="document-modal">
+            <div class="modal-header">
+              <h3 class="modal-title">{{ currentDocument ? getDocumentTitle(currentDocument) : 'Document Details' }}</h3>
+              <button @click="showDocumentModal = false" class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+              <div v-if="currentDocument" class="document-details">
+                <div class="details-grid">
+                  <template v-if="currentDocument.type === 'buyer-rep'">
+                    <div class="detail-item">
+                      <span class="detail-label">Buyer Name</span>
+                      <span class="detail-value">{{ currentDocument.buyerName }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-label">Email</span>
+                      <span class="detail-value">{{ currentDocument.buyerEmail }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-label">Phone</span>
+                      <span class="detail-value">{{ currentDocument.phoneNumber }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-label">Property Type</span>
+                      <span class="detail-value">{{ currentDocument.propertyType }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-label">Budget Range</span>
+                      <span class="detail-value">{{ currentDocument.budgetRange }}</span>
+                    </div>
+                    <div class="detail-item full-width">
+                      <span class="detail-label">Additional Notes</span>
+                      <span class="detail-value">{{ currentDocument.additionalNotes }}</span>
+                    </div>
+                  </template>
+
+                  <template v-if="currentDocument.type === 'seller-rep'">
+                    <div class="detail-item">
+                      <span class="detail-label">Seller Name</span>
+                      <span class="detail-value">{{ currentDocument.sellerName }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-label">Email</span>
+                      <span class="detail-value">{{ currentDocument.sellerEmail }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-label">Phone</span>
+                      <span class="detail-value">{{ currentDocument.phoneNumber }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-label">Property Type</span>
+                      <span class="detail-value">{{ currentDocument.propertyType }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-label">Property Address</span>
+                      <span class="detail-value">{{ currentDocument.propertyAddress }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-label">Listing Price</span>
+                      <span class="detail-value">{{ currentDocument.listingPrice }}</span>
+                    </div>
+                    <div class="detail-item full-width">
+                      <span class="detail-label">Additional Notes</span>
+                      <span class="detail-value">{{ currentDocument.additionalNotes }}</span>
+                    </div>
+                  </template>
+
+                  <template v-if="currentDocument.type === 'mls'">
+                    <div class="detail-item">
+                      <span class="detail-label">Property Address</span>
+                      <span class="detail-value">{{ currentDocument.propertyAddress }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-label">Listing Price</span>
+                      <span class="detail-value">{{ currentDocument.listingPrice }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-label">Bedrooms</span>
+                      <span class="detail-value">{{ currentDocument.bedrooms }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-label">Bathrooms</span>
+                      <span class="detail-value">{{ currentDocument.bathrooms }}</span>
+                    </div>
+                    <div class="detail-item">
+                      <span class="detail-label">Square Footage</span>
+                      <span class="detail-value">{{ currentDocument.squareFootage }}</span>
+                    </div>
+                    <div class="detail-item full-width">
+                      <span class="detail-label">Property Description</span>
+                      <span class="detail-value">{{ currentDocument.propertyDescription }}</span>
+                    </div>
+                  </template>
+
+                  <div class="detail-item">
+                    <span class="detail-label">Document ID</span>
+                    <span class="detail-value">{{ currentDocument.id }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Created Date</span>
+                    <span class="detail-value">{{ formatDate(currentDocument.createdAt) }}</span>
+                  </div>
+                </div>
+
+                <div class="document-files">
+                  <h4 class="files-title">Attached Files</h4>
+                  <div v-if="currentDocument.files && currentDocument.files.length > 0" class="files-list">
+                    <div v-for="file in currentDocument.files" :key="file.id" class="file-item">
+                      <div class="file-info">
+                        <div class="file-icon">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"/>
+                          </svg>
+                        </div>
+                        <div class="file-details">
+                          <span class="file-name">{{ file.name }}</span>
+                          <span class="file-size">{{ formatFileSize(file.size || 0) }}</span>
+                        </div>
+                      </div>
+                      <div class="file-actions">
+                        <button @click="viewFile(file)" class="view-file-btn">View</button>
+                        <button @click="downloadFile(file)" class="download-file-btn">Download</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div v-else class="no-files">
+                    <p>No files attached to this document</p>
+                  </div>
+                </div>
+              </div>
+              <div v-else class="loading-document">
+                <p>Loading document details...</p>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button @click="editDocument" class="btn-primary">Edit Document</button>
+              <button @click="showDocumentModal = false" class="btn-secondary">Close</button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -233,22 +375,44 @@ const clientDetails = ref(null);
 const isLoading = ref(true);
 
 // Client documents
-const clientDocuments = computed(() => {
-  return documentStore.getDocumentsByClientId(clientId.value);
-});
+const clientDocuments = ref([]);
+const isLoadingDocuments = ref(true);
+
+// Document Viewer State
+const showDocumentModal = ref(false);
+const currentDocument = ref(null);
 
 // View document function
-function viewDocument(docId) {
-  console.log('Editing document:', docId);
-  // Navigate to document edit page instead of view page
-  router.push(`/receipts-docs/document/${docId}/edit`);
+async function viewDocument(docId) {
+  try {
+    console.log('Viewing document:', docId);
+    const document = await documentStore.fetchDocument(docId);
+
+    if (document) {
+      currentDocument.value = document;
+      showDocumentModal.value = true;
+    } else {
+      console.error('Document not found:', docId);
+      alert('Document not found');
+    }
+  } catch (error) {
+    console.error('Error loading document:', error);
+    alert('Error loading document details');
+  }
+}
+
+// Edit document function
+function editDocument() {
+  if (currentDocument.value) {
+    showDocumentModal.value = false;
+    router.push(`/admin/document/${currentDocument.value.id}/edit`);
+  }
 }
 
 // Upload document function
 function uploadDocument() {
   console.log('Uploading document for client:', clientId.value);
-  // In a real app, you might open a modal or navigate to an upload page
-  router.push(`/receipts-docs/document/new?clientId=${clientId.value}`);
+  router.push(`/admin/document/new?clientId=${clientId.value}`);
 }
 
 // Get client basic info
@@ -327,7 +491,7 @@ function navigateTo(tab) {
 }
 
 // Load client details on mount
-onMounted(() => {
+onMounted(async () => {
   if (clientId.value) {
     clientDetails.value = clientStore.getClientFullDetails(clientId.value);
     console.log('Client details:', clientDetails.value);
@@ -337,19 +501,47 @@ onMounted(() => {
       activeTab.value = route.query.tab;
     }
 
-    // Set loading to false after a brief delay to simulate loading
-    setTimeout(() => {
+    // Load documents if on documents tab
+    if (activeTab.value === 'documents') {
+      await loadClientDocuments();
+    } else {
+      // Set loading to false
       isLoading.value = false;
-    }, 500);
+    }
   }
 });
 
-// Watch for route query changes to update the active tab
+// Watch for tab changes
+watch(() => activeTab.value, async (newTab) => {
+  if (newTab === 'documents' && clientId.value) {
+    await loadClientDocuments();
+  }
+});
+
+// Watch for route query changes
 watch(() => route.query.tab, (newTab) => {
   if (newTab) {
     activeTab.value = newTab;
   }
 });
+
+// Function to load client documents
+async function loadClientDocuments() {
+  isLoadingDocuments.value = true;
+  try {
+    // Fetch documents from API
+    const documents = await documentStore.fetchDocumentsByClientId(clientId.value);
+    clientDocuments.value = documents;
+  } catch (error) {
+    console.error('Error loading documents:', error);
+  } finally {
+    // Set loading to false after a brief delay
+    setTimeout(() => {
+      isLoadingDocuments.value = false;
+      isLoading.value = false;
+    }, 500);
+  }
+}
 
 // Get property title based on ID
 function getPropertyTitle(listingId) {
@@ -374,6 +566,81 @@ function formatDate(dateString) {
     month: 'short',
     day: 'numeric'
   });
+}
+
+// Format file size helper function
+function formatFileSize(bytes) {
+  if (!bytes) return '0 B';
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
+}
+
+// Get document title function
+function getDocumentTitle(doc) {
+  if (!doc) return '';
+
+  switch (doc.type) {
+    case 'buyer-rep':
+      return `${doc.buyerName}'s Buyer Rep Agreement`;
+    case 'seller-rep':
+      return `${doc.sellerName}'s Seller Rep Agreement`;
+    case 'mls':
+      return `MLS Listing - ${doc.propertyAddress}`;
+    default:
+      return 'Untitled Document';
+  }
+}
+
+// File handling functions
+function viewFile(file) {
+  if (file && file.url) {
+    // Open file in a new tab
+    window.open(file.url, '_blank');
+  } else {
+    // Show error message if file URL is not available
+    console.error('File URL not available');
+    // Display user-friendly notification
+    alert('File preview not available. The file may be processing or unavailable.');
+  }
+}
+
+function downloadFile(file) {
+  if (file && file.url) {
+    try {
+      // Create temp link and trigger download
+      const link = document.createElement('a');
+      link.href = file.url;
+      link.download = file.name || 'document';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      console.log('Downloading file:', file.name);
+    } catch (error) {
+      console.error('Error downloading file:', error);
+      alert('An error occurred while downloading the file. Please try again.');
+    }
+  } else {
+    console.error('File download URL not available');
+    alert('File download not available. The file may be processing or unavailable.');
+  }
+}
+
+// Format document type function
+function formatDocumentType(type) {
+  if (!type) return '';
+
+  switch (type) {
+    case 'buyer-rep':
+      return 'Buyer';
+    case 'seller-rep':
+      return 'Seller';
+    case 'mls':
+      return 'MLS';
+    default:
+      return type;
+  }
 }
 </script>
 
@@ -820,5 +1087,228 @@ function formatDate(dateString) {
   font-size: 0.75rem;
   color: #6b7280;
   margin-top: 0.25rem;
+}
+
+/* Document Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+.document-modal {
+  background-color: white;
+  border-radius: 0.5rem;
+  width: 90%;
+  max-width: 900px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: #6b7280;
+  font-size: 1.5rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.detail-item.full-width {
+  grid-column: 1 / -1;
+}
+
+.detail-label {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.detail-value {
+  font-size: 1rem;
+  color: #111827;
+  font-weight: 500;
+}
+
+.document-files {
+  margin-top: 2rem;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1.5rem;
+}
+
+.files-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 1rem 0;
+}
+
+.files-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.file-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+}
+
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.file-icon {
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #e5e7eb;
+  border-radius: 0.25rem;
+  color: #6b7280;
+}
+
+.file-icon svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.file-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.file-name {
+  font-weight: 500;
+  color: #111827;
+}
+
+.file-size {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.file-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.view-file-btn,
+.download-file-btn {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  border-radius: 0.25rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.view-file-btn {
+  background-color: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+
+.download-file-btn {
+  background-color: #f9fafb;
+  color: #4b5563;
+  border: 1px solid #e5e7eb;
+}
+
+.no-files {
+  padding: 2rem;
+  text-align: center;
+  background-color: #f9fafb;
+  border-radius: 0.375rem;
+  color: #6b7280;
+  border: 1px dashed #e5e7eb;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+}
+
+.btn-primary {
+  background-color: #1a4189;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-secondary {
+  background-color: white;
+  color: #6b7280;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+}
+
+.loading-document {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  color: #6b7280;
 }
 </style>
