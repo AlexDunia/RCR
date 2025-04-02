@@ -314,10 +314,227 @@
       <div v-if="activeTab === 'connections'" class="profile-section">
         <div class="section-header">
           <h2 class="section-title">{{ client?.name || 'Alex Dunia' }}'s Connections</h2>
-          <button class="edit-button">Add Connection</button>
+          <button class="edit-button" @click="showAddConnectionModal = true">Add Connection</button>
         </div>
-        <div class="placeholder-content">
-          <p>Client's connections with agents and other clients will be displayed here.</p>
+
+        <div v-if="isLoadingConnections" class="loading-state">
+          <p>Loading connections...</p>
+        </div>
+
+        <div v-else class="connections-wrapper">
+          <div class="connections-container">
+            <h3 class="connections-heading">{{ client?.name || 'Alex Dunia' }}'s Connections</h3>
+            <p class="connections-subheading">See all connections {{ client?.name || 'Alex Dunia' }} has made.</p>
+
+            <div class="connection-tabs">
+              <button
+                class="connection-tab-btn"
+                :class="{ active: connectionDisplayType === 'agents' }"
+                @click="connectionDisplayType = 'agents'"
+              >
+                Agents
+              </button>
+              <button
+                class="connection-tab-btn"
+                :class="{ active: connectionDisplayType === 'clients' }"
+                @click="connectionDisplayType = 'clients'"
+              >
+                Clients
+              </button>
+            </div>
+
+            <!-- Agents View -->
+            <div v-if="connectionDisplayType === 'agents'">
+              <div v-if="connectedAgents.length === 0" class="empty-connections">
+                <p>No connected agents found.</p>
+              </div>
+
+              <div v-else class="agent-connection-list">
+                <div v-for="agent in agentCards" :key="agent.id" class="agent-connection-card">
+                  <div class="agent-card-avatar">
+                    <img :src="agent.avatar" alt="Agent avatar" class="agent-avatar-img" />
+                  </div>
+                  <div class="agent-card-content">
+                    <div class="agent-info">
+                      <h4 class="agent-name">{{ agent.name }} <span class="agent-experience">({{ agent.experience }} of experience)</span></h4>
+                      <div class="agent-details">
+                        <div class="agent-location">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                            <circle cx="12" cy="10" r="3"/>
+                          </svg>
+                          {{ agent.location }}
+                        </div>
+                        <div class="agent-specialty">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 7h-9m0 0l3 3m-3-3l3-3M11 17H2m0 0l3 3M2 17l3-3"/>
+                          </svg>
+                          {{ agent.specialty }}
+                        </div>
+                      </div>
+                    </div>
+                    <div class="agent-actions">
+                      <button class="view-profile-btn" @click="viewAgentProfile(agent.id)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                          <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        View profile
+                      </button>
+                      <button class="deactivate-btn" @click="handleConnectionAction(agent.connectionId, 'reject')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M18 6L6 18M6 6l12 12"/>
+                        </svg>
+                        Deactivate
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Clients View -->
+            <div v-if="connectionDisplayType === 'clients'">
+              <div v-if="connectedClientsList.length === 0" class="empty-connections">
+                <p>No connected clients found.</p>
+              </div>
+
+              <div v-else class="agent-connection-list">
+                <div v-for="clientConn in connectedClientsList" :key="clientConn.id" class="agent-connection-card">
+                  <div class="agent-card-avatar">
+                    <img :src="clientConn.profilePicture" alt="Client avatar" class="agent-avatar-img" />
+                  </div>
+                  <div class="agent-card-content">
+                    <div class="agent-info">
+                      <h4 class="agent-name">{{ clientConn.name }}</h4>
+                      <div class="agent-details">
+                        <div class="agent-location">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                            <circle cx="12" cy="10" r="3"/>
+                          </svg>
+                          {{ clientConn.location || 'New York, USA' }}
+                        </div>
+                      </div>
+                    </div>
+                    <div class="agent-actions">
+                      <button class="view-profile-btn" @click="viewClientProfile(clientConn.id)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                          <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        View profile
+                      </button>
+                      <button class="deactivate-btn" @click="handleConnectionAction(clientConn.connectionId, 'reject')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M18 6L6 18M6 6l12 12"/>
+                        </svg>
+                        Deactivate
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add Connection Modal -->
+        <div v-if="showAddConnectionModal" class="modal-overlay" @click.self="showAddConnectionModal = false">
+          <div class="connection-modal">
+            <div class="modal-header">
+              <h3 class="modal-title">Add Connection</h3>
+              <button @click="showAddConnectionModal = false" class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+              <div class="connection-tabs">
+                <button
+                  @click="connectionType = 'agent'"
+                  :class="{ active: connectionType === 'agent' }"
+                  class="connection-tab"
+                >
+                  Connect with Agent
+                </button>
+                <button
+                  @click="connectionType = 'client'"
+                  :class="{ active: connectionType === 'client' }"
+                  class="connection-tab"
+                >
+                  Connect with Client
+                </button>
+              </div>
+
+              <div class="search-container">
+                <input
+                  type="text"
+                  v-model="connectionSearchQuery"
+                  :placeholder="connectionType === 'agent' ? 'Search for agents...' : 'Search for clients...'"
+                  class="search-input"
+                />
+              </div>
+
+              <div class="connection-results">
+                <div v-if="filteredConnectionResults.length > 0" class="result-list">
+                  <div
+                    v-for="result in filteredConnectionResults"
+                    :key="result.id"
+                    class="result-item"
+                    :class="{ 'already-connected': isAlreadyConnected(result.id) }"
+                    @click="selectConnectionTarget(result)"
+                  >
+                    <div class="result-avatar">
+                      <img
+                        :src="connectionType === 'agent' ? result.avatar : result.profilePicture"
+                        :alt="connectionType === 'agent' ? 'Agent avatar' : 'Client avatar'"
+                        class="avatar-image"
+                      />
+                    </div>
+                    <div class="result-details">
+                      <h4 class="result-name">{{ result.name }}</h4>
+                      <p class="result-meta">
+                        {{ connectionType === 'agent'
+                          ? (result.specialties?.join(', ') || 'No specialties listed')
+                          : (result.interests?.join(', ') || 'No interests listed')
+                        }}
+                      </p>
+                    </div>
+                    <div class="result-status">
+                      <span v-if="isAlreadyConnected(result.id)" class="status-tag connected">Connected</span>
+                      <span v-else-if="hasPendingRequest(result.id)" class="status-tag pending">Pending</span>
+                      <span v-else class="status-tag">Select</span>
+                    </div>
+                  </div>
+                </div>
+                <div v-else class="empty-results">
+                  <p>No results found. Try a different search term.</p>
+                </div>
+              </div>
+
+              <div v-if="selectedTarget" class="connection-form">
+                <h4 class="form-title">Send connection request to {{ selectedTarget.name }}</h4>
+                <textarea
+                  v-model="connectionMessage"
+                  placeholder="Add a message to your connection request..."
+                  class="connection-message-input"
+                ></textarea>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button
+                class="btn-secondary"
+                @click="showAddConnectionModal = false"
+              >
+                Cancel
+              </button>
+              <button
+                class="btn-primary"
+                @click="sendConnectionRequest"
+                :disabled="!selectedTarget || isAlreadyConnected(selectedTarget?.id) || hasPendingRequest(selectedTarget?.id)"
+              >
+                Send Request
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -352,12 +569,16 @@ import { useRoute, useRouter } from 'vue-router';
 import { useClientStore } from '@/stores/clientStore';
 import { useListingStore } from '@/stores/listingStore';
 import { useDocumentStore } from '@/stores/documents';
+import { useAgentStore } from '@/stores/agentStore';
+import { useConnectionStore } from '@/stores/connectionStore';
 
 const route = useRoute();
 const router = useRouter();
 const clientStore = useClientStore();
 const listingStore = useListingStore();
 const documentStore = useDocumentStore();
+const agentStore = useAgentStore();
+const connectionStore = useConnectionStore();
 
 // Client ID from route params
 const clientId = computed(() => parseInt(route.params.id));
@@ -381,6 +602,222 @@ const isLoadingDocuments = ref(true);
 // Document Viewer State
 const showDocumentModal = ref(false);
 const currentDocument = ref(null);
+
+// Connections state
+const isLoadingConnections = ref(false);
+const showAddConnectionModal = ref(false);
+const connectionSearchQuery = ref('');
+const selectedTarget = ref(null);
+const connectionMessage = ref('');
+const connectionType = ref('agent');
+const connectionDisplayType = ref('agents');
+
+// Random agent photos
+const agentPhotos = [
+  'https://randomuser.me/api/portraits/men/32.jpg',
+  'https://randomuser.me/api/portraits/women/44.jpg',
+  'https://randomuser.me/api/portraits/men/22.jpg',
+  'https://randomuser.me/api/portraits/women/68.jpg',
+  'https://randomuser.me/api/portraits/men/75.jpg',
+  'https://randomuser.me/api/portraits/women/91.jpg'
+];
+
+// Computed connections
+const clientConnections = computed(() => {
+  const userId = clientId.value;
+  if (!userId) return [];
+  return connectionStore.getConnectionsByUserId(userId, 'client');
+});
+
+const connectedAgents = computed(() => {
+  return clientConnections.value
+    .filter(conn =>
+      (conn.status === 'accepted') &&
+      ((conn.fromType === 'agent' && conn.toId === clientId.value) ||
+       (conn.toType === 'agent' && conn.fromId === clientId.value))
+    )
+    .map(conn => {
+      const agentId = conn.fromType === 'agent' ? conn.fromId : conn.toId;
+      const agent = agentStore.getAgentById(agentId);
+      return {
+        connectionId: conn.id,
+        id: agentId,
+        agent,
+        requestedAt: conn.requestedAt,
+        updatedAt: conn.updatedAt
+      };
+    })
+    .filter(conn => conn.agent); // Filter out any undefined agents
+});
+
+// Mock data for agent cards
+const agentCards = computed(() => {
+  if (connectedAgents.value.length === 0) {
+    return [
+      {
+        id: 5,
+        name: 'James T. Whitfield',
+        experience: '5+ Yr',
+        location: 'Columbia, USA',
+        specialty: 'Luxury Real Estate',
+        avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+        connectionId: 1
+      },
+      {
+        id: 8,
+        name: 'Sarah Johnson',
+        experience: '8+ Yr',
+        location: 'Miami, USA',
+        specialty: 'Commercial Properties',
+        avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
+        connectionId: 2
+      },
+      {
+        id: 10,
+        name: 'Michael Chen',
+        experience: '3+ Yr',
+        location: 'Seattle, USA',
+        specialty: 'Residential Homes',
+        avatar: 'https://randomuser.me/api/portraits/men/22.jpg',
+        connectionId: 3
+      }
+    ];
+  }
+
+  // Use real data if available
+  return connectedAgents.value.map((conn, index) => {
+    return {
+      id: conn.id,
+      name: conn.agent.name,
+      experience: `${Math.floor(Math.random() * 10) + 1}+ Yr`,
+      location: conn.agent.location || 'Columbia, USA',
+      specialty: conn.agent.specialties ? conn.agent.specialties[0] : 'Luxury Real Estate',
+      avatar: agentPhotos[index % agentPhotos.length],
+      connectionId: conn.connectionId
+    };
+  });
+});
+
+const connectedClientsList = computed(() => {
+  // Use fake data for preview
+  return [
+    {
+      id: 2,
+      name: 'Emily Rodriguez',
+      profilePicture: 'https://randomuser.me/api/portraits/women/68.jpg',
+      location: 'New York, USA',
+      connectionId: 6
+    },
+    {
+      id: 3,
+      name: 'David Williams',
+      profilePicture: 'https://randomuser.me/api/portraits/men/75.jpg',
+      location: 'Los Angeles, USA',
+      connectionId: 7
+    }
+  ];
+});
+
+const filteredConnectionResults = computed(() => {
+  if (!connectionSearchQuery.value.trim()) {
+    // Return all available entities if no search query
+    return connectionType.value === 'agent'
+      ? agentStore.getAllAgents()
+      : clientStore.clients.filter(c => c.id !== clientId.value); // Exclude current client
+  }
+
+  const query = connectionSearchQuery.value.toLowerCase().trim();
+
+  if (connectionType.value === 'agent') {
+    return agentStore.getAllAgents().filter(agent =>
+      agent.name.toLowerCase().includes(query) ||
+      agent.email.toLowerCase().includes(query) ||
+      (agent.specialties && agent.specialties.some(s => s.toLowerCase().includes(query)))
+    );
+  } else {
+    return clientStore.clients.filter(client =>
+      client.id !== clientId.value && (
+        client.name.toLowerCase().includes(query) ||
+        client.email.toLowerCase().includes(query) ||
+        (client.interests && client.interests.some(i => i.toLowerCase().includes(query)))
+      )
+    );
+  }
+});
+
+// Connection methods
+function loadClientConnections() {
+  isLoadingConnections.value = true;
+
+  // In a real app with API, there would be an async call here
+  setTimeout(() => {
+    isLoadingConnections.value = false;
+  }, 500);
+}
+
+function viewAgentProfile(agentId) {
+  router.push(`/agent/${agentId}`);
+}
+
+function viewClientProfile(clientId) {
+  router.push(`/clients/${clientId}`);
+}
+
+function handleConnectionAction(connectionId, action) {
+  if (action === 'accept') {
+    connectionStore.acceptConnection(connectionId);
+  } else if (action === 'reject') {
+    connectionStore.rejectConnection(connectionId);
+    // Remove from display
+    alert('Connection deactivated successfully');
+  }
+}
+
+function isAlreadyConnected(targetId) {
+  return connectionStore.areUsersConnected(
+    clientId.value,
+    'client',
+    targetId,
+    connectionType.value
+  );
+}
+
+function hasPendingRequest(targetId) {
+  const connection = connectionStore.getConnectionBetweenUsers(
+    clientId.value,
+    'client',
+    targetId,
+    connectionType.value
+  );
+
+  return connection && connection.status === 'pending';
+}
+
+function selectConnectionTarget(target) {
+  if (!isAlreadyConnected(target.id) && !hasPendingRequest(target.id)) {
+    selectedTarget.value = target;
+  }
+}
+
+function sendConnectionRequest() {
+  if (!selectedTarget.value) return;
+
+  connectionStore.requestConnection(
+    clientId.value,
+    'client',
+    selectedTarget.value.id,
+    connectionType.value,
+    connectionMessage.value
+  );
+
+  // Reset state
+  connectionMessage.value = '';
+  selectedTarget.value = null;
+  showAddConnectionModal.value = false;
+
+  // Show success notification (in a real app)
+  alert('Connection request sent successfully!');
+}
 
 // View document function
 async function viewDocument(docId) {
@@ -504,6 +941,8 @@ onMounted(async () => {
     // Load documents if on documents tab
     if (activeTab.value === 'documents') {
       await loadClientDocuments();
+    } else if (activeTab.value === 'connections') {
+      loadClientConnections();
     } else {
       // Set loading to false
       isLoading.value = false;
@@ -515,6 +954,8 @@ onMounted(async () => {
 watch(() => activeTab.value, async (newTab) => {
   if (newTab === 'documents' && clientId.value) {
     await loadClientDocuments();
+  } else if (newTab === 'connections' && clientId.value) {
+    loadClientConnections();
   }
 });
 
@@ -1310,5 +1751,340 @@ function formatDocumentType(type) {
   align-items: center;
   min-height: 300px;
   color: #6b7280;
+}
+
+.connections-wrapper {
+  display: flex;
+  flex-direction: column;
+  background-color: #edf7f0;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.connections-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.connections-heading {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.25rem;
+}
+
+.connections-subheading {
+  font-size: 0.875rem;
+  color: #4b5563;
+  margin-bottom: 1.5rem;
+}
+
+.connection-tabs {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.connection-tab-btn {
+  padding: 0.5rem 1.5rem;
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.connection-tab-btn.active {
+  background-color: #1a4189;
+  color: white;
+  border-color: #1a4189;
+}
+
+.empty-connections {
+  padding: 2rem;
+  text-align: center;
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+  border: 1px dashed #e5e7eb;
+  color: #6b7280;
+}
+
+.agent-connection-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.agent-connection-card {
+  display: flex;
+  flex-direction: row;
+  background-color: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.agent-connection-card:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.agent-card-avatar {
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+}
+
+.agent-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.agent-card-content {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
+}
+
+.agent-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.agent-name {
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  color: #111827;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.agent-experience {
+  font-size: 0.85rem;
+  color: #6b7280;
+  font-weight: normal;
+}
+
+.agent-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.agent-location, .agent-specialty {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #4b5563;
+}
+
+.agent-location svg, .agent-specialty svg {
+  width: 16px;
+  height: 16px;
+  color: #6b7280;
+}
+
+.agent-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: auto;
+}
+
+.view-profile-btn, .deactivate-btn {
+  flex: 1;
+  padding: 0.5rem;
+  font-size: 0.875rem;
+  border-radius: 0.375rem;
+  border: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+  color: #374151;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  transition: background-color 0.2s;
+}
+
+.view-profile-btn {
+  background-color: #f1f5f9;
+  color: #1a4189;
+}
+
+.deactivate-btn {
+  background-color: #f9fafb;
+  color: #ef4444;
+}
+
+.view-profile-btn:hover, .deactivate-btn:hover {
+  background-color: #e5e7eb;
+}
+
+.connection-modal {
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
+.connection-tabs {
+  display: flex;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 1rem;
+}
+
+.connection-tab {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  text-align: center;
+  background: none;
+  border: none;
+  color: #6b7280;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.connection-tab.active {
+  color: #1a4189;
+  border-bottom: 2px solid #1a4189;
+}
+
+.search-container {
+  margin-bottom: 1rem;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  font-size: 0.95rem;
+}
+
+.connection-results {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+}
+
+.result-list {
+  padding: 0.5rem;
+}
+
+.result-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  border-bottom: 1px solid #f3f4f6;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.result-item:last-child {
+  border-bottom: none;
+}
+
+.result-item:hover {
+  background-color: #f9fafb;
+}
+
+.result-item.already-connected {
+  background-color: #f3f4f6;
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.result-avatar {
+  width: 40px;
+  height: 40px;
+  margin-right: 1rem;
+}
+
+.result-details {
+  flex-grow: 1;
+}
+
+.result-name {
+  font-weight: 600;
+  margin: 0 0 0.25rem;
+  font-size: 0.95rem;
+}
+
+.result-meta {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.result-status {
+  margin-left: 1rem;
+  flex-shrink: 0;
+}
+
+.status-tag {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  border-radius: 1rem;
+  background-color: #f3f4f6;
+  color: #6b7280;
+}
+
+.status-tag.connected {
+  background-color: #ecfdf5;
+  color: #047857;
+}
+
+.status-tag.pending {
+  background-color: #fffbeb;
+  color: #b45309;
+}
+
+.connection-form {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.form-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.connection-message-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  font-size: 0.95rem;
+  min-height: 100px;
+  resize: vertical;
+}
+
+.empty-results {
+  padding: 2rem;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.95rem;
 }
 </style>

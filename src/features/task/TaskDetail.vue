@@ -506,7 +506,8 @@ const taskData = reactive({
   startedAt: '',
   lastEditedAt: '',
   isPaused: false,
-  totalTime: 0
+  totalTime: 0,
+  timerStopped: false
 });
 
 // Timer State Management
@@ -700,6 +701,14 @@ const handleSaveTask = async () => {
 // Timer Control Methods
 const startTimer = () => {
   if (timerInterval.value) return;
+
+  // Check if due date is already reached
+  if (isDueDateReached()) {
+    taskData.timerStopped = true;
+    persistTaskData({ timerStopped: true });
+    return;
+  }
+
   startTime.value = startTime.value || Date.now();
   timerInterval.value = setInterval(() => {
     if (taskData.isPaused || isDueDateReached()) {
@@ -740,8 +749,11 @@ const stopTimer = () => {
 // Due Date Check
 const isDueDateReached = () => {
   if (!taskData.endDate || !taskData.endTime) return false;
-  const dueDateTime = new Date(`${taskData.endDate} ${taskData.endTime}`);
-  return new Date() >= dueDateTime;
+
+  const now = new Date();
+  const endDateTime = new Date(`${taskData.endDate}T${taskData.endTime}`);
+
+  return now > endDateTime;
 };
 
 // Validation Method
@@ -1029,9 +1041,20 @@ watch([() => taskData.agentDetails, () => taskData.clientDetails, () => taskData
 
 // Due Date Check Interval
 const checkDueDate = () => {
-  if (taskData.status === 'in_progress' && isDueDateReached()) {
+  if (taskData.status === 'in_progress' && isDueDateReached() && !taskData.timerStopped) {
     stopTimer();
-    alert('Task timer has automatically stopped as the due date and time have been reached.');
+
+    // Update task with timerStopped flag
+    taskData.timerStopped = true;
+
+    // Persist the change to taskStore
+    persistTaskData({
+      status: taskData.status,
+      timerStopped: true,
+      totalTime: taskData.totalTime
+    });
+
+    // The notification will be handled by the global timer check in App.vue
   }
 };
 

@@ -3,12 +3,14 @@ import { useRoute } from 'vue-router';
 import { useHeaderStore } from '@/stores/headerStore';
 import { useLayoutStore } from '@/stores/layout';
 import { useRoleStore } from './stores/roleStore.js'; // Added explicit .js extension
+import { useTaskTimer } from './composables/useTaskTimer';
 import { watch, computed, onMounted } from 'vue';
 
 import Sidebar from './layouts/components/SidebarView.vue';
 import AdminSidebar from './layouts/components/AdminSidebar.vue'; // Import Admin Sidebar
 import Header from './layouts/components/HeaderView.vue';
 // import AdminHeader from './layouts/admin/AdminHeader.vue';
+import TaskNotification from './components/TaskNotification.vue';
 import PageTransition from './ui/PageTransition.vue';
 
 import '@fontsource/poppins';
@@ -18,6 +20,9 @@ const route = useRoute();
 const headerStore = useHeaderStore();
 const layoutStore = useLayoutStore();
 const roleStore = useRoleStore(); // Access role store
+
+// Initialize task timer functionality
+const { showNotification, currentNotification, dismissNotification } = useTaskTimer();
 
 // Check if user is an admin
 const isAdmin = computed(() => roleStore.currentRole === 'admin');
@@ -76,6 +81,13 @@ watch(route, (to) => {
       <PageTransition>
         <router-view :key="$route.fullPath"></router-view>
       </PageTransition>
+
+      <!-- Task Notification -->
+      <TaskNotification
+        :show="showNotification"
+        :message="currentNotification?.message || ''"
+        @dismiss="dismissNotification"
+      />
     </div>
   </div>
 </template>

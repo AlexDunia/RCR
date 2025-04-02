@@ -295,19 +295,19 @@ export const useDocumentStore = defineStore('documents', () => {
 
       // For now, use the current implementation
       const newId = generateDocumentId()
-      const newDocument = {
+    const newDocument = {
         id: newId,
-        createdAt: new Date().toISOString().split('T')[0],
+      createdAt: new Date().toISOString().split('T')[0],
         updatedAt: new Date().toISOString().split('T')[0],
-        files: [],
-        agents: [],
-        ...document
-      }
+      files: [],
+      agents: [],
+      ...document
+    }
 
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 500))
 
-      documents.value.push(newDocument)
+    documents.value.push(newDocument)
       console.log('Added document with mock implementation:', newDocument)
       return newId
     } catch (err) {
@@ -369,24 +369,24 @@ export const useDocumentStore = defineStore('documents', () => {
       // return true
 
       // For now, use current implementation
-      const docId = typeof id === 'number' ? id.toString() : id
-      const index = documents.value.findIndex(doc => doc.id === docId)
+    const docId = typeof id === 'number' ? id.toString() : id
+    const index = documents.value.findIndex(doc => doc.id === docId)
 
-      if (index !== -1) {
+    if (index !== -1) {
         // Simulate API delay
         await new Promise(resolve => setTimeout(resolve, 500))
 
-        documents.value[index] = {
-          ...documents.value[index],
+      documents.value[index] = {
+        ...documents.value[index],
           ...updates,
           updatedAt: new Date().toISOString().split('T')[0]
-        }
-
-        console.log(`Updated document ${id} with mock implementation`)
-        return true
       }
 
-      return false
+        console.log(`Updated document ${id} with mock implementation`)
+      return true
+    }
+
+    return false
     } catch (err) {
       console.error(`Error updating document ${id}:`, err)
       error.value = err.message || 'Failed to update document'
@@ -421,19 +421,19 @@ export const useDocumentStore = defineStore('documents', () => {
       // return true
 
       // For now, use current implementation
-      const docId = typeof id === 'number' ? id.toString() : id
-      const index = documents.value.findIndex(doc => doc.id === docId)
+    const docId = typeof id === 'number' ? id.toString() : id
+    const index = documents.value.findIndex(doc => doc.id === docId)
 
-      if (index !== -1) {
+    if (index !== -1) {
         // Simulate API delay
         await new Promise(resolve => setTimeout(resolve, 500))
 
-        documents.value.splice(index, 1)
+      documents.value.splice(index, 1)
         console.log(`Deleted document ${id} with mock implementation`)
-        return true
-      }
+      return true
+    }
 
-      return false
+    return false
     } catch (err) {
       console.error(`Error deleting document ${id}:`, err)
       error.value = err.message || 'Failed to delete document'
