@@ -1,130 +1,223 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 
 export const useTourStore = defineStore('tourStore', () => {
   // State
-  const tours = ref([
-    {
-      id: 201,
-      listingId: 101,
-      agentId: 5,
-      scheduledDateTime: '2024-05-15T14:30:00',
-      status: 'scheduled',
-      notes: 'Client is particularly interested in the kitchen and bathroom layouts.',
-      attendees: [1], // Client IDs
-      feedback: {
-        clientInterest: 4, // 1-5 scale
-        comments: 'Client loved the property but had concerns about the street noise.',
-        followUpNeeded: true
-      }
-    },
-    {
-      id: 202,
-      listingId: 102,
-      agentId: 8,
-      scheduledDateTime: '2024-05-16T10:00:00',
-      status: 'completed',
-      notes: 'Client wants to see more of the neighborhood during the tour.',
-      attendees: [1, 3], // Client IDs
-      feedback: {
-        clientInterest: 5, // 1-5 scale
-        comments: 'Clients were very excited about the property and asked about making an offer.',
-        followUpNeeded: true
-      }
+  const tours = ref([])
+  const isLoading = ref(false)
+  const error = ref(null)
+
+  // Load tours from localStorage on initialization
+  const initTours = () => {
+    isLoading.value = true
+    try {
+      const storedTours = JSON.parse(localStorage.getItem('tours') || '[]')
+      tours.value = storedTours
+    } catch (err) {
+      console.error('Failed to load tours from localStorage:', err)
+      error.value = 'Failed to load tours'
+    } finally {
+      isLoading.value = false
     }
-  ])
+  }
+
+  // Initialize store
+  initTours()
+
+  // Watch for changes and persist to localStorage
+  watch(tours, (newTours) => {
+    localStorage.setItem('tours', JSON.stringify(newTours))
+  }, { deep: true })
 
   // Getters
   const getTourById = (id) => {
-    return tours.value.find(tour => tour.id === id)
+    return tours.value.find(tour => tour.id === parseInt(id))
   }
 
   const getToursByClient = (clientId) => {
-    return tours.value.filter(tour => tour.attendees.includes(clientId))
+    return tours.value.filter(tour =>
+      tour.clients.includes(parseInt(clientId))
+    )
   }
 
-  const getUpcomingTours = () => {
-    const now = new Date()
-    return tours.value
-      .filter(tour => {
-        const tourDate = new Date(tour.scheduledDateTime)
-        return tourDate > now && tour.status === 'scheduled'
-      })
-      .sort((a, b) => new Date(a.scheduledDateTime) - new Date(b.scheduledDateTime))
+  const getToursByAgent = (agentId) => {
+    return tours.value.filter(tour =>
+      tour.agents.includes(parseInt(agentId))
+    )
+  }
+
+  const getToursByStatus = (status) => {
+    return tours.value.filter(tour => tour.status === status)
+  }
+
+  const getDraftTours = () => {
+    return getToursByStatus('draft')
+  }
+
+  const getScheduledTours = () => {
+    return getToursByStatus('scheduled')
+  }
+
+  const getCompletedTours = () => {
+    return getToursByStatus('completed')
+  }
+
+  const getInProgressTours = () => {
+    return getToursByStatus('in-progress')
   }
 
   // Actions
-  function scheduleTour(tour) {
-    const newTour = {
-      id: generateTourId(),
-      status: 'scheduled',
-      feedback: {
-        clientInterest: 0,
-        comments: '',
-        followUpNeeded: false
-      },
-      ...tour
-    }
+  function createTour(tour) {
+    isLoading.value = true
+    error.value = null
 
-    tours.value.push(newTour)
-    return newTour.id
+    try {
+      const newTour = {
+        id: generateTourId(),
+        status: 'draft',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        completedAt: null,
+        agents: [],
+        agentDetails: [],
+        clients: [],
+        clientDetails: [],
+        attachments: [],
+        image: tour.image || null,
+        lastEdited: null,
+        ...tour
+      }
+
+      tours.value.push(newTour)
+      return newTour.id
+    } catch (err) {
+      console.error('Failed to create tour:', err)
+      error.value = 'Failed to create tour'
+      return null
+    } finally {
+      isLoading.value = false
+    }
   }
 
   function updateTour(id, updates) {
-    const index = tours.value.findIndex(tour => tour.id === id)
+    isLoading.value = true
+    error.value = null
 
-    if (index !== -1) {
-      tours.value[index] = {
-        ...tours.value[index],
-        ...updates
-      }
-      return true
-    }
+    try {
+      const index = tours.value.findIndex(tour => tour.id === parseInt(id))
 
-    return false
-  }
-
-  function cancelTour(id) {
-    const tour = tours.value.find(tour => tour.id === id)
-
-    if (tour && tour.status === 'scheduled') {
-      tour.status = 'cancelled'
-      return true
-    }
-
-    return false
-  }
-
-  function completeTour(id, feedback) {
-    const tour = tours.value.find(tour => tour.id === id)
-
-    if (tour && tour.status === 'scheduled') {
-      tour.status = 'completed'
-
-      if (feedback) {
-        tour.feedback = {
-          ...tour.feedback,
-          ...feedback
+      if (index !== -1) {
+        tours.value[index] = {
+          ...tours.value[index],
+          ...updates,
+          updatedAt: new Date().toISOString(),
+          lastEdited: new Date().toISOString()
         }
+        return true
       }
 
-      return true
+      return false
+    } catch (err) {
+      console.error('Failed to update tour:', err)
+      error.value = 'Failed to update tour'
+      return false
+    } finally {
+      isLoading.value = false
     }
-
-    return false
   }
 
-  function addAttendee(tourId, clientId) {
-    const tour = tours.value.find(tour => tour.id === tourId)
+  function deleteTour(id) {
+    isLoading.value = true
+    error.value = null
 
-    if (tour) {
-      if (!tour.attendees.includes(clientId)) {
-        tour.attendees.push(clientId)
+    try {
+      const index = tours.value.findIndex(tour => tour.id === parseInt(id))
+
+      if (index !== -1) {
+        tours.value.splice(index, 1)
+        return true
       }
-      return true
-    }
 
-    return false
+      return false
+    } catch (err) {
+      console.error('Failed to delete tour:', err)
+      error.value = 'Failed to delete tour'
+      return false
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  function completeTour(id) {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      const tour = tours.value.find(tour => tour.id === parseInt(id))
+
+      if (tour) {
+        tour.status = 'completed'
+        tour.completedAt = new Date().toISOString()
+        tour.updatedAt = new Date().toISOString()
+        return true
+      }
+
+      return false
+    } catch (err) {
+      console.error('Failed to complete tour:', err)
+      error.value = 'Failed to complete tour'
+      return false
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  function saveAsDraft(tour) {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      const newTour = {
+        id: generateTourId(),
+        status: 'draft',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        completedAt: null,
+        agents: [],
+        agentDetails: [],
+        clients: [],
+        clientDetails: [],
+        attachments: [],
+        image: tour.image || null,
+        lastEdited: null,
+        ...tour
+      }
+
+      tours.value.push(newTour)
+      return newTour.id
+    } catch (err) {
+      console.error('Failed to save draft:', err)
+      error.value = 'Failed to save draft'
+      return null
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  function clearAllDrafts() {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      tours.value = tours.value.filter(tour => tour.status !== 'draft')
+      return true
+    } catch (err) {
+      console.error('Failed to clear drafts:', err)
+      error.value = 'Failed to clear drafts'
+      return false
+    } finally {
+      isLoading.value = false
+    }
   }
 
   // Helper method to generate unique tour ID
@@ -135,17 +228,28 @@ export const useTourStore = defineStore('tourStore', () => {
   return {
     // State
     tours,
+    isLoading,
+    error,
+
+    // Initialization
+    initTours,
 
     // Getters
     getTourById,
     getToursByClient,
-    getUpcomingTours,
+    getToursByAgent,
+    getToursByStatus,
+    getDraftTours,
+    getScheduledTours,
+    getCompletedTours,
+    getInProgressTours,
 
     // Actions
-    scheduleTour,
+    createTour,
     updateTour,
-    cancelTour,
+    deleteTour,
     completeTour,
-    addAttendee
+    saveAsDraft,
+    clearAllDrafts
   }
 })

@@ -1203,6 +1203,12 @@ const goBack = () => {
   padding: 20px;
   background-color: #fff;
   border-bottom: 1px solid #e6e6e6;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .task-detail__header {
@@ -1412,6 +1418,7 @@ const goBack = () => {
 .task-detail {
   margin: 0 auto;
   box-sizing: border-box;
+  padding-top: 140px; /* Add padding to account for fixed header */
 }
 
 .task-detail__grid {

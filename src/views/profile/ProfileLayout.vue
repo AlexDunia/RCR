@@ -107,7 +107,9 @@
     </div>
 
     <!-- Other pages content area -->
-    <router-view v-else />
+    <div v-else class="route-content">
+      <router-view />
+    </div>
   </div>
 </template>
 
@@ -158,13 +160,20 @@ const navigateToEditProfile = () => {
   min-height: 100vh;
   background-color: #f9fafb;
   font-family: 'Poppins', sans-serif;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
 }
 
 .profile-header {
   padding: 32px 24px;
   background-color: #fff;
   border-bottom: none;
-  position: relative;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  max-width: 1200px;
+  z-index: 1000;
 }
 
 .profile-header::after {
@@ -215,6 +224,11 @@ const navigateToEditProfile = () => {
   padding: 20px 24px 0;
   background-color: #fff;
   border-bottom: 1px solid #eeeded;
+  position: fixed;
+  top: 100px;
+  width: 100%;
+  max-width: 1200px;
+  z-index: 999;
 }
 
 .tabs-wrapper {
@@ -236,8 +250,8 @@ const navigateToEditProfile = () => {
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   cursor: pointer;
-  margin-right:20px;
-  margin-top:1px;
+  margin-right: 20px;
+  margin-top: 1px;
   text-decoration: none;
   font-weight: 500;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
@@ -261,9 +275,21 @@ const navigateToEditProfile = () => {
 }
 
 /* Profile Bio Styles */
-.profile-bio-container {
-  padding: 24px;
+.profile-bio-container,
+.route-content {
+  padding-top: 200px;
+  padding-left: 24px;
+  padding-right: 24px;
   background-color: #f9fafb;
+}
+
+:deep(.router-view),
+:deep(> .router-view) {
+  padding-top: 200px !important;
+  padding-left: 24px;
+  padding-right: 24px;
+  background-color: #f9fafb;
+  display: block;
 }
 
 .bio-header {

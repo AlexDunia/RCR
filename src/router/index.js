@@ -480,6 +480,51 @@ const routes = [
       title: 'Create Document',
       allowedRoles: ['admin']
     }
+  },
+  // Tour routes
+  {
+    path: '/tours',
+    name: 'Tours',
+    component: () => import('@/features/tour/TourList.vue'),
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: '',
+        redirect: '/tours/scheduled'
+      },
+      {
+        path: 'scheduled',
+        name: 'ScheduledTours',
+        component: () => import('@/features/tour/TourList.vue')
+      },
+      {
+        path: 'in-progress',
+        name: 'InProgressTours',
+        component: () => import('@/features/tour/TourList.vue')
+      },
+      {
+        path: 'drafts',
+        name: 'DraftTours',
+        component: () => import('@/features/tour/TourList.vue')
+      },
+      {
+        path: 'completed',
+        name: 'CompletedTours',
+        component: () => import('@/features/tour/TourList.vue')
+      }
+    ]
+  },
+  {
+    path: '/tours/create',
+    name: 'CreateTour',
+    component: () => import('@/features/tour/TourCreate.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/tours/:id/edit',
+    name: 'EditTour',
+    component: () => import('@/features/tour/TourCreate.vue'),
+    meta: { requiresAuth: true }
   }
 ];
 
