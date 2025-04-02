@@ -487,11 +487,29 @@ const router = createRouter({
   history: createWebHashHistory(),
   routes,
   scrollBehavior(to, from, savedPosition) {
+    // If there's a hash, scroll to that element
+    if (to.hash) {
+      return {
+        el: to.hash
+      };
+    }
+
+    // For browser back button, restore position
     if (savedPosition) {
       return savedPosition;
-    } else {
-      return { top: 0 };
     }
+
+    // Find the main scroll container and instantly scroll to top
+    const scrollContainer = document.querySelector('.scroll-container');
+    if (scrollContainer) {
+      scrollContainer.scrollTop = 0;
+    }
+
+    // Return top position without smooth behavior
+    return {
+      top: 0,
+      left: 0
+    };
   }
 });
 

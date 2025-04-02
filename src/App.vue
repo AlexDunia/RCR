@@ -64,6 +64,17 @@ watch(route, (to) => {
     });
   }
 }, { immediate: true });
+
+// Add scroll management
+const handleRouteChange = () => {
+  const mainContent = document.querySelector('.main-content');
+  if (mainContent) {
+    mainContent.scrollTop = 0;
+  }
+};
+
+// Watch route changes
+watch(route, handleRouteChange);
 </script>
 
 <template>
@@ -76,18 +87,20 @@ watch(route, (to) => {
       <!-- Show different headers if needed -->
       <!-- <AdminHeader v-if="isAdmin && !hideHeader" /> -->
       <!-- <Header v-else-if="!hideHeader" /> -->
-      <Header/>
+      <Header v-if="!hideHeader"/>
 
-      <PageTransition>
-        <router-view :key="$route.fullPath"></router-view>
-      </PageTransition>
+      <div class="scroll-container">
+        <PageTransition>
+          <router-view :key="$route.fullPath"></router-view>
+        </PageTransition>
 
-      <!-- Task Notification -->
-      <TaskNotification
-        :show="showNotification"
-        :message="currentNotification?.message || ''"
-        @dismiss="dismissNotification"
-      />
+        <!-- Task Notification -->
+        <TaskNotification
+          :show="showNotification"
+          :message="currentNotification?.message || ''"
+          @dismiss="dismissNotification"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -117,9 +130,18 @@ html, body {
 
 .main-content {
   flex: 1;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
   position: relative;
   transition: all 0.3s ease;
+}
+
+.scroll-container {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
 }
 
 .main-content.full-width {
