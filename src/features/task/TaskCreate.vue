@@ -1,5 +1,245 @@
+<template>
+  <div class="task-create-container">
+    <!-- Custom Header -->
+    <header class="task-header">
+      <div class="task-header__left">
+        <button class="task-header__back-btn" @click="handleBack">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <div class="task-header__title-container">
+          <h1 class="task-header__title">Create new task</h1>
+          <p class="task-header__subtitle">Here, you can add, remove, edit properties on your profile</p>
+        </div>
+      </div>
+      <div class="task-header__right">
+        <button class="task-header__icon-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+        </button>
+        <button class="task-header__icon-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+        </button>
+        <div class="task-header__user">
+          <img src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1739408381/Screenshot_2025-02-13_015617_mhjgby.png" alt="User" class="task-header__avatar">
+          <span class="task-header__username">Alex Dunia</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </div>
+      </div>
+    </header>
+
+    <!-- Loading Skeleton -->
+    <div v-if="loading" class="task-create__loading">
+      <div class="skeleton-loader"></div>
+    </div>
+
+    <!-- Main Content -->
+    <div v-else class="task-create-content">
+      <h2 class="task-create__main-title">Create a task</h2>
+
+      <!-- Main Form -->
+      <form class="task-create__form" @submit.prevent="handleSubmit">
+        <!-- Task Name -->
+        <div class="form-group">
+          <label for="taskName">Name of task</label>
+          <input
+            type="text"
+            id="taskName"
+            v-model="taskData.name"
+            placeholder="Visit offshore island"
+            required
+            @input="handleInputChange"
+          />
+        </div>
+
+        <!-- Date and Time Selection -->
+        <div class="date-time-container">
+          <div class="form-group">
+            <label for="startDate">Start date</label>
+            <div class="custom-select">
+              <input
+                type="date"
+                id="startDate"
+                v-model="taskData.startDate"
+                required
+                @input="handleInputChange"
+              />
+              <svg class="select-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="startTime">Start time</label>
+            <div class="custom-select">
+              <input
+                type="time"
+                id="startTime"
+                v-model="taskData.startTime"
+                required
+                @input="handleInputChange"
+              />
+              <svg class="select-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="date-time-container">
+          <div class="form-group">
+            <label for="endDate">End date</label>
+            <div class="custom-select">
+              <input
+                type="date"
+                id="endDate"
+                v-model="taskData.endDate"
+                required
+                @input="handleInputChange"
+              />
+              <svg class="select-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="endTime">End time</label>
+            <div class="custom-select">
+              <input
+                type="time"
+                id="endTime"
+                v-model="taskData.endTime"
+                required
+                @input="handleInputChange"
+              />
+              <svg class="select-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Priority Selection -->
+        <div class="form-group">
+          <label for="priority">Priority status</label>
+          <div class="custom-select">
+            <select id="priority" v-model="taskData.priority" @change="handleInputChange">
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+            <svg class="select-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Agent Selection -->
+        <div class="form-group">
+          <label>Add an agent</label>
+          <div class="custom-select" @click="showAgentModal = true">
+            <div class="select-placeholder">
+              {{ selectedAgents.length > 0 ? `${selectedAgents.length} agent(s) selected` : 'Select from your contacts who you want to tour' }}
+            </div>
+            <svg class="select-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <!-- Selected Agents List -->
+          <div class="selected-items-list" v-if="selectedAgents.length > 0">
+            <div v-for="agent in selectedAgents" :key="agent.id" class="selected-item">
+              <div class="selected-item-info">
+                <img :src="agent.avatar" alt="Agent avatar" class="selected-item-avatar">
+                <span class="selected-item-name">{{ agent.name }}</span>
+              </div>
+              <button class="remove-item-btn" @click.stop="removeAgent(agent.id)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Client Selection -->
+        <div class="form-group">
+          <label>Add your client</label>
+          <div class="custom-select" @click="showClientModal = true">
+            <div class="select-placeholder">
+              {{ selectedClients.length > 0 ? `${selectedClients.length} client(s) selected` : 'Select from your contacts who you want to tour' }}
+            </div>
+            <svg class="select-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <!-- Selected Clients List -->
+          <div class="selected-items-list" v-if="selectedClients.length > 0">
+            <div v-for="client in selectedClients" :key="client.id" class="selected-item">
+              <div class="selected-item-info">
+                <img :src="client.avatar" alt="Client avatar" class="selected-item-avatar">
+                <span class="selected-item-name">{{ client.name }}</span>
+              </div>
+              <button class="remove-item-btn" @click.stop="removeClient(client.id)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">
+            {{ route.query.draftId ? 'Update Task' : 'Create Task' }}
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Agent and Client Modals -->
+    <AgentModal
+      :show="showAgentModal"
+      :agents="availableAgents"
+      :selected-agents="selectedAgents"
+      @close="showAgentModal = false"
+      @select="handleAgentSelect"
+    />
+
+    <ClientModal
+      :show="showClientModal"
+      :clients="availableClients"
+      :selected-clients="selectedClients"
+      @close="showClientModal = false"
+      @select="handleClientSelect"
+    />
+
+    <!-- Draft Confirmation Dialog -->
+    <div v-if="showDraftConfirm" class="dialog-overlay">
+      <div class="dialog">
+        <h3>Save as Draft?</h3>
+        <p>You have unsaved changes. Would you like to save your progress as a draft?</p>
+        <div class="dialog-actions">
+          <button class="btn btn-secondary" @click="handleDraftCancel">No</button>
+          <button class="btn btn-primary" @click="handleDraftSave">Yes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
 <script setup>
-import { ref, reactive, onMounted, computed, watch, onBeforeUnmount } from 'vue'
+import { ref, reactive, onMounted, watch, onBeforeUnmount } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useRoleGuard } from '@/composables/useRoleGuard'
 import { useDateValidation } from '@/composables/useDateValidation'
@@ -11,16 +251,12 @@ const router = useRouter()
 const route = useRoute()
 const { checkAccess } = useRoleGuard()
 const layoutStore = useLayoutStore()
-const { todayDate, ensureFutureDate, isValidFutureDateTime, isValidDateTimeRange } = useDateValidation()
+const { ensureFutureDate, isValidFutureDateTime, isValidDateTimeRange } = useDateValidation()
 
 // Loading state
 const loading = ref(true)
 
-// Check if we're in edit mode
-const isEditMode = computed(() => !!route.query.draftId)
-
 // Form refs
-const fileInput = ref(null)
 const taskDescription = ref('Meet at the villa entrance ## Review property features ## Discuss client preferences')
 
 // Calculate tomorrow's date for startDate and endDate
@@ -28,8 +264,18 @@ const tomorrow = new Date()
 tomorrow.setDate(tomorrow.getDate() + 1)
 const tomorrowDate = tomorrow.toISOString().split('T')[0] // Format: YYYY-MM-DD
 
+// Form state and data
+const showAgentModal = ref(false)
+const showClientModal = ref(false)
+const isNavigating = ref(false)
+const showDraftConfirm = ref(false)
+const navigationGuard = ref(null)
+const hasInteracted = ref(false)
+const originalTaskData = ref(null)
+
+// Task data reactive object
 const taskData = reactive({
-  name: 'Tour Beachfront Villa',
+  name: 'Visit offshore island',
   startDate: tomorrowDate,
   startTime: '10:00',
   endDate: tomorrowDate,
@@ -59,21 +305,68 @@ const taskData = reactive({
   description: []
 })
 
-// Modal states
-const isAgentModalOpen = ref(false)
-const isClientModalOpen = ref(false)
+// For Agent/Client selection
+const availableAgents = ref([
+  {
+    id: 1,
+    name: 'John Smith',
+    avatar: 'https://example.com/avatars/john.jpg',
+    email: 'john@example.com'
+  },
+  {
+    id: 2,
+    name: 'Emily Davis',
+    avatar: 'https://example.com/avatars/emily.jpg',
+    email: 'emily@example.com'
+  },
+  {
+    id: 3,
+    name: 'Robert Johnson',
+    avatar: 'https://example.com/avatars/robert.jpg',
+    email: 'robert@example.com'
+  },
+  {
+    id: 4,
+    name: 'Sarah Parker',
+    avatar: 'https://example.com/avatars/sarah.jpg',
+    email: 'sarah@example.com'
+  }
+])
+
+const availableClients = ref([
+  {
+    id: 3,
+    name: 'Michael Brown',
+    avatar: 'https://example.com/avatars/michael.jpg',
+    email: 'michael@example.com'
+  },
+  {
+    id: 4,
+    name: 'Jessica White',
+    avatar: 'https://example.com/avatars/jessica.jpg',
+    email: 'jessica@example.com'
+  },
+  {
+    id: 5,
+    name: 'David Miller',
+    avatar: 'https://example.com/avatars/david.jpg',
+    email: 'david@example.com'
+  }
+])
 
 // Pre-populate selected agents and clients for testing
 const selectedAgents = ref([
   {
     id: 1,
     name: 'John Smith',
-    avatar: 'https://example.com/avatars/john.jpg'
+    avatar: 'https://example.com/avatars/john.jpg',
+    email: 'john@example.com'
   },
   {
     id: 2,
     name: 'Emily Davis',
-    avatar: 'https://example.com/avatars/emily.jpg'
+    avatar: 'https://example.com/avatars/emily.jpg',
+    email: 'emily@example.com'
   }
 ])
 
@@ -81,7 +374,8 @@ const selectedClients = ref([
   {
     id: 3,
     name: 'Michael Brown',
-    avatar: 'https://example.com/avatars/michael.jpg'
+    avatar: 'https://example.com/avatars/michael.jpg',
+    email: 'michael@example.com'
   }
 ])
 
@@ -91,61 +385,40 @@ taskData.agentDetails = selectedAgents.value
 taskData.clients = selectedClients.value.map(client => client.id)
 taskData.clientDetails = selectedClients.value
 
-// Dialog state
-const showDraftConfirm = ref(false)
-
-// Add originalTaskData to store the initial state
-const originalTaskData = ref(null)
-
 // Methods
-const handleAvatarError = (e) => {
-  e.target.src = '/default-avatar.jpg'
-}
-
-const openAgentModal = () => {
-  isAgentModalOpen.value = true
-}
-
-const closeAgentModal = () => {
-  isAgentModalOpen.value = false
-}
-
 const handleAgentSelect = (agents) => {
   selectedAgents.value = agents
   taskData.agents = agents.map(agent => agent.id)
   taskData.agentDetails = agents
-}
-
-const removeAgent = (agent) => {
-  selectedAgents.value = selectedAgents.value.filter(a => a.id !== agent.id)
-  taskData.agents = taskData.agents.filter(id => id !== agent.id)
-  taskData.agentDetails = taskData.agentDetails.filter(a => a.id !== agent.id)
-}
-
-const openClientModal = () => {
-  isClientModalOpen.value = true
-}
-
-const closeClientModal = () => {
-  isClientModalOpen.value = false
+  hasInteracted.value = true
 }
 
 const handleClientSelect = (clients) => {
   selectedClients.value = clients
   taskData.clients = clients.map(client => client.id)
   taskData.clientDetails = clients
+  hasInteracted.value = true
 }
 
-const removeClient = (client) => {
-  selectedClients.value = selectedClients.value.filter(c => c.id !== client.id)
-  taskData.clients = taskData.clients.filter(id => id !== client.id)
-  taskData.clientDetails = taskData.clientDetails.filter(c => c.id !== client.id)
+const removeAgent = (agentId) => {
+  selectedAgents.value = selectedAgents.value.filter(agent => agent.id !== agentId)
+  taskData.agents = selectedAgents.value.map(agent => agent.id)
+  taskData.agentDetails = selectedAgents.value
+  hasInteracted.value = true
+}
+
+const removeClient = (clientId) => {
+  selectedClients.value = selectedClients.value.filter(client => client.id !== clientId)
+  taskData.clients = selectedClients.value.map(client => client.id)
+  taskData.clientDetails = selectedClients.value
+  hasInteracted.value = true
 }
 
 const handleBack = () => {
-  if (hasFormData() && hasChanges()) {
+  if (hasFormData() && hasChanges() && hasInteracted.value) {
     showDraftConfirm.value = true
   } else {
+    isNavigating.value = true
     if (route.query.draftId) {
       if (route.query.from) {
         router.push(`/tasks/${route.query.from}`)
@@ -191,18 +464,12 @@ const saveDraftChanges = () => {
 }
 
 const hasFormData = () => {
+  // Consider task creation with any actual content worth saving
   if (taskData.name.trim() !== '') return true
   if (taskData.agents.length > 0) return true
   if (taskData.clients.length > 0) return true
   if (taskData.attachments.length > 0) return true
   if (taskDescription.value.trim() !== '') return true
-
-  const today = new Date().toISOString().split('T')[0]
-  if (taskData.startDate !== today) return true
-  if (taskData.startTime !== '09:00') return true
-  if (taskData.endDate !== today) return true
-  if (taskData.endTime !== '21:00' && taskData.endTime !== '17:00') return true
-  if (taskData.priority !== 'medium') return true
 
   return false
 }
@@ -239,6 +506,9 @@ const handleDraftSave = () => {
       localStorage.setItem('tasks', JSON.stringify(tasks))
     }
 
+    isNavigating.value = true
+    showDraftConfirm.value = false
+
     if (route.query.from) {
       router.push(`/tasks/${route.query.from}`)
     } else {
@@ -252,6 +522,7 @@ const handleDraftSave = () => {
 
 const handleDraftCancel = () => {
   showDraftConfirm.value = false
+  isNavigating.value = true
 
   if (route.query.from) {
     router.push(`/tasks/${route.query.from}`)
@@ -319,6 +590,7 @@ const handleSubmit = () => {
 
     localStorage.setItem('currentTaskDetail', JSON.stringify(completeTaskData))
 
+    isNavigating.value = true
     router.push('/tasks/scheduled')
   } catch (error) {
     console.error('Failed to create task:', error)
@@ -402,31 +674,9 @@ const loadDraftData = (draftId) => {
   })
 }
 
-const triggerFileInput = () => {
-  fileInput.value.click()
-}
-
-const handleFileUpload = (event) => {
-  const files = Array.from(event.target.files)
-  files.forEach(file => {
-    const fileData = {
-      id: Date.now() + Math.random().toString(36).substr(2, 9),
-      name: file.name,
-      type: file.type || getFileExtension(file.name),
-      size: file.size,
-      lastModified: file.lastModified
-    }
-    taskData.attachments.push(fileData)
-  })
-  event.target.value = ''
-}
-
-const removeFile = (index) => {
-  taskData.attachments.splice(index, 1)
-}
-
-const getFileExtension = (filename) => {
-  return filename.slice((filename.lastIndexOf(".") - 1 >>> 0) + 2).toUpperCase()
+// Add form input tracking
+const handleInputChange = () => {
+  hasInteracted.value = true
 }
 
 watch(() => taskData.startDate, (newStartDate) => {
@@ -436,13 +686,32 @@ watch(() => taskData.startDate, (newStartDate) => {
 })
 
 onMounted(() => {
-  setTimeout(() => {
-    layoutStore.setLayout({
-      hideSidebar: true,
-      hideHeader: true,
-      background: '#f9fafb'
-    })
-  }, 50)
+  // Hide the app header and sidebar
+  layoutStore.setLayout({
+    hideSidebar: true,
+    hideHeader: true,
+    hideFooter: true,
+    background: '#f9fafb'
+  })
+
+  // Set up navigation guard to prevent accidental navigation when form has changes
+  navigationGuard.value = router.beforeEach((to, from, next) => {
+    // Skip confirmation if we're already navigating after user decision
+    if (isNavigating.value) {
+      isNavigating.value = false
+      next()
+      return
+    }
+
+    if (hasFormData() && hasChanges() && hasInteracted.value) {
+      // Show confirmation dialog
+      showDraftConfirm.value = true
+      // Prevent navigation until dialog is answered
+      next(false)
+      return
+    }
+    next() // Allow navigation if no changes or no form data
+  })
 
   loading.value = true
 
@@ -488,10 +757,366 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  // Clean up navigation guard
+  if (navigationGuard.value) {
+    navigationGuard.value()
+  }
+
+  // Restore the default layout
   layoutStore.setLayout({
     hideSidebar: false,
     hideHeader: false,
-    background: '#F9FAFB'
+    hideFooter: false,
+    background: '#f9fafb'
   })
 })
 </script>
+
+<style scoped>
+.task-create-container {
+  max-width: 100%;
+  background-color: #f9fafb;
+  min-height: 100vh;
+  padding-bottom: 40px;
+}
+
+/* Header Styles */
+.task-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 24px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.task-header__left {
+  display: flex;
+  align-items: center;
+}
+
+.task-header__back-btn {
+  background: none;
+  border: none;
+  color: #111827;
+  cursor: pointer;
+  padding: 8px;
+  margin-right: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.task-header__title-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.task-header__title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.task-header__subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.task-header__right {
+  display: flex;
+  align-items: center;
+}
+
+.task-header__icon-btn {
+  background: #f3f4f6;
+  border: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 10px;
+  color: #6b7280;
+  cursor: pointer;
+}
+
+.task-header__user {
+  display: flex;
+  align-items: center;
+  margin-left: 14px;
+  cursor: pointer;
+}
+
+.task-header__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  margin-right: 8px;
+  object-fit: cover;
+}
+
+.task-header__username {
+  margin-right: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+}
+
+/* Main content */
+.task-create-content {
+  max-width: 800px;
+  margin: 30px auto 0;
+  padding: 40px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.task-create__main-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #0F172A;
+  margin: 0 0 40px 0;
+  text-align: center;
+}
+
+.task-create__loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.skeleton-loader {
+  width: 100%;
+  max-width: 800px;
+  height: 600px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 8px;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.task-create__form {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.form-group {
+  margin-bottom: 0;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: 500;
+  color: #374151;
+  font-size: 15px;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: #fff;
+  color: #111827;
+  height: 48px;
+}
+
+input::placeholder {
+  color: #9CA3AF;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.date-time-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 0;
+}
+
+/* Custom Select Styling */
+.custom-select {
+  position: relative;
+}
+
+.custom-select select,
+.custom-select input {
+  width: 100%;
+  appearance: none;
+  padding-right: 30px;
+  background-color: #ffffff;
+  height: 48px;
+}
+
+.select-arrow {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #9CA3AF;
+}
+
+.select-placeholder {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: #fff;
+  color: #9CA3AF;
+  cursor: pointer;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  height: 48px;
+  display: flex;
+  align-items: center;
+}
+
+/* Form actions */
+.form-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.btn {
+  padding: 14px 36px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-primary {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  min-width: 150px;
+}
+
+.btn-primary:hover {
+  background-color: #2563eb;
+}
+
+.btn-secondary {
+  background-color: white;
+  color: #4b5563;
+  border: 1px solid #d1d5db;
+}
+
+.btn-secondary:hover {
+  background-color: #f9fafb;
+}
+
+/* Dialog */
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.dialog {
+  background-color: white;
+  border-radius: 8px;
+  padding: 24px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.dialog h3 {
+  margin-top: 0;
+  font-size: 18px;
+  color: #111827;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+/* Selected Items List */
+.selected-items-list {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.selected-item {
+  display: flex;
+  align-items: center;
+  background-color: #f3f4f6;
+  border-radius: 20px;
+  padding: 6px 12px;
+  max-width: fit-content;
+}
+
+.selected-item-info {
+  display: flex;
+  align-items: center;
+}
+
+.selected-item-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  margin-right: 8px;
+  object-fit: cover;
+}
+
+.selected-item-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.remove-item-btn {
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.remove-item-btn:hover {
+  color: #ef4444;
+}
+</style>
