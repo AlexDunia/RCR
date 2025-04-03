@@ -9,8 +9,8 @@
         </button>
         <div class="tour-create__subtitle">
           {{ isEditMode ? 'Update your tour details and save changes' : 'Schedule a new property tour' }}
-        </div>
       </div>
+    </div>
       <div class="tour-create__profile">
         <!-- Placeholder icons, consider making these functional or removing -->
         <button class="tour-create__icon-btn" aria-label="Messages">
@@ -35,7 +35,7 @@
           <svg class="tour-create__dropdown-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
           </svg>
-        </div>
+      </div>
       </div>
     </header>
 
@@ -74,74 +74,74 @@
     <section v-else class="tour-create__content">
       <h1 class="tour-create__title">{{ isEditMode ? 'Edit tour' : 'Create a tour' }}</h1>
 
-      <form class="tour-create__form" @submit.prevent="handleSubmit" role="form">
+      <form class="tour-create__form" @submit.prevent="handleSubmit" role="form" @change="formInputChange" @input="formInputChange">
         <!-- Tour Name/Title -->
         <div class="tour-create__form-group">
           <label for="tourName" class="tour-create__label">Name of tour</label>
-          <input
-            type="text"
+            <input
+              type="text"
             id="tourName"
             v-model="tourData.title"
             class="tour-create__input"
             :placeholder="isEditMode ? 'Edit tour name' : 'Luxury Condo Showing'"
-            required
+              required
             aria-required="true"
           >
-        </div>
+          </div>
 
         <!-- Start Date and Time Section -->
         <div class="tour-create__datetime-group">
           <!-- Start Date -->
           <div class="tour-create__form-group tour-create__form-group--half">
             <label for="startDate" class="tour-create__label">Start date</label>
-            <input
+              <input
               type="date"
-              id="startDate"
-              v-model="tourData.startDate"
-              :min="todayDate"
+                id="startDate"
+                v-model="tourData.startDate"
+                :min="todayDate"
               class="tour-create__input"
-              required
+                required
               aria-required="true"
             >
-          </div>
+            </div>
           <!-- Start Time -->
           <div class="tour-create__form-group tour-create__form-group--half">
             <label for="startTime" class="tour-create__label">Start time</label>
-            <input
+              <input
               type="time"
-              id="startTime"
-              v-model="tourData.startTime"
+                id="startTime"
+                v-model="tourData.startTime"
               class="tour-create__input"
-              required
+                required
               aria-required="true"
             >
+            </div>
           </div>
-        </div>
 
         <!-- End Date and Time Section -->
         <div class="tour-create__datetime-group">
           <!-- End Date -->
           <div class="tour-create__form-group tour-create__form-group--half">
             <label for="endDate" class="tour-create__label">End date</label>
-            <input
+              <input
               type="date"
-              id="endDate"
-              v-model="tourData.endDate"
+                id="endDate"
+                v-model="tourData.endDate"
               :min="tourData.startDate || todayDate"
               class="tour-create__input"
-              required
+                required
               aria-required="true"
             >
-          </div>
+            </div>
           <!-- End Time -->
           <div class="tour-create__form-group tour-create__form-group--half">
             <label for="endTime" class="tour-create__label">End time</label>
-            <input
+              <input
               type="time"
-              id="endTime"
-              v-model="tourData.endTime"
+                id="endTime"
+                v-model="tourData.endTime"
               class="tour-create__input"
-              required
+                required
               aria-required="true"
             >
           </div>
@@ -173,7 +173,7 @@
             placeholder="Client interested in kitchen layout, check availability of garage..."
             rows="4"
           ></textarea>
-        </div>
+            </div>
 
         <!-- Agent Selection -->
         <div class="tour-create__form-group">
@@ -192,17 +192,17 @@
             <div v-for="agent in selectedAgents" :key="agent.id" class="tour-create__selected-item">
               <img :src="agent.avatar || defaultAvatar" :alt="agent.name" class="tour-create__selected-avatar" @error="handleAvatarError">
               <span class="tour-create__selected-name">{{ agent.name }}</span>
-              <button
-                type="button"
+                <button
+                  type="button"
                 class="tour-create__selected-remove"
                 @click.stop="removeAgent(agent)"
                 aria-label="Remove agent"
-              >
+                >
                 &times;
-              </button>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
 
         <!-- Client Selection -->
         <div class="tour-create__form-group">
@@ -221,17 +221,17 @@
             <div v-for="client in selectedClients" :key="client.id" class="tour-create__selected-item">
               <img :src="client.avatar || defaultAvatar" :alt="client.name" class="tour-create__selected-avatar" @error="handleAvatarError">
               <span class="tour-create__selected-name">{{ client.name }}</span>
-              <button
-                type="button"
+                <button
+                  type="button"
                 class="tour-create__selected-remove"
                 @click.stop="removeClient(client)"
                 aria-label="Remove client"
-              >
+                >
                 &times;
-              </button>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
 
         <!-- Attachment Section -->
          <div class="tour-create__section">
@@ -251,7 +251,7 @@
               </svg>
               Upload Files
             </button>
-          </div>
+        </div>
 
           <!-- File List -->
           <div v-if="tourData.attachments.length > 0" class="tour-create__file-list">
@@ -300,8 +300,8 @@
         <h3 class="tour-create__dialog-title">{{ confirmationTitle }}</h3>
         <p class="tour-create__dialog-text">{{ confirmationMessage }}</p>
         <div class="tour-create__dialog-actions">
-          <button class="tour-create__dialog-btn tour-create__dialog-btn--secondary" @click="closeConfirmation">Cancel</button>
-          <button class="tour-create__dialog-btn tour-create__dialog-btn--primary" @click="confirmAction">Confirm</button>
+          <button class="tour-create__dialog-btn tour-create__dialog-btn--secondary" @click="handleNoAction">No</button>
+          <button class="tour-create__dialog-btn tour-create__dialog-btn--primary" @click="confirmAction">Yes</button>
         </div>
       </div>
     </div>
@@ -358,45 +358,139 @@ const showConfirmation = ref(false)
 const confirmationTitle = ref('')
 const confirmationMessage = ref('')
 const pendingAction = ref(null)
+const pendingCancelAction = ref(null)
 
 // File input ref
 const fileInput = ref(null)
 
-// Add a flag to track form changes
+// Add a flag to track form changes and interaction
 const hasFormChanges = ref(false)
+const hasInteracted = ref(false)
 
-// Track form changes
+// Store initial form state to compare against
+const initialFormState = ref({})
+
+// Set up the initial form state after the form is loaded/populated
+const saveInitialFormState = () => {
+  initialFormState.value = {
+    title: tourData.title,
+    startDate: tourData.startDate,
+    startTime: tourData.startTime,
+    endDate: tourData.endDate,
+    endTime: tourData.endTime,
+    notes: tourData.notes,
+    priority: tourData.priority,
+    agents: JSON.stringify(tourData.agents),
+    clients: JSON.stringify(tourData.clients),
+    attachments: JSON.stringify(tourData.attachments)
+  }
+
+  // Initialize flags as false after saving initial state
+  hasFormChanges.value = false
+  hasInteracted.value = false
+}
+
+// Check if form has actual content that would be worth saving
+const hasActualContent = () => {
+  return (
+    tourData.title.trim() !== '' ||
+    tourData.notes.trim() !== '' ||
+    tourData.agents.length > 0 ||
+    tourData.clients.length > 0 ||
+    tourData.attachments.length > 0
+  )
+}
+
+// Compare current form state with initial state
+const hasStateChanged = () => {
+  return (
+    tourData.title !== initialFormState.value.title ||
+    tourData.startDate !== initialFormState.value.startDate ||
+    tourData.startTime !== initialFormState.value.startTime ||
+    tourData.endDate !== initialFormState.value.endDate ||
+    tourData.endTime !== initialFormState.value.endTime ||
+    tourData.notes !== initialFormState.value.notes ||
+    tourData.priority !== initialFormState.value.priority ||
+    JSON.stringify(tourData.agents) !== initialFormState.value.agents ||
+    JSON.stringify(tourData.clients) !== initialFormState.value.clients ||
+    JSON.stringify(tourData.attachments) !== initialFormState.value.attachments
+  )
+}
+
+// Track form changes and interaction
 watch(tourData, () => {
-  hasFormChanges.value = true
+  // Only consider form changed if there is actual content or the state has changed
+  if (hasActualContent() && hasStateChanged()) {
+    hasFormChanges.value = true
+    hasInteracted.value = true
+  }
 }, { deep: true })
 
-// Listen for navigation to confirm unsaved changes
-onBeforeUnmount(() => {
-  if (hasFormChanges.value) {
-    // Show confirmation before leaving if there are unsaved changes
-    router.beforeEach((to, from, next) => {
-      openConfirmation(
-        'Unsaved Changes',
-        'You have unsaved changes. Do you want to save as draft before leaving?',
-        () => {
-          saveDraft().then(() => {
-            next()
-          })
-        }
-      )
-      // This navigation will be prevented until the user confirms
-    })
+// Reset interaction flag on mount
+onMounted(() => {
+  // After default values are set
+  setTimeout(() => {
+    saveInitialFormState()
+  }, 100)
+})
+
+// Save initial state after existing tour data is loaded
+watch([isEditMode, loading], () => {
+  if (!loading.value) {
+    setTimeout(() => {
+      saveInitialFormState()
+    }, 100)
   }
 })
 
-// --- Computed Properties ---
-const todayDate = computed(() => {
-  const today = new Date()
-  return today.toISOString().split('T')[0]
-})
+// Manually track form interaction on user inputs
+const formInputChange = () => {
+  // Only update if there's actual content worth saving
+  if (hasActualContent() && hasStateChanged()) {
+    hasInteracted.value = true
+    hasFormChanges.value = true
+  }
+}
 
-// --- Lifecycle Hooks ---
+// Add a proper navigation guard when the component is mounted
+const navigationGuard = ref(null)
+let isNavigating = ref(false)
+
 onMounted(() => {
+  // Register the navigation guard and store the remove function
+  navigationGuard.value = router.beforeEach((to, from, next) => {
+    // Skip confirmation if we're already navigating after user decision
+    if (isNavigating.value) {
+      isNavigating.value = false
+      next()
+      return
+    }
+
+    if (hasInteracted.value) {
+      // Show confirmation dialog
+      openConfirmation(
+        'Unsaved Changes',
+        'You have made changes to this form. Do you want to save as draft before leaving?',
+        () => {
+          // YES - Save before navigating
+          saveDraft().then(() => {
+            isNavigating.value = true
+            next()
+          }).catch(() => {
+            next(false) // If save fails, stay on page
+          })
+        },
+        () => {
+          // NO - Discard changes and navigate
+          isNavigating.value = true
+          next()
+        }
+      )
+      return false // Prevent navigation until dialog is answered
+    }
+    next() // No changes, allow navigation
+  })
+
   // Set default dates to today
   tourData.startDate = todayDate.value
   tourData.endDate = todayDate.value
@@ -465,18 +559,25 @@ onMounted(async () => {
 
 // Navigation
 const handleBack = () => {
-  if (hasFormChanges.value) {
+  if (hasInteracted.value) {
     openConfirmation(
       'Unsaved Changes',
-      'You have unsaved changes. Do you want to save as draft before leaving?',
+      'You have made changes to this form. Do you want to save as draft before leaving?',
       () => {
+        // YES - Save before navigating back
         saveDraft().then(() => {
-          router.push('/tours')
+          isNavigating.value = true
+          router.go(-1)
         })
+      },
+      () => {
+        // NO - Discard changes and navigate back
+        isNavigating.value = true
+        router.go(-1)
       }
     )
   } else {
-    router.push('/tours')
+    router.go(-1)
   }
 }
 
@@ -575,7 +676,7 @@ const handleSubmit = async () => {
       const success = await tourStore.updateTour(tourId.value, tourPayload)
       if (success) {
         router.push(`/tours/${tourId.value}`) // Go to tour detail page
-      } else {
+    } else {
         errorMessage.value = 'Failed to update tour. Please try again.'
       }
     } else {
@@ -636,8 +737,8 @@ const saveDraft = async () => {
             router.push('/tours/drafts'); // Navigate to drafts list
         } else {
             errorMessage.value = 'Failed to save draft. Please try again.';
-        }
-    } catch (error) {
+    }
+  } catch (error) {
         console.error('Error saving draft:', error);
         errorMessage.value = `An error occurred while saving draft: ${error.message || 'Please try again.'}`;
     } finally {
@@ -646,28 +747,55 @@ const saveDraft = async () => {
 }
 
 // Confirmation Dialog Logic
-const openConfirmation = (title, message, action) => {
+const openConfirmation = (title, message, yesAction, noAction) => {
   confirmationTitle.value = title
   confirmationMessage.value = message
-  pendingAction.value = action
+  pendingAction.value = yesAction // "Yes" action
+  pendingCancelAction.value = noAction // "No" action
   showConfirmation.value = true
 }
 
 const closeConfirmation = () => {
+  // When clicking outside, stay on the current page
   showConfirmation.value = false
 }
 
+const handleNoAction = () => {
+  // "No" button action - don't save, execute the no action
+  showConfirmation.value = false
+
+  if (pendingCancelAction.value) {
+    pendingCancelAction.value()
+  }
+}
+
 const confirmAction = () => {
+  // "Yes" button action - save and continue
+  showConfirmation.value = false
+
   if (pendingAction.value) {
     pendingAction.value()
   }
-  closeConfirmation()
 }
 
 // Handle broken avatar images
 const handleAvatarError = (event) => {
   event.target.src = defaultAvatar
 }
+
+// Clean up the navigation guard when component is unmounted
+onBeforeUnmount(() => {
+  // Remove the navigation guard if it exists
+  if (navigationGuard.value) {
+    navigationGuard.value()
+  }
+})
+
+// --- Computed Properties ---
+const todayDate = computed(() => {
+  const today = new Date()
+  return today.toISOString().split('T')[0]
+})
 
 </script>
 
@@ -1135,9 +1263,9 @@ const handleAvatarError = (event) => {
 .tour-create__dialog-btn {
    padding: 0.625rem 1.25rem;
    border-radius: 0.375rem;
-   font-weight: 500;
+  font-weight: 500;
    font-size: 0.875rem;
-   cursor: pointer;
+  cursor: pointer;
 }
 .tour-create__dialog-btn--primary {
   background-color: #dc2626; /* red-600 */
@@ -1149,7 +1277,7 @@ const handleAvatarError = (event) => {
 }
 .tour-create__dialog-btn--secondary {
    background-color: #ffffff;
-   color: #374151;
+  color: #374151;
    border: 1px solid #d1d5db;
 }
 .tour-create__dialog-btn--secondary:hover {
