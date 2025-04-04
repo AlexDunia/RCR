@@ -115,11 +115,12 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { useTaskStore } from '@/stores/taskStore';
 
 const router = useRouter();
 const route = useRoute();
+const taskStore = useTaskStore();
 
-const tasks = ref([]);
 const loading = ref(true);
 const showDeleteConfirm = ref(false);
 const showClearAllConfirm = ref(false);
@@ -134,10 +135,8 @@ const loadTasks = () => {
 
   // Simulate network delay for skeleton loader
   setTimeout(() => {
-    const storedTasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-    tasks.value = storedTasks;
+    taskStore.initTasks(); // Make sure tasks are loaded in the store
     loading.value = false;
-    console.log('Loaded tasks:', storedTasks); // Debug to verify dates
   }, 1000);
 };
 
@@ -153,49 +152,76 @@ const confirmDelete = (task) => {
 
 const handleDelete = () => {
   if (taskToDelete.value) {
-    const updatedTasks = tasks.value.filter(t => t.id !== taskToDelete.value.id);
-    localStorage.setItem('tasks', JSON.stringify(updatedTasks));
-    tasks.value = updatedTasks;
+    taskStore.deleteTask(taskToDelete.value.id);
     showDeleteConfirm.value = false;
     taskToDelete.value = null;
   }
 };
 
 const handleClearAll = () => {
-  localStorage.clear(); // This will clear all localStorage
-  tasks.value = [];
+  taskStore.clearAllDrafts();
   showClearAllConfirm.value = false;
 };
 
 const filteredTasks = computed(() => {
   const status = route.path.split('/').pop();
-  return tasks.value
-    .filter(task => {
-      switch(status) {
-        case 'in-progress':
-          return task.status === 'in_progress';
-        case 'drafts':
-          return task.status === 'draft';
-        case 'completed':
-          return task.status === 'completed';
-        case 'scheduled':
-          return task.status === 'scheduled';
-        default:
-          return true;
-      }
-    })
-    .sort((a, b) => {
-      // Sort by updatedAt (edited) or createdAt (created), newest first
-      const dateA = new Date(a.updatedAt || a.createdAt || a.id).getTime();
-      const dateB = new Date(b.updatedAt || b.createdAt || b.id).getTime();
-      return dateB - dateA; // Newest (most recently created/edited) first
-    });
+  let result = [];
+
+  switch(status) {
+    case 'in-progress':
+      result = taskStore.getInProgressTasks();
+      break;
+    case 'drafts':
+      result = taskStore.getDraftTasks();
+      break;
+    case 'completed':
+      result = taskStore.getCompletedTasks();
+      break;
+    case 'scheduled':
+      result = taskStore.getScheduledTasks();
+      break;
+    default:
+      result = taskStore.tasks;
+  }
+
+  // Sort by relevant dates based on status, newest first
+  return [...result].sort((a, b) => {
+    let dateA, dateB;
+
+    // Use the most relevant date field based on task status
+    if (a.status === 'scheduled') {
+      // For scheduled tasks, use their scheduled start date
+      dateA = new Date(`${a.startDate || a.formattedStartTime || a.createdAt}`.replace(' ', 'T')).getTime();
+    } else if (a.status === 'completed') {
+      // For completed tasks, use completion date
+      dateA = new Date(a.completedAt || a.updatedAt || a.createdAt).getTime();
+    } else if (a.status === 'in_progress') {
+      // For in-progress tasks, use start date
+      dateA = new Date(a.startedAt || a.updatedAt || a.createdAt).getTime();
+    } else {
+      // For drafts and others, use update date
+      dateA = new Date(a.updatedAt || a.createdAt || a.id).getTime();
+    }
+
+    if (b.status === 'scheduled') {
+      dateB = new Date(`${b.startDate || b.formattedStartTime || b.createdAt}`.replace(' ', 'T')).getTime();
+    } else if (b.status === 'completed') {
+      dateB = new Date(b.completedAt || b.updatedAt || b.createdAt).getTime();
+    } else if (b.status === 'in_progress') {
+      dateB = new Date(b.startedAt || b.updatedAt || b.createdAt).getTime();
+    } else {
+      dateB = new Date(b.updatedAt || b.createdAt || b.id).getTime();
+    }
+
+    // Sort newest first (highest timestamp first)
+    return dateB - dateA;
+  });
 });
 
 const handleTaskClick = (task) => {
   // Navigate to the appropriate task detail page based on status
   if (task.status === 'completed') {
-    // For completed tasks, store in completedTasks localStorage
+    // For completed tasks, store in localStorage for compatibility
     localStorage.setItem('completedTasks', JSON.stringify(task));
 
     // Navigate to the CompletedTaskDetail component

@@ -7,6 +7,16 @@ import EducationLayout from '@/layouts/EducationLayout.vue';
 
 // Lazy-loaded route components
 const routes = [
+  // Agents management route (Admin-only)
+  {
+    path: '/agents',
+    name: 'Agents',
+    component: () => import('@/views/AgentsView.vue'),
+    meta: {
+      title: 'Find Agents',
+      allowedRoles: ['admin']
+    }
+  },
   // Dashboard route with role-based component
   {
     path: '/',
@@ -133,6 +143,46 @@ const routes = [
         }
       }
     ]
+  },
+
+  // Admin Task routes
+  {
+    path: '/admin/tasks',
+    component: TasksLayout,
+    meta: { allowedRoles: ['admin'] }, // Restrict to admin only
+    children: [
+      {
+        path: '',
+        redirect: '/' // Redirect to home if no specific task ID
+      },
+      {
+        path: ':id',
+        name: 'AdminTaskDetail',
+        component: () => import('@/views/admin/AdminTaskDetail.vue'),
+        meta: {
+          hideSidebar: true,
+          hideHeader: true
+        }
+      }
+    ]
+  },
+
+  // Admin Client Task Detail route (Admin-only)
+  {
+    path: '/admin/client-task/:id',
+    name: 'AdminClientTaskDetail',
+    component: () => import('@/views/admin/ClientTaskDetail.vue'),
+    meta: {
+      title: 'Client Task Detail',
+      hideSidebar: true,
+      hideHeader: true,
+      allowedRoles: ['admin']
+    }
+  },
+  {
+    path: '/admin/client-task/:id/edit',
+    name: 'EditClientTask',
+    component: () => import('@/views/admin/EditClientTask.vue')
   },
 
   // Agent Profile route (Agent-only)
@@ -409,7 +459,7 @@ const routes = [
     meta: {
       title: 'Property Details',
       hideSidebar: false,
-      allowedRoles: ['agent'] // Restricted to agents as per your request
+      allowedRoles: ['admin', 'agent'] // Allow both admin and agent
     }
   },
   {
@@ -418,7 +468,7 @@ const routes = [
     component: () => import('@/views/listings/PropertiesView.vue'),
     meta: {
       title: 'All Properties',
-      allowedRoles: ['agent'] // Restricted to agents as per your request
+      allowedRoles: ['admin', 'agent'] // Allow both admin and agent
     }
   },
   // Clients route (Admin-only)
@@ -448,6 +498,16 @@ const routes = [
     component: () => import('@/views/admin/PropertyDetailView.vue'),
     meta: {
       title: 'Property Details',
+      allowedRoles: ['admin']
+    }
+  },
+  // Admin Agent Profile route (Admin-only)
+  {
+    path: '/admin/agent/:id',
+    name: 'AdminAgentProfileDetail',
+    component: () => import('@/views/admin/AgentProfileView.vue'),
+    meta: {
+      title: 'Agent Profile',
       allowedRoles: ['admin']
     }
   },
@@ -525,6 +585,19 @@ const routes = [
     name: 'EditTour',
     component: () => import('@/features/tour/TourCreate.vue'),
     meta: { requiresAuth: true }
+  },
+  // Error and fallback routes
+  {
+    path: '/unauthorized',
+    name: 'Unauthorized',
+    component: () => import('@/views/auth/UnauthorizedView.vue')
+  },
+
+  // 404 route - must be the last route
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: () => import('@/views/NotFoundView.vue')
   }
 ];
 
@@ -573,7 +646,15 @@ router.beforeEach(async (to, from, next) => {
     const { useRoleGuard } = await import('@/composables/useRoleGuard');
     const { checkAccess } = useRoleGuard();
     const hasAccess = await checkAccess(to.meta.allowedRoles);
+
+    // Log the access check result
+    console.log(`Route access check for ${to.path}:`, {
+      requiredRoles: to.meta.allowedRoles,
+      hasAccess
+    });
+
     if (!hasAccess) {
+      console.warn(`Access denied to ${to.path} - redirecting to unauthorized`);
       next('/unauthorized');
       return;
     }

@@ -220,6 +220,24 @@ export const useTourStore = defineStore('tourStore', () => {
     }
   }
 
+  // Clear all tours (reset data)
+  function clearAllTours() {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      tours.value = []
+      localStorage.removeItem('tours')
+      return true
+    } catch (err) {
+      console.error('Failed to clear tours:', err)
+      error.value = 'Failed to clear tours'
+      return false
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   // Helper method to generate unique tour ID
   function generateTourId() {
     return Math.max(0, ...tours.value.map(tour => tour.id)) + 1
@@ -250,6 +268,7 @@ export const useTourStore = defineStore('tourStore', () => {
     deleteTour,
     completeTour,
     saveAsDraft,
-    clearAllDrafts
+    clearAllDrafts,
+    clearAllTours
   }
 })

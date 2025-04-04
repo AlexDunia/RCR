@@ -143,7 +143,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useClientStore } from '@/stores/clientStore';
 import { useRouter } from 'vue-router';
 
@@ -166,20 +166,29 @@ const newClient = ref({
 
 // Computed properties
 const filteredClients = computed(() => {
-  if (!searchQuery.value) {
+  console.log('Search query:', searchQuery.value); // Debug log
+  console.log('All clients:', clientStore.clients); // Debug log
+
+  if (!searchQuery.value.trim()) {
     return clientStore.clients;
   }
 
-  const query = searchQuery.value.toLowerCase();
-  return clientStore.clients.filter(client =>
-    client.name.toLowerCase().includes(query) ||
-    client.email.toLowerCase().includes(query) ||
-    (client.bio && client.bio.toLowerCase().includes(query)) ||
-    (client.location && client.location.toLowerCase().includes(query)) ||
-    (client.specialty && client.specialty.toLowerCase().includes(query)) ||
-    (client.interests &&
-      client.interests.some(interest => interest.toLowerCase().includes(query)))
-  );
+  const query = searchQuery.value.toLowerCase().trim();
+  const filtered = clientStore.clients.filter(client => {
+    const matchName = client.name?.toLowerCase().includes(query);
+    const matchEmail = client.email?.toLowerCase().includes(query);
+    const matchBio = client.bio?.toLowerCase().includes(query);
+    const matchLocation = client.location?.toLowerCase().includes(query);
+    const matchSpecialty = client.specialty?.toLowerCase().includes(query);
+    const matchInterests = client.interests?.some(interest =>
+      interest.toLowerCase().includes(query)
+    );
+
+    return matchName || matchEmail || matchBio || matchLocation || matchSpecialty || matchInterests;
+  });
+
+  console.log('Filtered clients:', filtered); // Debug log
+  return filtered;
 });
 
 const activeClientsCount = computed(() => {
@@ -253,8 +262,8 @@ function cancelAddClient() {
 // Lifecycle hooks
 onMounted(() => {
   console.log('ClientsView mounted');
-  console.log('Clients from store:', clientStore.clients);
-  console.log('Client interactions:', clientStore.clientInteractions);
+  console.log('Initial clients from store:', clientStore.clients);
+  console.log('Initial search query:', searchQuery.value);
 
   // Add status property to clients if they don't have it
   clientStore.clients.forEach(client => {
@@ -262,6 +271,16 @@ onMounted(() => {
       clientStore.updateClient(client.id, { status: 'active' });
     }
   });
+
+  // Log after initialization
+  console.log('Clients after initialization:', clientStore.clients);
+  console.log('Client interactions:', clientStore.clientInteractions);
+});
+
+// Watch search query for changes
+watch(searchQuery, (newQuery) => {
+  console.log('Search query changed:', newQuery);
+  console.log('Filtered clients:', filteredClients.value);
 });
 </script>
 

@@ -87,7 +87,8 @@ const props = defineProps({
   },
   clients: {
     type: Array,
-    default: () => []
+    default: () => [],
+    required: false
   },
   selectedClients: {
     type: Array,
@@ -100,6 +101,13 @@ const emit = defineEmits(['close', 'select', 'remove']);
 // State
 const searchQuery = ref('');
 const localSelectedClients = ref([...props.selectedClients]);
+
+// Make sure the console logs are added for debugging
+console.log('ClientModal props:', {
+  show: props.show,
+  clientsCount: props.clients?.length,
+  selectedCount: props.selectedClients?.length
+});
 
 // Handle avatar errors
 const handleAvatarError = (e) => {

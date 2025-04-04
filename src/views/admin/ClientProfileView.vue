@@ -4,7 +4,7 @@
       <div class="avatar-container">
         <img :src="client?.profilePicture || 'https://randomuser.me/api/portraits/men/32.jpg'" alt="Client avatar" class="profile-avatar" />
       </div>
-      <h1 class="profile-name">{{ client?.name || 'Alex Dunia' }}</h1>
+      <h1 class="profile-name">{{ client?.name  }}</h1>
     </div>
 
     <div class="nav-container">
@@ -542,22 +542,18 @@
       <div v-if="activeTab === 'tours'" class="profile-section">
         <div class="section-header">
           <h2 class="section-title">{{ client?.name || 'Alex Dunia' }}'s Property Tours</h2>
-          <button class="edit-button">Schedule Tour</button>
+          <button class="edit-button" @click="router.push('/tours/create')">Schedule Tour</button>
         </div>
-        <div class="placeholder-content">
-          <p>Client's scheduled and completed property tours will be displayed here.</p>
-        </div>
+        <ClientTours />
       </div>
 
       <!-- Tasks Tab Content -->
       <div v-if="activeTab === 'tasks'" class="profile-section">
         <div class="section-header">
           <h2 class="section-title">{{ client?.name || 'Alex Dunia' }}'s Tasks</h2>
-          <button class="edit-button">Create Task</button>
+          <button class="edit-button" @click="createTaskForClient">Create Task</button>
         </div>
-        <div class="placeholder-content">
-          <p>Tasks related to this client will be displayed here.</p>
-        </div>
+        <ClientTasks />
       </div>
     </div>
   </div>
@@ -571,6 +567,8 @@ import { useListingStore } from '@/stores/listingStore';
 import { useDocumentStore } from '@/stores/documents';
 import { useAgentStore } from '@/stores/agentStore';
 import { useConnectionStore } from '@/stores/connectionStore';
+import ClientTasks from '@/features/client/ClientTasks.vue';
+import ClientTours from '@/features/client/ClientTours.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -1082,6 +1080,11 @@ function formatDocumentType(type) {
     default:
       return type;
   }
+}
+
+// Function to create a new task for this client
+function createTaskForClient() {
+  router.push(`/tasks/create?clientId=${clientId.value}`);
 }
 </script>
 

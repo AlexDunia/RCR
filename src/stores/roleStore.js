@@ -3,9 +3,9 @@ import { ref } from 'vue'
 
 const useRoleStore = defineStore('role', () => {
   // Default role set to 'admin'
-  const currentRole = ref('agent')
+  const currentRole = ref('admin')
 
-  // Available roles
+  // Available roles - fixed to include admin
   const availableRoles = ['admin', 'agent', 'client']
 
   // Function to change the current role

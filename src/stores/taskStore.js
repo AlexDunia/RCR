@@ -8,12 +8,189 @@ export const useTaskStore = defineStore('taskStore', () => {
   const error = ref(null)
   const expiredTaskNotifications = ref([])
 
+  // Create sample tasks with exactly 2 clients and 2 agents each
+  const createSampleTasks = () => {
+    console.log('Creating sample tasks with exactly 2 people per task...')
+
+    const sampleTasks = [
+      {
+        id: 301,
+        title: 'Property Viewing - Downtown Condo',
+        status: 'scheduled',
+        priority: 'high',
+        startDate: '2025-04-15',
+        startTime: '10:00',
+        endDate: '2025-04-15',
+        endTime: '11:30',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        completedAt: null,
+        startedAt: null,
+        clients: [1, 3], // Alex Dunia and Robert Johnson
+        clientDetails: [
+          {
+            id: 1,
+            name: 'Alex Dunia',
+            email: 'alex.dunia@example.com',
+            avatar: 'https://randomuser.me/api/portraits/men/32.jpg'
+          },
+          {
+            id: 3,
+            name: 'Robert Johnson',
+            email: 'robert.johnson@example.com',
+            avatar: 'https://randomuser.me/api/portraits/men/65.jpg'
+          }
+        ],
+        agents: [5, 10], // Sarah Johnson and Jessica Ramirez
+        agentDetails: [
+          {
+            id: 5,
+            name: 'Sarah Johnson',
+            email: 'sarah.johnson@realestateagency.com',
+            avatar: 'https://res.cloudinary.com/example/image/upload/v123456/sarah_johnson.jpg'
+          },
+          {
+            id: 10,
+            name: 'Jessica Ramirez',
+            email: 'jessica.ramirez@realestateagency.com',
+            avatar: 'https://res.cloudinary.com/example/image/upload/v123456/jessica_ramirez.jpg'
+          }
+        ],
+        attachments: [],
+        timerStopped: false
+      },
+      {
+        id: 302,
+        title: 'Investment Property Consultation',
+        status: 'in_progress',
+        priority: 'medium',
+        startDate: '2025-04-10',
+        startTime: '14:00',
+        endDate: '2025-04-10',
+        endTime: '15:00',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        completedAt: null,
+        startedAt: null,
+        clients: [2, 6], // Jane Smith and Emily Chen
+        clientDetails: [
+          {
+            id: 2,
+            name: 'Jane Smith',
+            email: 'jane.smith@example.com',
+            avatar: 'https://randomuser.me/api/portraits/women/42.jpg'
+          },
+          {
+            id: 6,
+            name: 'Emily Chen',
+            email: 'emily.chen@example.com',
+            avatar: 'https://randomuser.me/api/portraits/women/36.jpg'
+          }
+        ],
+        agents: [8, 12], // Michael Chen and David Thompson
+        agentDetails: [
+          {
+            id: 8,
+            name: 'Michael Chen',
+            email: 'michael.chen@realestateagency.com',
+            avatar: 'https://res.cloudinary.com/example/image/upload/v123456/michael_chen.jpg'
+          },
+          {
+            id: 12,
+            name: 'David Thompson',
+            email: 'david.thompson@realestateagency.com',
+            avatar: 'https://res.cloudinary.com/example/image/upload/v123456/david_thompson.jpg'
+          }
+        ],
+        attachments: [],
+        timerStopped: false
+      },
+      {
+        id: 303,
+        title: 'First-time Homebuyer Meeting',
+        status: 'completed',
+        priority: 'low',
+        startDate: '2025-04-05',
+        startTime: '09:00',
+        endDate: '2025-04-05',
+        endTime: '10:00',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        completedAt: new Date().toISOString(),
+        startedAt: new Date().toISOString(),
+        clients: [4, 5], // Maria Garcia and James Wilson
+        clientDetails: [
+          {
+            id: 4,
+            name: 'Maria Garcia',
+            email: 'maria.garcia@example.com',
+            avatar: 'https://randomuser.me/api/portraits/women/28.jpg'
+          },
+          {
+            id: 5,
+            name: 'James Wilson',
+            email: 'james.wilson@example.com',
+            avatar: 'https://randomuser.me/api/portraits/men/55.jpg'
+          }
+        ],
+        agents: [15, 5], // Olivia Wilson and Sarah Johnson
+        agentDetails: [
+          {
+            id: 15,
+            name: 'Olivia Wilson',
+            email: 'olivia.wilson@realestateagency.com',
+            avatar: 'https://res.cloudinary.com/example/image/upload/v123456/olivia_wilson.jpg'
+          },
+          {
+            id: 5,
+            name: 'Sarah Johnson',
+            email: 'sarah.johnson@realestateagency.com',
+            avatar: 'https://res.cloudinary.com/example/image/upload/v123456/sarah_johnson.jpg'
+          }
+        ],
+        attachments: [],
+        timerStopped: true
+      }
+    ];
+
+    // Update the tasks and save to localStorage
+    tasks.value = sampleTasks;
+    localStorage.setItem('tasks', JSON.stringify(sampleTasks));
+    return sampleTasks;
+  };
+
+  // Force reset all tasks to the sample tasks (for testing purposes)
+  const resetTasks = () => {
+    isLoading.value = true;
+    try {
+      // Clear all existing tasks in localStorage
+      localStorage.removeItem('tasks');
+      localStorage.removeItem('completedTasks');
+      localStorage.removeItem('currentTaskDetail');
+
+      // Create new sample tasks with 2 clients each
+      createSampleTasks();
+      console.log('Tasks have been reset to sample data with 2 clients per task');
+    } catch (err) {
+      console.error('Failed to reset tasks:', err);
+      error.value = 'Failed to reset tasks';
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
   // Load tasks from localStorage on initialization
   const initTasks = () => {
     isLoading.value = true
     try {
       const storedTasks = JSON.parse(localStorage.getItem('tasks') || '[]')
-      tasks.value = storedTasks
+
+      // If there are no tasks or only a few tasks, create sample tasks with limited clients
+      if (storedTasks.length < 3) {
+        createSampleTasks();
+      } else {
+        tasks.value = storedTasks
+      }
     } catch (err) {
       console.error('Failed to load tasks from localStorage:', err)
       error.value = 'Failed to load tasks'
@@ -36,9 +213,25 @@ export const useTaskStore = defineStore('taskStore', () => {
   }
 
   const getTasksByClient = (clientId) => {
-    return tasks.value.filter(task =>
-      task.clients.includes(parseInt(clientId))
-    )
+    // If clientId is invalid, return empty array
+    if (!clientId || isNaN(clientId)) {
+      console.warn('Invalid client ID provided to getTasksByClient:', clientId);
+      return [];
+    }
+
+    // Convert clientId to number for consistent comparison
+    const numericClientId = parseInt(clientId);
+
+    // Return tasks where the client ID is included in the clients array
+    return tasks.value.filter(task => {
+      // Make sure task.clients exists and is an array
+      if (!task.clients || !Array.isArray(task.clients)) {
+        return false;
+      }
+
+      // Check if the client ID is in the task's clients array
+      return task.clients.includes(numericClientId);
+    });
   }
 
   const getTasksByAgent = (agentId) => {
@@ -165,28 +358,33 @@ export const useTaskStore = defineStore('taskStore', () => {
   }
 
   function updateTask(id, updates) {
-    isLoading.value = true
-    error.value = null
+    isLoading.value = true;
+    error.value = null;
 
     try {
-      const index = tasks.value.findIndex(task => task.id === parseInt(id))
+      const index = tasks.value.findIndex(task => task.id === parseInt(id));
 
       if (index !== -1) {
+        // Update the task
         tasks.value[index] = {
           ...tasks.value[index],
           ...updates,
           updatedAt: new Date().toISOString()
-        }
-        return true
+        };
+
+        // Save to localStorage
+        localStorage.setItem('tasks', JSON.stringify(tasks.value));
+
+        return true;
       }
 
-      return false
+      return false;
     } catch (err) {
-      console.error('Failed to update task:', err)
-      error.value = 'Failed to update task'
-      return false
+      console.error('Failed to update task:', err);
+      error.value = 'Failed to update task';
+      return false;
     } finally {
-      isLoading.value = false
+      isLoading.value = false;
     }
   }
 
@@ -341,6 +539,58 @@ export const useTaskStore = defineStore('taskStore', () => {
     return Math.max(0, ...tasks.value.map(task => task.id)) + 1
   }
 
+  // Remove an agent from a task
+  const removeAgentFromTask = async (taskId, agentId) => {
+    try {
+      const task = tasks.value.find(t => t.id === taskId);
+      if (!task) {
+        throw new Error('Task not found');
+      }
+
+      // Remove agent from agents array
+      task.agents = task.agents.filter(id => id !== agentId);
+      // Remove agent from agentDetails array
+      task.agentDetails = task.agentDetails.filter(agent => agent.id !== agentId);
+
+      // Update the task in the store
+      tasks.value = tasks.value.map(t => t.id === taskId ? task : t);
+
+      // Save to localStorage
+      localStorage.setItem('tasks', JSON.stringify(tasks.value));
+
+      return task;
+    } catch (error) {
+      console.error('Error removing agent from task:', error);
+      throw error;
+    }
+  };
+
+  // Remove a client from a task
+  const removeClientFromTask = async (taskId, clientId) => {
+    try {
+      const task = tasks.value.find(t => t.id === taskId);
+      if (!task) {
+        throw new Error('Task not found');
+      }
+
+      // Remove client from clients array
+      task.clients = task.clients.filter(id => id !== clientId);
+      // Remove client from clientDetails array
+      task.clientDetails = task.clientDetails.filter(client => client.id !== clientId);
+
+      // Update the task in the store
+      tasks.value = tasks.value.map(t => t.id === taskId ? task : t);
+
+      // Save to localStorage
+      localStorage.setItem('tasks', JSON.stringify(tasks.value));
+
+      return task;
+    } catch (error) {
+      console.error('Error removing client from task:', error);
+      throw error;
+    }
+  };
+
   return {
     // State
     tasks,
@@ -350,6 +600,7 @@ export const useTaskStore = defineStore('taskStore', () => {
 
     // Initialization
     initTasks,
+    resetTasks,
 
     // Getters
     getTaskById,
@@ -375,6 +626,8 @@ export const useTaskStore = defineStore('taskStore', () => {
     clearAllDrafts,
     checkTaskTimers,
     clearNotification,
-    clearAllNotifications
+    clearAllNotifications,
+    removeAgentFromTask,
+    removeClientFromTask
   }
 })

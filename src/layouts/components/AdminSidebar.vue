@@ -9,7 +9,8 @@ const getActiveMenuFromPath = (path) => {
   if (path === '/') return 'dashboard';
   if (path.startsWith('/properties')) return 'properties';
   if (path.startsWith('/clients')) return 'clients';
-  if (path.startsWith('/agents')) return 'agents';
+  if (path.startsWith('/agents') || path.startsWith('/admin/agent')) return 'agents';
+  if (path.startsWith('/agent')) return 'agents';
   return 'dashboard';
 };
 

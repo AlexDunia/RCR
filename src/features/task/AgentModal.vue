@@ -87,7 +87,8 @@ const props = defineProps({
   },
   agents: {
     type: Array,
-    default: () => []
+    default: () => [],
+    required: false
   },
   selectedAgents: {
     type: Array,
@@ -100,6 +101,13 @@ const emit = defineEmits(['close', 'select', 'remove']);
 // State
 const searchQuery = ref('');
 const localSelectedAgents = ref([...props.selectedAgents]);
+
+// Make sure the console logs are added for debugging
+console.log('AgentModal props:', {
+  show: props.show,
+  agentsCount: props.agents?.length,
+  selectedCount: props.selectedAgents?.length
+});
 
 // Handle avatar errors
 const handleAvatarError = (e) => {

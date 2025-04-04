@@ -239,11 +239,14 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, watch, onBeforeUnmount } from 'vue'
+import { ref, reactive, onMounted, watch, onBeforeUnmount, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useRoleGuard } from '@/composables/useRoleGuard'
 import { useDateValidation } from '@/composables/useDateValidation'
 import { useLayoutStore } from '@/stores/layout'
+import { useTaskStore } from '@/stores/taskStore'
+import { useClientStore } from '@/stores/clientStore'
+import { useAgentStore } from '@/stores/agentStore'
 import AgentModal from './AgentModal.vue'
 import ClientModal from './ClientModal.vue'
 
@@ -251,6 +254,9 @@ const router = useRouter()
 const route = useRoute()
 const { checkAccess } = useRoleGuard()
 const layoutStore = useLayoutStore()
+const taskStore = useTaskStore()
+const clientStore = useClientStore()
+const agentStore = useAgentStore()
 const { ensureFutureDate, isValidFutureDateTime, isValidDateTimeRange } = useDateValidation()
 
 // Loading state
@@ -305,387 +311,80 @@ const taskData = reactive({
   description: []
 })
 
-// For Agent/Client selection
-const availableAgents = ref([
-  {
-    id: 1,
-    name: 'John Smith',
-    avatar: 'https://example.com/avatars/john.jpg',
-    email: 'john@example.com'
-  },
-  {
-    id: 2,
-    name: 'Emily Davis',
-    avatar: 'https://example.com/avatars/emily.jpg',
-    email: 'emily@example.com'
-  },
-  {
-    id: 3,
-    name: 'Robert Johnson',
-    avatar: 'https://example.com/avatars/robert.jpg',
-    email: 'robert@example.com'
-  },
-  {
-    id: 4,
-    name: 'Sarah Parker',
-    avatar: 'https://example.com/avatars/sarah.jpg',
-    email: 'sarah@example.com'
-  }
-])
-
-const availableClients = ref([
-  {
-    id: 3,
-    name: 'Michael Brown',
-    avatar: 'https://example.com/avatars/michael.jpg',
-    email: 'michael@example.com'
-  },
-  {
-    id: 4,
-    name: 'Jessica White',
-    avatar: 'https://example.com/avatars/jessica.jpg',
-    email: 'jessica@example.com'
-  },
-  {
-    id: 5,
-    name: 'David Miller',
-    avatar: 'https://example.com/avatars/david.jpg',
-    email: 'david@example.com'
-  }
-])
-
-// Pre-populate selected agents and clients for testing
-const selectedAgents = ref([
-  {
-    id: 1,
-    name: 'John Smith',
-    avatar: 'https://example.com/avatars/john.jpg',
-    email: 'john@example.com'
-  },
-  {
-    id: 2,
-    name: 'Emily Davis',
-    avatar: 'https://example.com/avatars/emily.jpg',
-    email: 'emily@example.com'
-  }
-])
-
-const selectedClients = ref([
-  {
-    id: 3,
-    name: 'Michael Brown',
-    avatar: 'https://example.com/avatars/michael.jpg',
-    email: 'michael@example.com'
-  }
-])
-
-// Sync selected agents and clients with taskData
-taskData.agents = selectedAgents.value.map(agent => agent.id)
-taskData.agentDetails = selectedAgents.value
-taskData.clients = selectedClients.value.map(client => client.id)
-taskData.clientDetails = selectedClients.value
-
-// Methods
-const handleAgentSelect = (agents) => {
-  selectedAgents.value = agents
-  taskData.agents = agents.map(agent => agent.id)
-  taskData.agentDetails = agents
-  hasInteracted.value = true
-}
-
-const handleClientSelect = (clients) => {
-  selectedClients.value = clients
-  taskData.clients = clients.map(client => client.id)
-  taskData.clientDetails = clients
-  hasInteracted.value = true
-}
-
-const removeAgent = (agentId) => {
-  selectedAgents.value = selectedAgents.value.filter(agent => agent.id !== agentId)
-  taskData.agents = selectedAgents.value.map(agent => agent.id)
-  taskData.agentDetails = selectedAgents.value
-  hasInteracted.value = true
-}
-
-const removeClient = (clientId) => {
-  selectedClients.value = selectedClients.value.filter(client => client.id !== clientId)
-  taskData.clients = selectedClients.value.map(client => client.id)
-  taskData.clientDetails = selectedClients.value
-  hasInteracted.value = true
-}
-
-const handleBack = () => {
-  if (hasFormData() && hasChanges() && hasInteracted.value) {
-    showDraftConfirm.value = true
-  } else {
-    isNavigating.value = true
-    if (route.query.draftId) {
-      if (route.query.from) {
-        router.push(`/tasks/${route.query.from}`)
-      } else if (route.query.mode === 'edit') {
-        router.push(`/tasks/${route.query.draftId}`)
-      } else {
-        router.push('/tasks/drafts')
-      }
-    } else {
-      router.push('/tasks')
-    }
-  }
-}
-
-const saveDraftChanges = () => {
-  const tasks = JSON.parse(localStorage.getItem('tasks') || '[]')
-  const draftId = parseInt(route.query.draftId)
-  const draftIndex = tasks.findIndex(t => t.id === draftId)
-  if (draftIndex !== -1) {
-    const startDate = ensureFutureDate(taskData.startDate)
-    const endDate = ensureFutureDate(taskData.endDate)
-
-    const descriptionArray = taskDescription.value
-      ? taskDescription.value.split('##').map(item => `- ${item.trim()}`).filter(item => item !== '- ')
-      : tasks[draftIndex].description || []
-    const updatedDraft = {
-      ...tasks[draftIndex],
-      ...taskData,
-      startDate,
-      endDate,
-      title: taskData.name || tasks[draftIndex].title,
-      updatedAt: new Date().toISOString(),
-      lastEditedAt: new Date().toISOString(),
-      agentDetails: selectedAgents.value,
-      clientDetails: selectedClients.value,
-      status: 'draft',
-      attachments: taskData.attachments,
-      description: descriptionArray
-    }
-    tasks[draftIndex] = updatedDraft
-    localStorage.setItem('tasks', JSON.stringify(tasks))
-  }
-}
-
-const hasFormData = () => {
-  // Consider task creation with any actual content worth saving
-  if (taskData.name.trim() !== '') return true
-  if (taskData.agents.length > 0) return true
-  if (taskData.clients.length > 0) return true
-  if (taskData.attachments.length > 0) return true
-  if (taskDescription.value.trim() !== '') return true
-
-  return false
-}
-
-const handleDraftSave = () => {
-  try {
-    if (route.query.draftId) {
-      saveDraftChanges()
-    } else {
-      const startDate = ensureFutureDate(taskData.startDate)
-      const endDate = ensureFutureDate(taskData.endDate)
-
-      const descriptionArray = taskDescription.value
-        ? taskDescription.value.split('##').map(item => `- ${item.trim()}`).filter(item => item !== '- ')
-        : []
-      const draftData = {
-        ...taskData,
-        startDate,
-        endDate,
-        id: Date.now(),
-        title: taskData.name || 'Untitled Task',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        status: 'draft',
-        agentDetails: selectedAgents.value,
-        clientDetails: selectedClients.value,
-        lastEditedAt: new Date().toISOString(),
-        isPartiallyComplete: true,
-        attachments: taskData.attachments,
-        description: descriptionArray
-      }
-      const tasks = JSON.parse(localStorage.getItem('tasks') || '[]')
-      tasks.push(draftData)
-      localStorage.setItem('tasks', JSON.stringify(tasks))
-    }
-
-    isNavigating.value = true
-    showDraftConfirm.value = false
-
-    if (route.query.from) {
-      router.push(`/tasks/${route.query.from}`)
-    } else {
-      router.push('/tasks/drafts')
-    }
-  } catch (error) {
-    console.error('Failed to save draft:', error)
-    alert('Failed to save draft. Please try again.')
-  }
-}
-
-const handleDraftCancel = () => {
-  showDraftConfirm.value = false
-  isNavigating.value = true
-
-  if (route.query.from) {
-    router.push(`/tasks/${route.query.from}`)
-  } else {
-    router.push('/tasks')
-  }
-}
-
-const handleSubmit = () => {
-  try {
-    const startDateTime = new Date(`${taskData.startDate} ${taskData.startTime}`)
-
-    if (!isValidFutureDateTime(taskData.startDate, taskData.startTime)) {
-      alert('Start date cannot be in the past')
-      return
-    }
-
-    if (!isValidDateTimeRange(taskData.startDate, taskData.startTime, taskData.endDate, taskData.endTime)) {
-      alert('End date/time must be after start date/time')
-      return
-    }
-
-    if (taskData.agents.length === 0) {
-      alert('Please select at least one agent')
-      return
-    }
-    if (taskData.clients.length === 0) {
-      alert('Please select at least one client')
-      return
-    }
-
-    const now = new Date()
-    const taskId = route.query.draftId ? Number(route.query.draftId) : Number(Date.now())
-    const descriptionArray = taskDescription.value
-      ? taskDescription.value.split('##').map(item => `- ${item.trim()}`).filter(item => item !== '- ')
-      : []
-    const completeTaskData = {
-      ...taskData,
-      id: taskId,
-      title: taskData.name,
-      createdAt: now.toISOString(),
-      updatedAt: now.toISOString(),
-      startedAt: null,
-      status: 'scheduled',
-      agentDetails: selectedAgents.value,
-      clientDetails: selectedClients.value,
-      formattedStartDate: startDateTime.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-      formattedStartTime: startDateTime.toISOString(),
-      attachments: taskData.attachments,
-      description: descriptionArray
-    }
-
-    console.log('Creating task with ID:', taskId, 'and type:', typeof taskId)
-
-    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]')
-    if (route.query.draftId) {
-      const draftId = Number(route.query.draftId)
-      const taskIndex = tasks.findIndex(t => Number(t.id) === draftId)
-      if (taskIndex !== -1) {
-        tasks.splice(taskIndex, 1)
-      }
-    }
-    tasks.push(completeTaskData)
-    localStorage.setItem('tasks', JSON.stringify(tasks))
-
-    localStorage.setItem('currentTaskDetail', JSON.stringify(completeTaskData))
-
-    isNavigating.value = true
-    router.push('/tasks/scheduled')
-  } catch (error) {
-    console.error('Failed to create task:', error)
-    alert('Failed to create task. Please try again.')
-  }
-}
-
-const hasChanges = () => {
-  if (!originalTaskData.value) return true
-
-  if (taskData.name !== originalTaskData.value.name) return true
-  if (taskData.startDate !== originalTaskData.value.startDate) return true
-  if (taskData.startTime !== originalTaskData.value.startTime) return true
-  if (taskData.endDate !== originalTaskData.value.endDate) return true
-  if (taskData.endTime !== originalTaskData.value.endTime) return true
-  if (taskData.priority !== originalTaskData.value.priority) return true
-  if (taskDescription.value !== originalTaskData.value.description) return true
-
-  if (taskData.agents.length !== originalTaskData.value.agents.length) return true
-  if (taskData.clients.length !== originalTaskData.value.clients.length) return true
-  if (taskData.attachments.length !== originalTaskData.value.attachments.length) return true
-
-  for (let i = 0; i < taskData.agents.length; i++) {
-    if (!originalTaskData.value.agents.includes(taskData.agents[i])) return true
-  }
-
-  for (let i = 0; i < taskData.clients.length; i++) {
-    if (!originalTaskData.value.clients.includes(taskData.clients[i])) return true
-  }
-
-  for (let i = 0; i < taskData.attachments.length; i++) {
-    const attachment = taskData.attachments[i]
-    const originalAttachment = originalTaskData.value.attachments.find(a => a.id === attachment.id)
-    if (!originalAttachment) return true
-  }
-
-  return false
-}
-
-const loadDraftData = (draftId) => {
-  return new Promise((resolve, reject) => {
-    try {
-      const tasks = JSON.parse(localStorage.getItem('tasks') || '[]')
-      const draft = tasks.find(task => task.id === draftId)
-      if (draft) {
-        taskData.name = draft.title
-        taskData.startDate = ensureFutureDate(draft.startDate)
-        taskData.startTime = draft.startTime
-        taskData.endDate = ensureFutureDate(draft.endDate)
-        taskData.endTime = draft.endTime
-        taskData.priority = draft.priority
-        taskData.agents = draft.agents
-        taskData.agentDetails = draft.agentDetails
-        taskData.clients = draft.clients
-        taskData.clientDetails = draft.clientDetails
-        taskData.attachments = draft.attachments
-        taskData.description = draft.description || []
-        taskDescription.value = draft.description ? draft.description.map(item => item.replace('- ', '')).join(' ## ') : ''
-        selectedAgents.value = draft.agentDetails
-        selectedClients.value = draft.clientDetails
-
-        originalTaskData.value = {
-          name: draft.title,
-          startDate: taskData.startDate,
-          startTime: draft.startTime,
-          endDate: taskData.endDate,
-          endTime: draft.endTime,
-          priority: draft.priority,
-          agents: [...draft.agents],
-          clients: [...draft.clients],
-          attachments: JSON.parse(JSON.stringify(draft.attachments)),
-          description: taskDescription.value
-        }
-        resolve()
-      } else {
-        reject(new Error('Draft not found'))
-      }
-    } catch (error) {
-      reject(error)
-    }
-  })
-}
-
-// Add form input tracking
-const handleInputChange = () => {
-  hasInteracted.value = true
-}
-
-watch(() => taskData.startDate, (newStartDate) => {
-  if (taskData.endDate < newStartDate) {
-    taskData.endDate = newStartDate
-  }
+// Replace hardcoded agents with computed property from agentStore with correct format
+const availableAgents = computed(() => {
+  return agentStore.agents.map(agent => ({
+    id: agent.id,
+    name: agent.name,
+    avatar: agent.avatar || 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739408381/Screenshot_2025-02-13_015617_mhjgby.png',
+    email: agent.email
+  }));
 })
 
+// Replace hardcoded clients with computed property from clientStore
+const availableClients = computed(() => {
+  return clientStore.clients.map(client => ({
+    id: client.id,
+    name: client.name,
+    avatar: client.profilePicture || 'https://example.com/avatars/default.jpg',
+    email: client.email
+  }));
+})
+
+// Pre-populate selected agents and clients for testing
+const selectedAgents = ref([])
+
+// Updated to get client from the clientStore instead of hardcoded data
+const selectedClients = ref([])
+
+// Initialize data
+taskData.agents = selectedAgents.value.map(agent => agent.id)
+taskData.agentDetails = selectedAgents.value
+
+// Initialize selected client and agent if provided in the URL
 onMounted(() => {
+  // Initialize agents with proper data structure
+  if (availableAgents.value.length > 0) {
+    // Default to first two agents for demo purposes
+    const firstTwoAgents = availableAgents.value.slice(0, 2);
+    selectedAgents.value = firstTwoAgents;
+
+    // Update task data with selected agents - no modifications needed
+    taskData.agents = selectedAgents.value.map(agent => agent.id);
+    taskData.agentDetails = selectedAgents.value;
+  }
+
+  // If clientId is provided in URL query, preselect that client
+  if (route.query.clientId) {
+    const clientId = parseInt(route.query.clientId)
+    const client = clientStore.getClientById(clientId)
+    if (client) {
+      selectedClients.value = [{
+        id: client.id,
+        name: client.name,
+        avatar: client.profilePicture || 'https://example.com/avatars/default.jpg',
+        email: client.email
+      }]
+
+      // Update taskData with selected client
+      taskData.clients = selectedClients.value.map(client => client.id)
+      taskData.clientDetails = selectedClients.value
+    }
+  } else if (clientStore.clients.length > 0) {
+    // Otherwise, default to first client for demo purposes (optional, can be removed)
+    const defaultClient = clientStore.clients[0]
+    selectedClients.value = [{
+      id: defaultClient.id,
+      name: defaultClient.name,
+      avatar: defaultClient.profilePicture || 'https://example.com/avatars/default.jpg',
+      email: defaultClient.email
+    }]
+
+    // Update taskData with selected client
+    taskData.clients = selectedClients.value.map(client => client.id)
+    taskData.clientDetails = selectedClients.value
+  }
+
   // Hide the app header and sidebar
   layoutStore.setLayout({
     hideSidebar: true,
@@ -769,6 +468,298 @@ onBeforeUnmount(() => {
     hideFooter: false,
     background: '#f9fafb'
   })
+})
+
+// Methods
+const handleAgentSelect = (agents) => {
+  selectedAgents.value = agents
+  taskData.agents = agents.map(agent => agent.id)
+  taskData.agentDetails = agents
+  hasInteracted.value = true
+}
+
+const handleClientSelect = (clients) => {
+  selectedClients.value = clients
+  taskData.clients = clients.map(client => client.id)
+  taskData.clientDetails = clients
+  hasInteracted.value = true
+}
+
+const removeAgent = (agentId) => {
+  selectedAgents.value = selectedAgents.value.filter(agent => agent.id !== agentId)
+  taskData.agents = selectedAgents.value.map(agent => agent.id)
+  taskData.agentDetails = selectedAgents.value
+  hasInteracted.value = true
+}
+
+const removeClient = (clientId) => {
+  selectedClients.value = selectedClients.value.filter(client => client.id !== clientId)
+  taskData.clients = selectedClients.value.map(client => client.id)
+  taskData.clientDetails = selectedClients.value
+  hasInteracted.value = true
+}
+
+const handleBack = () => {
+  if (hasFormData() && hasChanges() && hasInteracted.value) {
+    showDraftConfirm.value = true
+  } else {
+    isNavigating.value = true
+    if (route.query.draftId) {
+      if (route.query.from) {
+        router.push(`/tasks/${route.query.from}`)
+      } else if (route.query.mode === 'edit') {
+        router.push(`/tasks/${route.query.draftId}`)
+      } else {
+        router.push('/tasks/drafts')
+      }
+    } else {
+      router.push('/tasks')
+    }
+  }
+}
+
+const saveDraftChanges = () => {
+  const draftId = parseInt(route.query.draftId)
+  const startDate = ensureFutureDate(taskData.startDate)
+  const endDate = ensureFutureDate(taskData.endDate)
+
+  const descriptionArray = taskDescription.value
+    ? taskDescription.value.split('##').map(item => `- ${item.trim()}`).filter(item => item !== '- ')
+    : taskStore.getTaskById(draftId)?.description || []
+
+  const updatedDraft = {
+    title: taskData.name,
+    startDate,
+    endDate,
+    startTime: taskData.startTime,
+    endTime: taskData.endTime,
+    priority: taskData.priority,
+    agents: taskData.agents,
+    agentDetails: selectedAgents.value,
+    clients: taskData.clients,
+    clientDetails: selectedClients.value,
+    status: 'draft',
+    attachments: taskData.attachments,
+    description: descriptionArray
+  }
+
+  taskStore.updateTask(draftId, updatedDraft)
+}
+
+const hasFormData = () => {
+  // Consider task creation with any actual content worth saving
+  if (taskData.name.trim() !== '') return true
+  if (taskData.agents.length > 0) return true
+  if (taskData.clients.length > 0) return true
+  if (taskData.attachments.length > 0) return true
+  if (taskDescription.value.trim() !== '') return true
+
+  return false
+}
+
+const handleDraftSave = () => {
+  try {
+    if (route.query.draftId) {
+      saveDraftChanges()
+    } else {
+      const startDate = ensureFutureDate(taskData.startDate)
+      const endDate = ensureFutureDate(taskData.endDate)
+
+      const descriptionArray = taskDescription.value
+        ? taskDescription.value.split('##').map(item => `- ${item.trim()}`).filter(item => item !== '- ')
+        : []
+
+      const draftData = {
+        title: taskData.name || 'Untitled Task',
+        startDate,
+        endDate,
+        startTime: taskData.startTime,
+        endTime: taskData.endTime,
+        priority: taskData.priority,
+        agents: taskData.agents,
+        agentDetails: selectedAgents.value,
+        clients: taskData.clients,
+        clientDetails: selectedClients.value,
+        status: 'draft',
+        isPartiallyComplete: true,
+        attachments: taskData.attachments,
+        description: descriptionArray
+      }
+
+      taskStore.saveAsDraft(draftData)
+    }
+
+    isNavigating.value = true
+    showDraftConfirm.value = false
+
+    if (route.query.from) {
+      router.push(`/tasks/${route.query.from}`)
+    } else {
+      router.push('/tasks/drafts')
+    }
+  } catch (error) {
+    console.error('Failed to save draft:', error)
+    alert('Failed to save draft. Please try again.')
+  }
+}
+
+const handleDraftCancel = () => {
+  showDraftConfirm.value = false
+  isNavigating.value = true
+
+  if (route.query.from) {
+    router.push(`/tasks/${route.query.from}`)
+  } else {
+    router.push('/tasks')
+  }
+}
+
+const handleSubmit = () => {
+  try {
+    const startDateTime = new Date(`${taskData.startDate} ${taskData.startTime}`)
+
+    if (!isValidFutureDateTime(taskData.startDate, taskData.startTime)) {
+      alert('Start date cannot be in the past')
+      return
+    }
+
+    if (!isValidDateTimeRange(taskData.startDate, taskData.startTime, taskData.endDate, taskData.endTime)) {
+      alert('End date/time must be after start date/time')
+      return
+    }
+
+    if (taskData.agents.length === 0) {
+      alert('Please select at least one agent')
+      return
+    }
+    if (taskData.clients.length === 0) {
+      alert('Please select at least one client')
+      return
+    }
+
+    const descriptionArray = taskDescription.value
+      ? taskDescription.value.split('##').map(item => `- ${item.trim()}`).filter(item => item !== '- ')
+      : []
+
+    const taskDataForSubmit = {
+      title: taskData.name,
+      startDate: taskData.startDate,
+      endDate: taskData.endDate,
+      startTime: taskData.startTime,
+      endTime: taskData.endTime,
+      priority: taskData.priority,
+      agents: taskData.agents,
+      agentDetails: selectedAgents.value,
+      clients: taskData.clients,
+      clientDetails: selectedClients.value,
+      attachments: taskData.attachments,
+      description: descriptionArray,
+      formattedStartDate: startDateTime.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+      formattedStartTime: startDateTime.toISOString()
+    }
+
+    let taskId
+    if (route.query.draftId) {
+      const draftId = Number(route.query.draftId)
+      taskStore.updateTask(draftId, {...taskDataForSubmit, status: 'scheduled'})
+      taskId = draftId
+    } else {
+      taskId = taskStore.createTask(taskDataForSubmit)
+      taskStore.scheduleTask(taskId)
+    }
+
+    isNavigating.value = true
+    router.push('/tasks/scheduled')
+  } catch (error) {
+    console.error('Failed to create task:', error)
+    alert('Failed to create task. Please try again.')
+  }
+}
+
+const hasChanges = () => {
+  if (!originalTaskData.value) return true
+
+  if (taskData.name !== originalTaskData.value.name) return true
+  if (taskData.startDate !== originalTaskData.value.startDate) return true
+  if (taskData.startTime !== originalTaskData.value.startTime) return true
+  if (taskData.endDate !== originalTaskData.value.endDate) return true
+  if (taskData.endTime !== originalTaskData.value.endTime) return true
+  if (taskData.priority !== originalTaskData.value.priority) return true
+  if (taskDescription.value !== originalTaskData.value.description) return true
+
+  if (taskData.agents.length !== originalTaskData.value.agents.length) return true
+  if (taskData.clients.length !== originalTaskData.value.clients.length) return true
+  if (taskData.attachments.length !== originalTaskData.value.attachments.length) return true
+
+  for (let i = 0; i < taskData.agents.length; i++) {
+    if (!originalTaskData.value.agents.includes(taskData.agents[i])) return true
+  }
+
+  for (let i = 0; i < taskData.clients.length; i++) {
+    if (!originalTaskData.value.clients.includes(taskData.clients[i])) return true
+  }
+
+  for (let i = 0; i < taskData.attachments.length; i++) {
+    const attachment = taskData.attachments[i]
+    const originalAttachment = originalTaskData.value.attachments.find(a => a.id === attachment.id)
+    if (!originalAttachment) return true
+  }
+
+  return false
+}
+
+const loadDraftData = (draftId) => {
+  return new Promise((resolve, reject) => {
+    try {
+      const draft = taskStore.getTaskById(draftId)
+      if (draft) {
+        taskData.name = draft.title
+        taskData.startDate = ensureFutureDate(draft.startDate)
+        taskData.startTime = draft.startTime
+        taskData.endDate = ensureFutureDate(draft.endDate)
+        taskData.endTime = draft.endTime
+        taskData.priority = draft.priority
+        taskData.agents = draft.agents
+        taskData.agentDetails = draft.agentDetails
+        taskData.clients = draft.clients
+        taskData.clientDetails = draft.clientDetails
+        taskData.attachments = draft.attachments
+        taskData.description = draft.description || []
+        taskDescription.value = draft.description ? draft.description.map(item => item.replace('- ', '')).join(' ## ') : ''
+        selectedAgents.value = draft.agentDetails
+        selectedClients.value = draft.clientDetails
+
+        originalTaskData.value = {
+          name: draft.title,
+          startDate: taskData.startDate,
+          startTime: draft.startTime,
+          endDate: taskData.endDate,
+          endTime: draft.endTime,
+          priority: draft.priority,
+          agents: [...draft.agents],
+          clients: [...draft.clients],
+          attachments: JSON.parse(JSON.stringify(draft.attachments)),
+          description: taskDescription.value
+        }
+        resolve()
+      } else {
+        reject(new Error('Draft not found'))
+      }
+    } catch (error) {
+      reject(error)
+    }
+  })
+}
+
+// Add form input tracking
+const handleInputChange = () => {
+  hasInteracted.value = true
+}
+
+watch(() => taskData.startDate, (newStartDate) => {
+  if (taskData.endDate < newStartDate) {
+    taskData.endDate = newStartDate
+  }
 })
 </script>
 
