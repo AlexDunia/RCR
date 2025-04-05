@@ -28,6 +28,9 @@ const isEducationTrainingPage = computed(() => isRoutePath('/education-training'
 const isManageListingsPage = computed(() => {
   return isRoutePath(['/manage-listings', '/add-listing', '/view-listings', '/pending-approvals']);
 });
+const isPropertiesPage = computed(() => isRoutePath('/properties'));
+const isClientsAdminPage = computed(() => isRoutePath('/clients'));
+const isAgentsAdminPage = computed(() => isRoutePath('/agents'));
 const isDashboardPage = computed(() => isRoutePath('/'));
 const isAnalyticsPage = computed(() => isRoutePath('/analytics'));
 const isCalendarPage = computed(() => isRoutePath('/calendar'));
@@ -80,6 +83,21 @@ const isEducationTestPage = computed(() => isRoutePath('/education-training/test
     <div v-else-if="isManageListingsPage" class="custom-header">
       <h1>Manage Listings</h1>
       <p>How you can add, remove, and edit properties on your profile</p>
+    </div>
+    <!-- Show properties header -->
+    <div v-else-if="isPropertiesPage" class="custom-header">
+      <h1>Properties</h1>
+      <p>Browse and manage all available properties</p>
+    </div>
+    <!-- Show clients admin header -->
+    <div v-else-if="isClientsAdminPage" class="custom-header">
+      <h1>Find Clients</h1>
+      <p>For Real City admin</p>
+    </div>
+    <!-- Show agents admin header -->
+    <div v-else-if="isAgentsAdminPage" class="custom-header">
+      <h1>Agents</h1>
+      <p>Manage agents and their properties</p>
     </div>
     <!-- Show dashboard header -->
     <div v-else-if="isDashboardPage" class="custom-header">
@@ -214,10 +232,11 @@ const isEducationTestPage = computed(() => isRoutePath('/education-training/test
   border-bottom: 1px solid #ddd;
   position: sticky;
   top: 0;
-  border:none;
+  border: none;
   z-index: 100;
   box-shadow: 0px 2px 5px rgba(99, 98, 98, 0.1);
-  /* Ensure it stays below modal overlays */
+  /* Ensure it stays on top for sticky behavior */
+  transition: box-shadow 0.3s ease;
 }
 
 .header.below-modal {

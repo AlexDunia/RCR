@@ -11,6 +11,8 @@ const getActiveMenuFromPath = (path) => {
   if (path.startsWith('/clients')) return 'clients';
   if (path.startsWith('/agents') || path.startsWith('/admin/agent')) return 'agents';
   if (path.startsWith('/agent')) return 'agents';
+  if (path.startsWith('/marketing-tools')) return 'marketing';
+  if (path.startsWith('/education-training')) return 'education';
   return 'dashboard';
 };
 
@@ -58,6 +60,26 @@ const menuItems = [
     icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M16 21V19C16 17.9391 15.5786 16.9217 14.8284 16.1716C14.0783 15.4214 13.0609 15 12 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M8.5 11C10.7091 11 12.5 9.20914 12.5 7C12.5 4.79086 10.7091 3 8.5 3C6.29086 3 4.5 4.79086 4.5 7C4.5 9.20914 6.29086 11 8.5 11Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>`
+  },
+  {
+    name: 'Marketing Tools',
+    key: 'marketing',
+    path: '/marketing-tools',
+    icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16 8C16 8 14.5 9 12 9C9.5 9 8 8 8 8V14C8 14 9.5 15 12 15C14.5 15 16 14 16 14V8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 9V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>`
+  },
+  {
+    name: 'Education & Training',
+    key: 'education',
+    path: '/education-training',
+    icon: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>`
   }
 ];
@@ -156,7 +178,7 @@ nav ul li a {
 }
 
 nav ul li.active {
-  background: white;
+  background: #FFEB3B !important;
 }
 
 nav ul li.active a {

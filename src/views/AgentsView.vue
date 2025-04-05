@@ -127,7 +127,7 @@ const fallbackAgents = [
     experience: '3+ Yr of experience',
     location: 'Columbia, USA',
     specialty: 'Luxury Homes',
-    avatar: 'https://randomuser.me/api/portraits/women/42.jpg',
+    avatar: '/images/avatar-1.jpg', // Use local image path
     active: true
   },
   {
@@ -136,7 +136,7 @@ const fallbackAgents = [
     experience: '7+ Yr of experience',
     location: 'New York, USA',
     specialty: 'Urban Properties',
-    avatar: 'https://randomuser.me/api/portraits/men/65.jpg',
+    avatar: '/images/avatar-2.jpg', // Use local image path
     active: true
   },
   {
@@ -145,7 +145,7 @@ const fallbackAgents = [
     experience: '4+ Yr of experience',
     location: 'Miami, USA',
     specialty: 'Downtown Properties',
-    avatar: 'https://randomuser.me/api/portraits/women/28.jpg',
+    avatar: '/images/avatar-3.jpg', // Use local image path
     active: true
   },
   {
@@ -154,7 +154,7 @@ const fallbackAgents = [
     experience: '6+ Yr of experience',
     location: 'Los Angeles, USA',
     specialty: 'Luxury Estates',
-    avatar: 'https://randomuser.me/api/portraits/men/55.jpg',
+    avatar: '/images/avatar-4.jpg', // Use local image path
     active: true
   }
 ];
@@ -167,39 +167,10 @@ const formatStoreAgent = (agent) => {
     experience: agent.specialties ? agent.specialties[0] : '',
     location: agent.location || '',
     specialty: agent.specialties ? agent.specialties[0] : '',
-    // Map the agent to a specific image based on name or id
-    avatar: getAvatarForAgent(agent),
+    // Use the avatar directly from the agent object, now that we're using reliable URLs
+    avatar: agent.avatar,
     active: true
   };
-};
-
-// Helper to get the correct avatar for an agent
-const getAvatarForAgent = (agent) => {
-  const nameMap = {
-    'Sarah Johnson': 'https://randomuser.me/api/portraits/women/42.jpg',
-    'Michael Chen': 'https://randomuser.me/api/portraits/men/65.jpg',
-    'Jessica Ramirez': 'https://randomuser.me/api/portraits/women/28.jpg',
-    'David Thompson': 'https://randomuser.me/api/portraits/men/55.jpg',
-    'Olivia Wilson': 'https://randomuser.me/api/portraits/women/36.jpg'
-  };
-
-  // Try to match by name first
-  if (agent.name && nameMap[agent.name]) {
-    return nameMap[agent.name];
-  }
-
-  // Otherwise, use a default based on id
-  const defaultAvatars = [
-    'https://randomuser.me/api/portraits/men/32.jpg',
-    'https://randomuser.me/api/portraits/women/42.jpg',
-    'https://randomuser.me/api/portraits/men/65.jpg',
-    'https://randomuser.me/api/portraits/women/28.jpg',
-    'https://randomuser.me/api/portraits/men/55.jpg'
-  ];
-
-  // Use agent.id as index, with fallback to ensure we have a valid index
-  const index = (typeof agent.id === 'number' ? agent.id : 0) % defaultAvatars.length;
-  return defaultAvatars[index];
 };
 
 // Computed property for filtered agents

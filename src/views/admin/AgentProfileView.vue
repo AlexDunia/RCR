@@ -2,7 +2,7 @@
   <div class="agent-profile-page">
     <div class="profile-header">
       <div class="avatar-container">
-        <img :src="agent?.profilePicture || 'https://randomuser.me/api/portraits/men/32.jpg'" alt="Agent avatar" class="profile-avatar" />
+        <img :src="agent?.avatar || '/images/avatar-1.jpg'" alt="Agent avatar" class="profile-avatar" />
       </div>
       <div class="agent-info">
         <h1 class="profile-name">{{ agent?.name || 'Alex Dunia' }}</h1>
@@ -81,7 +81,7 @@
         </div>
 
         <div class="profile-photo-container">
-          <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Large profile photo" class="profile-photo" />
+          <img src="/images/agent-profile.jpg" alt="Large profile photo" class="profile-photo" />
         </div>
       </div>
 
