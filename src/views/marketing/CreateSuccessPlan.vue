@@ -196,6 +196,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useMarketingStore } from '@/stores/marketingStore';
 
 const plan = ref({
   title: 'Marketing Strategy for Williams',
@@ -210,6 +211,8 @@ const plan = ref({
 });
 
 const router = useRouter();
+const marketingStore = useMarketingStore();
+const isSaving = ref(false);
 
 const addAudience = () => plan.value.targetAudiences.push({ title: '', description: '', icon: '' });
 const removeAudience = (index) => plan.value.targetAudiences.splice(index, 1);
@@ -239,12 +242,17 @@ const updateChannelIcon = (index) => {
   plan.value.channels[index].icon = iconMap[channelName] || '';
 };
 
-const savePlan = () => {
-  const existingPlans = JSON.parse(localStorage.getItem('marketingPlans') || '[]');
-  existingPlans.push(plan.value);
-  localStorage.setItem('marketingPlans', JSON.stringify(existingPlans));
-  alert('Plan saved successfully!');
-  router.push('/marketing-tools');
+const savePlan = async () => {
+  try {
+    isSaving.value = true;
+    await marketingStore.plans.savePlan(plan.value);
+    router.push('/marketing-tools');
+  } catch (error) {
+    console.error('Failed to save marketing plan:', error);
+    alert('There was an error saving your plan. Please try again.');
+  } finally {
+    isSaving.value = false;
+  }
 };
 </script>
 

@@ -158,6 +158,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import ConfirmationModal from '@/ui/ConfirmationModal.vue';
+import { useMarketingStore } from '@/stores/marketingStore';
 
 const router = useRouter();
 const route = useRoute();
@@ -173,13 +174,20 @@ const modalConfig = ref({
   onConfirm: null
 });
 
-onMounted(() => {
-  const checklists = JSON.parse(localStorage.getItem('checklists') || '[]');
-  const existingChecklist = checklists.find(c => c.id === Number(route.params.id));
+const marketingStore = useMarketingStore();
 
-  if (existingChecklist) {
-    checklist.value = { ...existingChecklist };
-    originalChecklist.value = JSON.stringify(existingChecklist);
+onMounted(async () => {
+  try {
+    // Use the marketing store to fetch the checklist
+    await marketingStore.checklists.fetchChecklists();
+    const existingChecklist = marketingStore.checklists.marketingChecklists.find(c => c.id === route.params.id);
+
+    if (existingChecklist) {
+      checklist.value = { ...existingChecklist };
+      originalChecklist.value = JSON.stringify(existingChecklist);
+    }
+  } catch (error) {
+    console.error('Error loading checklist:', error);
   }
 });
 
@@ -208,18 +216,30 @@ const handleSave = (e) => {
 };
 
 const saveChecklist = () => {
-  const checklists = JSON.parse(localStorage.getItem('checklists') || '[]');
-  const index = checklists.findIndex(c => c.id === checklist.value.id);
+  try {
+    // Find and update the checklist in the store
+    const checklistsArray = marketingStore.checklists.marketingChecklists;
+    const index = checklistsArray.findIndex(c => c.id === checklist.value.id);
 
-  if (index !== -1) {
-    // Update existing checklist
-    checklists[index] = {
-      ...checklist.value,
-      items: checklist.value.items.filter(item => item.text.trim() !== ''),
-      lastModified: new Date().toISOString() // Add last modified timestamp
-    };
-    localStorage.setItem('checklists', JSON.stringify(checklists));
-    router.push('/RCR/marketing-tools/checklist'); // Route to checklist home
+    if (index !== -1) {
+      // Update existing checklist
+      const updatedChecklist = {
+        ...checklist.value,
+        items: checklist.value.items.filter(item => item.text.trim() !== ''),
+        lastModified: new Date().toISOString() // Add last modified timestamp
+      };
+
+      // Update the checklist in the array
+      checklistsArray[index] = updatedChecklist;
+
+      // Save back to localStorage with the correct key
+      localStorage.setItem('marketingChecklists', JSON.stringify(checklistsArray));
+
+      // Update the route
+      router.push('/marketing-tools/checklist');
+    }
+  } catch (error) {
+    console.error('Error saving checklist:', error);
   }
 };
 
@@ -231,10 +251,19 @@ const deleteChecklist = async () => {
     type: 'delete',
     confirmText: 'Delete',
     onConfirm: () => {
-      const checklists = JSON.parse(localStorage.getItem('checklists') || '[]');
-      const filteredChecklists = checklists.filter(c => c.id !== checklist.value.id);
-      localStorage.setItem('checklists', JSON.stringify(filteredChecklists));
-      router.push('/RCR/marketing-tools/checklist');
+      try {
+        // Find and filter out the checklist
+        const checklistsArray = marketingStore.checklists.marketingChecklists;
+        const filteredChecklists = checklistsArray.filter(c => c.id !== checklist.value.id);
+
+        // Save back to localStorage with the correct key
+        localStorage.setItem('marketingChecklists', JSON.stringify(filteredChecklists));
+
+        // Update the route
+        router.push('/marketing-tools/checklist');
+      } catch (error) {
+        console.error('Error deleting checklist:', error);
+      }
     }
   };
 };
@@ -248,16 +277,16 @@ const cancel = () => {
       type: 'warning',
       confirmText: 'Discard',
       onConfirm: () => {
-        router.push(`/RCR/marketing-tools/checklist/${checklist.value.id}`);
+        router.push(`/marketing-tools/checklist/${checklist.value.id}`);
       }
     };
   } else {
-    router.push(`/RCR/marketing-tools/checklist/${checklist.value.id}`);
+    router.push(`/marketing-tools/checklist/${checklist.value.id}`);
   }
 };
 
 const goBack = () => {
-  router.push('/RCR/marketing-tools/checklist');
+  router.push('/marketing-tools/checklist');
 };
 </script>
 

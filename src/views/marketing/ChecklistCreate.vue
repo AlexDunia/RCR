@@ -97,9 +97,11 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useDateValidation } from '@/composables/useDateValidation'
+import { useDateValidation } from '@/composables/useDateValidation';
+import { useMarketingStore } from '@/stores/marketingStore'; // Import the marketing store
 
 const router = useRouter();
+const marketingStore = useMarketingStore(); // Use the marketing store
 
 const checklist = ref({
   title: '',
@@ -136,7 +138,7 @@ const validateDueDate = () => {
   return true
 }
 
-const saveChecklist = () => {
+const saveChecklist = async () => {
   if (!validateDueDate()) {
     return
   }
@@ -145,21 +147,9 @@ const saveChecklist = () => {
     // Log the current state before saving
     console.log('Current checklist to save:', checklist.value);
 
-    // Get existing checklists from localStorage
-    let existingChecklists = [];
-    const storedChecklists = localStorage.getItem('checklists');
-
-    if (storedChecklists) {
-      console.log('Found existing checklists:', storedChecklists);
-      existingChecklists = JSON.parse(storedChecklists);
-    } else {
-      console.log('No existing checklists found in localStorage');
-    }
-
     // Create new checklist object with all required fields
     const newChecklist = {
       ...checklist.value,
-      id: Date.now(),
       items: checklist.value.items
         .filter(item => item.text.trim() !== '')
         .map(item => ({
@@ -171,21 +161,12 @@ const saveChecklist = () => {
       progress: 0
     };
 
-    // Log the new checklist object
-    console.log('New checklist object created:', newChecklist);
-
-    // Add new checklist to array
-    existingChecklists.push(newChecklist);
-
-    // Save back to localStorage
-    localStorage.setItem('checklists', JSON.stringify(existingChecklists));
-
-    // Verify the save by reading it back
-    const verifyStorage = localStorage.getItem('checklists');
-    console.log('Verification - Reading back from localStorage:', verifyStorage);
+    // Use the marketing store to save the checklist
+    await marketingStore.checklists.saveChecklist(newChecklist);
+    console.log('Checklist saved successfully using marketingStore');
 
     // Navigate back to checklist list
-    router.push('/RCR/marketing-tools/checklist');
+    router.push('/marketing-tools/checklist');
   } catch (error) {
     console.error('Error saving checklist:', error);
     alert('There was an error saving your checklist. Please try again.');
@@ -193,7 +174,7 @@ const saveChecklist = () => {
 };
 
 const cancel = () => {
-  router.push('/RCR/marketing-tools/checklist');
+  router.push('/marketing-tools/checklist');
 };
 </script>
 

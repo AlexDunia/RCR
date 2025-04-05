@@ -114,9 +114,11 @@
 import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import ConfirmationModal from '@/ui/ConfirmationModal.vue';
+import { useMarketingStore } from '@/stores/marketingStore';
 
 const router = useRouter();
 const route = useRoute();
+const marketingStore = useMarketingStore();
 const checklist = ref(null);
 const showModal = ref(false);
 const modalConfig = ref({
@@ -126,20 +128,20 @@ const modalConfig = ref({
   confirmText: ''
 });
 
-onMounted(() => {
+onMounted(async () => {
   console.log('Component mounted, loading checklist...');
-  loadChecklist();
+  await loadChecklist();
 });
 
-const loadChecklist = () => {
+const loadChecklist = async () => {
   try {
-    // Get all checklists from localStorage
-    const checklists = JSON.parse(localStorage.getItem('checklists') || '[]');
-    console.log('All checklists:', checklists);
+    // Fetch checklists from the store
+    await marketingStore.checklists.fetchChecklists();
+    console.log('All checklists:', marketingStore.checklists.marketingChecklists);
     console.log('Current route ID:', route.params.id);
 
     // Find the checklist with matching ID
-    const found = checklists.find(c => String(c.id) === String(route.params.id));
+    const found = marketingStore.checklists.marketingChecklists.find(c => String(c.id) === String(route.params.id));
     console.log('Found checklist:', found);
 
     if (found) {
@@ -206,7 +208,7 @@ const goBack = () => {
 };
 
 const editChecklist = () => {
-  router.push(`/RCR/marketing-tools/checklist/${route.params.id}/edit`);
+  router.push(`/marketing-tools/checklist/${checklist.value.id}/edit`);
 };
 
 const deleteChecklist = () => {
@@ -214,25 +216,53 @@ const deleteChecklist = () => {
   modalConfig.value = {
     title: 'Delete Checklist',
     message: 'Are you sure you want to delete this checklist? This action cannot be undone.',
-    type: 'delete',
+    type: 'danger',
     confirmText: 'Delete',
     onConfirm: () => {
-      const checklists = JSON.parse(localStorage.getItem('checklists') || '[]');
-      const updatedChecklists = checklists.filter(c => String(c.id) !== String(route.params.id));
-      localStorage.setItem('checklists', JSON.stringify(updatedChecklists));
-      router.push('/marketing-tools/checklist');
+      try {
+        // Get all checklists from the store
+        const checklistsArray = marketingStore.checklists.marketingChecklists;
+
+        // Filter out the current checklist
+        const filteredChecklists = checklistsArray.filter(c => c.id !== checklist.value.id);
+
+        // Save back to localStorage with the correct key
+        localStorage.setItem('marketingChecklists', JSON.stringify(filteredChecklists));
+
+        // Navigate back to the checklist list
+        router.push('/marketing-tools/checklist');
+      } catch (error) {
+        console.error('Error deleting checklist:', error);
+      }
     }
   };
 };
 
 const saveEdit = async () => {
-  showModal.value = true;
-  modalConfig.value = {
-    title: 'Save Changes',
-    message: 'Do you want to save your changes to this checklist?',
-    type: 'update',
-    confirmText: 'Save'
-  };
+  if (!checklist.value) return;
+
+  try {
+    // Get all checklists from the store
+    const checklistsArray = marketingStore.checklists.marketingChecklists;
+
+    // Find the index of the current checklist
+    const index = checklistsArray.findIndex(c => c.id === checklist.value.id);
+
+    if (index !== -1) {
+      // Update the checklist in the array
+      checklistsArray[index] = {
+        ...checklist.value,
+        lastModified: new Date().toISOString()
+      };
+
+      // Save back to localStorage with the correct key
+      localStorage.setItem('marketingChecklists', JSON.stringify(checklistsArray));
+
+      console.log('Checklist saved successfully');
+    }
+  } catch (error) {
+    console.error('Error saving checklist:', error);
+  }
 };
 
 const handleSaveConfirm = async () => {

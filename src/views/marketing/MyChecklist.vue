@@ -171,15 +171,17 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import ConfirmationModal from '@/ui/ConfirmationModal.vue';
+import { useMarketingStore } from '@/stores/marketingStore';
 
 const router = useRouter();
+const marketingStore = useMarketingStore();
 
 // State
 const searchQuery = ref('');
 const currentFilter = ref('all');
 const sortBy = ref('newest');
 const selectedChecklists = ref([]);
-const checklists = ref([]);
+const checklists = computed(() => marketingStore.checklists.marketingChecklists);
 const showModal = ref(false);
 const modalConfig = ref({
   title: '',
@@ -200,17 +202,12 @@ const filterTabs = [
   { label: 'Completed', value: 'completed' }
 ];
 
-// Load checklists from localStorage
-const loadChecklists = () => {
+// Load checklists from the store
+const loadChecklists = async () => {
   try {
-    const storedChecklists = localStorage.getItem('checklists');
-    if (storedChecklists) {
-      checklists.value = JSON.parse(storedChecklists);
-      console.log('Loaded checklists:', checklists.value);
-    }
+    await marketingStore.checklists.fetchChecklists();
   } catch (error) {
     console.error('Error loading checklists:', error);
-    checklists.value = [];
   }
 };
 
@@ -249,76 +246,61 @@ const handleScroll = () => {
   }
 };
 
-onMounted(() => {
+// Watch for localStorage changes (for backward compatibility)
+const handleStorageChange = (e) => {
+  if (e.key === 'marketingChecklists') {
+    loadChecklists();
+  }
+};
+
+onMounted(async () => {
   loadChecklists();
+  window.addEventListener('storage', handleStorageChange);
   window.addEventListener('scroll', handleScroll);
 });
 
 onUnmounted(() => {
+  window.removeEventListener('storage', handleStorageChange);
   window.removeEventListener('scroll', handleScroll);
 });
 
-// Computed
-const sortedChecklists = computed(() => {
-  const allChecklists = [...checklists.value];
-
-  // Sort by date (newest first) and then by completion status
-  return allChecklists.sort((a, b) => {
-    // First sort by lastModified date (newest first)
-    const dateA = new Date(a.lastModified || a.creationDate);
-    const dateB = new Date(b.lastModified || b.creationDate);
-
-    if (dateA > dateB) return -1;
-    if (dateA < dateB) return 1;
-
-    // If dates are equal, sort completed items after non-completed
-    if (a.status === 'completed' && b.status !== 'completed') return 1;
-    if (a.status !== 'completed' && b.status === 'completed') return -1;
-
-    return 0;
-  });
-});
-
 const filteredChecklists = computed(() => {
-  let filtered = [...sortedChecklists.value];
+  let result = [];
+
+  if (!checklists.value || checklists.value.length === 0) {
+    return [];
+  }
+
+  if (currentFilter.value === 'all') {
+    result = checklists.value;
+  } else if (currentFilter.value === 'drafts') {
+    result = checklists.value.filter(item => !item.completed);
+  } else if (currentFilter.value === 'completed') {
+    result = checklists.value.filter(item => item.completed);
+  }
 
   // Apply search filter
   if (searchQuery.value) {
-    filtered = filtered.filter(checklist =>
-      checklist.title.toLowerCase().includes(searchQuery.value.toLowerCase())
+    const query = searchQuery.value.toLowerCase();
+    result = result.filter(item =>
+      item.title.toLowerCase().includes(query) ||
+      (item.description && item.description.toLowerCase().includes(query))
     );
   }
 
-  // Apply status filter
-  if (currentFilter.value === 'drafts') {
-    filtered = filtered.filter(checklist => checklist.status === 'draft');
-  } else if (currentFilter.value === 'completed') {
-    filtered = filtered.filter(checklist => checklist.status === 'completed');
-  }
-
-  // Sort based on status and date
-  filtered.sort((a, b) => {
-    // If sorting by newest/oldest
-    if (sortBy.value === 'newest' || sortBy.value === 'oldest') {
-      // First, separate completed and non-completed items
-      if (a.status === 'completed' && b.status !== 'completed') return 1;
-      if (a.status !== 'completed' && b.status === 'completed') return -1;
-
-      // Then sort by date within each group
-      const dateComparison = sortBy.value === 'newest'
-        ? new Date(b.creationDate) - new Date(a.creationDate)
-        : new Date(a.creationDate) - new Date(b.creationDate);
-
-      return dateComparison;
-    }
-    // If sorting by progress
-    else if (sortBy.value === 'progress') {
-      return a.progress - b.progress;
+  // Apply sorting
+  result = [...result].sort((a, b) => {
+    if (sortBy.value === 'newest') {
+      return new Date(b.creationDate) - new Date(a.creationDate);
+    } else if (sortBy.value === 'oldest') {
+      return new Date(a.creationDate) - new Date(b.creationDate);
+    } else if (sortBy.value === 'progress') {
+      return (a.progress || 0) - (b.progress || 0);
     }
     return 0;
   });
 
-  return filtered;
+  return result;
 });
 
 // Methods
@@ -355,24 +337,25 @@ const editChecklist = (id) => {
   router.push(`/marketing-tools/checklist/${id}/edit`);
 };
 
-const deleteChecklist = (id) => {
-  showModal.value = true;
+const deleteChecklist = async (id) => {
   modalConfig.value = {
     title: 'Delete Checklist',
     message: 'Are you sure you want to delete this checklist? This action cannot be undone.',
-    type: 'delete',
+    type: 'danger',
     confirmText: 'Delete',
     onConfirm: async () => {
       try {
+        // Will be updated to use marketingStore.checklists.deleteChecklist when that function is added
         const updatedChecklists = checklists.value.filter(c => c.id !== id);
-        localStorage.setItem('checklists', JSON.stringify(updatedChecklists));
-        loadChecklists();
-        selectedChecklists.value = selectedChecklists.value.filter(selectedId => selectedId !== id);
+        localStorage.setItem('marketingChecklists', JSON.stringify(updatedChecklists));
+        await loadChecklists();
+        showModal.value = false;
       } catch (error) {
         console.error('Error deleting checklist:', error);
       }
     }
   };
+  showModal.value = true;
 };
 
 const toggleSelection = (id) => {

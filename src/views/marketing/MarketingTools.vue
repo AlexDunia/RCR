@@ -7,8 +7,14 @@
       </div>
       <template v-else>
         <div v-if="isSuccessPlanRoute" class="success-plans">
-          <div class="plans-container">
-            <div v-for="(plan, index) in marketingPlans" :key="index" class="plan-card" @click="viewPlan(index)">
+          <div v-if="marketingStore.plans.marketingPlans.length === 0" class="empty-state">
+            <div class="empty-icon">📋</div>
+            <h3>No Marketing Plans Yet</h3>
+            <p>Create your first marketing plan to get started</p>
+            <button class="create-plan-btn" @click="createNewPlan">Create New Plan</button>
+          </div>
+          <div v-else class="plans-container">
+            <div v-for="(plan, index) in marketingStore.plans.marketingPlans" :key="index" class="plan-card" @click="viewPlan(index)">
               <div class="plan-header">
                 <div class="plan-icon" :style="{ backgroundColor: getRandomColor(plan.title) }">
                   {{ getFirstLetter(plan.title) }}
@@ -23,7 +29,7 @@
               </div>
               <p class="description">{{ plan.strategyOverview }}</p>
               <div class="card-footer">
-                <span class="status" :class="plan.status.toLowerCase()">{{ plan.status }}</span>
+                <span class="status" :class="plan.status ? plan.status.toLowerCase() : 'draft'">{{ plan.status || 'Draft' }}</span>
               </div>
             </div>
             <div class="plan-card add-new" @click="createNewPlan">
@@ -43,15 +49,17 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { useMarketingStore } from '@/stores/marketingStore';
 import MarketingNavigation from '@/features/marketing/MarketingNavigation.vue';
 import Loader from '@/ui/Loader.vue';
 
 const router = useRouter();
 const route = useRoute();
-const marketingPlans = ref(JSON.parse(localStorage.getItem('marketingPlans') || '[]'));
-const isLoading = ref(true);
+const marketingStore = useMarketingStore();
+
+const isLoading = computed(() => marketingStore.isLoading);
 
 // Expanded array of colors that work well with white text (good contrast)
 // More diverse with less emphasis on purple shades
@@ -82,10 +90,9 @@ const contrastColors = [
   '#0C4A6E'  // Dark Cyan
 ];
 
-onMounted(() => {
-  setTimeout(() => {
-    isLoading.value = false;
-  }, 1000);
+onMounted(async () => {
+  // Fetch marketing plans when component mounts
+  await marketingStore.plans.fetchPlans();
 });
 
 const isSuccessPlanRoute = computed(() => {
@@ -160,6 +167,51 @@ const formatTime = (date) => {
   flex-direction: column;
   gap: 1rem;
   padding: 1rem;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4rem 1rem;
+  background: #f9fafb;
+  border-radius: 0.5rem;
+  border: 1px dashed #e5e7eb;
+  margin-bottom: 2rem;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+}
+
+.create-plan-btn {
+  padding: 0.625rem 1.25rem;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.create-plan-btn:hover {
+  background-color: #1d4ed8;
 }
 
 .plans-container {
@@ -289,9 +341,5 @@ const formatTime = (date) => {
   width: 2.5rem;
   height: 2.5rem;
   margin-bottom: 1rem;
-}
-
-.add-new h3 {
-  color: #6B7280;
 }
 </style>

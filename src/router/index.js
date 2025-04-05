@@ -278,7 +278,10 @@ const routes = [
       },
       {
         path: 'create',
-        component: () => import('@/views/marketing/CreateSuccessPlan.vue')
+        component: () => import('@/views/marketing/CreateSuccessPlan.vue'),
+        meta: {
+          allowedRoles: ['agent']
+        }
       },
       {
         path: 'plan/:id',

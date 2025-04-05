@@ -16,10 +16,22 @@
       </button>
     </div>
 
-    <MarketingContentLoader>
+    <div v-if="isLoading" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Loading plans...</p>
+    </div>
+
+    <div v-else-if="marketingStore.plans.marketingPlans.length === 0" class="empty-state">
+      <div class="empty-icon">📋</div>
+      <h3>No Marketing Plans Yet</h3>
+      <p>Create your first marketing plan to get started</p>
+      <button class="create-plan-btn" @click="createNewPlan">Create New Plan</button>
+    </div>
+
+    <MarketingContentLoader v-else>
       <div class="success-plans">
         <div class="plans-container">
-          <div v-for="(plan, index) in marketingPlans" :key="index" class="plan-card" @click="viewPlan(index)">
+          <div v-for="(plan, index) in marketingStore.plans.marketingPlans" :key="index" class="plan-card" @click="viewPlan(index)">
             <div class="plan-header">
               <div class="plan-icon" :style="{ backgroundColor: getRandomColor(plan.title) }">
                 {{ getFirstLetter(plan.title) }}
@@ -34,7 +46,7 @@
             </div>
             <p class="description">{{ plan.strategyOverview }}</p>
             <div class="card-footer">
-              <span class="status" :class="plan.status.toLowerCase()">{{ plan.status }}</span>
+              <span class="status" :class="plan.status ? plan.status.toLowerCase() : 'draft'">{{ plan.status || 'Draft' }}</span>
             </div>
           </div>
           <div class="plan-card add-new" @click="createNewPlan">
@@ -52,13 +64,20 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { useMarketingStore } from '@/stores/marketingStore';
 import MarketingContentLoader from '@/features/marketing/MarketingContentLoader.vue';
 
 const router = useRouter();
+const marketingStore = useMarketingStore();
 const currentTab = ref('success');
-const marketingPlans = ref(JSON.parse(localStorage.getItem('marketingPlans') || '[]'));
+const isLoading = computed(() => marketingStore.isLoading);
+
+// Fetch marketing plans when component mounts
+onMounted(async () => {
+  await marketingStore.plans.fetchPlans();
+});
 
 // Expanded array of colors that work well with white text (good contrast)
 // More diverse with less emphasis on purple shades
@@ -103,26 +122,26 @@ const handleTabChange = (key) => {
   currentTab.value = key;
   switch (key) {
     case 'success':
-      router.push('/RCR/marketing-tools/success-plan');
+      router.push('/marketing-tools/success-plan');
       break;
     case 'checklist':
-      router.push('/RCR/marketing-tools/checklist');
+      router.push('/marketing-tools/checklist');
       break;
     case 'done':
-      router.push('/RCR/marketing-tools/done-for-you');
+      router.push('/marketing-tools/done-for-you');
       break;
     case 'social':
-      router.push('/RCR/marketing-tools/social-platforms');
+      router.push('/marketing-tools/social-platforms');
       break;
   }
 };
 
 const viewPlan = (index) => {
-  router.push(`/RCR/marketing-tools/plan/${index}`);
+  router.push(`/marketing-tools/plan/${index}`);
 };
 
 const createNewPlan = () => {
-  router.push('/RCR/marketing-tools/create');
+  router.push('/marketing-tools/create');
 };
 
 // Get the first letter of the plan title
@@ -205,6 +224,73 @@ const formatTime = (date) => {
 .marketing-tab.active {
   color: #2563EB;
   border-bottom: 2px solid #2563EB;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+.loading-spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top: 4px solid #3498db;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4rem 1rem;
+  background: #f9fafb;
+  border-radius: 0.5rem;
+  border: 1px dashed #e5e7eb;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+}
+
+.create-plan-btn {
+  padding: 0.625rem 1.25rem;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.create-plan-btn:hover {
+  background-color: #1d4ed8;
 }
 
 .plans-container {
