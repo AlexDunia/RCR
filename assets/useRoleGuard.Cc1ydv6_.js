@@ -1,0 +1,1 @@
+import{u as r}from"./index.CY-6Z1Wa.js";import"./vendor.CYxyFTSN.js";function t(){const e=r();return{checkAccess:async o=>o.includes(e.currentRole),currentRole:e.currentRole,availableRoles:e.availableRoles,setRole:e.setRole}}export{t as useRoleGuard};

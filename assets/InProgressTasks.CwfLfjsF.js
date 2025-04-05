@@ -1,0 +1,1 @@
+import{c as a,h as s,e}from"./vendor.CYxyFTSN.js";import{T as o,a as r}from"./TaskNavigation.DjBvOP_t.js";import{T as t}from"./TaskList.DXN4oLqB.js";import{_ as c}from"./index.CY-6Z1Wa.js";const _={class:"task-home"},m={__name:"InProgressTasks",setup(n){return(p,i)=>(e(),a("div",_,[s(o),s(r),s(t)]))}},l=c(m,[["__scopeId","data-v-2146c205"]]);export{l as default};

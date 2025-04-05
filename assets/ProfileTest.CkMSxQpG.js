@@ -1,0 +1,1 @@
+import{c as o,f as t,e as s}from"./vendor.CYxyFTSN.js";import{_ as r}from"./index.CY-6Z1Wa.js";const a={class:"profile-test"},l={__name:"ProfileTest",setup(c){return(f,e)=>(s(),o("div",a,e[0]||(e[0]=[t("h1",null,"Profile Test Page",-1),t("p",null,"If you can see this, the profile routing works!",-1)])))}},i=r(l,[["__scopeId","data-v-90f8180c"]]);export{i as default};

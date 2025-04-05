@@ -1,0 +1,1 @@
+import{c as e,e as o}from"./vendor.CYxyFTSN.js";import{_ as a}from"./index.CY-6Z1Wa.js";const c={name:"AppLoader"},r={class:"app-loader"};function s(t,p,n,_,d,f){return o(),e("div",r)}const l=a(c,[["render",s],["__scopeId","data-v-8ac8f965"]]);export{l as L};
