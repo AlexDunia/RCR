@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
+import { hasPermission } from '@/services/permissionService';
+import { useRoleStore } from '@/stores/roleStore';
 // import { useAuthStore } from './authStore';
 import axios from 'axios'; // Assuming axios is used for API calls
 
@@ -76,6 +78,13 @@ export const useMarketingStore = defineStore('marketing', () => {
       setLoading(true);
       clearError();
       try {
+        // Check user permission before proceeding
+        const roleStore = useRoleStore();
+        if (!hasPermission('create-marketing-plans')) {
+          setError('You do not have permission to create marketing plans');
+          throw new Error('Permission denied: Cannot create marketing plans');
+        }
+
         // Will connect to Laravel API endpoint
         // const response = await api.post('/marketing/plans', plan);
         // const savedPlan = response.data.data;
@@ -90,12 +99,15 @@ export const useMarketingStore = defineStore('marketing', () => {
           plan.creationDate = new Date().toISOString();
         }
 
+        // Add creator information using roleStore
+        plan.creator = roleStore.getCurrentUser();
+
         plans.push(plan);
         localStorage.setItem('marketingPlans', JSON.stringify(plans));
         marketingPlans.value = plans;
         return plan;
       } catch (err) {
-        setError('Failed to save marketing plan');
+        setError(err.message || 'Failed to save marketing plan');
         console.error(err);
         throw err;
       } finally {
@@ -161,8 +173,9 @@ export const useMarketingStore = defineStore('marketing', () => {
             localStorage.setItem('marketingChecklists', JSON.stringify(mergedChecklists));
             console.log(`Migration complete. Moved ${parsedOldChecklists.length} checklists.`);
 
-            // Don't delete old data yet - keep as backup
-            // localStorage.removeItem('checklists');
+            // Delete the old data now that it's been safely migrated
+            localStorage.removeItem('checklists');
+            console.log('Old checklist data removed after successful migration.');
           }
         }
       } catch (error) {
@@ -210,6 +223,10 @@ export const useMarketingStore = defineStore('marketing', () => {
         if (!checklist.id) {
           checklist.id = Date.now().toString();
         }
+
+        // Add creator information using roleStore
+        const roleStore = useRoleStore();
+        checklist.creator = roleStore.getCurrentUser();
 
         checklists.push(checklist);
         localStorage.setItem('marketingChecklists', JSON.stringify(checklists));
@@ -328,6 +345,10 @@ export const useMarketingStore = defineStore('marketing', () => {
         if (!post.id) {
           post.id = Date.now().toString();
         }
+
+        // Add creator information using roleStore
+        const roleStore = useRoleStore();
+        post.creator = roleStore.getCurrentUser();
 
         allPosts.push(post);
         localStorage.setItem('socialPosts', JSON.stringify(allPosts));

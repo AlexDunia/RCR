@@ -1,7 +1,7 @@
 <template>
   <div class="social-platforms">
     <div class="social-platforms__header">
-      <button class="create-post-button" @click="handleCreatePost">
+      <button class="create-post-button" @click="handleCreatePost" v-can="'create-social-posts'">
         <span class="create-post-button__icon">+</span>
         CREATE POST
       </button>
@@ -54,6 +54,7 @@
                 class="action-button action-button--edit"
                 @click.stop="editPost(post)"
                 aria-label="Edit post"
+                v-can="'edit-social-posts'"
               >
                 <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -63,6 +64,7 @@
                 class="action-button action-button--delete"
                 @click.stop="deletePost(post)"
                 aria-label="Delete post"
+                v-can="'delete-social-posts'"
               >
                 <svg class="action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -76,6 +78,50 @@
         </div>
       </div>
     </MarketingContentLoader>
+
+    <div v-can="'access-social-profiles'" class="social-profiles-section">
+      <h2>Your Social Media Profiles</h2>
+      <div class="profiles-list">
+        <div class="profile-card" v-for="platform in platforms" :key="platform.id">
+          <div class="profile-icon">{{ platform.icon }}</div>
+          <div class="profile-info">
+            <h3>{{ platform.name }}</h3>
+            <p>{{ platform.handle }}</p>
+            <div class="profile-stats">
+              <span>{{ platform.followers }} followers</span>
+              <span>{{ platform.engagement }}% engagement</span>
+            </div>
+          </div>
+          <button class="profile-action">Manage</button>
+        </div>
+      </div>
+    </div>
+
+    <div v-can="'view-social-insights'" class="social-insights-section">
+      <h2>Social Media Insights</h2>
+      <div class="insights-grid">
+        <div class="insight-card">
+          <h3>Impressions</h3>
+          <div class="insight-value">{{ stats.impressions }}</div>
+          <div class="insight-trend positive">+12.5%</div>
+        </div>
+        <div class="insight-card">
+          <h3>Engagement</h3>
+          <div class="insight-value">{{ stats.engagement }}%</div>
+          <div class="insight-trend positive">+5.3%</div>
+        </div>
+        <div class="insight-card">
+          <h3>Click-through</h3>
+          <div class="insight-value">{{ stats.clickThrough }}%</div>
+          <div class="insight-trend negative">-2.1%</div>
+        </div>
+        <div class="insight-card">
+          <h3>Audience Growth</h3>
+          <div class="insight-value">{{ stats.audienceGrowth }}</div>
+          <div class="insight-trend positive">+8.7%</div>
+        </div>
+      </div>
+    </div>
 
     <ConfirmationModal
       v-if="showModal"
@@ -95,6 +141,7 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import ConfirmationModal from '@/ui/ConfirmationModal.vue';
 import MarketingContentLoader from '@/features/marketing/MarketingContentLoader.vue';
+import { usePermission } from '@/composables/usePermission';
 
 const router = useRouter();
 const currentTab = ref('scheduled');
@@ -108,6 +155,8 @@ const modalConfig = ref({
   action: null
 });
 const selectedPost = ref(null);
+
+const { can } = usePermission();
 
 const tabOptions = [
   { id: 'drafts', name: 'Drafts' },
@@ -232,26 +281,35 @@ const formatDate = (dateString) => {
 };
 
 const handleCreatePost = () => {
-  console.log('Navigating to create post page');
-  router.push('/marketing-tools/social-platforms/create');
+  if (can('create-social-posts')) {
+    router.push('/marketing-tools/social-platforms/create');
+  } else {
+    alert('You do not have permission to create posts');
+  }
 };
 
 const editPost = (post) => {
-  console.log('Navigating to edit post page', post.id);
-  router.push(`/marketing-tools/social-platforms/edit/${post.id}`);
+  if (can('edit-social-posts')) {
+    router.push(`/marketing-tools/social-platforms/edit/${post.id}`);
+  } else {
+    alert('You do not have permission to edit posts');
+  }
 };
 
 const deletePost = (post) => {
-  selectedPost.value = post;
-  showModal.value = true;
-  modalConfig.value = {
-    title: 'Delete Post',
-    message: 'Are you sure you want to delete this post?',
-    type: 'delete',
-    confirmText: 'Delete',
-    cancelText: 'Cancel',
-    action: 'delete'
-  };
+  if (can('delete-social-posts')) {
+    selectedPost.value = post;
+    showModal.value = true;
+    modalConfig.value = {
+      title: 'Delete Post',
+      message: `Are you sure you want to delete "${post.title}"?`,
+      type: 'danger',
+      confirmText: 'Delete',
+      action: 'delete'
+    };
+  } else {
+    alert('You do not have permission to delete posts');
+  }
 };
 
 const showSaveToDraftsModal = (post) => {
@@ -326,6 +384,42 @@ const viewPostDetails = (post) => {
   console.log('Navigating to post detail page', post.id);
   router.push(`/marketing-tools/social-platforms/post/${post.id}`);
 };
+
+// Sample social media platforms (only visible to agents)
+const platforms = ref([
+  {
+    id: 'facebook',
+    name: 'Facebook',
+    icon: 'fb',
+    handle: '@yourbusiness',
+    followers: 1250,
+    engagement: 3.2
+  },
+  {
+    id: 'instagram',
+    name: 'Instagram',
+    icon: 'ig',
+    handle: '@yourbusiness',
+    followers: 2800,
+    engagement: 4.7
+  },
+  {
+    id: 'twitter',
+    name: 'Twitter',
+    icon: 'tw',
+    handle: '@yourbusiness',
+    followers: 965,
+    engagement: 2.1
+  }
+]);
+
+// Sample analytics data (visible to both agents and admins)
+const stats = ref({
+  impressions: '15,872',
+  engagement: '3.8',
+  clickThrough: '2.4',
+  audienceGrowth: '+185'
+});
 </script>
 
 <style scoped>

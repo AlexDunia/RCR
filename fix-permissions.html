@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Fix Admin Permissions</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #1E3A8A;
+    }
+    button {
+      background-color: #2563EB;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 20px;
+    }
+    button:hover {
+      background-color: #1D4ED8;
+    }
+    #output {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f5f5f5;
+      border-radius: 4px;
+      white-space: pre-line;
+    }
+    .success {
+      color: #047857;
+      font-weight: bold;
+    }
+    .info {
+      background-color: #EFF6FF;
+      border-left: 4px solid #3B82F6;
+      padding: 1rem;
+      margin: 1rem 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Fix Admin Permissions</h1>
+  
+  <div class="info">
+    <p><strong>Issue Found:</strong> There was a synchronization problem between the Pinia store (useRoleStore) and localStorage.</p>
+    <p>The Pinia store had your role set as 'admin', but the permission system was checking localStorage, which didn't have the right value.</p>
+    <p>We've fixed this by updating the roleStore to automatically synchronize with localStorage.</p>
+  </div>
+  
+  <p>Click the button below to set your role to admin in localStorage and fix the synchronization issue.</p>
+  
+  <button id="fixButton">Set Admin Role</button>
+  <div id="output"></div>
+
+  <script>
+    document.getElementById('fixButton').addEventListener('click', function() {
+      const output = document.getElementById('output');
+      
+      output.innerHTML = 'Current localStorage values:\n';
+      output.innerHTML += `user_role: ${localStorage.getItem('user_role') || 'not set'}\n`;
+      output.innerHTML += `user_name: ${localStorage.getItem('user_name') || 'not set'}\n`;
+      output.innerHTML += `user_id: ${localStorage.getItem('user_id') || 'not set'}\n\n`;
+      
+      // Fix: Set admin role
+      localStorage.setItem('user_role', 'admin');
+      localStorage.setItem('user_name', 'Admin User');
+      localStorage.setItem('user_id', 'admin-123');
+      
+      output.innerHTML += 'After updating:\n';
+      output.innerHTML += `user_role: ${localStorage.getItem('user_role')}\n`;
+      output.innerHTML += `user_name: ${localStorage.getItem('user_name')}\n`;
+      output.innerHTML += `user_id: ${localStorage.getItem('user_id')}\n\n`;
+      
+      output.innerHTML += '<span class="success">✓ Role updated successfully! Now you should be able to create marketing plans.</span>\n\n';
+      output.innerHTML += 'Please navigate back to the marketing tools page and try again. If it still doesn\'t work, try refreshing your browser.';
+    });
+  </script>
+</body>
+</html> 

@@ -1,8 +1,64 @@
 <template>
   <div class="success-plan-container">
     <div class="marketing-tools-header">
-      <h1 class="marketing-tools-title">Succezz Plan</h1>
-      <p class="marketing-tools-subtitle">Create and track your success milestones with our comprehensive planning tools.</p>
+      <div class="header-with-actions">
+        <div>
+          <h1 class="marketing-tools-title">Succezz Plan</h1>
+          <p class="marketing-tools-subtitle">Create and track your success milestones with our comprehensive planning tools.</p>
+        </div>
+
+        <!-- Admin-only Create Plan button at the top -->
+        <button
+          v-if="canCreatePlans"
+          class="create-plan-top-btn"
+          @click="createNewPlan"
+          v-can="'create-marketing-plans'"
+        >
+          <span class="btn-icon">+</span>
+          Create New Plan
+        </button>
+      </div>
+
+      <!-- Admin-only search and filters -->
+      <div v-if="canCreatePlans" class="admin-search-filters">
+        <div class="search-bar">
+          <input
+            type="text"
+            v-model="searchQuery"
+            placeholder="Search plans..."
+            @input="filterPlans"
+          />
+          <button class="search-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="search-icon">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="filter-options">
+          <div class="filter-label">Filter by:</div>
+
+          <div class="filter-pills">
+            <button
+              v-for="filter in filterOptions"
+              :key="filter.value"
+              :class="['filter-pill', { active: activeFilters.includes(filter.value) }]"
+              @click="toggleFilter(filter.value)"
+            >
+              {{ filter.label }}
+            </button>
+          </div>
+
+          <select v-if="showAgentFilter" v-model="selectedAgent" class="agent-filter" @change="filterPlans">
+            <option value="">All Agents</option>
+            <option v-for="agent in availableAgents" :key="agent">{{ agent }}</option>
+          </select>
+
+          <button v-if="isFiltering" class="clear-filters" @click="clearFilters">
+            Clear Filters
+          </button>
+        </div>
+      </div>
     </div>
 
     <div class="marketing-tabs">
@@ -25,13 +81,38 @@
       <div class="empty-icon">📋</div>
       <h3>No Marketing Plans Yet</h3>
       <p>Create your first marketing plan to get started</p>
-      <button class="create-plan-btn" @click="createNewPlan">Create New Plan</button>
+      <button
+        v-if="canCreatePlans"
+        class="create-plan-btn"
+        @click="createNewPlan"
+        v-can="'create-marketing-plans'"
+      >
+        Create New Plan
+      </button>
+      <p v-else class="permission-message">Please contact an administrator to create a marketing plan</p>
+    </div>
+
+    <div v-else-if="filteredPlans.length === 0 && isFiltering" class="empty-state">
+      <div class="empty-icon">🔍</div>
+      <h3>No Matching Plans</h3>
+      <p>No plans match your search criteria</p>
+      <button class="clear-filters-btn" @click="clearFilters">Clear Filters</button>
     </div>
 
     <MarketingContentLoader v-else>
       <div class="success-plans">
+        <!-- Add security reminder for admins -->
+        <div v-if="canCreatePlans" class="security-reminder">
+          <p>As an admin, you have special privileges to create marketing plans. Remember to follow company guidelines.</p>
+        </div>
+
+        <!-- Search results count for admins -->
+        <div v-if="canCreatePlans && isFiltering" class="search-results-count">
+          Showing {{ filteredPlans.length }} of {{ marketingStore.plans.marketingPlans.length }} plans
+        </div>
+
         <div class="plans-container">
-          <div v-for="(plan, index) in marketingStore.plans.marketingPlans" :key="index" class="plan-card" @click="viewPlan(index)">
+          <div v-for="(plan, index) in filteredPlans" :key="index" class="plan-card" @click="viewPlan(getOriginalIndex(plan))">
             <div class="plan-header">
               <div class="plan-icon" :style="{ backgroundColor: getRandomColor(plan.title) }">
                 {{ getFirstLetter(plan.title) }}
@@ -39,6 +120,12 @@
               <div class="plan-info">
                 <h3>{{ plan.title }}</h3>
                 <p class="date">Creation date: {{ formatDate(plan.creationDate) }}</p>
+
+                <!-- Add creator badge if available -->
+                <div v-if="plan.creator" class="creator-badge">
+                  <span class="creator-name">{{ plan.creator.name }}</span>
+                  <span class="creator-role" :class="plan.creator.role">{{ plan.creator.role }}</span>
+                </div>
               </div>
               <button class="view-plan-btn">
                 View plan
@@ -47,14 +134,12 @@
             <p class="description">{{ plan.strategyOverview }}</p>
             <div class="card-footer">
               <span class="status" :class="plan.status ? plan.status.toLowerCase() : 'draft'">{{ plan.status || 'Draft' }}</span>
-            </div>
-          </div>
-          <div class="plan-card add-new" @click="createNewPlan">
-            <div class="add-content">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="add-icon">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-              </svg>
-              <h3>Create New Plan</h3>
+
+              <!-- Show assigned agents if available -->
+              <div v-if="plan.assignedAgents && plan.assignedAgents.length > 0" class="assigned-agents">
+                <span class="assigned-label">Assigned to:</span>
+                <span class="agent-name">{{ plan.assignedAgents.join(', ') }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -64,20 +149,193 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useMarketingStore } from '@/stores/marketingStore';
 import MarketingContentLoader from '@/features/marketing/MarketingContentLoader.vue';
+import { hasPermission } from '@/services/permissionService';
+import { useRoleStore } from '@/stores/roleStore';
 
 const router = useRouter();
 const marketingStore = useMarketingStore();
+const roleStore = useRoleStore();
 const currentTab = ref('success');
 const isLoading = computed(() => marketingStore.isLoading);
+
+// Multiple security layers for checking permissions
+// Layer 1: Check if the current user can create plans using permissions service
+const canCreatePlans = computed(() => {
+  // Base permission check
+  const hasCreatePermission = hasPermission('create-marketing-plans');
+
+  // Additional security: Double check the role directly
+  const isAdminRole = roleStore.currentRole === 'admin';
+
+  // Both conditions must be true
+  return hasCreatePermission && isAdminRole;
+});
+
+// Search and filtering state
+const searchQuery = ref('');
+const activeFilters = ref([]);
+const selectedAgent = ref('');
+const filterOptions = [
+  { label: 'Title', value: 'title' },
+  { label: 'Description', value: 'description' },
+  { label: 'Agent', value: 'agent' },
+  { label: 'Status', value: 'status' }
+];
+
+// Computed property to determine if any filtering is active
+const isFiltering = computed(() => {
+  return searchQuery.value.trim() !== '' ||
+         activeFilters.value.length > 0 ||
+         selectedAgent.value !== '';
+});
+
+// Show agent filter dropdown when agent filter is selected
+const showAgentFilter = computed(() => {
+  return activeFilters.value.includes('agent');
+});
+
+// Get all available agents from plans
+const availableAgents = computed(() => {
+  const agents = new Set();
+
+  marketingStore.plans.marketingPlans.forEach(plan => {
+    if (plan.assignedAgents && plan.assignedAgents.length) {
+      plan.assignedAgents.forEach(agent => agents.add(agent));
+    }
+    if (plan.creator && plan.creator.role === 'agent') {
+      agents.add(plan.creator.name);
+    }
+  });
+
+  return Array.from(agents);
+});
+
+// Filter plans based on search query and selected filters
+const filteredPlans = computed(() => {
+  if (!isFiltering.value) {
+    return marketingStore.plans.marketingPlans;
+  }
+
+  return marketingStore.plans.marketingPlans.filter(plan => {
+    let matchesSearch = true;
+
+    // If search query is provided, check against selected filters
+    if (searchQuery.value.trim() !== '') {
+      const query = searchQuery.value.toLowerCase();
+
+      // If no specific filters are selected, search in all fields
+      if (activeFilters.value.length === 0) {
+        matchesSearch =
+          (plan.title && plan.title.toLowerCase().includes(query)) ||
+          (plan.strategyOverview && plan.strategyOverview.toLowerCase().includes(query)) ||
+          (plan.assignedAgents && plan.assignedAgents.some(agent => agent.toLowerCase().includes(query))) ||
+          (plan.creator && plan.creator.name && plan.creator.name.toLowerCase().includes(query));
+      } else {
+        // Otherwise, only search in selected filters
+        matchesSearch = false;
+
+        if (activeFilters.value.includes('title') && plan.title) {
+          matchesSearch = matchesSearch || plan.title.toLowerCase().includes(query);
+        }
+
+        if (activeFilters.value.includes('description') && plan.strategyOverview) {
+          matchesSearch = matchesSearch || plan.strategyOverview.toLowerCase().includes(query);
+        }
+
+        if (activeFilters.value.includes('agent')) {
+          const hasMatchingAssignedAgent = plan.assignedAgents &&
+            plan.assignedAgents.some(agent => agent.toLowerCase().includes(query));
+
+          const hasMatchingCreator = plan.creator &&
+            plan.creator.name &&
+            plan.creator.name.toLowerCase().includes(query);
+
+          matchesSearch = matchesSearch || hasMatchingAssignedAgent || hasMatchingCreator;
+        }
+
+        if (activeFilters.value.includes('status') && plan.status) {
+          matchesSearch = matchesSearch || plan.status.toLowerCase().includes(query);
+        }
+      }
+    }
+
+    // Additional filter for selected agent
+    if (selectedAgent.value && activeFilters.value.includes('agent')) {
+      const agentMatch =
+        (plan.assignedAgents && plan.assignedAgents.includes(selectedAgent.value)) ||
+        (plan.creator && plan.creator.name === selectedAgent.value);
+
+      matchesSearch = matchesSearch && agentMatch;
+    }
+
+    return matchesSearch;
+  });
+});
+
+// Get original index from the unfiltered array
+const getOriginalIndex = (plan) => {
+  return marketingStore.plans.marketingPlans.findIndex(p =>
+    p.title === plan.title && p.creationDate === plan.creationDate);
+};
+
+// Toggle filter selection
+const toggleFilter = (filter) => {
+  const index = activeFilters.value.indexOf(filter);
+  if (index === -1) {
+    activeFilters.value.push(filter);
+  } else {
+    activeFilters.value.splice(index, 1);
+  }
+  filterPlans();
+};
+
+// Reset all filters
+const clearFilters = () => {
+  searchQuery.value = '';
+  activeFilters.value = [];
+  selectedAgent.value = '';
+  filterPlans();
+};
+
+// Call this when filters change
+const filterPlans = () => {
+  // This function is here for any additional logic we may want to add
+  // The filtering itself happens in the computed property
+};
+
+// Layer 2: Security verification on component mount and role changes
+watch(() => roleStore.currentRole, verifyPermissions);
+
+function verifyPermissions() {
+  // If user tries to access features they shouldn't have access to, redirect
+  if (window.location.href.includes('/marketing-tools/create') && !canCreatePlans.value) {
+    console.error('Unauthorized access attempt detected');
+    router.push('/unauthorized');
+  }
+}
 
 // Fetch marketing plans when component mounts
 onMounted(async () => {
   await marketingStore.plans.fetchPlans();
+
+  // Verify permissions on mount (security layer 2)
+  verifyPermissions();
 });
+
+// Layer 3: Additional security in action methods
+const createNewPlan = () => {
+  // Triple-check permissions before allowing action
+  if (!hasPermission('create-marketing-plans') || roleStore.currentRole !== 'admin') {
+    console.error('Unauthorized create plan attempt');
+    return router.push('/unauthorized');
+  }
+
+  router.push('/marketing-tools/create');
+};
 
 // Expanded array of colors that work well with white text (good contrast)
 // More diverse with less emphasis on purple shades
@@ -138,10 +396,6 @@ const handleTabChange = (key) => {
 
 const viewPlan = (index) => {
   router.push(`/marketing-tools/plan/${index}`);
-};
-
-const createNewPlan = () => {
-  router.push('/marketing-tools/create');
 };
 
 // Get the first letter of the plan title
@@ -379,6 +633,8 @@ const formatTime = (date) => {
   display: flex;
   justify-content: flex-start;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .status {
@@ -420,5 +676,238 @@ const formatTime = (date) => {
   width: 2.5rem;
   height: 2.5rem;
   margin-bottom: 1rem;
+}
+
+.creator-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.creator-name {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.creator-role {
+  display: inline-block;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.625rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.creator-role.admin {
+  background-color: #374151;
+  color: white;
+}
+
+.creator-role.agent {
+  background-color: #2563eb;
+  color: white;
+}
+
+.permission-message {
+  color: #EF4444;
+  font-size: 0.875rem;
+  margin-top: 1rem;
+  padding: 0.5rem;
+  background-color: #FEF2F2;
+  border-radius: 0.375rem;
+  max-width: 400px;
+  text-align: center;
+}
+
+/* New styles for the top "Create Plan" button and header layout */
+.header-with-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.create-plan-top-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.create-plan-top-btn:hover {
+  background-color: #1d4ed8;
+}
+
+.btn-icon {
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.security-reminder {
+  background-color: #FFFBEB;
+  border-left: 4px solid #F59E0B;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: 0.375rem;
+}
+
+.security-reminder p {
+  color: #92400E;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+/* Admin search and filter styles */
+.admin-search-filters {
+  background-color: #f8fafc;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-top: 1rem;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.search-bar {
+  display: flex;
+  position: relative;
+}
+
+.search-bar input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  padding-right: 3rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  width: 100%;
+}
+
+.search-btn {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+.search-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.filter-options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.filter-label {
+  color: #4b5563;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.filter-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.filter-pill {
+  background-color: #f3f4f6;
+  color: #4b5563;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.375rem 0.75rem;
+  border: none;
+  border-radius: 2rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-pill.active {
+  background-color: #2563eb;
+  color: white;
+}
+
+.agent-filter {
+  padding: 0.375rem 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  background-color: white;
+}
+
+.clear-filters {
+  background-color: #ef4444;
+  color: white;
+  padding: 0.375rem 0.75rem;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-left: auto;
+}
+
+.search-results-count {
+  color: #4b5563;
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+  background-color: #f3f4f6;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  display: inline-block;
+}
+
+.clear-filters-btn {
+  padding: 0.625rem 1.25rem;
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.clear-filters-btn:hover {
+  background-color: #dc2626;
+}
+
+/* Assigned agents display */
+.assigned-agents {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.assigned-label {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.agent-name {
+  font-size: 0.75rem;
+  color: #1f2937;
+  font-weight: 500;
+  background-color: #f3f4f6;
+  padding: 0.125rem 0.5rem;
+  border-radius: 1rem;
 }
 </style>

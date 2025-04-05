@@ -5,7 +5,16 @@
       <div class="post-header">
         <div class="post-meta">
           <h2>Post details</h2>
-          <span class="publish-date">Published {{ formatDate(post?.creationDate) }}</span>
+          <div class="post-date">
+            <span v-if="post?.status === 'published'">Published: {{ formatDate(post?.publishedDate) }}</span>
+            <span v-else-if="post?.status === 'scheduled'">Scheduled for: {{ formatDate(post?.scheduledDate) }}</span>
+            <span v-else>Created: {{ formatDate(post?.creationDate) }}</span>
+          </div>
+          <div v-if="post?.creator" class="creator-badge">
+            <span class="creator-label">Created by:</span>
+            <span class="creator-name">{{ post?.creator.name }}</span>
+            <span class="creator-role" :class="post?.creator.role">{{ post?.creator.role }}</span>
+          </div>
           <div class="platform-icons">
             <div class="platform-icon-wrapper bg-[#000000]">
               <svg viewBox="0 0 24 24" fill="currentColor" class="icon text-white">
@@ -526,7 +535,7 @@ const formatStatLabel = (key) => {
   margin: 0 0 0.5rem 0;
 }
 
-.publish-date {
+.post-date {
   font-size: 0.75rem;
   color: #6B7280;
   display: block;
@@ -1201,5 +1210,45 @@ const formatStatLabel = (key) => {
 .platform-icon {
   width: 1rem;
   height: 1rem;
+}
+
+/* Creator Badge Styles */
+.creator-badge {
+  display: inline-flex;
+  align-items: center;
+  background-color: #f3f4f6;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  margin-left: 1rem;
+}
+
+.creator-label {
+  color: #6b7280;
+  margin-right: 0.5rem;
+}
+
+.creator-name {
+  font-weight: 500;
+  margin-right: 0.5rem;
+}
+
+.creator-role {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.creator-role.admin {
+  background-color: #374151;
+  color: white;
+}
+
+.creator-role.agent {
+  background-color: #2563eb;
+  color: white;
 }
 </style>

@@ -24,8 +24,10 @@ const roleStore = useRoleStore(); // Access role store
 // Initialize task timer functionality
 const { showNotification, currentNotification, dismissNotification } = useTaskTimer();
 
-// Check if user is an admin
-const isAdmin = computed(() => roleStore.currentRole === 'admin');
+// Check if user is an admin - use only roleStore
+const isAdmin = computed(() => {
+  return roleStore.currentRole === 'admin';
+});
 
 // Computed properties for layout settings
 const hideSidebar = computed(() => layoutStore.hideSidebar);
@@ -35,6 +37,7 @@ const background = computed(() => layoutStore.background);
 // Force layout update on mount
 onMounted(() => {
   console.log('App.vue mounted - Forcing initial layout update');
+  console.log('Current role:', roleStore.currentRole);
 
   if (route.meta) {
     layoutStore.setLayout({

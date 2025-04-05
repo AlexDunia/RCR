@@ -21,7 +21,16 @@
         Back to Home
       </button>
       <h1 class="plan-title">{{ plan.title }}</h1>
-      <p class="plan-date">Created on {{ formatDate(plan.creationDate) }}</p>
+      <div class="meta-info">
+        <span class="date">Created: {{ formatDate(plan.creationDate) }}</span>
+
+        <!-- Add creator badge if available -->
+        <div v-if="plan.creator" class="creator-badge">
+          <span class="creator-label">Created by:</span>
+          <span class="creator-name">{{ plan.creator.name }}</span>
+          <span class="creator-role" :class="plan.creator.role">{{ plan.creator.role }}</span>
+        </div>
+      </div>
     </div>
 
     <div class="plan-content">
@@ -474,5 +483,55 @@ const formatDate = (dateString, dateOnly = false) => {
   font-size: 0.75rem;
   color: #2563EB;
   font-weight: 500;
+}
+
+.meta-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.date {
+  font-size: 0.875rem;
+  color: #6B7280;
+}
+
+.creator-badge {
+  display: inline-flex;
+  align-items: center;
+  background-color: #f3f4f6;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  margin-left: 1rem;
+}
+
+.creator-label {
+  color: #6b7280;
+  margin-right: 0.5rem;
+}
+
+.creator-name {
+  font-weight: 500;
+  margin-right: 0.5rem;
+}
+
+.creator-role {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.creator-role.admin {
+  background-color: #374151;
+  color: white;
+}
+
+.creator-role.agent {
+  background-color: #2563eb;
+  color: white;
 }
 </style>

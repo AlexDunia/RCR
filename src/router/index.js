@@ -4,6 +4,7 @@ import { useRoleStore } from '@/stores/roleStore';
 import DocumentLayout from '@/layouts/DocumentLayout.vue';
 import TasksLayout from '@/layouts/TasksLayout.vue';
 import EducationLayout from '@/layouts/EducationLayout.vue';
+import permissionGuard from './guards/permissionGuard';
 
 // Lazy-loaded route components
 const routes = [
@@ -266,7 +267,10 @@ const routes = [
   {
     path: '/marketing-tools',
     component: () => import('@/views/marketing/MarketingTools.vue'),
-    meta: { allowedRoles: ['agent'] }, // Restrict parent route to agents
+    meta: {
+      allowedRoles: ['agent', 'admin'],
+      requiredPermissions: ['view-marketing-plans']
+    },
     children: [
       {
         path: '',
@@ -280,7 +284,8 @@ const routes = [
         path: 'create',
         component: () => import('@/views/marketing/CreateSuccessPlan.vue'),
         meta: {
-          allowedRoles: ['agent']
+          requiredPermissions: ['create-marketing-plans'],
+          allowedRoles: ['admin']
         }
       },
       {
@@ -320,7 +325,10 @@ const routes = [
       },
       {
         path: 'social-platforms',
-        component: () => import('@/views/marketing/SocialPlatforms.vue')
+        component: () => import('@/views/marketing/SocialPlatforms.vue'),
+        meta: {
+          requiredPermissions: ['view-social-posts']
+        }
       },
       {
         path: 'social-platforms/create',
@@ -328,7 +336,8 @@ const routes = [
         meta: {
           hideSidebar: true,
           hideHeader: true,
-          background: '#f9fafb'
+          background: '#f9fafb',
+          requiredPermissions: ['create-social-posts']
         }
       },
       {
@@ -593,7 +602,12 @@ const routes = [
   {
     path: '/unauthorized',
     name: 'Unauthorized',
-    component: () => import('@/views/auth/UnauthorizedView.vue')
+    component: () => import('@/views/UnauthorizedView.vue'),
+    props: (route) => ({ redirect: route.query.redirect }),
+    meta: {
+      title: 'Unauthorized Access',
+      hideHeader: false
+    }
   },
 
   // 404 route - must be the last route
@@ -700,5 +714,7 @@ router.afterEach((to) => {
     layoutStore.setHeaderVisibility(true);
   }
 });
+
+router.beforeEach(permissionGuard);
 
 export default router;

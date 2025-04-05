@@ -1,5 +1,14 @@
 <template>
   <div class="admin-form-container">
+    <!-- Admin-only notice banner -->
+    <div class="admin-only-banner">
+      <svg class="lock-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+      </svg>
+      <span>Admin Only: Marketing Plan Creation</span>
+    </div>
+
     <h1>Create Marketing Plan</h1>
 
     <form @submit.prevent="savePlan">
@@ -125,7 +134,7 @@
                   <path d="M12 0C5.373 0 0 5.373 0 12c0 5.139 3.247 9.501 7.792 11.166-.108-.945-.204-2.396.043-3.429.222-.936 1.428-5.967 1.428-5.967s-.364-.732-.364-1.814c0-1.698.986-2.966 2.214-2.966 1.043 0 1.546.786 1.546 1.729 0 1.053-.669 2.627-1.015 4.084-.289 1.216.609 2.207 1.803 2.207 2.162 0 3.825-2.279 3.825-5.571 0-2.911-2.094-4.944-5.084-4.944-3.463 0-5.494 2.597-5.494 5.279 0 1.052.405 2.181.912 2.794.1.121.115.227.084.35-.094.384-.609 2.408-.684 2.742-.094.419-.304.509-.702.304-1.041-.536-1.695-2.229-1.695-3.591 0-2.923 2.124-5.611 6.126-5.611 3.216 0 5.711 2.294 5.711 5.354 0 3.191-2.014 5.761-4.805 5.761-1.167 0-2.267-.609-2.645-1.326 0 0-.577 2.194-.715 2.732-.254.986-.938 2.215-1.395 2.962 1.056.329 2.162.508 3.309.508 6.627 0 12-5.373 12-12S18.627 0 12 0z"/>
                 </svg>
                 <svg v-if="channel.icon === 'others'" class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                  <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                  <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-4-6H8v4h4V5z"/>
                 </svg>
               </span>
             </div>
@@ -194,9 +203,11 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, onBeforeMount, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useMarketingStore } from '@/stores/marketingStore';
+import { hasPermission } from '@/services/permissionService';
+import { useRoleStore } from '@/stores/roleStore';
 
 const plan = ref({
   title: 'Marketing Strategy for Williams',
@@ -212,7 +223,63 @@ const plan = ref({
 
 const router = useRouter();
 const marketingStore = useMarketingStore();
+const roleStore = useRoleStore();
 const isSaving = ref(false);
+
+// Multi-layered permission check
+const hasCreatePermission = computed(() => {
+  // Layer 1: Permission service check
+  const permissionCheck = hasPermission('create-marketing-plans');
+
+  // Layer 2: Role check
+  const roleCheck = roleStore.currentRole === 'admin';
+
+  // Both must be true
+  return permissionCheck && roleCheck;
+});
+
+// Security Layer 1: Check permission before mount
+onBeforeMount(() => {
+  verifyAccess();
+});
+
+// Security Layer 2: Check permission on mount
+onMounted(() => {
+  verifyAccess();
+
+  // Security Layer 3: Set up periodic permission checks
+  const securityInterval = setInterval(() => {
+    if (!hasCreatePermission.value) {
+      clearInterval(securityInterval);
+      securityRedirect();
+    }
+  }, 5000); // Check every 5 seconds
+
+  // Clean up interval on component unmount
+  return () => clearInterval(securityInterval);
+});
+
+// Security Layer 4: Centralized verification function
+function verifyAccess() {
+  console.log('Verifying admin access...');
+
+  if (!hasCreatePermission.value) {
+    securityRedirect();
+  }
+
+  // Additional URL manipulation check
+  const urlPath = window.location.pathname;
+  if (urlPath.includes('/marketing-tools/create') && !hasCreatePermission.value) {
+    console.error('Security violation: Unauthorized access attempt to create marketing plan');
+    securityRedirect();
+  }
+}
+
+// Security Layer 5: Centralized redirect function
+function securityRedirect() {
+  console.error('Access denied: User does not have permission to create marketing plans');
+  router.push('/unauthorized');
+}
 
 const addAudience = () => plan.value.targetAudiences.push({ title: '', description: '', icon: '' });
 const removeAudience = (index) => plan.value.targetAudiences.splice(index, 1);
@@ -243,6 +310,11 @@ const updateChannelIcon = (index) => {
 };
 
 const savePlan = async () => {
+  // Final permission check before saving
+  if (!hasCreatePermission.value) {
+    return securityRedirect();
+  }
+
   try {
     isSaving.value = true;
     await marketingStore.plans.savePlan(plan.value);
@@ -437,5 +509,23 @@ button[type="submit"] {
 
 button[type="submit"]:hover {
   background: linear-gradient(135deg, #1E40AF 0%, #1D4ED8 100%);
+}
+
+/* New admin-only banner */
+.admin-only-banner {
+  background-color: #7f1d1d;
+  color: white;
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 0.375rem;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+}
+
+.lock-icon {
+  width: 1.25rem;
+  height: 1.25rem;
 }
 </style>
