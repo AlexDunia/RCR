@@ -281,10 +281,10 @@ const isEducationCreatePage = computed(() => isRoutePath('/admin/education-train
       <h1>About</h1>
       <p>Learn more about our platform and services</p>
     </div>
-    <!-- Default search bar for other pages -->
+    <!-- Default header for any other page -->
     <div v-else class="custom-header">
-      <h1>Education & Training</h1>
-      <p>Manage educational sessions for your real estate agents</p>
+      <h1>{{ route.meta.title || 'Dashboard' }}</h1>
+      <p>{{ route.meta.description || 'Welcome to Real City realty platform' }}</p>
     </div>
 
     <!-- Wrapping both icons in a flex container -->

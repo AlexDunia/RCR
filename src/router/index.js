@@ -28,24 +28,24 @@ const routes = [
       if (roleStore.currentRole === 'admin') {
         next();
       } else {
-        next({ name: 'AgentDashboardView' });
+        next('/agent-dashboard');
       }
     },
-    meta: { allowedRoles: ['admin'] } // Restrict to admin
+    meta: {
+      title: 'Dashboard',
+      description: 'View your performance metrics and important updates',
+      allowedRoles: ['admin', 'agent']
+    }
   },
   {
     path: '/agent-dashboard',
     name: 'AgentDashboardView',
     component: () => import('@/views/dashboard/AgentDashboardView.vue'),
-    beforeEnter: (to, from, next) => {
-      const roleStore = useRoleStore();
-      if (roleStore.currentRole === 'agent') {
-        next();
-      } else {
-        next({ name: 'Dashboard' });
-      }
-    },
-    meta: { allowedRoles: ['agent'] } // Restrict to agent
+    meta: {
+      title: 'Agent Dashboard',
+      description: 'View your listings, clients, and performance metrics',
+      allowedRoles: ['agent']
+    }
   },
 
   // Manage Listings routes (Agent-only)

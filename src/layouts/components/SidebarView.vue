@@ -63,17 +63,6 @@ const menuItems = Object.freeze([
     `
   },
   {
-    name: 'Clients',
-    key: 'clients',
-    path: '/clients',
-    icon: `
-      <svg class="menu-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/>
-        <path d="M20 21V19C20 16.7909 17.9853 15 15.5 15H8.5C6.01472 15 4 16.7909 4 19V21" stroke="currentColor" stroke-width="1.5"/>
-      </svg>
-    `
-  },
-  {
     name: 'Manage Listing',
     key: 'manage-listing',
     path: '/manage-listings',
@@ -85,18 +74,6 @@ const menuItems = Object.freeze([
       </svg>
     `
   },
-  // {
-  //   name: 'Create offer',
-  //   key: 'create-offer',
-  //   path: '/create-offer',
-  //   icon: `
-  //     <svg class="menu-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-  //       <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.5"/>
-  //       <path d="M12 8V16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-  //       <path d="M8 12H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-  //     </svg>
-  //   `
-  // },
   {
     name: 'Receipts and documents',
     key: 'receipts-docs',
