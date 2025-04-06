@@ -1,8 +1,36 @@
 <script setup>
 import { computed } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
+import { useAgentStore } from '@/stores/agentStore';
+import { useClientStore } from '@/stores/clientStore';
 
 const route = useRoute();
+const router = useRouter();
+const agentStore = useAgentStore();
+const clientStore = useClientStore();
+
+// Function to go back to previous page
+const goBack = () => {
+  router.back();
+};
+
+// Get current agent if on agent profile page
+const currentAgent = computed(() => {
+  if (route.name === 'AdminAgentProfileDetail' || route.name === 'AgentProfileDetail') {
+    const agentId = parseInt(route.params.id);
+    return agentStore.getAgentById(agentId);
+  }
+  return null;
+});
+
+// Get current client if on client profile page
+const currentClient = computed(() => {
+  if (route.name === 'ClientProfile') {
+    const clientId = parseInt(route.params.id);
+    return clientStore.getClientById(clientId);
+  }
+  return null;
+});
 
 // Check if the current route is the PostDetail page
 const isPostDetailPage = computed(() => {
@@ -22,9 +50,20 @@ const isRoutePath = (path) => {
   return route.path === path || route.path.startsWith(path + '/');
 };
 
+// Check if on agent profile page
+const isAgentProfileDetailPage = computed(() => {
+  return route.name === 'AdminAgentProfileDetail' || route.name === 'AgentProfileDetail';
+});
+
+// Check if on client profile page
+const isClientProfilePage = computed(() => {
+  return route.name === 'ClientProfile';
+});
+
 // Routes with custom headers
 const isDraftsPage = computed(() => isRoutePath('/drafts'));
 const isEducationTrainingPage = computed(() => isRoutePath('/education-training'));
+const isAdminEducationTrainingPage = computed(() => isRoutePath('/admin/education-training'));
 const isManageListingsPage = computed(() => {
   return isRoutePath(['/manage-listings', '/add-listing', '/view-listings', '/pending-approvals']);
 });
@@ -50,12 +89,53 @@ const isSocialPlatformsPage = computed(() => isRoutePath('/marketing-tools/socia
 const isEducationSessionPage = computed(() =>
   isRoutePath(['/education-training/session', '/education-training/module']));
 const isEducationTestPage = computed(() => isRoutePath('/education-training/test'));
+const isEducationCreatePage = computed(() => isRoutePath('/admin/education-training/create'));
 </script>
 
 <template>
   <header class="header" :class="{ 'below-modal': $root.modalOpen }">
+    <!-- Show agent profile header when viewing an agent's profile -->
+    <div v-if="isAgentProfileDetailPage && currentAgent" class="custom-header agent-profile-header">
+      <div class="agent-profile-info">
+        <button @click="goBack" class="back-button" aria-label="Go back">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M19 12H5" stroke="#1a4189" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 19L5 12L12 5" stroke="#1a4189" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <img
+          :src="currentAgent.avatar || '/images/default-avatar.jpg'"
+          :alt="currentAgent.name + ' profile'"
+          class="agent-header-avatar"
+        />
+        <div class="agent-header-details">
+          <h1>{{ currentAgent.name }}</h1>
+          <p>{{ currentAgent.title || 'Real Estate Agent' }}</p>
+        </div>
+      </div>
+    </div>
+    <!-- Show client profile header when viewing a client's profile -->
+    <div v-else-if="isClientProfilePage && currentClient" class="custom-header client-profile-header">
+      <div class="client-profile-info">
+        <button @click="goBack" class="back-button" aria-label="Go back">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M19 12H5" stroke="#1a4189" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 19L5 12L12 5" stroke="#1a4189" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <img
+          :src="currentClient.profilePicture || '/images/default-avatar.jpg'"
+          :alt="currentClient.name + ' profile'"
+          class="client-header-avatar"
+        />
+        <div class="client-header-details">
+          <h1>{{ currentClient.name }}</h1>
+          <p>Client</p>
+        </div>
+      </div>
+    </div>
     <!-- Show marketing header on post detail page -->
-    <div v-if="isPostDetailPage" class="custom-header">
+    <div v-else-if="isPostDetailPage" class="custom-header">
       <h1>Marketing Tools</h1>
       <p>Link your social media accounts to reach a wider audience.</p>
     </div>
@@ -68,6 +148,28 @@ const isEducationTestPage = computed(() => isRoutePath('/education-training/test
     <div v-else-if="isEducationTrainingPage" class="custom-header">
       <h1>Education & Training</h1>
       <p>Get informed about the business and modern trends on real estate</p>
+    </div>
+
+    <!-- Show admin education & training header -->
+    <div v-else-if="isAdminEducationTrainingPage" class="custom-header">
+      <h1>Manage Education & Training</h1>
+      <p>Create and organize training resources for agents</p>
+    </div>
+
+    <!-- Show education creation header -->
+    <div v-else-if="isEducationCreatePage" class="custom-header">
+      <div class="create-education-header">
+        <button @click="goBack" class="back-button" aria-label="Go back">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M19 12H5" stroke="#1a4189" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 19L5 12L12 5" stroke="#1a4189" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="education-create-details">
+          <h1>Create Educational Session</h1>
+          <p>Design a structured learning experience with chapters, sections, and resources</p>
+        </div>
+      </div>
     </div>
     <!-- Show education session header -->
     <div v-else-if="isEducationSessionPage" class="custom-header">
@@ -180,12 +282,9 @@ const isEducationTestPage = computed(() => isRoutePath('/education-training/test
       <p>Learn more about our platform and services</p>
     </div>
     <!-- Default search bar for other pages -->
-    <div v-else class="search-bar">
-      <svg class="search-icon" viewBox="0 0 24 24">
-        <circle cx="11" cy="11" r="8" stroke="black" stroke-width="1.5" fill="none" />
-        <line x1="16" y1="16" x2="22" y2="22" stroke="black" stroke-width="1.5" />
-      </svg>
-      <input type="text" placeholder="Search..." />
+    <div v-else class="custom-header">
+      <h1>Education & Training</h1>
+      <p>Manage educational sessions for your real estate agents</p>
     </div>
 
     <!-- Wrapping both icons in a flex container -->
@@ -241,6 +340,64 @@ const isEducationTestPage = computed(() => isRoutePath('/education-training/test
 
 .header.below-modal {
   z-index: 10;
+}
+
+/* Agent profile header styles */
+.agent-profile-header, .client-profile-header {
+  width: 100%;
+}
+
+.agent-profile-info, .client-profile-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.back-button:hover {
+  background-color: rgba(26, 65, 137, 0.08);
+}
+
+.back-button:active {
+  background-color: rgba(26, 65, 137, 0.12);
+}
+
+.agent-header-avatar, .client-header-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #f3f4f6;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.agent-header-details, .client-header-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.agent-header-details h1, .client-header-details h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a4189;
+}
+
+.agent-header-details p, .client-header-details p {
+  margin: 0;
+  font-size: 14px;
+  color: #6b7280;
 }
 
 h1 {
@@ -393,4 +550,39 @@ input {
 }
 
 /* Back button styles removed */
+
+.create-education-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.back-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.education-create-details h1 {
+  font-size: 1.25rem;
+  margin-bottom: 0.25rem;
+  color: #1a4189;
+  font-weight: 600;
+}
+
+.education-create-details p {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0;
+}
 </style>

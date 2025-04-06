@@ -1,17 +1,5 @@
 <template>
   <div class="create-session-container">
-    <div class="header">
-      <div class="back-button" @click="$router.go(-1)">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M15 18L9 12L15 6" stroke="#0F172A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
-      <div class="header-content">
-        <h1 class="header-title">Create Educational Session</h1>
-        <p class="header-subtitle">Design a structured learning experience with chapters, sections, and resources</p>
-      </div>
-    </div>
-
     <div class="form-container">
       <h2 class="form-title">Educational Content Builder</h2>
 
@@ -399,9 +387,11 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { useDateValidation } from '@/composables/useDateValidation'
+import { useDateValidation } from '@/composables/useDateValidation';
+import { useEducationStore } from '@/stores/educationStore';
 
 const router = useRouter();
+const educationStore = useEducationStore();
 
 // Generate time options in 30-minute increments
 const timeOptions = ref([]);
@@ -607,20 +597,11 @@ const saveSession = () => {
     }
   };
 
-  // Get existing sessions from localStorage or initialize empty array
-  const existingSessions = JSON.parse(localStorage.getItem('educationSessions') || '[]');
+  // Add the session using our store
+  educationStore.addSession(session);
 
-  // Add new session
-  existingSessions.push(session);
-
-  // Save back to localStorage
-  localStorage.setItem('educationSessions', JSON.stringify(existingSessions));
-
-  // Also save as current session for immediate viewing
-  localStorage.setItem('currentSession', JSON.stringify(session));
-
-  // Navigate to the session details page
-  router.push(`/education-training/session/${session.id}`);
+  // Navigate to the admin session details page
+  router.push(`/admin/education-training/session/${session.id}`);
 };
 
 onMounted(() => {
@@ -793,6 +774,7 @@ const copyMeetingLink = async () => {
   color: #334155;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   line-height: 1.6;
+  padding-top: 1rem;
 }
 
 .header {
@@ -847,7 +829,7 @@ const copyMeetingLink = async () => {
   border-radius: 16px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
   padding: 48px;
-  margin-bottom: 48px;
+  margin-top: 0;
   transition: all 0.3s ease;
 }
 
@@ -858,6 +840,7 @@ const copyMeetingLink = async () => {
   margin: 0 0 48px 0;
   text-align: center;
   letter-spacing: -0.01em;
+  padding-top: 1rem;
 }
 
 .section-title {

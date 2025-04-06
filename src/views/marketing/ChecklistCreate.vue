@@ -95,13 +95,16 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useDateValidation } from '@/composables/useDateValidation';
 import { useMarketingStore } from '@/stores/marketingStore'; // Import the marketing store
+import { useRoleStore } from '@/stores/roleStore';
 
 const router = useRouter();
 const marketingStore = useMarketingStore(); // Use the marketing store
+const roleStore = useRoleStore();
+const isAdmin = computed(() => roleStore.currentRole === 'admin');
 
 const checklist = ref({
   title: '',
@@ -176,6 +179,14 @@ const saveChecklist = async () => {
 const cancel = () => {
   router.push('/marketing-tools/checklist');
 };
+
+// Redirect admin to admin checklist overview
+onMounted(() => {
+  if (isAdmin.value) {
+    console.log('Admin users cannot create checklists directly. Redirecting...');
+    router.push('/marketing-tools/admin-checklists');
+  }
+});
 </script>
 
 <style scoped>

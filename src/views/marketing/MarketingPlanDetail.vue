@@ -30,7 +30,53 @@
           <span class="creator-name">{{ plan.creator.name }}</span>
           <span class="creator-role" :class="plan.creator.role">{{ plan.creator.role }}</span>
         </div>
+
+        <!-- Status badge -->
+        <div class="status-badge" :class="plan.status ? plan.status.toLowerCase() : 'draft'">
+          {{ plan.status || 'Draft' }}
+        </div>
       </div>
+
+      <!-- Assignment information -->
+      <div v-if="plan.assignedAgents && plan.assignedAgents.length > 0" class="assignment-info">
+        <span class="assigned-label">Assigned to:</span>
+        <span class="assigned-agents">{{ plan.assignedAgents.join(', ') }}</span>
+      </div>
+
+      <!-- Associated checklist information if it exists -->
+      <div v-if="associatedChecklist" class="checklist-info">
+        <div class="checklist-badge">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" width="16" height="16">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+          <span>Converted to Checklist</span>
+        </div>
+        <div class="progress-bar-container">
+          <div class="progress-bar" :style="{width: `${associatedChecklist.progress}%`}"></div>
+        </div>
+        <div class="progress-text">
+          <span>Progress: {{ associatedChecklist.progress }}%</span>
+          <div class="checklist-actions">
+            <button @click="viewChecklist" class="view-checklist-btn">View Checklist</button>
+            <button v-if="isAdmin" @click="viewAdminChecklistOverview" class="admin-overview-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" width="14" height="14">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              Admin Overview
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Agent action - convert to checklist -->
+    <div v-if="isAgentAssigned && !associatedChecklist" class="agent-actions">
+      <button @click="convertToChecklist" class="convert-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" width="16" height="16">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+        Convert to Checklist
+      </button>
     </div>
 
     <div class="plan-content">
@@ -105,18 +151,50 @@
       </div>
     </div>
   </div>
+
+  <!-- Confirmation modal for converting to checklist -->
+  <div v-if="showModal" class="modal-overlay">
+    <div class="modal-content">
+      <h2>Convert to Checklist</h2>
+      <p>Are you sure you want to convert this marketing plan to a checklist?</p>
+      <p class="modal-note">This will create a new checklist you can track progress on.</p>
+      <div class="modal-actions">
+        <button @click="showModal = false" class="cancel-btn">Cancel</button>
+        <button @click="confirmConvertToChecklist" class="confirm-btn">Convert</button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useMarketingStore } from '@/stores/marketingStore';
+import { useRoleStore } from '@/stores/roleStore';
 
 const router = useRouter();
 const route = useRoute();
 const marketingStore = useMarketingStore();
+const roleStore = useRoleStore();
 const plan = ref(null);
 const isLoading = computed(() => marketingStore.isLoading);
+const showModal = ref(false);
+const associatedChecklist = ref(null);
+
+// Check if current user is an assigned agent
+const isAgentAssigned = computed(() => {
+  if (!plan.value || !plan.value.assignedAgents) return false;
+
+  // If the user is an agent, check if they're assigned to this plan
+  if (roleStore.currentRole === 'agent') {
+    return plan.value.assignedAgents.includes(roleStore.getCurrentUser().name);
+  }
+
+  return false;
+});
+
+// Add isAdmin computed property
+const isAdmin = computed(() => roleStore.currentRole === 'admin');
 
 onMounted(async () => {
   const planId = route.params.id;
@@ -125,14 +203,126 @@ onMounted(async () => {
 
     if (!plan.value) {
       console.error('Plan not found');
+    } else {
+      // Check if there's an associated checklist
+      await findAssociatedChecklist();
     }
   } catch (error) {
     console.error('Error loading plan:', error);
   }
 });
 
+const findAssociatedChecklist = async () => {
+  if (!plan.value) return;
+
+  // Fetch checklists
+  await marketingStore.checklists.fetchChecklists();
+
+  // Find a checklist that was converted from this plan
+  const checklist = marketingStore.checklists.marketingChecklists.find(c =>
+    c.convertedFromPlan && c.convertedFromPlan.id === route.params.id
+  );
+
+  if (checklist) {
+    associatedChecklist.value = checklist;
+  }
+};
+
 const goBack = () => {
   router.push('/marketing-tools');
+};
+
+const convertToChecklist = () => {
+  showModal.value = true;
+};
+
+const confirmConvertToChecklist = async () => {
+  try {
+    // Create a new checklist from the plan
+    const newChecklist = {
+      id: Date.now().toString(),
+      title: `Checklist: ${plan.value.title}`,
+      description: plan.value.strategyOverview,
+      items: [],
+      status: 'draft',
+      progress: 0,
+      creationDate: new Date().toISOString(),
+      completed: false,
+      convertedFromPlan: {
+        id: route.params.id,
+        title: plan.value.title
+      }
+    };
+
+    // Add checklist items based on plan content
+    if (plan.value.targetAudiences && plan.value.targetAudiences.length) {
+      newChecklist.items.push({
+        text: 'Review target audiences',
+        completed: false
+      });
+    }
+
+    if (plan.value.channels && plan.value.channels.length) {
+      // Add an item for each channel
+      plan.value.channels.forEach(channel => {
+        newChecklist.items.push({
+          text: `Set up ${channel.name}`,
+          completed: false
+        });
+      });
+    }
+
+    if (plan.value.timeline && plan.value.timeline.length) {
+      // Add an item for each timeline milestone
+      plan.value.timeline.forEach(milestone => {
+        newChecklist.items.push({
+          text: milestone.title,
+          completed: false
+        });
+      });
+    }
+
+    // Add a completion item
+    newChecklist.items.push({
+      text: 'Mark plan as complete',
+      completed: false
+    });
+
+    // Save the checklist
+    await marketingStore.checklists.saveChecklist(newChecklist);
+
+    // Update the plan's status to "Active"
+    const plans = marketingStore.plans.marketingPlans;
+    const planIndex = plans.findIndex(p =>
+      p.title === plan.value.title && p.creationDate === plan.value.creationDate
+    );
+
+    if (planIndex !== -1) {
+      plans[planIndex].status = 'Active';
+      localStorage.setItem('marketingPlans', JSON.stringify(plans));
+    }
+
+    // Update UI
+    associatedChecklist.value = newChecklist;
+    showModal.value = false;
+
+    // Show success notification (you can replace this with your preferred notification method)
+    alert('Plan converted to checklist successfully!');
+  } catch (error) {
+    console.error('Error converting plan to checklist:', error);
+    alert('Failed to convert plan to checklist. Please try again.');
+  }
+};
+
+const viewChecklist = () => {
+  if (associatedChecklist.value) {
+    router.push(`/marketing-tools/checklist/${associatedChecklist.value.id}`);
+  }
+};
+
+// Add a method to navigate to admin checklist overview
+const viewAdminChecklistOverview = () => {
+  router.push('/marketing-tools/admin-checklists');
 };
 
 // Format date to a more readable format
@@ -533,5 +723,209 @@ const formatDate = (dateString, dateOnly = false) => {
 .creator-role.agent {
   background-color: #2563eb;
   color: white;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: 1rem;
+  text-transform: capitalize;
+}
+
+.status-badge.draft {
+  background: #EFF6FF;
+  color: #2563EB;
+}
+
+.status-badge.active {
+  background: #ECFDF5;
+  color: #059669;
+}
+
+.status-badge.completed {
+  background: #F9FAFB;
+  color: #4B5563;
+}
+
+.assignment-info {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.assigned-label {
+  color: #6B7280;
+  margin-right: 0.5rem;
+}
+
+.assigned-agents {
+  font-weight: 500;
+  color: #111827;
+  background-color: #F3F4F6;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+}
+
+.agent-actions {
+  margin-bottom: 1.5rem;
+}
+
+.convert-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background-color: #2563EB;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.convert-btn:hover {
+  background-color: #1D4ED8;
+}
+
+.checklist-info {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #F3F4F6;
+  border-radius: 0.5rem;
+}
+
+.checklist-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #1F2937;
+  margin-bottom: 0.5rem;
+}
+
+.progress-bar-container {
+  height: 0.5rem;
+  background-color: #E5E7EB;
+  border-radius: 0.25rem;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.progress-bar {
+  height: 100%;
+  background-color: #2563EB;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+  color: #4B5563;
+}
+
+.view-checklist-btn {
+  background: none;
+  border: none;
+  color: #2563EB;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+.modal-content {
+  background-color: white;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  max-width: 500px;
+  width: 100%;
+}
+
+.modal-content h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 1rem;
+}
+
+.modal-content p {
+  color: #4B5563;
+  margin-bottom: 1rem;
+}
+
+.modal-note {
+  font-size: 0.875rem;
+  color: #6B7280;
+  font-style: italic;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.cancel-btn {
+  padding: 0.5rem 1rem;
+  background-color: #F3F4F6;
+  color: #4B5563;
+  border: none;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.confirm-btn {
+  padding: 0.5rem 1rem;
+  background-color: #2563EB;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.checklist-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.admin-overview-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.6rem;
+  background-color: #ede9fe;
+  color: #6d28d9;
+  border: none;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.admin-overview-btn:hover {
+  background-color: #ddd6fe;
 }
 </style>

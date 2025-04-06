@@ -5,25 +5,40 @@
       <!-- Top Action Bar (with gray background) -->
       <div class="checklist-action-bar" :class="{ 'fixed': isActionBarFixed }">
         <div class="action-bar-content">
-    <button class="add-checklist-btn" @click="createNewChecklist" aria-label="Create new checklist">
-      <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-      </svg>
-      Add new checklist
-    </button>
+          <div class="checklist-actions">
+            <!-- Only show create button for agents, not admins -->
+            <button v-if="!isAdmin" class="create-btn" @click="createNewChecklist">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              Create Checklist
+            </button>
 
-      <div class="filter-tabs" role="tablist">
-        <button
-          v-for="tab in filterTabs"
-          :key="tab.value"
-          class="filter-tab"
-          :class="{ active: currentFilter === tab.value }"
-          @click="currentFilter = tab.value"
-          :aria-selected="currentFilter === tab.value"
-          role="tab"
-        >
-          {{ tab.label }}
-        </button>
+            <!-- Show admin view button for admins -->
+            <router-link v-if="isAdmin" to="/marketing-tools/admin-checklists" class="admin-view-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon">
+                <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                <line x1="9" y1="9" x2="15" y2="9"></line>
+                <line x1="9" y1="12" x2="15" y2="12"></line>
+                <line x1="9" y1="15" x2="15" y2="15"></line>
+              </svg>
+              Admin Overview
+            </router-link>
+          </div>
+
+          <div class="filter-tabs" role="tablist">
+            <button
+              v-for="tab in filterTabs"
+              :key="tab.value"
+              class="filter-tab"
+              :class="{ active: currentFilter === tab.value }"
+              @click="currentFilter = tab.value"
+              :aria-selected="currentFilter === tab.value"
+              role="tab"
+            >
+              {{ tab.label }}
+            </button>
           </div>
         </div>
       </div>
@@ -43,114 +58,114 @@
             placeholder="Search checklists..."
             aria-label="Search checklists"
           >
-      </div>
+        </div>
 
-      <div class="sort-dropdown">
-        <select v-model="sortBy" aria-label="Sort checklists">
-          <option value="newest">Newest First</option>
-          <option value="oldest">Oldest First</option>
-          <option value="progress">Progress (Low to High)</option>
-        </select>
+        <div class="sort-dropdown">
+          <select v-model="sortBy" aria-label="Sort checklists">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="progress">Progress (Low to High)</option>
+          </select>
+        </div>
       </div>
-    </div>
 
       <!-- Checklist Content (white background) -->
       <div class="checklist-content">
-    <!-- Bulk Actions -->
-    <div class="bulk-actions" v-if="selectedChecklists.length > 0">
-      <span>{{ selectedChecklists.length }} selected</span>
-      <button class="bulk-action-btn" @click="markSelectedAsCompleted">
-        <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-        </svg>
-        Mark as Completed
-      </button>
-      <button class="bulk-action-btn delete" @click="deleteSelected">
-        <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-        </svg>
-        Delete Selected
-      </button>
-    </div>
+        <!-- Bulk Actions -->
+        <div class="bulk-actions" v-if="selectedChecklists.length > 0">
+          <span>{{ selectedChecklists.length }} selected</span>
+          <button class="bulk-action-btn" @click="markSelectedAsCompleted">
+            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            Mark as Completed
+          </button>
+          <button class="bulk-action-btn delete" @click="deleteSelected">
+            <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            Delete Selected
+          </button>
+        </div>
 
-    <!-- Checklist Cards -->
+        <!-- Checklist Cards -->
         <div class="checklist-cards" v-if="filteredChecklists.length > 0" ref="checklistCards">
-      <div
-        v-for="checklist in filteredChecklists"
-        :key="checklist.id"
-        class="checklist-card"
-        :class="{ 'is-selected': selectedChecklists.includes(checklist.id) }"
-        @click="viewChecklist(checklist.id)"
-      >
-        <div class="card-checkbox">
-          <input
-            type="checkbox"
-            :checked="selectedChecklists.includes(checklist.id)"
-            @click.stop="toggleSelection(checklist.id)"
-            :aria-label="'Select ' + checklist.title"
+          <div
+            v-for="checklist in filteredChecklists"
+            :key="checklist.id"
+            class="checklist-card"
+            :class="{ 'is-selected': selectedChecklists.includes(checklist.id) }"
+            @click="viewChecklist(checklist.id)"
           >
-        </div>
+            <div class="card-checkbox">
+              <input
+                type="checkbox"
+                :checked="selectedChecklists.includes(checklist.id)"
+                @click.stop="toggleSelection(checklist.id)"
+                :aria-label="'Select ' + checklist.title"
+              >
+            </div>
 
-        <div class="card-emoji">
+            <div class="card-emoji">
               {{ getFirstLetter(checklist.title) }}
-        </div>
+            </div>
 
-        <div class="card-content">
-          <h3>{{ checklist.title }}</h3>
-          <p class="creation-date">Creation date: {{ formatDate(checklist.creationDate) }}</p>
+            <div class="card-content">
+              <h3>{{ checklist.title }}</h3>
+              <p class="creation-date">Creation date: {{ formatDate(checklist.creationDate) }}</p>
 
-          <div class="progress-section">
-            <div v-if="!checklist.completed" class="progress-info">
-              <span class="progress-text">Progress: {{ checklist.progress }}% done</span>
-              <span v-if="checklist.status === 'draft'" class="draft-badge">Draft</span>
-              <span v-if="isOverdue(checklist)" class="overdue-badge" :title="'Overdue by ' + getDaysOverdue(checklist) + ' days'">
-                <svg class="overdue-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <circle cx="12" cy="12" r="10" stroke-width="2"/>
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2"/>
+              <div class="progress-section">
+                <div v-if="!checklist.completed" class="progress-info">
+                  <span class="progress-text">Progress: {{ checklist.progress }}% done</span>
+                  <span v-if="checklist.status === 'draft'" class="draft-badge">Draft</span>
+                  <span v-if="isOverdue(checklist)" class="overdue-badge" :title="'Overdue by ' + getDaysOverdue(checklist) + ' days'">
+                    <svg class="overdue-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2"/>
+                    </svg>
+                    Overdue
+                  </span>
+                </div>
+                <div v-else class="completed-badge">
+                  Completed
+                </div>
+                <div class="progress-bar" v-if="!checklist.completed">
+                  <div class="progress-fill" :style="{ width: checklist.progress + '%' }"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-actions">
+              <button
+                class="action-btn edit"
+                @click.stop="editChecklist(checklist.id)"
+                aria-label="Edit checklist"
+              >
+                <svg class="action-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                 </svg>
-                Overdue
-              </span>
-            </div>
-            <div v-else class="completed-badge">
-              Completed
-            </div>
-            <div class="progress-bar" v-if="!checklist.completed">
-              <div class="progress-fill" :style="{ width: checklist.progress + '%' }"></div>
+              </button>
+              <button
+                class="action-btn delete"
+                @click.stop="deleteChecklist(checklist.id)"
+                aria-label="Delete checklist"
+              >
+                <svg class="action-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+              </button>
             </div>
           </div>
         </div>
 
-        <div class="card-actions">
-          <button
-            class="action-btn edit"
-            @click.stop="editChecklist(checklist.id)"
-            aria-label="Edit checklist"
-          >
-            <svg class="action-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-            </svg>
-          </button>
-          <button
-            class="action-btn delete"
-            @click.stop="deleteChecklist(checklist.id)"
-            aria-label="Delete checklist"
-          >
-            <svg class="action-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Empty State -->
-    <div v-else class="empty-state">
-      <svg class="empty-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-        <rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2"/>
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m-4-4h8"/>
-      </svg>
-      <p>No checklists found for this filter</p>
-      <button class="add-checklist-btn" @click="createNewChecklist">Create your first checklist</button>
+        <!-- Empty State -->
+        <div v-else class="empty-state">
+          <svg class="empty-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v8m-4-4h8"/>
+          </svg>
+          <p>No checklists found for this filter</p>
+          <button class="add-checklist-btn" @click="createNewChecklist">Create your first checklist</button>
         </div>
       </div>
     </div>
@@ -172,9 +187,12 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import ConfirmationModal from '@/ui/ConfirmationModal.vue';
 import { useMarketingStore } from '@/stores/marketingStore';
+import { useRoleStore } from '@/stores/roleStore';
 
 const router = useRouter();
 const marketingStore = useMarketingStore();
+const roleStore = useRoleStore();
+const isAdmin = computed(() => roleStore.currentRole === 'admin');
 
 // State
 const searchQuery = ref('');
@@ -822,5 +840,28 @@ const getFirstLetter = (title) => {
 .action-bar-spacer {
   height: 60px; /* Same height as the action bar */
   width: 100%;
+}
+
+/* Admin View Button */
+.admin-view-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #ede9fe;
+  color: #6d28d9;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.admin-view-btn:hover {
+  background-color: #ddd6fe;
+}
+
+.admin-view-btn .icon {
+  width: 1.25rem;
+  height: 1.25rem;
 }
 </style>

@@ -1,11 +1,6 @@
 <template>
   <div class="client-profile-page">
-    <div class="profile-header">
-      <div class="avatar-container">
-        <img :src="client?.profilePicture || 'https://randomuser.me/api/portraits/men/32.jpg'" alt="Client avatar" class="profile-avatar" />
-      </div>
-      <h1 class="profile-name">{{ client?.name  }}</h1>
-    </div>
+    <!-- Profile header is removed and will be shown in the page header -->
 
     <div class="nav-container">
       <div class="tab-buttons">
@@ -46,30 +41,30 @@
       <!-- Bio Tab Content -->
       <div v-if="activeTab === 'bio'" class="profile-section">
         <div class="section-header">
-          <h2 class="section-title">{{ client?.name || 'Alex Dunia' }} personal Information</h2>
+          <h2 class="section-title">{{ client?.name }} personal Information</h2>
           <button class="edit-button">Edit profile as admin</button>
         </div>
 
         <div class="info-grid">
           <div class="info-item">
             <div class="info-label">Full name</div>
-            <div class="info-value">{{ client?.name || 'Alex Dunia' }}</div>
+            <div class="info-value">{{ client?.name }}</div>
           </div>
           <div class="info-item">
             <div class="info-label">Email</div>
-            <div class="info-value">{{ client?.email || 'helloduniamedia@gmail.com' }}</div>
+            <div class="info-value">{{ client?.email }}</div>
           </div>
           <div class="info-item">
             <div class="info-label">Phone number</div>
-            <div class="info-value">08108725914</div>
+            <div class="info-value">{{ client?.phone || '08108725914' }}</div>
           </div>
           <div class="info-item">
             <div class="info-label">Alternate phone number</div>
-            <div class="info-value">08108725914</div>
+            <div class="info-value">{{ client?.alternatePhone || '08108725914' }}</div>
           </div>
           <div class="info-item">
             <div class="info-label">Country of residence</div>
-            <div class="info-value">123 Main Street, Los Angeles, CA 90001</div>
+            <div class="info-value">{{ client?.location || '123 Main Street, Los Angeles, CA 90001' }}</div>
           </div>
         </div>
 
@@ -82,7 +77,7 @@
       <div v-if="activeTab === 'listings'" class="profile-section">
         <div class="listings-header">
           <h2 class="section-title">Most Viewed</h2>
-          <p class="section-subtitle">Most Viewed properties by {{ client?.name || 'Alex Dunia' }}</p>
+          <p class="section-subtitle">Most Viewed properties by {{ client?.name }}</p>
 
           <div class="filter-buttons">
             <button
@@ -136,7 +131,7 @@
       <!-- Documents Tab Content -->
       <div v-if="activeTab === 'documents'" class="profile-section">
         <div class="section-header">
-          <h2 class="section-title">{{ client?.name || 'Alex Dunia' }}'s Documents</h2>
+          <h2 class="section-title">{{ client?.name }}'s Documents</h2>
           <button class="edit-button" @click="uploadDocument">Upload Document</button>
         </div>
 
@@ -313,7 +308,7 @@
       <!-- Connections Tab Content -->
       <div v-if="activeTab === 'connections'" class="profile-section">
         <div class="section-header">
-          <h2 class="section-title">{{ client?.name || 'Alex Dunia' }}'s Connections</h2>
+          <h2 class="section-title">{{ client?.name }}'s Connections</h2>
           <button class="edit-button" @click="showAddConnectionModal = true">Add Connection</button>
         </div>
 
@@ -323,8 +318,8 @@
 
         <div v-else class="connections-wrapper">
           <div class="connections-container">
-            <h3 class="connections-heading">{{ client?.name || 'Alex Dunia' }}'s Connections</h3>
-            <p class="connections-subheading">See all connections {{ client?.name || 'Alex Dunia' }} has made.</p>
+            <h3 class="connections-heading">{{ client?.name }}'s Connections</h3>
+            <p class="connections-subheading">See all connections {{ client?.name }} has made.</p>
 
             <div class="connection-tabs">
               <button
@@ -541,7 +536,7 @@
       <!-- Tours Tab Content -->
       <div v-if="activeTab === 'tours'" class="profile-section">
         <div class="section-header">
-          <h2 class="section-title">{{ client?.name || 'Alex Dunia' }}'s Property Tours</h2>
+          <h2 class="section-title">{{ client?.name }}'s Property Tours</h2>
           <button class="edit-button" @click="router.push('/tours/create')">Schedule Tour</button>
         </div>
         <ClientTours />
@@ -550,7 +545,7 @@
       <!-- Tasks Tab Content -->
       <div v-if="activeTab === 'tasks'" class="profile-section">
         <div class="section-header">
-          <h2 class="section-title">{{ client?.name || 'Alex Dunia' }}'s Tasks</h2>
+          <h2 class="section-title">{{ client?.name }}'s Tasks</h2>
           <button class="edit-button" @click="createTaskForClient">Create Task</button>
         </div>
         <ClientTasks />
@@ -560,7 +555,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch, provide } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useClientStore } from '@/stores/clientStore';
 import { useListingStore } from '@/stores/listingStore';
@@ -581,13 +576,28 @@ const connectionStore = useConnectionStore();
 // Client ID from route params
 const clientId = computed(() => parseInt(route.params.id));
 
+// Client data
+const client = computed(() => clientStore.getClientById(clientId.value) || {
+  id: clientId.value,
+  name: 'Client Not Found',
+  email: '',
+  profilePicture: 'https://randomuser.me/api/portraits/men/32.jpg'
+});
+
+// Expose client data to parent components (for header)
+provide('profileData', {
+  name: computed(() => client.value.name),
+  avatar: computed(() => client.value.profilePicture),
+  title: computed(() => 'Client')
+});
+
 // Active tab tracking
 const activeTab = ref('bio');
 
 // Filter tracking for listings tab
 const activeFilter = ref('mostViewed');
 
-// Client data
+// Client details
 const clientDetails = ref(null);
 
 // Loading state
@@ -754,7 +764,7 @@ function loadClientConnections() {
 }
 
 function viewAgentProfile(agentId) {
-  router.push(`/agent/${agentId}`);
+  router.push(`/admin/agent/${agentId}`);
 }
 
 function viewClientProfile(clientId) {
@@ -848,24 +858,6 @@ function editDocument() {
 function uploadDocument() {
   console.log('Uploading document for client:', clientId.value);
   router.push(`/admin/document/new?clientId=${clientId.value}`);
-}
-
-// Get client basic info
-const client = computed(() => {
-  return clientId.value ? clientStore.getClientById(clientId.value) : null;
-});
-
-// Get property image based on ID
-function getPropertyImage(listingId) {
-  // Map specific listing IDs to the provided Cloudinary images
-  const imageMap = {
-    101: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548284/Rectangle_227_ncwnmz.png',
-    102: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1743087291/Designer_8_1_fjvyi0.png',
-    103: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png',
-    105: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1718259997/house1_eogyom.jpg'
-  };
-
-  return imageMap[listingId] || 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548284/Rectangle_227_ncwnmz.png';
 }
 
 // Get filtered listings based on active filter
@@ -1095,34 +1087,6 @@ function createTaskForClient() {
   font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   color: #374151;
   background-color: #fff;
-}
-
-.profile-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 2rem 0;
-  margin-left: 2rem;
-}
-
-.avatar-container {
-  position: relative;
-}
-
-.profile-avatar {
-  width: 3.5rem;
-  height: 3.5rem;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.profile-name {
-  font-size: 1.75rem;
-  font-weight: 600;
-  color: #111827;
-  margin: 0;
 }
 
 .nav-container {

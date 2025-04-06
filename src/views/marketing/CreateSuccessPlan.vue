@@ -186,10 +186,23 @@
         </div>
         <div class="form-group">
           <label for="assigned-agents">Assigned Agents</label>
-          <select id="assigned-agents" multiple v-model="plan.assignedAgents">
-            <option>Alex Dunia</option>
-            <option>Jane Smith</option>
-          </select>
+          <div class="agents-selection">
+            <select id="assigned-agents" multiple v-model="plan.assignedAgents" class="agents-dropdown">
+              <option v-for="agent in availableAgents" :key="agent" :value="agent">{{ agent }}</option>
+            </select>
+            <div class="agents-help">
+              <p class="note">Select agents who will be responsible for implementing this plan</p>
+              <div v-if="plan.assignedAgents && plan.assignedAgents.length > 0" class="selected-agents">
+                <p><strong>Selected agents:</strong></p>
+                <ul class="agent-list">
+                  <li v-for="agent in plan.assignedAgents" :key="agent" class="agent-item">
+                    {{ agent }}
+                    <button type="button" @click="removeAgent(agent)" class="remove-agent-btn">&times;</button>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="form-group">
           <label for="internal-notes">Internal Notes (Admin Only)</label>
@@ -208,6 +221,7 @@ import { useRouter } from 'vue-router';
 import { useMarketingStore } from '@/stores/marketingStore';
 import { hasPermission } from '@/services/permissionService';
 import { useRoleStore } from '@/stores/roleStore';
+import { useAgentStore } from '@/stores/agentStore';
 
 const plan = ref({
   title: 'Marketing Strategy for Williams',
@@ -224,7 +238,27 @@ const plan = ref({
 const router = useRouter();
 const marketingStore = useMarketingStore();
 const roleStore = useRoleStore();
+const agentStore = useAgentStore();
 const isSaving = ref(false);
+
+// Get available agents for assignment
+const availableAgents = computed(() => {
+  // If we have an agent store with real data
+  if (agentStore && agentStore.getAllAgents) {
+    // Return agent names from the agent store
+    return agentStore.getAllAgents().map(agent => agent.name);
+  }
+
+  // Fallback to hardcoded list if no agent store
+  return [
+    'Alex Dunia',
+    'Jane Smith',
+    'Michael Johnson',
+    'Sarah Williams',
+    'Robert Davis',
+    'Olivia Wilson'
+  ];
+});
 
 // Multi-layered permission check
 const hasCreatePermission = computed(() => {
@@ -307,6 +341,11 @@ const updateChannelIcon = (index) => {
     'Others': 'others'
   };
   plan.value.channels[index].icon = iconMap[channelName] || '';
+};
+
+// Remove an agent from the assigned agents list
+const removeAgent = (agentName) => {
+  plan.value.assignedAgents = plan.value.assignedAgents.filter(name => name !== agentName);
 };
 
 const savePlan = async () => {
@@ -527,5 +566,53 @@ button[type="submit"]:hover {
 .lock-icon {
   width: 1.25rem;
   height: 1.25rem;
+}
+
+.agents-selection {
+  position: relative;
+}
+
+.agents-dropdown {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid #E5E7EB;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  background: #FFFFFF;
+}
+
+.agents-help {
+  margin-top: 0.5rem;
+}
+
+.note {
+  font-size: 0.875rem;
+  color: #4B5563;
+  margin-bottom: 0.5rem;
+}
+
+.selected-agents {
+  margin-top: 0.5rem;
+}
+
+.agent-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.agent-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.remove-agent-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #EF4444;
+  font-size: 1rem;
 }
 </style>

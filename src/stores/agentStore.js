@@ -10,12 +10,14 @@ export const useAgentStore = defineStore('agentStore', () => {
       email: 'sarah.johnson@realestateagency.com',
       phone: '(555) 123-4567',
       avatar: '/images/avatar-1.jpg',
+      profilePicture: '/images/avatar-1.jpg',
       bio: 'Experienced real estate agent specializing in luxury properties with over 10 years in the industry.',
       specialties: ['Luxury Homes', 'Waterfront Properties', 'Investment Properties'],
       licenseNumber: 'RE12345678',
       languages: ['English', 'Spanish'],
       averageRating: 4.8,
       location: 'Columbia, USA',
+      status: 'active',
       reviews: [
         { id: 1, clientId: 1, rating: 5, comment: 'Excellent service and very knowledgeable!' },
         { id: 2, clientId: 3, rating: 4.5, comment: 'Sarah helped us find our dream home quickly.' }
@@ -27,12 +29,14 @@ export const useAgentStore = defineStore('agentStore', () => {
       email: 'michael.chen@realestateagency.com',
       phone: '(555) 987-6543',
       avatar: '/images/avatar-2.jpg',
+      profilePicture: '/images/avatar-2.jpg',
       bio: 'Detail-oriented agent with expertise in urban properties and first-time homebuyers.',
       specialties: ['Urban Properties', 'First-Time Homebuyers', 'Condos'],
       licenseNumber: 'RE87654321',
       languages: ['English', 'Mandarin', 'Cantonese'],
       averageRating: 4.9,
       location: 'New York, USA',
+      status: 'active',
       reviews: [
         { id: 3, clientId: 2, rating: 5, comment: 'Michael made the home buying process so easy!' },
         { id: 4, clientId: 4, rating: 4.8, comment: 'Great communication and very responsive.' }
@@ -44,12 +48,14 @@ export const useAgentStore = defineStore('agentStore', () => {
       email: 'jessica.ramirez@realestateagency.com',
       phone: '(555) 789-0123',
       avatar: '/images/avatar-3.jpg',
+      profilePicture: '/images/avatar-3.jpg',
       bio: 'Passionate about helping clients find their dream homes in vibrant neighborhoods.',
       specialties: ['Historic Homes', 'Downtown Properties', 'First-Time Buyers'],
       licenseNumber: 'RE56781234',
       languages: ['English', 'Spanish', 'Portuguese'],
       averageRating: 4.7,
       location: 'Miami, USA',
+      status: 'active',
       reviews: [
         { id: 5, clientId: 5, rating: 5, comment: 'Jessica was amazing throughout our entire buying process!' },
         { id: 6, clientId: 6, rating: 4.5, comment: 'Very knowledgeable about the local market.' }
@@ -61,12 +67,14 @@ export const useAgentStore = defineStore('agentStore', () => {
       email: 'david.thompson@realestateagency.com',
       phone: '(555) 456-7890',
       avatar: '/images/avatar-4.jpg',
+      profilePicture: '/images/avatar-4.jpg',
       bio: 'Specializing in luxury properties and high-end real estate investments.',
       specialties: ['Luxury Estates', 'Investment Properties', 'Commercial Real Estate'],
       licenseNumber: 'RE34567812',
       languages: ['English', 'French'],
       averageRating: 4.9,
       location: 'Los Angeles, USA',
+      status: 'active',
       reviews: [
         { id: 7, clientId: 7, rating: 5, comment: 'David helped us find the perfect investment property!' },
         { id: 8, clientId: 8, rating: 4.8, comment: 'Extremely professional and knowledgeable.' }
@@ -78,12 +86,14 @@ export const useAgentStore = defineStore('agentStore', () => {
       email: 'olivia.wilson@realestateagency.com',
       phone: '(555) 321-0987',
       avatar: '/images/avatar-5.jpg',
+      profilePicture: '/images/avatar-5.jpg',
       bio: 'Expert in suburban family homes and relocation services.',
       specialties: ['Family Homes', 'Relocation Services', 'New Constructions'],
       licenseNumber: 'RE90876543',
       languages: ['English'],
       averageRating: 4.6,
       location: 'Chicago, USA',
+      status: 'active',
       reviews: [
         { id: 9, clientId: 9, rating: 4.5, comment: 'Olivia was so helpful during our relocation process.' },
         { id: 10, clientId: 10, rating: 4.7, comment: 'Found us the perfect family home in our target neighborhood.' }
@@ -112,6 +122,7 @@ export const useAgentStore = defineStore('agentStore', () => {
       id: generateAgentId(),
       averageRating: 0,
       reviews: [],
+      status: 'active',
       ...agent
     }
 
@@ -127,6 +138,17 @@ export const useAgentStore = defineStore('agentStore', () => {
         ...agents.value[index],
         ...updates
       }
+      return true
+    }
+
+    return false
+  }
+
+  function updateAgentStatus(id, status) {
+    const index = agents.value.findIndex(agent => agent.id === id)
+
+    if (index !== -1) {
+      agents.value[index].status = status
       return true
     }
 
@@ -170,6 +192,7 @@ export const useAgentStore = defineStore('agentStore', () => {
     // Actions
     addAgent,
     updateAgent,
+    updateAgentStatus,
     addReview
   }
 })

@@ -55,6 +55,7 @@
               :src="agent.avatar"
               :alt="`${agent.name} profile`"
               class="agent-avatar"
+              @error="handleImageError($event)"
             />
           </div>
 
@@ -127,7 +128,7 @@ const fallbackAgents = [
     experience: '3+ Yr of experience',
     location: 'Columbia, USA',
     specialty: 'Luxury Homes',
-    avatar: '/images/avatar-1.jpg', // Use local image path
+    avatar: '/images/avatar-1.jpg', // Use correct image path
     active: true
   },
   {
@@ -136,7 +137,7 @@ const fallbackAgents = [
     experience: '7+ Yr of experience',
     location: 'New York, USA',
     specialty: 'Urban Properties',
-    avatar: '/images/avatar-2.jpg', // Use local image path
+    avatar: '/images/avatar-2.jpg', // Use correct image path
     active: true
   },
   {
@@ -145,7 +146,7 @@ const fallbackAgents = [
     experience: '4+ Yr of experience',
     location: 'Miami, USA',
     specialty: 'Downtown Properties',
-    avatar: '/images/avatar-3.jpg', // Use local image path
+    avatar: '/images/avatar-3.jpg', // Use correct image path
     active: true
   },
   {
@@ -154,7 +155,7 @@ const fallbackAgents = [
     experience: '6+ Yr of experience',
     location: 'Los Angeles, USA',
     specialty: 'Luxury Estates',
-    avatar: '/images/avatar-4.jpg', // Use local image path
+    avatar: '/images/avatar-4.jpg', // Use correct image path
     active: true
   }
 ];
@@ -167,9 +168,9 @@ const formatStoreAgent = (agent) => {
     experience: agent.specialties ? agent.specialties[0] : '',
     location: agent.location || '',
     specialty: agent.specialties ? agent.specialties[0] : '',
-    // Use the avatar directly from the agent object, now that we're using reliable URLs
-    avatar: agent.avatar,
-    active: true
+    // Use the avatar directly from the agent object with fallback
+    avatar: agent.avatar || '/images/default-avatar.jpg',
+    active: agent.status === 'active' || true
   };
 };
 
@@ -256,6 +257,10 @@ const deactivateAgent = (agent) => {
       agents.value[index].active = false;
     }
   }
+};
+
+const handleImageError = (event) => {
+  event.target.src = '/images/default-avatar.jpg';
 };
 
 // Lifecycle hooks

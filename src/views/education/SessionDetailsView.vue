@@ -76,7 +76,7 @@
             <div v-if="selectedDate" class="selected-date-info">
               <div class="date-header">
                 <h3>{{ formatSelectedDate(selectedDate) }}</h3>
-                <button v-if="isSessionDay(selectedDate)" class="join-button" @click="openMeetLink">
+                <button v-if="isSessionDay(selectedDate) && !isSessionCompleted(session.date)" class="join-button" @click="openMeetLink">
                   <span class="platform-icon" v-if="getMeetingPlatform(session.meetLink) === 'google'">
                     <img src="https://upload.wikimedia.org/wikipedia/commons/9/9b/Google_Meet_icon.svg" alt="Google Meet" width="16" height="16">
                   </span>
@@ -92,6 +92,13 @@
                     <path d="M7 7H17V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
                 </button>
+                <div v-else-if="isSessionDay(selectedDate) && isSessionCompleted(session.date)" class="completed-badge">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 11L12 14L22 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M21 12V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  COMPLETED
+                </div>
               </div>
 
               <div v-if="isSessionDay(selectedDate)" class="host-info">
@@ -157,7 +164,7 @@
               <div class="datetime-pill">
                 {{ formatSessionDateTime(session.date, session.startTime) }}
               </div>
-              <button class="join-button" @click="openMeetLink" v-if="session.meetLink">
+              <button v-if="session.meetLink && !isSessionCompleted(session.date)" class="join-button" @click="openMeetLink">
                 <span class="platform-icon" v-if="getMeetingPlatform(session.meetLink) === 'google'">
                   <img src="https://upload.wikimedia.org/wikipedia/commons/9/9b/Google_Meet_icon.svg" alt="Google Meet" width="16" height="16">
                 </span>
@@ -173,6 +180,13 @@
                   <path d="M7 7H17V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               </button>
+              <div v-else-if="session.meetLink && isSessionCompleted(session.date)" class="completed-badge">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M9 11L12 14L22 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M21 12V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                COMPLETED
+              </div>
             </div>
 
             <!-- Host section -->
@@ -273,28 +287,13 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
+import { useEducationStore } from '@/stores/educationStore';
 
 const route = useRoute();
+const educationStore = useEducationStore();
 
 // Session data
-const session = ref({
-  id: 1,
-  title: 'Loading...',
-  description: '',
-  tableOfContent: [],
-  objectives: [],
-  chapter: '',
-  prerequisites: '',
-  date: '',
-  startTime: '',
-  endTime: '',
-  meetLink: '',
-  createdAt: new Date().toISOString(),
-  host: {
-    name: 'Alex Dunia',
-    role: 'Real Estate Marketing Specialist'
-  }
-});
+const session = ref({});
 
 // Calendar state
 const currentDate = ref(new Date());
@@ -562,11 +561,10 @@ const getMeetingPlatformName = (url) => {
 // Load session data
 const loadSession = () => {
   try {
-    // Try to get the session data from localStorage
-    const savedSession = localStorage.getItem('currentSession');
-    if (savedSession) {
-      session.value = JSON.parse(savedSession);
-      console.log('Loaded session from localStorage:', session.value);
+    // First check if we already have a current session in the store
+    if (educationStore.getCurrentSession) {
+      session.value = educationStore.getCurrentSession;
+      console.log('Loaded session from store:', session.value);
 
       // If session has a date, set it as the selected date and update current date
       if (session.value.date) {
@@ -590,35 +588,34 @@ const loadSession = () => {
         // Check if the date is valid
         if (!isNaN(sessionDate.getTime())) {
           console.log('Parsed session date:', sessionDate);
-        selectedDate.value = sessionDate;
-        currentDate.value = new Date(
-          sessionDate.getFullYear(),
-          sessionDate.getMonth(),
-          1
-        );
+          selectedDate.value = sessionDate;
+          currentDate.value = new Date(
+            sessionDate.getFullYear(),
+            sessionDate.getMonth(),
+            1
+          );
           console.log('Session date set to:', sessionDate);
-    } else {
+        } else {
           console.error('Invalid session date format:', session.value.date);
         }
       }
     } else if (route.params.id) {
-      // If we have an ID in the route, try to find the session in the educationSessions array
+      // If we have an ID in the route, try to find the session in the store
       console.log('Session ID from route:', route.params.id);
       const sessionId = parseInt(route.params.id);
 
-      // Get all sessions from localStorage
-      const allSessions = JSON.parse(localStorage.getItem('educationSessions') || '[]');
-      console.log('All sessions:', allSessions);
+      // Make sure sessions are loaded into the store
+      educationStore.loadAllSessions();
 
       // Find the session with the matching ID
-      const foundSession = allSessions.find(s => s.id === sessionId);
+      const foundSession = educationStore.getSessionById(sessionId);
 
       if (foundSession) {
         console.log('Found session by ID:', foundSession);
         session.value = foundSession;
 
-        // Save it as the current session for future reference
-        localStorage.setItem('currentSession', JSON.stringify(foundSession));
+        // Set it as the current session in the store
+        educationStore.setCurrentSession(foundSession);
 
         // If session has a date, set it as the selected date and update current date
         if (foundSession.date) {
@@ -668,6 +665,28 @@ const loadSession = () => {
 const showChapterDetails = ref(false);
 const toggleChapterDetails = () => {
   showChapterDetails.value = !showChapterDetails.value;
+};
+
+// Check if session is in the past (completed)
+const isSessionCompleted = (date) => {
+  if (!date) return false;
+
+  try {
+    const sessionDate = new Date(date);
+    const today = new Date();
+
+    // Check if date is valid
+    if (isNaN(sessionDate.getTime())) return false;
+
+    // Set today to midnight for proper comparison
+    today.setHours(0, 0, 0, 0);
+
+    // If session date is before today, it's completed
+    return sessionDate < today;
+  } catch (error) {
+    console.error('Error checking if session is completed:', error);
+    return false;
+  }
 };
 
 onMounted(() => {
@@ -1415,5 +1434,22 @@ onMounted(() => {
   font-size: 14px;
   font-weight: 500;
   color: #0F172A;
+}
+
+.completed-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  background-color: #E6EEF9;
+  color: #4C51BF;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: default;
+}
+
+.completed-badge svg {
+  stroke: #4C51BF;
 }
 </style>

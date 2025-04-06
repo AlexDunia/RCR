@@ -1,0 +1,11 @@
+src/features/marketing/MarketingNavigation.vue
+src/router/index.js
+src/views/admin/AgentProfileView.vue
+src/views/marketing/ChecklistCreate.vue
+src/views/marketing/ChecklistDetail.vue
+src/views/marketing/ChecklistEdit.vue
+src/views/marketing/CreateSuccessPlan.vue
+src/views/marketing/MarketingPlanDetail.vue
+src/views/marketing/MarketingTools.vue
+src/views/marketing/MyChecklist.vue
+src/views/marketing/SocialPlatforms.vue

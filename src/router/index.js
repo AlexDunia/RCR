@@ -12,7 +12,7 @@ const routes = [
   {
     path: '/agents',
     name: 'Agents',
-    component: () => import('@/views/AgentsView.vue'),
+    component: () => import('@/views/admin/AgentsView.vue'),
     meta: {
       title: 'Find Agents',
       allowedRoles: ['admin']
@@ -303,7 +303,10 @@ const routes = [
       {
         path: 'checklist/create',
         name: 'ChecklistCreate',
-        component: () => import('@/views/marketing/ChecklistCreate.vue')
+        component: () => import('@/views/marketing/ChecklistCreate.vue'),
+        meta: {
+          allowedRoles: ['agent']
+        }
       },
       {
         path: 'checklist/:id',
@@ -317,7 +320,10 @@ const routes = [
       {
         path: 'checklist/:id/edit',
         name: 'ChecklistEdit',
-        component: () => import('@/views/marketing/ChecklistEdit.vue')
+        component: () => import('@/views/marketing/ChecklistEdit.vue'),
+        meta: {
+          allowedRoles: ['agent']
+        }
       },
       {
         path: 'done-for-you',
@@ -352,6 +358,26 @@ const routes = [
       {
         path: 'social-platforms/post/:id',
         component: () => import('@/views/marketing/PostDetail.vue')
+      },
+      {
+        path: 'admin-checklists',
+        name: 'AdminChecklistView',
+        component: () => import('@/views/marketing/AdminChecklistView.vue'),
+        meta: {
+          requiredPermissions: ['view-marketing-plans', 'manage-agents'],
+          allowedRoles: ['admin'],
+          keepAlive: true
+        }
+      },
+      {
+        path: 'admin-social',
+        name: 'AdminSocialInsights',
+        component: () => import('@/views/marketing/AdminSocialInsights.vue'),
+        meta: {
+          requiredPermissions: ['view-marketing-plans', 'view-social-insights'],
+          allowedRoles: ['admin'],
+          keepAlive: true
+        }
       }
     ]
   },
@@ -385,14 +411,6 @@ const routes = [
         }
       },
       {
-        path: 'create',
-        name: 'CreateEducationSession',
-        component: () => import('@/views/education/CreateEducationSession.vue'),
-        meta: {
-          title: 'Create Education Session'
-        }
-      },
-      {
         path: 'session/:id',
         name: 'SessionDetails',
         component: () => import('@/views/education/SessionDetailsView.vue'),
@@ -416,6 +434,51 @@ const routes = [
         component: () => import('@/views/education/TestView.vue'),
         meta: {
           title: 'Education Test'
+        }
+      }
+    ]
+  },
+
+  // Education & Training Admin routes
+  {
+    path: '/admin/education-training',
+    component: EducationLayout,
+    meta: { allowedRoles: ['admin'] }, // Restrict to admin
+    children: [
+      {
+        path: '',
+        name: 'AdminEducationTraining',
+        component: () => import('@/views/education/AdminEducationView.vue'),
+        meta: {
+          title: 'Manage Education & Training'
+        }
+      },
+      {
+        path: 'create',
+        name: 'CreateEducationSession',
+        component: () => import('@/views/education/CreateEducationSession.vue'),
+        meta: {
+          title: 'Create Education Session',
+          allowedRoles: ['admin']
+        }
+      },
+      {
+        path: 'session/:id',
+        name: 'AdminSessionDetails',
+        component: () => import('@/views/education/SessionDetailsView.vue'),
+        props: true,
+        meta: {
+          title: 'Session Details'
+        }
+      },
+      {
+        path: 'edit/:id',
+        name: 'EditEducationSession',
+        component: () => import('@/views/education/CreateEducationSession.vue'),
+        props: true,
+        meta: {
+          title: 'Edit Education Session',
+          allowedRoles: ['admin']
         }
       }
     ]
@@ -510,6 +573,16 @@ const routes = [
     component: () => import('@/views/admin/PropertyDetailView.vue'),
     meta: {
       title: 'Property Details',
+      allowedRoles: ['admin']
+    }
+  },
+  // Admin Profile route (Admin-only)
+  {
+    path: '/admin/profile',
+    name: 'AdminProfile',
+    component: () => import('@/views/admin/AdminProfileView.vue'),
+    meta: {
+      title: 'Admin Profile',
       allowedRoles: ['admin']
     }
   },

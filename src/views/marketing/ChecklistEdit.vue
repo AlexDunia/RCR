@@ -155,10 +155,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import ConfirmationModal from '@/ui/ConfirmationModal.vue';
 import { useMarketingStore } from '@/stores/marketingStore';
+import { useRoleStore } from '@/stores/roleStore';
 
 const router = useRouter();
 const route = useRoute();
@@ -175,6 +176,8 @@ const modalConfig = ref({
 });
 
 const marketingStore = useMarketingStore();
+const roleStore = useRoleStore();
+const isAdmin = computed(() => roleStore.currentRole === 'admin');
 
 onMounted(async () => {
   try {
@@ -185,6 +188,11 @@ onMounted(async () => {
     if (existingChecklist) {
       checklist.value = { ...existingChecklist };
       originalChecklist.value = JSON.stringify(existingChecklist);
+    }
+
+    if (isAdmin.value) {
+      console.log('Admin users cannot edit checklists directly. Redirecting...');
+      router.push('/marketing-tools/admin-checklists');
     }
   } catch (error) {
     console.error('Error loading checklist:', error);

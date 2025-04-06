@@ -1,60 +1,48 @@
 <template>
   <div class="education-layout">
-    <div class="education-banner">
-      <div class="banner-content">
-        <h2>Learn about the real estate business</h2>
+    <div class="education-main">
+      <div class="education-content">
+        <router-view v-slot="{ Component }">
+          <transition name="fade" mode="out-in">
+            <component :is="Component" />
+          </transition>
+        </router-view>
       </div>
-    </div>
-    <div class="education-content">
-      <router-view v-slot="{ Component }">
-        <transition name="fade" mode="out-in">
-          <component :is="Component" />
-        </transition>
-      </router-view>
     </div>
   </div>
 </template>
 
 <script setup>
-// The layout itself doesn't need additional functionality
-// All functionality is handled in the individual views
+// No script needed
 </script>
 
 <style scoped>
 .education-layout {
   width: 100%;
   height: 100%;
-  background-color: #f5f5f5;
+  background-color: #F9FAFB;
+  background-image:
+    radial-gradient(circle at 100% 100%, rgba(226, 232, 240, 0.5) 0%, transparent 25%),
+    radial-gradient(circle at 0% 0%, rgba(226, 232, 240, 0.7) 0%, transparent 25%),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(248, 250, 252, 0.8));
+  background-attachment: fixed;
 }
 
-.education-banner {
-  background-color: #e6f4ef;
-  border-radius: 10px;
-  margin: 24px auto;
-  max-width: 960px;
-}
-
-.banner-content {
-  padding: 22px 36px;
-}
-
-.banner-content h2 {
-  color: #4a5568;
-  font-size: 17px;
-  font-weight: 500;
-  margin: 0;
-  line-height: 1.4;
+.education-main {
+  padding: 0;
+  overflow-y: auto;
+  min-height: calc(100vh - 64px);
 }
 
 .education-content {
   padding: 0;
-  max-width: 960px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.2s ease;
+  transition: opacity 0.3s ease;
 }
 
 .fade-enter-from,

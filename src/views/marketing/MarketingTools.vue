@@ -311,11 +311,31 @@ const filteredPlans = ref([]);
 // Filter plans based on search query and selected filters
 const filterPlans = () => {
   if (!isFiltering.value) {
-    filteredPlans.value = marketingStore.plans.marketingPlans;
+    // For agents, only show plans assigned to them
+    if (roleStore.currentRole === 'agent') {
+      const currentUserName = roleStore.getCurrentUser().name;
+      filteredPlans.value = marketingStore.plans.marketingPlans.filter(plan =>
+        plan.assignedAgents && plan.assignedAgents.includes(currentUserName)
+      );
+    } else {
+      // For admins, show all plans
+      filteredPlans.value = marketingStore.plans.marketingPlans;
+    }
     return;
   }
 
-  filteredPlans.value = marketingStore.plans.marketingPlans.filter(plan => {
+  // For both roles, apply filters to the appropriate set of plans
+  let plansToFilter = marketingStore.plans.marketingPlans;
+
+  // For agents, first filter by assignment
+  if (roleStore.currentRole === 'agent') {
+    const currentUserName = roleStore.getCurrentUser().name;
+    plansToFilter = plansToFilter.filter(plan =>
+      plan.assignedAgents && plan.assignedAgents.includes(currentUserName)
+    );
+  }
+
+  filteredPlans.value = plansToFilter.filter(plan => {
     let matchesSearch = true;
 
     // If search query is provided, check against selected filters

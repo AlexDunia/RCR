@@ -1,10 +1,24 @@
 <template>
   <div class="checklist-detail">
-    <!-- Simple debug info -->
+    <!-- Admin View Banner (only visible to admins) -->
+    <div v-if="isAdmin && !isOwner" class="admin-view-banner">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="admin-icon">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+      </svg>
+      <div class="admin-view-message">
+        <strong>Admin View Mode</strong>
+        <span>You are viewing this checklist as an administrator. Changes are disabled.</span>
+      </div>
+    </div>
+
+    <!-- Debug info - you can remove this in production -->
     <div class="debug-info" style="background: #f0f0f0; padding: 10px; margin-bottom: 10px; font-family: monospace;">
       <p>Route ID: {{ route.params.id }}</p>
       <p>Checklist loaded: {{ checklist !== null }}</p>
       <p>Checklist ID: {{ checklist?.id }}</p>
+      <p>User Role: {{ roleStore.currentRole }}</p>
+      <p>Can Edit: {{ canEdit }}</p>
+      <p>Can Modify Items: {{ canModifyItems }}</p>
     </div>
 
     <div class="header">
@@ -12,16 +26,16 @@
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
         </svg>
-        Back to Checklists
+        {{ isAdmin ? 'Back to Checklist Overview' : 'Back to Checklists' }}
       </button>
-      <div class="actions" v-if="checklist">
-        <button class="edit-btn" @click="editChecklist" v-if="!checklist.completed">
+      <div class="actions" v-if="checklist && canEdit">
+        <button class="edit-btn" @click="editChecklist" v-if="!checklist.completed && !isAdmin">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
           </svg>
           Edit
         </button>
-        <button class="delete-btn" @click="deleteChecklist">
+        <button class="delete-btn" @click="deleteChecklist" v-if="!isAdmin">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="icon">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
           </svg>
@@ -72,6 +86,17 @@
         </div>
       </div>
 
+      <!-- Show plan information if this is a converted plan -->
+      <div v-if="checklist.convertedFromPlan" class="converted-plan-info">
+        <div class="plan-badge">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="plan-icon">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+          </svg>
+          <span>Converted from Marketing Plan:</span>
+          <a @click.prevent="viewOriginalPlan" class="plan-link">{{ checklist.convertedFromPlan.title }}</a>
+        </div>
+      </div>
+
       <div class="items-section">
         <h2>Checklist Items</h2>
         <div class="items-list">
@@ -86,7 +111,7 @@
                 type="checkbox"
                 :checked="item.completed"
                 @change="toggleItem(index)"
-                :disabled="checklist.completed"
+                :disabled="checklist.completed || !canModifyItems"
               >
               <span class="item-text">{{ item.text }}</span>
             </div>
@@ -104,7 +129,7 @@
       <button class="back-btn" @click="goBack">Return to Checklists</button>
     </div>
 
-    <button @click="saveEdit" class="btn-save">Save Changes</button>
+    <button @click="saveEdit" class="btn-save" v-if="canModifyItems">Save Changes</button>
 
     <ConfirmationModal
       v-model="showModal"
@@ -118,14 +143,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import ConfirmationModal from '@/ui/ConfirmationModal.vue';
 import { useMarketingStore } from '@/stores/marketingStore';
+import { useRoleStore } from '@/stores/roleStore';
 
 const router = useRouter();
 const route = useRoute();
 const marketingStore = useMarketingStore();
+const roleStore = useRoleStore();
 const checklist = ref(null);
 const showModal = ref(false);
 const modalConfig = ref({
@@ -133,6 +160,26 @@ const modalConfig = ref({
   message: '',
   type: '',
   confirmText: ''
+});
+
+// Check if current user is an admin (for read-only mode)
+const isAdmin = computed(() => roleStore.currentRole === 'admin');
+
+// Check if the current user is the owner of the checklist
+const isOwner = computed(() => {
+  if (!checklist.value || !checklist.value.creator) return false;
+  return checklist.value.creator.name === roleStore.getCurrentUser().name;
+});
+
+// Determine if the user can edit this checklist
+const canEdit = computed(() => {
+  // If user is the creator or if they're an admin, they can view
+  return isOwner.value || isAdmin.value;
+});
+
+// Determine if the user can modify checklist items (only owner, not admin)
+const canModifyItems = computed(() => {
+  return isOwner.value && !checklist.value?.completed;
 });
 
 onMounted(async () => {
@@ -184,7 +231,8 @@ const getDaysOverdue = (checklist) => {
 };
 
 const toggleItem = async (index) => {
-  if (!checklist.value || checklist.value.completed) return;
+  // Only allow toggling if user can modify (not admin in view mode)
+  if (!checklist.value || checklist.value.completed || !canModifyItems.value) return;
 
   // Toggle the item's completed status directly
   checklist.value.items[index].completed = !checklist.value.items[index].completed;
@@ -193,11 +241,57 @@ const toggleItem = async (index) => {
   const completedItems = checklist.value.items.filter(item => item.completed).length;
   checklist.value.progress = Math.round((completedItems / checklist.value.items.length) * 100);
 
-  // Update status based on progress
+  // Update checklist status based on progress
+  const wasAlreadyCompleted = checklist.value.status === 'completed';
   if (checklist.value.progress === 100) {
     checklist.value.status = 'completed';
+
+    // If this is a conversion from a marketing plan and was just completed
+    if (!wasAlreadyCompleted && checklist.value.convertedFromPlan) {
+      // Update the marketing plan status to Completed
+      await updateOriginalPlanStatus('Completed');
+    }
   } else {
     checklist.value.status = 'draft';
+
+    // If this was previously completed and now is not, update the marketing plan status
+    if (wasAlreadyCompleted && checklist.value.convertedFromPlan) {
+      // Update the marketing plan status to Active
+      await updateOriginalPlanStatus('Active');
+    }
+  }
+
+  // Save the checklist with updated status
+  await saveEdit();
+};
+
+// Helper function to update the status of the original marketing plan
+const updateOriginalPlanStatus = async (newStatus) => {
+  if (!checklist.value.convertedFromPlan) return;
+
+  try {
+    // Get plan ID from the checklist
+    const planId = checklist.value.convertedFromPlan.id;
+
+    // Fetch marketing plans
+    const plans = marketingStore.plans.marketingPlans;
+
+    // Find the original plan by ID
+    const planIndex = plans.findIndex(p => String(p.index) === String(planId));
+
+    if (planIndex !== -1) {
+      // Update the plan status
+      plans[planIndex].status = newStatus;
+
+      // Save the updated plans to localStorage
+      localStorage.setItem('marketingPlans', JSON.stringify(plans));
+
+      console.log(`Original marketing plan status updated to ${newStatus}`);
+    } else {
+      console.warn('Original marketing plan not found');
+    }
+  } catch (error) {
+    console.error('Error updating original plan status:', error);
   }
 };
 
@@ -209,7 +303,12 @@ const goBack = () => {
     type: 'default',
     confirmText: 'Leave',
     onConfirm: () => {
-      router.push('/marketing-tools/checklist');
+      // Redirect based on user role
+      if (isAdmin.value) {
+        router.push('/marketing-tools/admin-checklists');
+      } else {
+        router.push('/marketing-tools/checklist');
+      }
     }
   };
 };
@@ -285,6 +384,13 @@ const handleSaveConfirm = async () => {
     }
   } catch (error) {
     console.error('Error saving checklist:', error);
+  }
+};
+
+const viewOriginalPlan = () => {
+  if (checklist.value && checklist.value.convertedFromPlan) {
+    // Navigate to the original plan
+    router.push(`/marketing-tools/plan/${checklist.value.convertedFromPlan.id}`);
   }
 };
 </script>
@@ -608,5 +714,122 @@ const handleSaveConfirm = async () => {
 .creator-role.agent {
   background-color: #2563eb;
   color: white;
+}
+
+/* Add new styles for admin view mode */
+.admin-view-banner {
+  background-color: #fdf2f8;
+  border-left: 4px solid #db2777;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-radius: 0.375rem;
+}
+
+.admin-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: #db2777;
+  flex-shrink: 0;
+}
+
+.admin-view-message {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-view-message strong {
+  color: #db2777;
+  margin-bottom: 0.25rem;
+}
+
+.admin-view-message span {
+  color: #9d174d;
+  font-size: 0.875rem;
+}
+
+.converted-plan-info {
+  background-color: #f0f9ff;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin: 1.5rem 0;
+}
+
+.plan-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #0369a1;
+  font-size: 0.9rem;
+}
+
+.plan-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #0284c7;
+}
+
+.plan-link {
+  color: #0284c7;
+  font-weight: 500;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.plan-link:hover {
+  color: #0369a1;
+}
+
+/* Style for checkbox in read-only mode */
+input[type="checkbox"]:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Style for the creator badge */
+.creator-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #f8fafc;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.8rem;
+  margin-left: 0.5rem;
+}
+
+.creator-label {
+  color: #64748b;
+}
+
+.creator-name {
+  font-weight: 500;
+  color: #334155;
+}
+
+.creator-role {
+  display: inline-block;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-weight: 500;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+}
+
+.creator-role.admin {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.creator-role.agent {
+  background-color: #e0f2fe;
+  color: #0369a1;
+}
+
+.creator-role.client {
+  background-color: #f0fdf4;
+  color: #166534;
 }
 </style>
