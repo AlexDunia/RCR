@@ -30,25 +30,31 @@ const isAdmin = computed(() => {
 });
 
 // Computed properties for layout settings
-const hideSidebar = computed(() => layoutStore.hideSidebar);
 const hideHeader = computed(() => layoutStore.hideHeader);
 const background = computed(() => layoutStore.background);
 
 // Force layout update on mount
 onMounted(() => {
-  console.log('App.vue mounted - Forcing initial layout update');
-  console.log('Current role:', roleStore.currentRole);
+  console.log('App.vue mounted - Current role:', roleStore.currentRole);
+  console.log('App.vue - Is admin?', roleStore.currentRole === 'admin');
 
-  if (route.meta) {
-    layoutStore.setLayout({
-      hideSidebar: route.meta.hideSidebar || false,
-      hideHeader: route.meta.hideHeader || false,
-      background: route.meta.background || '#FFFFFF'
-    });
+  // Simple reactivity trigger to ensure correct sidebar is shown
+  if (isAdmin.value) {
+    console.log('Admin sidebar should be visible');
+  } else {
+    console.log('Agent sidebar should be visible');
+  }
+
+  // Check if we need a true reload after role toggle
+  const needsReload = localStorage.getItem('needsFullReload');
+  if (needsReload === 'true') {
+    localStorage.removeItem('needsFullReload');
+    // Force browser to reload the page completely including all assets
+    window.location.reload(true);
   }
 });
 
-// Watch route changes to update header and layout
+// Watch route changes to update header title only
 watch(route, (to) => {
   if (to.meta && to.meta.title) {
     headerStore.setTitle(to.meta.title);
@@ -57,15 +63,6 @@ watch(route, (to) => {
   }
 
   console.log(`App.vue - Route changed to: ${to.path}`);
-  console.log(`App.vue - Layout state: hideSidebar=${hideSidebar.value}, hideHeader=${hideHeader.value}`);
-
-  if (to.meta) {
-    layoutStore.setLayout({
-      hideSidebar: to.meta.hideSidebar || false,
-      hideHeader: to.meta.hideHeader || false,
-      background: to.meta.background || '#FFFFFF'
-    });
-  }
 }, { immediate: true });
 
 // Add scroll management
@@ -82,14 +79,15 @@ watch(route, handleRouteChange);
 
 <template>
   <div class="app-container" :style="{ background: background }">
-    <!-- Show different sidebars based on role -->
-    <AdminSidebar v-if="isAdmin && !hideSidebar" />
-    <Sidebar v-else-if="!hideSidebar" />
+    <!-- CRITICAL: Each sidebar is rendered individually - no conditional visibility at DOM level -->
+    <!-- Admin sidebar - only hidden with CSS when not admin -->
+    <AdminSidebar :class="{ 'hidden': !isAdmin }" />
 
-    <div class="main-content" :class="{ 'full-width': hideSidebar }">
-      <!-- Show different headers if needed -->
-      <!-- <AdminHeader v-if="isAdmin && !hideHeader" /> -->
-      <!-- <Header v-else-if="!hideHeader" /> -->
+    <!-- Agent sidebar - only hidden with CSS when admin -->
+    <Sidebar :class="{ 'hidden': isAdmin }" />
+
+    <!-- Main content never has full-width class -->
+    <div class="main-content">
       <Header v-if="!hideHeader"/>
 
       <div class="scroll-container">
@@ -97,7 +95,6 @@ watch(route, handleRouteChange);
           <router-view :key="$route.fullPath"></router-view>
         </PageTransition>
 
-        <!-- Task Notification -->
         <TaskNotification
           :show="showNotification"
           :message="currentNotification?.message || ''"
@@ -126,9 +123,8 @@ html, body {
   transition: background 0.3s ease;
 }
 
-.app-container.no-sidebar .main-content {
-  margin-left: 0;
-  width: 100%;
+.hidden {
+  display: none !important;
 }
 
 .main-content {
@@ -145,10 +141,5 @@ html, body {
   overflow-y: auto;
   overflow-x: hidden;
   position: relative;
-}
-
-.main-content.full-width {
-  margin-left: 0;
-  width: 100%;
 }
 </style>

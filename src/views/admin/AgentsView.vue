@@ -62,11 +62,12 @@
       <div v-for="agent in filteredAgents" :key="agent.id" class="client-card">
         <div class="client-info">
           <div class="avatar-container">
-            <img
+            <ImageWithFallback
               :src="agent.profilePicture || agent.avatar || '/images/default-avatar.jpg'"
-              alt="Agent avatar"
+              :alt="`${agent.name}'s avatar`"
               class="client-avatar"
-              @error="handleImageError($event)"
+              :forceRefresh="true"
+              fallbackSrc="/images/default-avatar.svg"
             />
             <div class="status-indicator" :class="{ 'active': agent.status === 'active' }"></div>
           </div>
@@ -122,6 +123,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAgentStore } from '@/stores/agentStore';
+import ImageWithFallback from '@/components/ImageWithFallback.vue';
 
 const router = useRouter();
 const agentStore = useAgentStore();
@@ -168,10 +170,6 @@ function viewAgentProfile(agentId) {
 function toggleAgentStatus(agent) {
   const newStatus = agent.status === 'active' ? 'inactive' : 'active';
   agentStore.updateAgentStatus(agent.id, newStatus);
-}
-
-function handleImageError($event) {
-  $event.target.src = '/images/default-avatar.jpg';
 }
 
 // Load data

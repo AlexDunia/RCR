@@ -1,9 +1,30 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { useRoute } from 'vue-router';
+import { useRoleStore } from '@/stores/roleStore';
 
 const route = useRoute();
+const roleStore = useRoleStore();
 const activeMenu = ref('');
+const currentRole = computed(() => roleStore.currentRole);
+
+// Toggle between admin and agent roles
+const toggleRole = () => {
+  console.log('Toggle role from admin sidebar - Current role:', currentRole.value);
+
+  // Set the new role first - always switching to agent from admin sidebar
+  const newRole = 'agent';
+  console.log('Toggling to new role:', newRole);
+
+  // Set flag for full reload to prevent image loading issues
+  localStorage.setItem('needsFullReload', 'true');
+
+  // Apply the role change - this updates localStorage
+  roleStore.setRole(newRole);
+
+  // Force a hard page reload to ensure all resources are properly loaded
+  window.location.href = window.location.href.split('#')[0] + '#/';
+};
 
 const getActiveMenuFromPath = (path) => {
   if (path === '/') return 'dashboard';
@@ -98,8 +119,18 @@ const menuItems = [
 <template>
   <aside class="sidebar">
     <div class="logo-container">
-      <h2 class="logo">Real City</h2>
-      <p class="tagline">realty inc brokerage</p>
+      <div class="logo-section">
+        <h2 class="logo">Real City</h2>
+        <p class="tagline">realty inc brokerage</p>
+      </div>
+      <label class="switch small">
+        <input type="checkbox" @change="toggleRole" :checked="currentRole === 'admin'">
+        <span class="slider round"></span>
+        <span class="toggle-labels">
+          <span class="agent-label">A</span>
+          <span class="admin-label">+</span>
+        </span>
+      </label>
     </div>
 
     <nav class="sidebar-nav">
@@ -112,10 +143,6 @@ const menuItems = [
         </li>
       </ul>
     </nav>
-
-    <div class="account-section">
-      <h3>Account Management</h3>
-    </div>
   </aside>
 </template>
 
@@ -133,6 +160,14 @@ const menuItems = [
 
 .logo-container {
   padding: 10px 0 20px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo-section {
+  display: flex;
+  flex-direction: column;
 }
 
 .logo {
@@ -216,5 +251,177 @@ nav ul li:not(.active):hover {
   opacity: 0.7;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+.role-toggle {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.role-label {
+  margin-right: 10px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #FFEB3B;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #FFEB3B;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+.toggle-labels {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: space-between;
+  padding: 0 8px;
+  pointer-events: none;
+  font-size: 10px;
+  color: white;
+}
+
+.agent-label {
+  margin-right: 5px;
+}
+
+.admin-label {
+  margin-left: 5px;
+}
+
+.switch.small {
+  width: 30px;
+  height: 18px;
+}
+
+.switch.small input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch.small .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.switch.small .slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.switch.small input:checked + .slider {
+  background-color: #FFEB3B;
+}
+
+.switch.small input:focus + .slider {
+  box-shadow: 0 0 1px #FFEB3B;
+}
+
+.switch.small input:checked + .slider:before {
+  -webkit-transform: translateX(14px);
+  -ms-transform: translateX(14px);
+  transform: translateX(14px);
+}
+
+.switch.small .slider.round {
+  border-radius: 18px;
+}
+
+.switch.small .slider.round:before {
+  border-radius: 50%;
+}
+
+.switch.small .toggle-labels {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: space-between;
+  padding: 0 4px;
+  pointer-events: none;
+  font-size: 8px;
+  color: white;
+}
+
+.switch.small .agent-label {
+  margin-right: 2px;
+}
+
+.switch.small .admin-label {
+  margin-left: 2px;
 }
 </style>

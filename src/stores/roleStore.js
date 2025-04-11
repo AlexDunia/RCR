@@ -4,23 +4,39 @@ import { ref } from 'vue'
 /**
  * Role Store - Central source of truth for user roles
  *
- * Uses a fixed role, bypassing localStorage
+ * Now uses localStorage to persist role between reloads
  */
 export const useRoleStore = defineStore('role', () => {
-  // IMPORTANT: Fixed role value - change this line to switch roles
-  const currentRole = ref('agent'); // Fixed to 'admin' - change to 'agent' when needed
+  // Get role from localStorage or default to 'agent'
+  const storedRole = localStorage.getItem('userRole');
+  const currentRole = ref(storedRole && ['admin', 'agent', 'client'].includes(storedRole) ? storedRole : 'agent');
 
   // Available roles
   const availableRoles = ['admin', 'agent', 'client'];
 
-  // Function to change the current role (in-memory only)
+  // Function to change the current role and save to localStorage
   const setRole = (role) => {
-    if (availableRoles.includes(role)) {
-      currentRole.value = role;
-      console.log(`Role changed to: ${role}`);
-    } else {
+    // Validate that the role is allowed
+    if (!availableRoles.includes(role)) {
       console.error(`Role ${role} is not valid. Available roles: ${availableRoles.join(', ')}`)
+      return false;
     }
+
+    // Only allow toggling between admin and agent (not client)
+    if (role === 'client') {
+      console.error('Cannot manually set role to client');
+      return false;
+    }
+
+    // Valid role, proceed with change
+    currentRole.value = role;
+    localStorage.setItem('userRole', role);
+
+    // Set a flag to indicate images need to be reloaded
+    localStorage.setItem('imagesNeedRefresh', 'true');
+
+    console.log(`Role changed to: ${role}`);
+    return true;
   };
 
   // Get current user info

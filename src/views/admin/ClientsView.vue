@@ -63,7 +63,13 @@
       <div v-for="client in filteredClients" :key="client.id" class="client-card">
         <div class="client-info">
           <div class="avatar-container">
-            <img :src="client.profilePicture || 'https://randomuser.me/api/portraits/men/32.jpg'" alt="Client avatar" class="client-avatar" />
+            <ImageWithFallback
+              :src="client.profilePicture || 'https://randomuser.me/api/portraits/men/32.jpg'"
+              :alt="`${client.name}'s avatar`"
+              class="client-avatar"
+              :forceRefresh="true"
+              fallbackSrc="/images/default-avatar.svg"
+            />
             <div class="status-indicator" :class="{ 'active': client.status !== 'inactive' }"></div>
           </div>
           <div class="client-details">
@@ -206,6 +212,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useClientStore } from '@/stores/clientStore';
 import { useRouter } from 'vue-router';
+import ImageWithFallback from '@/components/ImageWithFallback.vue';
 
 // Stores
 const clientStore = useClientStore();

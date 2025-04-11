@@ -773,13 +773,6 @@ router.afterEach((to) => {
     layoutStore.resetBackgroundColor();
   }
 
-  // Set sidebar visibility
-  if (to.meta.hideSidebar !== undefined) {
-    layoutStore.setSidebarVisibility(!to.meta.hideSidebar);
-  } else {
-    layoutStore.setSidebarVisibility(true);
-  }
-
   // Set header visibility
   if (to.meta.hideHeader !== undefined) {
     layoutStore.setHeaderVisibility(!to.meta.hideHeader);

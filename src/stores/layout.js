@@ -28,6 +28,32 @@ export const useLayoutStore = defineStore('layout', {
       this.hideSidebar = !isVisible;
     },
 
+    // Force sidebar to be visible and persist this setting
+    forceSidebarVisible() {
+      // Set state
+      this.hideSidebar = false;
+
+      // Store in localStorage for persistence
+      localStorage.setItem('forceSidebarVisible', 'true');
+
+      // Force reactivity update
+      this.$patch({
+        hideSidebar: false
+      });
+
+      console.log('Sidebar visibility forced to visible');
+    },
+
+    // Check if sidebar should be forced visible
+    checkForcedSidebar() {
+      if (localStorage.getItem('forceSidebarVisible') === 'true') {
+        // Ensure state is updated
+        this.hideSidebar = false;
+        return true;
+      }
+      return false;
+    },
+
     setHeaderVisibility(isVisible) {
       this.hideHeader = !isVisible;
     },
