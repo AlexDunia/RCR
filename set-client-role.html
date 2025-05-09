@@ -1,0 +1,74 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Set Client Role</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 40px auto;
+            padding: 20px;
+            text-align: center;
+            background-color: #f9fafb;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #0056d6;
+        }
+        button {
+            background-color: #0056d6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover {
+            background-color: #0046c0;
+        }
+        .message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        .success {
+            background-color: #d1fae5;
+            color: #047857;
+        }
+    </style>
+</head>
+<body>
+    <h1>Real City Role Setter</h1>
+    <p>Click the button below to set your role to 'client':</p>
+
+    <button id="setClientRole">Set Role to Client</button>
+
+    <div id="message" class="message success">
+        Role successfully set to client!<br>
+        Please <a href="/" id="refreshLink">click here</a> to go back to the application.
+    </div>
+
+    <script>
+        document.getElementById('setClientRole').addEventListener('click', function() {
+            // Set the role in localStorage
+            localStorage.setItem('userRole', 'client');
+
+            // Set a flag to indicate images need to be reloaded
+            localStorage.setItem('imagesNeedRefresh', 'true');
+
+            // Show success message
+            document.getElementById('message').style.display = 'block';
+        });
+
+        // Update the refresh link to the correct URL
+        document.getElementById('refreshLink').href = window.location.origin;
+    </script>
+</body>
+</html>

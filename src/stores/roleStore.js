@@ -22,12 +22,6 @@ export const useRoleStore = defineStore('role', () => {
       return false;
     }
 
-    // Only allow toggling between admin and agent (not client)
-    if (role === 'client') {
-      console.error('Cannot manually set role to client');
-      return false;
-    }
-
     // Valid role, proceed with change
     currentRole.value = role;
     localStorage.setItem('userRole', role);
@@ -44,7 +38,8 @@ export const useRoleStore = defineStore('role', () => {
     return {
       id: 'user-fixed',
       role: currentRole.value,
-      name: currentRole.value === 'admin' ? 'Admin User' : 'Agent User'
+      name: currentRole.value === 'admin' ? 'Admin User' :
+            currentRole.value === 'agent' ? 'Agent User' : 'Client User'
     };
   };
 
@@ -67,5 +62,10 @@ export const roleUtil = {
     const store = useRoleStore();
     store.setRole('agent');
     console.log('Role set to agent.');
+  },
+  setClient: () => {
+    const store = useRoleStore();
+    store.setRole('client');
+    console.log('Role set to client.');
   }
 };

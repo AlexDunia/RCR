@@ -29,7 +29,14 @@ export const PERMISSIONS = {
   // Templates
   'view-templates': 'View marketing templates',
   'create-templates': 'Create custom templates',
-  'edit-templates': 'Edit templates'
+  'edit-templates': 'Edit templates',
+
+  // Client permissions
+  'view-client-dashboard': 'View client dashboard',
+  'view-property-listings': 'View available property listings',
+  'contact-agent': 'Contact real estate agent',
+  'submit-documents': 'Submit documents',
+  'schedule-viewings': 'Schedule property viewings'
 };
 
 // Role definitions with assigned permissions
@@ -68,6 +75,13 @@ export const ROLE_PERMISSIONS = {
     'view-templates',
     'create-templates',
     'edit-templates'
+  ],
+  'client': [
+    'view-client-dashboard',
+    'view-property-listings',
+    'contact-agent',
+    'submit-documents',
+    'schedule-viewings'
   ]
 };
 

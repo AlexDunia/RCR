@@ -1,13 +1,38 @@
 <script setup>
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAgentStore } from '@/stores/agentStore';
 import { useClientStore } from '@/stores/clientStore';
+import { useRoleStore } from '@/stores/roleStore';
 
 const route = useRoute();
 const router = useRouter();
 const agentStore = useAgentStore();
 const clientStore = useClientStore();
+const roleStore = useRoleStore();
+
+// Role switching menu
+const showRoleMenu = ref(false);
+const toggleRoleMenu = () => {
+  showRoleMenu.value = !showRoleMenu.value;
+};
+
+// Get current role
+const currentRole = computed(() => roleStore.currentRole);
+
+// Change user role
+const changeRole = (role) => {
+  roleStore.setRole(role);
+  showRoleMenu.value = false;
+  // Redirect to home after role change
+  if (role === 'client') {
+    router.push('/client-dashboard');
+  } else if (role === 'admin') {
+    router.push('/');
+  } else {
+    router.push('/agent-dashboard');
+  }
+};
 
 // Function to go back to previous page
 const goBack = () => {
@@ -52,7 +77,11 @@ const isRoutePath = (path) => {
 
 // Check if on agent profile page
 const isAgentProfileDetailPage = computed(() => {
-  return route.name === 'AdminAgentProfileDetail' || route.name === 'AgentProfileDetail';
+  return (
+    route.name === 'AdminAgentProfileDetail' ||
+    route.name === 'AgentProfileDetail' ||
+    route.name === 'ClientAgentProfile'
+  );
 });
 
 // Check if on client profile page
@@ -79,7 +108,6 @@ const isTasksPage = computed(() => isRoutePath('/tasks'));
 const isReceiptsDocsPage = computed(() => isRoutePath('/receipts-docs'));
 const isMarketingToolsPage = computed(() => isRoutePath('/marketing-tools'));
 const isProfilePage = computed(() => isRoutePath('/profile'));
-const isAgentProfilePage = computed(() => isRoutePath('/agent-profile'));
 const isChatPage = computed(() => isRoutePath(['/chat/admin', '/chat/client']));
 const isAboutPage = computed(() => isRoutePath('/about'));
 const isSuccessPlanPage = computed(() => isRoutePath('/marketing-tools/success-plan'));
@@ -94,8 +122,8 @@ const isEducationCreatePage = computed(() => isRoutePath('/admin/education-train
 
 <template>
   <header class="header" :class="{ 'below-modal': $root.modalOpen }">
-    <!-- Show agent profile header when viewing an agent's profile -->
-    <div v-if="isAgentProfileDetailPage && currentAgent" class="custom-header agent-profile-header">
+    <!-- Agent Profile fixed at top -->
+    <div v-if="isAgentProfileDetailPage && currentAgent" class="agent-profile-header">
       <div class="agent-profile-info">
         <button @click="goBack" class="back-button" aria-label="Go back">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -104,7 +132,7 @@ const isEducationCreatePage = computed(() => isRoutePath('/admin/education-train
           </svg>
         </button>
         <img
-          :src="currentAgent.avatar || '/images/default-avatar.jpg'"
+          :src="currentAgent.profilePicture || currentAgent.avatar || '/images/default-avatar.jpg'"
           :alt="currentAgent.name + ' profile'"
           class="agent-header-avatar"
         />
@@ -266,11 +294,6 @@ const isEducationCreatePage = computed(() => isRoutePath('/admin/education-train
       <h1>My Profile</h1>
       <p>Manage your personal information and preferences</p>
     </div>
-    <!-- Show agent profile header -->
-    <div v-else-if="isAgentProfilePage" class="custom-header">
-      <h1>Agent Profile</h1>
-      <p>Customize how clients see your professional profile</p>
-    </div>
     <!-- Show chat header -->
     <div v-else-if="isChatPage" class="custom-header">
       <h1>Messages</h1>
@@ -309,14 +332,31 @@ const isEducationCreatePage = computed(() => isRoutePath('/admin/education-train
     </div>
 
     <!-- Profile Section -->
-    <div class="profile-section">
+    <div class="profile-section" @click="toggleRoleMenu">
       <img class="profile-image"
         src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1739408381/Screenshot_2025-02-13_015617_mhjgby.png"
         alt="Profile" />
-      <span class="profile-name">John Doe</span>
+      <span class="profile-name">{{ currentRole === 'admin' ? 'Admin' : currentRole === 'agent' ? 'Agent' : 'Client' }}</span>
       <svg class="dropdown-icon" viewBox="0 0 24 24">
         <path d="M7 10l5 5 5-5z" />
       </svg>
+
+      <!-- Role switcher dropdown -->
+      <div v-if="showRoleMenu" class="role-switcher-menu">
+        <div class="role-switcher-header">Switch Role</div>
+        <div class="role-option" :class="{ 'active': currentRole === 'admin' }" @click="changeRole('admin')">
+          <span class="role-icon admin-icon">A</span>
+          <span class="role-name">Admin</span>
+        </div>
+        <div class="role-option" :class="{ 'active': currentRole === 'agent' }" @click="changeRole('agent')">
+          <span class="role-icon agent-icon">Ag</span>
+          <span class="role-name">Agent</span>
+        </div>
+        <div class="role-option" :class="{ 'active': currentRole === 'client' }" @click="changeRole('client')">
+          <span class="role-icon client-icon">C</span>
+          <span class="role-name">Client</span>
+        </div>
+      </div>
     </div>
   </header>
 </template>
@@ -329,12 +369,11 @@ const isEducationCreatePage = computed(() => isRoutePath('/admin/education-train
   padding: 30px 38px;
   background: white;
   border-bottom: 1px solid #ddd;
-  position: sticky;
-  top: 0;
+  position: relative;
   border: none;
   z-index: 100;
   box-shadow: 0px 2px 5px rgba(99, 98, 98, 0.1);
-  /* Ensure it stays on top for sticky behavior */
+  width: 100%;
   transition: box-shadow 0.3s ease;
 }
 
@@ -523,6 +562,7 @@ input {
 
 /* Profile side */
 .profile-section {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -584,5 +624,82 @@ input {
   font-size: 0.85rem;
   color: #6b7280;
   margin: 0;
+}
+
+/* Role switcher menu styles */
+.role-switcher-menu {
+  position: absolute;
+  top: 45px;
+  right: 0;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  width: 180px;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.role-switcher-header {
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  border-bottom: 1px solid #eee;
+}
+
+.role-option {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.role-option:hover {
+  background-color: #f5f5f5;
+}
+
+.role-option.active {
+  background-color: #e6f7ff;
+}
+
+.role-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  margin-right: 12px;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.admin-icon {
+  background-color: #f56a00;
+  color: white;
+}
+
+.agent-icon {
+  background-color: #1890ff;
+  color: white;
+}
+
+.client-icon {
+  background-color: #52c41a;
+  color: white;
+}
+
+.role-name {
+  font-size: 14px;
+  color: #333;
+}
+
+/* Make header properly responsive to sidebar */
+@media (max-width: 768px) {
+  .marketing-header, .custom-header {
+    width: auto;
+    max-width: 500px;
+  }
 }
 </style>

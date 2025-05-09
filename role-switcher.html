@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Role Switcher</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f8fafc;
+        }
+        .role-switcher {
+            background-color: #ffffff;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        h1 {
+            color: #1a4189;
+            margin-top: 0;
+        }
+        .buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+        .client-btn {
+            background-color: #1a4189;
+            color: white;
+        }
+        .agent-btn {
+            background-color: #e5e7eb;
+            color: #1e293b;
+        }
+        .admin-btn {
+            background-color: #475569;
+            color: white;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        .note {
+            margin-top: 24px;
+            font-size: 14px;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+    <div class="role-switcher">
+        <h1>Role Switcher</h1>
+        <p>Select a role to view the application as:</p>
+        
+        <div class="buttons">
+            <button class="client-btn" onclick="switchRole('client')">Client</button>
+            <button class="agent-btn" onclick="switchRole('agent')">Agent</button>
+            <button class="admin-btn" onclick="switchRole('admin')">Admin</button>
+        </div>
+        
+        <div class="note">
+            <p>After switching roles, you will be redirected to the appropriate dashboard.</p>
+        </div>
+    </div>
+
+    <script>
+        function switchRole(role) {
+            // Set role in localStorage
+            localStorage.setItem('userRole', role);
+            
+            // Set flag to refresh images
+            localStorage.setItem('imagesNeedRefresh', 'true');
+            
+            // Redirect to appropriate dashboard
+            if (role === 'client') {
+                window.location.href = '/client-dashboard';
+            } else if (role === 'agent') {
+                window.location.href = '/agent-dashboard';
+            } else if (role === 'admin') {
+                window.location.href = '/admin-dashboard';
+            }
+        }
+    </script>
+</body>
+</html> 

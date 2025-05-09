@@ -14,6 +14,8 @@ export const usePropertyStore = defineStore('propertyStore', {
         bathrooms: 6,
         size: 1700,
         type: 'Residential',
+        isFavorite: true,
+        status: 'For Sale',
         image:
           'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png',
         description: 'A beautiful residential estate located in Austin, Texas.',
@@ -38,6 +40,8 @@ export const usePropertyStore = defineStore('propertyStore', {
         bathrooms: 5,
         size: 2000,
         type: 'Commercial',
+        isFavorite: false,
+        status: 'For Rent',
         image:
           'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png',
         description: 'A spacious commercial villa in Boulder, Colorado.',
@@ -62,6 +66,8 @@ export const usePropertyStore = defineStore('propertyStore', {
         bathrooms: 4,
         size: 2500,
         type: 'Residential',
+        isFavorite: true,
+        status: 'New',
         image:
           'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548284/Rectangle_227_ncwnmz.png',
         description: 'A cozy residential cottage in Portland, Oregon.',
@@ -180,6 +186,9 @@ export const usePropertyStore = defineStore('propertyStore', {
   getters: {
     visibleProperties: (state) =>
       state.properties.slice(state.currentIndex, state.currentIndex + 4),
+
+    favoriteProperties: (state) =>
+      state.properties.filter(property => property.isFavorite),
   },
 
   actions: {
@@ -191,6 +200,12 @@ export const usePropertyStore = defineStore('propertyStore', {
     prevSlide() {
       if (this.currentIndex > 0) {
         this.currentIndex -= 4
+      }
+    },
+    toggleFavorite(propertyId) {
+      const property = this.properties.find(p => p.id === propertyId);
+      if (property) {
+        property.isFavorite = !property.isFavorite;
       }
     },
   },

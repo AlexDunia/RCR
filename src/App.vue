@@ -8,6 +8,7 @@ import { watch, computed, onMounted } from 'vue';
 
 import Sidebar from './layouts/components/SidebarView.vue';
 import AdminSidebar from './layouts/components/AdminSidebar.vue'; // Import Admin Sidebar
+import ClientSidebar from './layouts/components/ClientSidebar.vue'; // Import Client Sidebar
 import Header from './layouts/components/HeaderView.vue';
 // import AdminHeader from './layouts/admin/AdminHeader.vue';
 import TaskNotification from './components/TaskNotification.vue';
@@ -29,6 +30,16 @@ const isAdmin = computed(() => {
   return roleStore.currentRole === 'admin';
 });
 
+// Check if user is a client
+const isClient = computed(() => {
+  return roleStore.currentRole === 'client';
+});
+
+// Determine if any sidebar is visible
+const hasSidebar = computed(() => {
+  return isAdmin.value || isClient.value || (!isAdmin.value && !isClient.value); // Agent has sidebar too
+});
+
 // Computed properties for layout settings
 const hideHeader = computed(() => layoutStore.hideHeader);
 const background = computed(() => layoutStore.background);
@@ -37,10 +48,13 @@ const background = computed(() => layoutStore.background);
 onMounted(() => {
   console.log('App.vue mounted - Current role:', roleStore.currentRole);
   console.log('App.vue - Is admin?', roleStore.currentRole === 'admin');
+  console.log('App.vue - Is client?', roleStore.currentRole === 'client');
 
   // Simple reactivity trigger to ensure correct sidebar is shown
   if (isAdmin.value) {
     console.log('Admin sidebar should be visible');
+  } else if (isClient.value) {
+    console.log('Client sidebar should be visible');
   } else {
     console.log('Agent sidebar should be visible');
   }
@@ -81,13 +95,16 @@ watch(route, handleRouteChange);
   <div class="app-container" :style="{ background: background }">
     <!-- CRITICAL: Each sidebar is rendered individually - no conditional visibility at DOM level -->
     <!-- Admin sidebar - only hidden with CSS when not admin -->
-    <AdminSidebar :class="{ 'hidden': !isAdmin }" />
+    <AdminSidebar class="admin-sidebar" :class="{ 'hidden': !isAdmin }" />
 
-    <!-- Agent sidebar - only hidden with CSS when admin -->
-    <Sidebar :class="{ 'hidden': isAdmin }" />
+    <!-- Agent sidebar - only hidden with CSS when not agent -->
+    <Sidebar class="agent-sidebar" :class="{ 'hidden': isAdmin || isClient }" />
 
-    <!-- Main content never has full-width class -->
-    <div class="main-content">
+    <!-- Client sidebar - only hidden with CSS when not client -->
+    <ClientSidebar class="client-sidebar" :class="{ 'hidden': !isClient }" />
+
+    <!-- Main content container with sidebar-adjusted class when needed -->
+    <div class="main-content" :class="{ 'with-sidebar': hasSidebar }">
       <Header v-if="!hideHeader"/>
 
       <div class="scroll-container">
@@ -127,6 +144,17 @@ html, body {
   display: none !important;
 }
 
+/* Sidebar base styles */
+.admin-sidebar, .agent-sidebar, .client-sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 260px;
+  height: 100vh;
+  z-index: 10;
+}
+
+/* Main content styles */
 .main-content {
   flex: 1;
   display: flex;
@@ -134,6 +162,14 @@ html, body {
   height: 100vh;
   position: relative;
   transition: all 0.3s ease;
+  width: 100%;
+  margin-left: 0;
+}
+
+/* Apply sidebar margin when any sidebar is visible */
+.main-content.with-sidebar {
+  width: calc(100% - 260px);
+  margin-left: 260px;
 }
 
 .scroll-container {

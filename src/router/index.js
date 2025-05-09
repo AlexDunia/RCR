@@ -27,6 +27,8 @@ const routes = [
       const roleStore = useRoleStore();
       if (roleStore.currentRole === 'admin') {
         next();
+      } else if (roleStore.currentRole === 'client') {
+        next('/client-dashboard');
       } else {
         next('/agent-dashboard');
       }
@@ -34,7 +36,7 @@ const routes = [
     meta: {
       title: 'Dashboard',
       description: 'View your performance metrics and important updates',
-      allowedRoles: ['admin', 'agent']
+      allowedRoles: ['admin', 'agent', 'client']
     }
   },
   {
@@ -45,6 +47,141 @@ const routes = [
       title: 'Agent Dashboard',
       description: 'View your listings, clients, and performance metrics',
       allowedRoles: ['agent']
+    }
+  },
+
+  // Client Dashboard route (Client-only)
+  {
+    path: '/client-dashboard',
+    name: 'ClientDashboard',
+    component: () => import('@/views/dashboard/ClientDashboardView.vue'),
+    meta: {
+      title: 'Client Dashboard',
+      description: 'View your properties, documents, and communications',
+      allowedRoles: ['client']
+    }
+  },
+  // Client Properties route (Client-only)
+  {
+    path: '/client-properties',
+    name: 'ClientProperties',
+    component: () => import('@/views/client/PropertiesView.vue'),
+    meta: {
+      title: 'My Properties',
+      description: 'View and manage your properties',
+      allowedRoles: ['client']
+    }
+  },
+  // Client Find Agents route (Client-only)
+  {
+    path: '/client-find-agents',
+    name: 'ClientFindAgents',
+    component: () => import('@/views/client/ClientAgentsView.vue'),
+    meta: {
+      title: 'Find Agents',
+      description: 'Browse and connect with real estate agents',
+      allowedRoles: ['client']
+    }
+  },
+  // Client Agent Profile route (Client-only)
+  {
+    path: '/client-find-agents/:id',
+    component: () => import('@/views/client/AgentProfileView.vue'),
+    meta: {
+      title: 'Agent Profile',
+      description: 'View detailed information about an agent',
+      allowedRoles: ['client']
+    },
+    children: [
+      {
+        path: '',
+        name: 'ClientAgentProfile',
+        redirect: to => {
+          return { name: 'AgentBio', params: { id: to.params.id } };
+        }
+      },
+      {
+        path: 'bio',
+        name: 'AgentBio',
+        component: () => import('@/views/client/AgentProfileView.vue'),
+        meta: {
+          tab: 'bio',
+          allowedRoles: ['client']
+        }
+      },
+      {
+        path: 'listings',
+        name: 'AgentListings',
+        component: () => import('@/views/client/AgentProfileView.vue'),
+        meta: {
+          tab: 'listings',
+          allowedRoles: ['client']
+        }
+      },
+      {
+        path: 'documents',
+        name: 'AgentDocuments',
+        component: () => import('@/views/client/AgentProfileView.vue'),
+        meta: {
+          tab: 'documents',
+          allowedRoles: ['client']
+        }
+      }
+    ]
+  },
+  // Client Favourites route (Client-only)
+  {
+    path: '/client-favourites',
+    name: 'ClientFavourites',
+    component: () => import('@/views/client/FavouritesView.vue'),
+    meta: {
+      title: 'Favourites',
+      description: 'View your saved properties and agents',
+      allowedRoles: ['client']
+    }
+  },
+  // Client Property Detail route (Client-only)
+  {
+    path: '/client-property/:id',
+    name: 'ClientPropertyDetail',
+    component: () => import('@/views/client/PropertyDetailView.vue'),
+    meta: {
+      title: 'Property Details',
+      description: 'View detailed information about a property',
+      allowedRoles: ['client']
+    }
+  },
+  // Client Documents route (Client-only)
+  {
+    path: '/client-documents',
+    name: 'ClientDocuments',
+    component: () => import('@/views/client/DocumentsView.vue'),
+    meta: {
+      title: 'Documents',
+      description: 'View and manage your documents',
+      allowedRoles: ['client']
+    }
+  },
+  // Client Appointments route (Client-only)
+  {
+    path: '/client-appointments',
+    name: 'ClientAppointments',
+    component: () => import('@/views/client/AppointmentsView.vue'),
+    meta: {
+      title: 'Appointments',
+      description: 'Schedule and manage property viewings',
+      allowedRoles: ['client']
+    }
+  },
+  // Client Messages route (Client-only)
+  {
+    path: '/client-messages',
+    name: 'ClientMessages',
+    component: () => import('@/views/client/MessagesView.vue'),
+    meta: {
+      title: 'Messages',
+      description: 'Communicate with your agent',
+      allowedRoles: ['client']
     }
   },
 

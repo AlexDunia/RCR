@@ -18,6 +18,7 @@ export const useAgentStore = defineStore('agentStore', () => {
       averageRating: 4.8,
       location: 'Columbia, USA',
       status: 'active',
+      yearsOfExperience: 10,
       reviews: [
         { id: 1, clientId: 1, rating: 5, comment: 'Excellent service and very knowledgeable!' },
         { id: 2, clientId: 3, rating: 4.5, comment: 'Sarah helped us find our dream home quickly.' }
@@ -37,6 +38,7 @@ export const useAgentStore = defineStore('agentStore', () => {
       averageRating: 4.9,
       location: 'New York, USA',
       status: 'active',
+      yearsOfExperience: 8,
       reviews: [
         { id: 3, clientId: 2, rating: 5, comment: 'Michael made the home buying process so easy!' },
         { id: 4, clientId: 4, rating: 4.8, comment: 'Great communication and very responsive.' }
@@ -56,6 +58,7 @@ export const useAgentStore = defineStore('agentStore', () => {
       averageRating: 4.7,
       location: 'Miami, USA',
       status: 'active',
+      yearsOfExperience: 6,
       reviews: [
         { id: 5, clientId: 5, rating: 5, comment: 'Jessica was amazing throughout our entire buying process!' },
         { id: 6, clientId: 6, rating: 4.5, comment: 'Very knowledgeable about the local market.' }
@@ -75,6 +78,7 @@ export const useAgentStore = defineStore('agentStore', () => {
       averageRating: 4.9,
       location: 'Los Angeles, USA',
       status: 'active',
+      yearsOfExperience: 12,
       reviews: [
         { id: 7, clientId: 7, rating: 5, comment: 'David helped us find the perfect investment property!' },
         { id: 8, clientId: 8, rating: 4.8, comment: 'Extremely professional and knowledgeable.' }
@@ -94,6 +98,7 @@ export const useAgentStore = defineStore('agentStore', () => {
       averageRating: 4.6,
       location: 'Chicago, USA',
       status: 'active',
+      yearsOfExperience: 5,
       reviews: [
         { id: 9, clientId: 9, rating: 4.5, comment: 'Olivia was so helpful during our relocation process.' },
         { id: 10, clientId: 10, rating: 4.7, comment: 'Found us the perfect family home in our target neighborhood.' }
@@ -123,6 +128,7 @@ export const useAgentStore = defineStore('agentStore', () => {
       averageRating: 0,
       reviews: [],
       status: 'active',
+      yearsOfExperience: 0,
       ...agent
     }
 
