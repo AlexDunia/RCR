@@ -148,7 +148,7 @@ const formatDate = (dateString) => {
       <div class="dashboard-section upcoming-tours">
         <div class="section-header">
           <h2>Upcoming Tours</h2>
-          <router-link to="/schedule-tours" class="view-all">Schedule Tour</router-link>
+          <router-link to="/client-messages" class="view-all">Contact Agent</router-link>
         </div>
         <div class="tours-list" v-if="upcomingTours.length > 0">
           <div class="tour-card" v-for="tour in upcomingTours.slice(0, 3)" :key="tour.id">
@@ -165,7 +165,8 @@ const formatDate = (dateString) => {
         </div>
         <div class="empty-state" v-else>
           <p>You have no upcoming tours scheduled.</p>
-          <router-link to="/schedule-tours" class="primary-button">Schedule a Tour</router-link>
+          <p class="scheduling-note">Property tours can only be scheduled by contacting your agent directly.</p>
+          <router-link to="/client-messages" class="primary-button">Contact Your Agent</router-link>
         </div>
       </div>
     </div>
@@ -450,6 +451,13 @@ const formatDate = (dateString) => {
 
 .primary-button:hover {
   background: #00796b;
+}
+
+.scheduling-note {
+  font-size: 14px;
+  color: #666;
+  margin: 8px 0 16px;
+  font-style: italic;
 }
 
 @media (max-width: 768px) {

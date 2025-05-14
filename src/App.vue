@@ -1,10 +1,10 @@
 <script setup>
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useHeaderStore } from '@/stores/headerStore';
 import { useLayoutStore } from '@/stores/layout';
 import { useRoleStore } from './stores/roleStore.js'; // Added explicit .js extension
 import { useTaskTimer } from './composables/useTaskTimer';
-import { watch, computed, onMounted } from 'vue';
+import { watch, computed, onMounted, ref, nextTick } from 'vue';
 
 import Sidebar from './layouts/components/SidebarView.vue';
 import AdminSidebar from './layouts/components/AdminSidebar.vue'; // Import Admin Sidebar
@@ -12,15 +12,16 @@ import ClientSidebar from './layouts/components/ClientSidebar.vue'; // Import Cl
 import Header from './layouts/components/HeaderView.vue';
 // import AdminHeader from './layouts/admin/AdminHeader.vue';
 import TaskNotification from './components/TaskNotification.vue';
-import PageTransition from './ui/PageTransition.vue';
 
 import '@fontsource/poppins';
 import '@fontsource/poppins/700.css';
 
 const route = useRoute();
+const router = useRouter();
 const headerStore = useHeaderStore();
 const layoutStore = useLayoutStore();
 const roleStore = useRoleStore(); // Access role store
+const isNavigating = ref(false);
 
 // Initialize task timer functionality
 const { showNotification, currentNotification, dismissNotification } = useTaskTimer();
@@ -44,20 +45,16 @@ const hasSidebar = computed(() => {
 const hideHeader = computed(() => layoutStore.hideHeader);
 const background = computed(() => layoutStore.background);
 
+// Get the current active sidebar component based on role
+const activeSidebar = computed(() => {
+  if (isAdmin.value) return AdminSidebar;
+  if (isClient.value) return ClientSidebar;
+  return Sidebar; // Default to agent sidebar
+});
+
 // Force layout update on mount
 onMounted(() => {
   console.log('App.vue mounted - Current role:', roleStore.currentRole);
-  console.log('App.vue - Is admin?', roleStore.currentRole === 'admin');
-  console.log('App.vue - Is client?', roleStore.currentRole === 'client');
-
-  // Simple reactivity trigger to ensure correct sidebar is shown
-  if (isAdmin.value) {
-    console.log('Admin sidebar should be visible');
-  } else if (isClient.value) {
-    console.log('Client sidebar should be visible');
-  } else {
-    console.log('Agent sidebar should be visible');
-  }
 
   // Check if we need a true reload after role toggle
   const needsReload = localStorage.getItem('needsFullReload');
@@ -66,9 +63,39 @@ onMounted(() => {
     // Force browser to reload the page completely including all assets
     window.location.reload(true);
   }
+
+  // Add global navigation handler
+  router.beforeEach((to, from, next) => {
+    isNavigating.value = true;
+    next();
+  });
+
+  router.afterEach(() => {
+    // Set a small delay to ensure components are fully rendered
+    setTimeout(() => {
+      isNavigating.value = false;
+    }, 100);
+  });
+
+  // Listen for router cleanup events
+  window.addEventListener('router:cleanup', clearRouterCache);
 });
 
-// Watch route changes to update header title only
+// Clear any router cache that might be causing issues
+const clearRouterCache = () => {
+  console.log('Cleaning up router cache');
+  // Force Vue's next tick to clear any pending renders
+  nextTick(() => {
+    // Clear any router internal state that might be stuck
+    if (router && router.history) {
+      // Force redraw of current route
+      const currentPath = router.currentRoute.value.fullPath;
+      router.replace(currentPath + '?t=' + Date.now());
+    }
+  });
+};
+
+// Watch route changes to update header title
 watch(route, (to) => {
   if (to.meta && to.meta.title) {
     headerStore.setTitle(to.meta.title);
@@ -77,6 +104,9 @@ watch(route, (to) => {
   }
 
   console.log(`App.vue - Route changed to: ${to.path}`);
+
+  // Reset scroll position
+  handleRouteChange();
 }, { immediate: true });
 
 // Add scroll management
@@ -86,31 +116,26 @@ const handleRouteChange = () => {
     mainContent.scrollTop = 0;
   }
 };
-
-// Watch route changes
-watch(route, handleRouteChange);
 </script>
 
 <template>
   <div class="app-container" :style="{ background: background }">
-    <!-- CRITICAL: Each sidebar is rendered individually - no conditional visibility at DOM level -->
-    <!-- Admin sidebar - only hidden with CSS when not admin -->
-    <AdminSidebar class="admin-sidebar" :class="{ 'hidden': !isAdmin }" />
+    <!-- Dynamic sidebar based on role -->
+    <component :is="activeSidebar" :key="'sidebar-' + roleStore.currentRole" />
 
-    <!-- Agent sidebar - only hidden with CSS when not agent -->
-    <Sidebar class="agent-sidebar" :class="{ 'hidden': isAdmin || isClient }" />
-
-    <!-- Client sidebar - only hidden with CSS when not client -->
-    <ClientSidebar class="client-sidebar" :class="{ 'hidden': !isClient }" />
-
-    <!-- Main content container with sidebar-adjusted class when needed -->
+    <!-- Main content container with sidebar-adjusted class -->
     <div class="main-content" :class="{ 'with-sidebar': hasSidebar }">
       <Header v-if="!hideHeader"/>
 
-      <div class="scroll-container">
-        <PageTransition>
-          <router-view :key="$route.fullPath"></router-view>
-        </PageTransition>
+      <div class="scroll-container" :class="{ 'navigating': isNavigating }">
+        <router-view v-slot="{ Component, route }">
+          <transition name="fade" mode="out-in">
+            <keep-alive v-if="route.meta.keepAlive">
+              <component :is="Component" :key="route.fullPath" />
+            </keep-alive>
+            <component v-else :is="Component" :key="route.fullPath" />
+          </transition>
+        </router-view>
 
         <TaskNotification
           :show="showNotification"
@@ -129,6 +154,11 @@ html, body {
   height: 100%;
   width: 100%;
   overflow: hidden;
+}
+
+#app {
+  height: 100%;
+  width: 100%;
 }
 
 .app-container {
@@ -177,5 +207,20 @@ html, body {
   overflow-y: auto;
   overflow-x: hidden;
   position: relative;
+}
+
+.navigating {
+  pointer-events: none;
+}
+
+/* Fade transition */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.15s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

@@ -1,361 +1,252 @@
 // src/stores/clientStore.js
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
-import { useListingStore } from './listingStore'
-import { useDocumentStore } from './documents'
-import { useAgentStore } from './agentStore'
-import { useTourStore } from './tourStore'
-import { useTaskStore } from './taskStore'
+import { ref, computed } from 'vue'
 
-export const useClientStore = defineStore('clientStore', () => {
+export const useClientStore = defineStore('client', () => {
   // State
-  const clients = ref([
-    // Sample client data
+  const favoriteClients = ref([
     {
       id: 1,
-      name: 'Alex Dunia',
-      email: 'alex.dunia@example.com',
-      profilePicture: '/images/avatar-1.jpg',
-      bio: 'Looking for luxury real estate properties.',
-      status: 'active',
-      location: 'New York, USA',
-      specialty: 'Luxury Real Estate',
-      interests: ['Luxury Homes', 'Waterfront Properties']
+      name: 'Emily R. Thompson',
+      propertyType: 'Looking for Luxury Home',
+      location: 'Seattle, USA',
+      budget: '$1M - $2M',
+      avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790261/300_e7yggy.jpg',
+      isConnected: true
     },
     {
       id: 2,
-      name: 'Jane Smith',
-      email: 'jane.smith@example.com',
-      profilePicture: '/images/avatar-2.jpg',
-      bio: 'Interested in investment properties in the downtown area.',
-      status: 'active',
-      location: 'Columbia, USA',
-      specialty: 'Investment Properties',
-      interests: ['Investment Properties', 'Downtown']
+      name: 'David Martinez',
+      propertyType: 'Seeking Investment Property',
+      location: 'Miami, USA',
+      budget: '$500K - $800K',
+      avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790261/300_1_gdilxy.jpg',
+      isConnected: false
     },
     {
       id: 3,
-      name: 'Robert Johnson',
-      email: 'robert.johnson@example.com',
-      profilePicture: 'https://randomuser.me/api/portraits/men/65.jpg',
-      bio: 'Looking for luxury waterfront properties.',
-      status: 'active',
-      location: 'Los Angeles, USA',
-      specialty: 'Luxury Homes',
-      interests: ['Luxury Homes', 'Waterfront']
-    },
-    {
-      id: 4,
-      name: 'Maria Garcia',
-      email: 'maria.garcia@example.com',
-      profilePicture: 'https://randomuser.me/api/portraits/women/28.jpg',
-      bio: 'First-time homebuyer looking for a condo.',
-      status: 'active',
-      location: 'Miami, USA',
-      specialty: 'Condos',
-      interests: ['Condos', 'First-Time Buyer']
-    },
-    {
-      id: 5,
-      name: 'James Wilson',
-      email: 'james.wilson@example.com',
-      profilePicture: 'https://randomuser.me/api/portraits/men/55.jpg',
-      bio: 'Relocating from out of state, looking for a quick move-in.',
-      status: 'active',
-      location: 'Chicago, USA',
-      specialty: 'New Construction',
-      interests: ['New Construction', 'Quick Move-in']
-    },
-    {
-      id: 6,
-      name: 'Emily Chen',
-      email: 'emily.chen@example.com',
-      profilePicture: 'https://randomuser.me/api/portraits/women/36.jpg',
-      bio: 'Looking for a property with rental potential.',
-      status: 'inactive',
-      location: 'San Francisco, USA',
-      specialty: 'Investment Properties',
-      interests: ['Investment Properties', 'Rentals']
+      name: 'Sophie Wang',
+      propertyType: 'First-Time Buyer',
+      location: 'Portland, USA',
+      budget: '$300K - $450K',
+      avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790260/300_3_inul8p.jpg',
+      isConnected: true
     }
   ])
 
-  // Client interactions - stored by ID references only for scalability
-  const clientInteractions = ref({
-    // Example: clientId -> interaction data
-    1: {
-      mostViewedListings: [101, 102, 103], // Listing IDs
-      mostSavedListings: [102, 105],       // Listing IDs
-      sharedDocuments: [1, 2],             // Document IDs
-      connectedAgents: [5, 8],             // Agent IDs
-      connectedClients: [2, 3],            // Other client IDs (referrals, family members, etc.)
-      attendedTours: [201, 202],           // Tour IDs
-      assignedTasks: [301, 302]            // Task IDs
-    },
-    2: {
-      mostViewedListings: [103, 105],
-      mostSavedListings: [103],
-      sharedDocuments: [1],
-      connectedAgents: [5],
-      connectedClients: [1, 4],
-      attendedTours: [201],
-      assignedTasks: [301]
-    },
-    3: {
-      mostViewedListings: [102, 103],
-      mostSavedListings: [103],
-      sharedDocuments: [],
-      connectedAgents: [8],
-      connectedClients: [1],
-      attendedTours: [],
-      assignedTasks: []
-    },
-    4: {
-      mostViewedListings: [101],
-      mostSavedListings: [101],
-      sharedDocuments: [2],
-      connectedAgents: [5],
-      connectedClients: [2],
-      attendedTours: [202],
-      assignedTasks: [302]
-    },
-    5: {
-      mostViewedListings: [102, 105],
-      mostSavedListings: [105],
-      sharedDocuments: [],
-      connectedAgents: [],
-      connectedClients: [],
-      attendedTours: [],
-      assignedTasks: []
-    },
-    6: {
-      mostViewedListings: [103],
-      mostSavedListings: [],
-      sharedDocuments: [],
-      connectedAgents: [8],
-      connectedClients: [],
-      attendedTours: [],
-      assignedTasks: []
+  const connectionRequests = ref([
+    {
+      id: 4,
+      clientId: 4,
+      name: 'Robert Wilson',
+      propertyType: 'Luxury Condo',
+      location: 'Chicago, USA',
+      budget: '$800K - $1.2M',
+      avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790260/300_2_rfyiva.jpg',
+      status: 'pending'
     }
-  })
+  ])
 
-  // Utility function to create empty interactions object
-  function initClientInteractions(clientId) {
-    if (!clientInteractions.value[clientId]) {
-      clientInteractions.value[clientId] = {
-        mostViewedListings: [],
-        mostSavedListings: [],
-        sharedDocuments: [],
-        connectedAgents: [],
-        connectedClients: [],
-        attendedTours: [],
-        assignedTasks: []
-      }
+  const clients = ref([
+    {
+      id: 1,
+      name: 'Emily R. Thompson',
+      email: 'emily.thompson@example.com',
+      location: 'Seattle, USA',
+      profilePicture: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790261/300_e7yggy.jpg',
+      avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790261/300_e7yggy.jpg',
+      preferences: ['Luxury Homes', 'Waterfront View'],
+      budget: '$1M - $2M',
+      searchStatus: 'active',
+      bio: 'Looking for a luxury waterfront property in the Seattle area.',
+      propertyViews: [{ id: 1, date: '2024-03-15' }, { id: 2, date: '2024-03-16' }]
+    },
+    {
+      id: 2,
+      name: 'David Martinez',
+      email: 'david.martinez@example.com',
+      location: 'Miami, USA',
+      profilePicture: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790261/300_1_gdilxy.jpg',
+      avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790261/300_1_gdilxy.jpg',
+      preferences: ['Investment Property', 'Commercial'],
+      budget: '$500K - $800K',
+      searchStatus: 'active',
+      bio: 'Investor looking for commercial properties with good ROI potential.',
+      propertyViews: [{ id: 1, date: '2024-03-14' }, { id: 2, date: '2024-03-15' }]
+    },
+    {
+      id: 3,
+      name: 'Sophie Wang',
+      email: 'sophie.wang@example.com',
+      location: 'Portland, USA',
+      profilePicture: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790260/300_3_inul8p.jpg',
+      avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790260/300_3_inul8p.jpg',
+      preferences: ['Residential', 'First-Time Buyer'],
+      budget: '$300K - $450K',
+      searchStatus: 'active',
+      bio: 'First-time homebuyer looking for a cozy residential property.',
+      propertyViews: [{ id: 1, date: '2024-03-13' }, { id: 2, date: '2024-03-14' }]
+    },
+    {
+      id: 4,
+      name: 'Robert Wilson',
+      email: 'robert.wilson@example.com',
+      location: 'Chicago, USA',
+      profilePicture: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790260/300_2_rfyiva.jpg',
+      avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790260/300_2_rfyiva.jpg',
+      preferences: ['Luxury Condos', 'City Center'],
+      budget: '$800K - $1.2M',
+      searchStatus: 'active',
+      bio: 'Seeking a luxury condo in downtown Chicago with modern amenities.',
+      propertyViews: [{ id: 1, date: '2024-03-12' }, { id: 2, date: '2024-03-13' }]
     }
-    return clientInteractions.value[clientId]
-  }
+  ])
+
+  // Client interactions tracking
+  const clientInteractions = ref({})
 
   // Getters
-  const getClientById = (id) => {
-    return clients.value.find(client => client.id === id)
-  }
+  const networkClients = computed(() => {
+    return favoriteClients.value.filter(client => client.isConnected)
+  })
 
-  const getClientFullDetails = (id) => {
-    const client = getClientById(id)
-
-    if (!client) return null
-
-    const interactions = clientInteractions.value[id] || {
-      mostViewedListings: [],
-      mostSavedListings: [],
-      sharedDocuments: [],
-      connectedAgents: [],
-      connectedClients: [],
-      attendedTours: [],
-      assignedTasks: []
-    }
-
-    // Get references to other stores
-    const listingStore = useListingStore()
-    const documentStore = useDocumentStore()
-    const agentStore = useAgentStore()
-    const tourStore = useTourStore()
-    const taskStore = useTaskStore()
-
-    // Map IDs to full objects from their respective stores
-    const fullDetails = {
-      ...client,
-      interactions: {
-        mostViewedListings: interactions.mostViewedListings.map(listingId =>
-          listingStore.getListingById(listingId)
-        ).filter(Boolean),
-
-        mostSavedListings: interactions.mostSavedListings.map(listingId =>
-          listingStore.getListingById(listingId)
-        ).filter(Boolean),
-
-        sharedDocuments: interactions.sharedDocuments.map(docId =>
-          documentStore.getDocument(docId)
-        ).filter(Boolean),
-
-        connectedAgents: interactions.connectedAgents.map(agentId =>
-          agentStore.getAgentById(agentId)
-        ).filter(Boolean),
-
-        connectedClients: interactions.connectedClients.map(clientId =>
-          getClientById(clientId)
-        ).filter(Boolean),
-
-        attendedTours: interactions.attendedTours.map(tourId =>
-          tourStore.getTourById(tourId)
-        ).filter(Boolean),
-
-        assignedTasks: interactions.assignedTasks.map(taskId =>
-          taskStore.getTaskById(taskId)
-        ).filter(Boolean)
-      }
-    }
-
-    return fullDetails
-  }
-
-  // Helper method to generate unique client ID
-  function generateClientId() {
-    return Math.max(0, ...clients.value.map(client => client.id)) + 1
-  }
+  const otherClients = computed(() => {
+    return favoriteClients.value.filter(client => !client.isConnected)
+  })
 
   // Actions
-  function addClient(client) {
-    const newClient = {
-      id: generateClientId(),
-      ...client
+  function toggleFavorite(clientId) {
+    const index = favoriteClients.value.findIndex(client => client.id === clientId)
+    if (index !== -1) {
+      favoriteClients.value.splice(index, 1)
+    } else {
+      favoriteClients.value.push({
+        id: clientId,
+        name: 'New Client',
+        propertyType: 'Residential',
+        location: 'New York, USA',
+        budget: '$400K - $600K',
+        avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790261/300_e7yggy.jpg',
+        isConnected: false
+      })
     }
-
-    clients.value.push(newClient)
-
-    // Initialize empty interactions record
-    initClientInteractions(newClient.id)
-
-    return newClient.id
   }
 
-  function updateClient(id, updates) {
-    const clientIndex = clients.value.findIndex(client => client.id === id)
+  function sendConnectionRequest(clientId) {
+    const client = favoriteClients.value.find(client => client.id === clientId)
+    if (client) {
+      connectionRequests.value.push({
+        id: Date.now(),
+        clientId: clientId,
+        name: client.name,
+        propertyType: client.propertyType,
+        location: client.location,
+        budget: client.budget,
+        avatar: client.avatar,
+        status: 'pending'
+      })
+    }
+  }
 
-    if (clientIndex !== -1) {
-      clients.value[clientIndex] = {
-        ...clients.value[clientIndex],
-        ...updates
+  function acceptConnection(requestId) {
+    const request = connectionRequests.value.find(req => req.id === requestId)
+    if (request) {
+      const client = favoriteClients.value.find(client => client.id === request.clientId)
+      if (client) {
+        client.isConnected = true
       }
+      const index = connectionRequests.value.findIndex(req => req.id === requestId)
+      if (index !== -1) {
+        connectionRequests.value.splice(index, 1)
+      }
+    }
+  }
+
+  function rejectConnection(requestId) {
+    const index = connectionRequests.value.findIndex(req => req.id === requestId)
+    if (index !== -1) {
+      connectionRequests.value.splice(index, 1)
+    }
+  }
+
+  function getAllClients() {
+    return clients.value
+  }
+
+  function getClientById(id) {
+    const numericId = typeof id === 'string' ? parseInt(id, 10) : id
+    return clients.value.find(client => client.id === numericId) || null
+  }
+
+  function getClientFullDetails(clientId) {
+    const client = getClientById(clientId)
+    if (!client) return null
+
+    return {
+      ...client,
+      interactions: clientInteractions.value[clientId] || []
+    }
+  }
+
+  async function fetchClients() {
+    console.log('Fetching clients data...')
+    return new Promise(resolve => {
+      setTimeout(() => {
+        console.log('Clients data fetched successfully')
+        resolve(clients.value)
+      }, 500)
+    })
+  }
+
+  function updateClientStatus(clientId, status) {
+    const client = clients.value.find(c => c.id === clientId)
+    if (client) {
+      client.searchStatus = status
+    }
+  }
+
+  function addClient(clientData) {
+    const newId = clients.value.length + 1
+    const newClient = {
+      id: newId,
+      ...clientData,
+      searchStatus: 'active'
+    }
+    clients.value.push(newClient)
+    return newClient
+  }
+
+  function updateClient(clientId, updates) {
+    const client = clients.value.find(c => c.id === clientId)
+    if (client) {
+      Object.assign(client, updates)
       return true
     }
-
-    return false
-  }
-
-  function trackListingView(clientId, listingId) {
-    const interactions = initClientInteractions(clientId)
-
-    // Add to viewed listings if not already there
-    if (!interactions.mostViewedListings.includes(listingId)) {
-      interactions.mostViewedListings.push(listingId)
-    }
-  }
-
-  function saveListingForClient(clientId, listingId) {
-    const interactions = initClientInteractions(clientId)
-
-    // Add to saved listings if not already there
-    if (!interactions.mostSavedListings.includes(listingId)) {
-      interactions.mostSavedListings.push(listingId)
-      return true
-    }
-
-    return false
-  }
-
-  function shareDocument(clientId, documentId) {
-    const interactions = initClientInteractions(clientId)
-
-    if (!interactions.sharedDocuments.includes(documentId)) {
-      interactions.sharedDocuments.push(documentId)
-      return true
-    }
-
-    return false
-  }
-
-  function connectAgent(clientId, agentId) {
-    const interactions = initClientInteractions(clientId)
-
-    if (!interactions.connectedAgents.includes(agentId)) {
-      interactions.connectedAgents.push(agentId)
-      return true
-    }
-
-    return false
-  }
-
-  function connectClients(clientId1, clientId2) {
-    // Initialize if needed
-    const interactions1 = initClientInteractions(clientId1)
-    const interactions2 = initClientInteractions(clientId2)
-
-    // Create bidirectional connection
-    let updated = false
-
-    if (!interactions1.connectedClients.includes(clientId2)) {
-      interactions1.connectedClients.push(clientId2)
-      updated = true
-    }
-
-    if (!interactions2.connectedClients.includes(clientId1)) {
-      interactions2.connectedClients.push(clientId1)
-      updated = true
-    }
-
-    return updated
-  }
-
-  function addTourAttendance(clientId, tourId) {
-    const interactions = initClientInteractions(clientId)
-
-    if (!interactions.attendedTours.includes(tourId)) {
-      interactions.attendedTours.push(tourId)
-      return true
-    }
-
-    return false
-  }
-
-  function assignTask(clientId, taskId) {
-    const interactions = initClientInteractions(clientId)
-
-    if (!interactions.assignedTasks.includes(taskId)) {
-      interactions.assignedTasks.push(taskId)
-      return true
-    }
-
     return false
   }
 
   return {
-    // State - return refs directly for reactivity
+    // State
+    favoriteClients,
+    connectionRequests,
     clients,
     clientInteractions,
 
     // Getters
-    getClientById,
-    getClientFullDetails,
+    networkClients,
+    otherClients,
 
     // Actions
+    toggleFavorite,
+    sendConnectionRequest,
+    acceptConnection,
+    rejectConnection,
+    getAllClients,
+    getClientById,
+    getClientFullDetails,
+    fetchClients,
+    updateClientStatus,
     addClient,
-    updateClient,
-    trackListingView,
-    saveListingForClient,
-    shareDocument,
-    connectAgent,
-    connectClients,
-    addTourAttendance,
-    assignTask
+    updateClient
   }
 })

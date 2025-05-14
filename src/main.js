@@ -4,6 +4,11 @@ import App from './App.vue'
 import router from './router'
 import tooltipDirective from './directives/tooltip'
 import permissionDirective from './directives/permission'
+import { patchHistoryAPI, enhanceRouter } from './utils/navigation-fixer'
+
+// Apply navigation fixes
+patchHistoryAPI()
+enhanceRouter(router)
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -12,6 +17,33 @@ const pinia = createPinia()
 app.directive('tooltip', tooltipDirective)
 app.directive('can', permissionDirective)
 
+// Add global error handler for component rendering issues
+app.config.errorHandler = (err, vm, info) => {
+  console.error('Vue Error:', err)
+  console.log('Component with error:', vm)
+  console.log('Error info:', info)
+
+  // Try to recover from rendering errors by forcing a clean state
+  if (err && (err.message.includes('render') || err.message.includes('mount'))) {
+    console.warn('Detected render error, attempting recovery...')
+
+    // Give Vue time to stabilize then redirect to recover
+    setTimeout(() => {
+      const currentPath = router.currentRoute.value.fullPath
+      router.replace(currentPath + (currentPath.includes('?') ? '&' : '?') + '_recover=1')
+    }, 100)
+  }
+}
+
+// Mount the app with all plugins
 app.use(pinia)
 app.use(router)
 app.mount('#app')
+
+// Create a global navigation recovery function
+window.__recoverNavigation = () => {
+  console.log('Manual navigation recovery triggered')
+  const currentPath = router.currentRoute.value.fullPath
+  router.replace(currentPath + (currentPath.includes('?') ? '&' : '?') + '_manual=1')
+  return 'Recovery attempted'
+}

@@ -135,7 +135,10 @@
 
           <div class="user-dropdown">
             <div class="user-avatar">
-              <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Alex Dunia" />
+              <img
+                src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790261/300_e7yggy.jpg"
+                alt="Alex Dunia"
+              />
             </div>
             <span class="username">Alex Dunia</span>
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="dropdown-icon">

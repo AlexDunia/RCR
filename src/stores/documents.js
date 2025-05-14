@@ -34,7 +34,7 @@ export const useDocumentStore = defineStore('documents', () => {
           id: 1,
           name: 'Pristia Candra',
           email: 'pristia@example.com',
-          avatar: '/img/avatars/pristia.jpg',
+          avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790261/300_e7yggy.jpg',
           experience: '3y experiences'
         }
       ]
@@ -81,7 +81,7 @@ export const useDocumentStore = defineStore('documents', () => {
           id: 5,
           name: 'Sarah Johnson',
           email: 'sarah.johnson@realestateagency.com',
-          avatar: 'https://res.cloudinary.com/example/image/upload/v123456/sarah_johnson.jpg',
+          avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790261/300_1_gdilxy.jpg',
           experience: '10y experiences'
         }
       ]
@@ -111,7 +111,7 @@ export const useDocumentStore = defineStore('documents', () => {
           id: 5,
           name: 'Sarah Johnson',
           email: 'sarah.johnson@realestateagency.com',
-          avatar: 'https://res.cloudinary.com/example/image/upload/v123456/sarah_johnson.jpg',
+          avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790260/300_3_inul8p.jpg',
           experience: '10y experiences'
         }
       ]

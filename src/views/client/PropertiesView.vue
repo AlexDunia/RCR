@@ -610,9 +610,9 @@ const viewProperty = (propertyId) => {
   router.push(`/client-property/${propertyId}`);
 };
 
-// Schedule property viewing
+// Schedule property viewing - now redirects to messages instead
 const scheduleViewing = (propertyId) => {
-  router.push(`/client-appointments/schedule?propertyId=${propertyId}`);
+  router.push(`/client-messages?contactAgent=${propertyId}`);
 };
 
 // Toggle property saved status

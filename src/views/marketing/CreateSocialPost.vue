@@ -25,7 +25,11 @@
           </svg>
         </button>
         <div class="user-profile">
-          <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User profile" class="user-avatar" />
+          <img
+            src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790261/300_e7yggy.jpg"
+            alt="User profile"
+            class="user-avatar"
+          />
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="dropdown-icon">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
           </svg>
@@ -97,7 +101,11 @@
         <div class="composer-card">
           <div class="composer-header">
             <div class="user-info">
-              <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User avatar" class="user-avatar-small">
+              <img
+                src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790261/300_e7yggy.jpg"
+                alt="User avatar"
+                class="user-avatar-small"
+              >
               <span class="user-name">Alexander</span>
             </div>
           </div>
@@ -274,9 +282,9 @@ const modalConfig = ref({
 
 // Social accounts data
 const socialAccounts = ref([
-  { id: 1, handle: '@alexanderrealtor_', platformName: 'LinkedIn', platform: 'linkedin', avatar: 'https://randomuser.me/api/portraits/men/32.jpg', selected: false },
-  { id: 2, handle: '@alexanderrealtor_', platformName: 'Instagram', platform: 'instagram', avatar: 'https://randomuser.me/api/portraits/men/32.jpg', selected: false },
-  { id: 3, handle: '@alexanderrealtor_', platformName: 'Facebook', platform: 'facebook', avatar: 'https://randomuser.me/api/portraits/men/32.jpg', selected: false }
+  { id: 1, handle: '@alexanderrealtor_', platformName: 'LinkedIn', platform: 'linkedin', avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790261/300_e7yggy.jpg', selected: false },
+  { id: 2, handle: '@alexanderrealtor_', platformName: 'Instagram', platform: 'instagram', avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790261/300_1_gdilxy.jpg', selected: false },
+  { id: 3, handle: '@alexanderrealtor_', platformName: 'Facebook', platform: 'facebook', avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790260/300_3_inul8p.jpg', selected: false }
 ]);
 
 // Post data

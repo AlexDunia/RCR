@@ -100,6 +100,14 @@
           <router-link to="/client-appointments" class="view-all">View All</router-link>
         </div>
         <div class="card-content">
+          <div class="appointments-note">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            <span>Please contact your agent to schedule viewings.</span>
+          </div>
           <div class="appointment">
             <div class="appointment-date">
               <span class="day">12</span>
@@ -333,6 +341,24 @@ h1 {
 .document-date {
   font-size: 12px;
   color: #666;
+}
+
+/* Appointments Note Styles */
+.appointments-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 10px;
+  border-radius: 6px;
+  background-color: #f9f9fa;
+  font-size: 13px;
+  color: #666;
+}
+
+.appointments-note svg {
+  color: #1a4189;
+  flex-shrink: 0;
 }
 
 /* Appointment Styles */

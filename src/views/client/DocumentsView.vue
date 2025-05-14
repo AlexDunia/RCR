@@ -5,7 +5,11 @@
     <div class="documents-header">
       <div class="search-filter">
         <div class="search-box">
-          <input type="text" placeholder="Search documents..." />
+          <input
+            type="text"
+            v-model="searchQuery"
+            placeholder="Search documents..."
+          />
           <button class="search-button">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="11" cy="11" r="8"></circle>
@@ -14,16 +18,15 @@
           </button>
         </div>
         <div class="filter-dropdown">
-          <select>
-            <option value="all">All Documents</option>
-            <option value="purchase">Purchase Agreements</option>
-            <option value="mortgage">Mortgage Documents</option>
-            <option value="inspection">Inspection Reports</option>
-            <option value="tax">Tax Documents</option>
+          <select v-model="selectedType">
+            <option value="">All Documents</option>
+            <option value="buyer-rep">Buyer Agreements</option>
+            <option value="seller-rep">Seller Agreements</option>
+            <option value="mls">MLS Listings</option>
           </select>
         </div>
       </div>
-      <button class="upload-button">
+      <button class="upload-button" @click="handleUpload">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
           <polyline points="17 8 12 3 7 8"></polyline>
@@ -33,85 +36,58 @@
       </button>
     </div>
 
-    <div class="documents-list">
-      <div class="document-card">
-        <div class="document-icon pdf">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-          </svg>
-        </div>
-        <div class="document-info">
-          <h3>Purchase Agreement</h3>
-          <p class="document-meta">Added: Jun 2, 2023 • 2.4 MB • PDF</p>
-        </div>
-        <div class="document-actions">
-          <button class="action-button view">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-              <circle cx="12" cy="12" r="3"></circle>
-            </svg>
-          </button>
-          <button class="action-button download">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="7 10 12 15 17 10"></polyline>
-              <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-          </button>
-        </div>
-      </div>
+    <div v-if="isLoading" class="loading-state">
+      Loading documents...
+    </div>
 
-      <div class="document-card">
-        <div class="document-icon pdf">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-          </svg>
-        </div>
-        <div class="document-info">
-          <h3>Mortgage Approval</h3>
-          <p class="document-meta">Added: May 27, 2023 • 1.8 MB • PDF</p>
-        </div>
-        <div class="document-actions">
-          <button class="action-button view">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-              <circle cx="12" cy="12" r="3"></circle>
-            </svg>
-          </button>
-          <button class="action-button download">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="7 10 12 15 17 10"></polyline>
-              <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-          </button>
-        </div>
+    <div v-else-if="filteredDocuments.length === 0" class="empty-state">
+      <div class="empty-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
       </div>
+      <h2>No Documents Found</h2>
+      <p>{{ searchQuery || selectedType ? 'Try adjusting your filters' : 'Upload important documents related to your real estate journey.' }}</p>
+    </div>
 
-      <div class="document-card">
-        <div class="document-icon docx">
+    <div v-else class="documents-list">
+      <div v-for="doc in filteredDocuments" :key="doc.id" class="document-card">
+        <div class="document-icon" :class="getDocumentIconClass(doc.type)">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
             <polyline points="14 2 14 8 20 8"></polyline>
-            <line x1="16" y1="13" x2="8" y2="13"></line>
-            <line x1="16" y1="17" x2="8" y2="17"></line>
-            <polyline points="10 9 9 9 8 9"></polyline>
           </svg>
         </div>
         <div class="document-info">
-          <h3>Property Inspection Report</h3>
-          <p class="document-meta">Added: May 15, 2023 • 3.2 MB • DOCX</p>
+          <h3>{{ getDocumentTitle(doc) }}</h3>
+          <p class="document-meta">
+            Added: {{ formatDate(doc.createdAt) }} •
+            {{ doc.files && doc.files.length > 0 ? formatFileSize(doc.files[0].size) : 'No files' }}
+          </p>
+          <div v-if="doc.agents && doc.agents.length > 0" class="document-agent">
+            <div class="agent-avatar">
+              <img
+                :src="doc.agents[0].avatar"
+                :alt="doc.agents[0].name"
+                @error="handleAvatarError"
+              >
+            </div>
+            <span>{{ doc.agents[0].name }}</span>
+            <span class="agent-experience">{{ doc.agents[0].experience }}</span>
+          </div>
         </div>
         <div class="document-actions">
-          <button class="action-button view">
+          <button class="action-button view" @click="viewDocument(doc)" title="View">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
               <circle cx="12" cy="12" r="3"></circle>
             </svg>
           </button>
-          <button class="action-button download">
+          <button class="action-button download" @click="downloadDocument(doc)" title="Download">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
               <polyline points="7 10 12 15 17 10"></polyline>
@@ -125,7 +101,118 @@
 </template>
 
 <script setup>
-// Documents view logic could go here
+import { ref, computed, onMounted } from 'vue';
+import { useDocumentStore } from '@/stores/documents';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+const documentStore = useDocumentStore();
+const isLoading = ref(true);
+const searchQuery = ref('');
+const selectedType = ref('');
+
+// Handle avatar loading error
+const handleAvatarError = (e) => {
+  e.target.src = 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739408381/Screenshot_2025-02-13_015617_mhjgby.png';
+};
+
+// Get documents for the current client (using ID 1 for demo)
+const currentClientId = 1;
+
+const documents = computed(() => {
+  return documentStore.documents.filter(doc => doc.clientId === currentClientId);
+});
+
+const filteredDocuments = computed(() => {
+  let filtered = documents.value;
+
+  // Apply search filter
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase();
+    filtered = filtered.filter(doc => {
+      const searchableContent = [
+        getDocumentTitle(doc),
+        doc.type,
+        doc.agents?.map(a => a.name).join(' ') || ''
+      ].join(' ').toLowerCase();
+      return searchableContent.includes(query);
+    });
+  }
+
+  // Apply type filter
+  if (selectedType.value) {
+    filtered = filtered.filter(doc => doc.type === selectedType.value);
+  }
+
+  return filtered;
+});
+
+// Format date helper
+const formatDate = (dateString) => {
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
+};
+
+// Format file size helper
+const formatFileSize = (bytes) => {
+  if (!bytes) return '0 B';
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
+};
+
+// Get document title helper
+const getDocumentTitle = (doc) => {
+  switch (doc.type) {
+    case 'buyer-rep':
+      return `${doc.buyerName}'s Buyer Rep Agreement`;
+    case 'seller-rep':
+      return `${doc.sellerName}'s Seller Rep Agreement`;
+    case 'mls':
+      return `MLS Listing - ${doc.propertyAddress}`;
+    default:
+      return 'Untitled Document';
+  }
+};
+
+// Get document icon class helper
+const getDocumentIconClass = (type) => {
+  switch (type) {
+    case 'buyer-rep':
+      return 'buyer-rep';
+    case 'seller-rep':
+      return 'seller-rep';
+    case 'mls':
+      return 'mls';
+    default:
+      return 'default';
+  }
+};
+
+// Document actions
+const viewDocument = (doc) => {
+  router.push(`/documents/${doc.id}`);
+};
+
+const downloadDocument = (doc) => {
+  // Implement document download logic
+  console.log('Downloading document:', doc.id);
+};
+
+const handleUpload = () => {
+  // Implement document upload logic
+  console.log('Opening upload modal');
+};
+
+onMounted(() => {
+  // Simulate loading delay
+  setTimeout(() => {
+    isLoading.value = false;
+  }, 1000);
+});
 </script>
 
 <style scoped>
@@ -328,5 +415,73 @@ h1 {
     width: 100%;
     justify-content: center;
   }
+}
+
+.loading-state {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px;
+}
+
+.empty-icon {
+  margin-bottom: 16px;
+  color: #999;
+}
+
+.empty-state h2 {
+  margin: 0 0 8px;
+  color: #333;
+}
+
+.empty-state p {
+  margin: 0;
+  color: #666;
+}
+
+.document-agent {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #666;
+}
+
+.agent-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.agent-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.agent-experience {
+  color: #999;
+  font-size: 12px;
+}
+
+.document-icon.buyer-rep {
+  background-color: #e6f7ff;
+  color: #1890ff;
+}
+
+.document-icon.seller-rep {
+  background-color: #f6ffed;
+  color: #52c41a;
+}
+
+.document-icon.mls {
+  background-color: #fff7e6;
+  color: #fa8c16;
 }
 </style>

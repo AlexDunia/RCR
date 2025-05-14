@@ -1,9 +1,52 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { ref, onMounted, watch, onUnmounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { applyClientNavFix, trackComponent } from '@/fix-client-navigation';
+import { useRoleStore } from '@/stores/roleStore';
 
 const route = useRoute();
+const router = useRouter();
+const roleStore = useRoleStore();
 const activeMenu = ref('');
+let navigationFixCleanup = null;
+
+// Track this component
+const { onMounted: trackMount, onUnmounted: trackUnmount } = trackComponent('ClientSidebar');
+
+// Apply client-specific navigation fixes
+onMounted(() => {
+  // Register component tracking
+  trackMount();
+
+  // Apply client navigation fix and store cleanup function
+  navigationFixCleanup = applyClientNavFix(router, roleStore);
+
+  // Set initial menu state
+  updateActiveMenu();
+
+  // Check if we need navigation recovery
+  if (localStorage.getItem('clientNavBroken') === 'true') {
+    console.log('Recovering from broken client navigation');
+    localStorage.removeItem('clientNavBroken');
+
+    // Force a reload of the current route
+    setTimeout(() => {
+      const currentPath = route.path;
+      router.replace(currentPath + '?recovered=true');
+    }, 200);
+  }
+});
+
+// Clean up when component is destroyed
+onUnmounted(() => {
+  // Unregister component tracking
+  trackUnmount();
+
+  // Clean up navigation fixes
+  if (navigationFixCleanup) {
+    navigationFixCleanup();
+  }
+});
 
 // Function to determine which menu item should be active based on the current route
 const getActiveMenuFromPath = (path) => {
@@ -30,6 +73,27 @@ const getActiveMenuFromPath = (path) => {
   return 'dashboard';
 };
 
+// Enhanced navigation handling
+const navigate = (path) => {
+  if (path === route.path) {
+    // Already on this page, no need to navigate
+    console.log('Already on this path, skipping navigation');
+    return;
+  }
+
+  // Use replace instead of push for same-section navigations to avoid history buildup
+  const currentSection = getActiveMenuFromPath(route.path);
+  const targetSection = getActiveMenuFromPath(path);
+
+  if (currentSection === targetSection) {
+    // Same section, use replace
+    router.replace(path);
+  } else {
+    // Different section, use push
+    router.push(path);
+  }
+};
+
 // Set active menu based on current route
 const updateActiveMenu = () => {
   activeMenu.value = getActiveMenuFromPath(route.path);
@@ -40,11 +104,6 @@ watch(() => route.path, updateActiveMenu, { immediate: true });
 
 // Also watch for query parameter changes
 watch(() => route.query, updateActiveMenu, { immediate: true });
-
-// Initialize on component mount
-onMounted(() => {
-  updateActiveMenu();
-});
 
 // Define menu items
 const menuItems = [
@@ -116,13 +175,12 @@ const settingsMenu = [
 </script>
 
 <template>
-  <aside class="sidebar">
+  <aside class="sidebar client-sidebar router-view-container">
     <div class="logo-container">
       <div class="logo-section">
         <h2 class="logo">Real City</h2>
         <p class="tagline">realty inc brokerage</p>
       </div>
-      <!-- Label removed for simplicity -->
     </div>
     <nav class="sidebar-nav">
       <ul>
@@ -131,14 +189,14 @@ const settingsMenu = [
           :key="item.key"
           :class="{ active: activeMenu === item.key }"
         >
-          <router-link
-            :to="item.path"
+          <a
+            href="#"
             :class="{ active: activeMenu === item.key }"
-            @click="updateActiveMenu"
+            @click.prevent="navigate(item.path)"
           >
             <span class="icon" v-html="item.icon"></span>
             {{ item.name }}
-          </router-link>
+          </a>
         </li>
       </ul>
 
@@ -150,14 +208,14 @@ const settingsMenu = [
             :key="item.key"
             :class="{ active: activeMenu === item.key }"
           >
-            <router-link
-              :to="item.path"
+            <a
+              href="#"
               :class="{ active: activeMenu === item.key }"
-              @click="updateActiveMenu"
+              @click.prevent="navigate(item.path)"
             >
               <span class="icon" v-html="item.icon"></span>
               {{ item.name }}
-            </router-link>
+            </a>
           </li>
         </ul>
       </div>

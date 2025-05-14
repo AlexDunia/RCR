@@ -256,9 +256,24 @@ export const useConnectionStore = defineStore('connectionStore', () => {
 
   // Helper to decrement pending count
   function decrementPendingCount(userId) {
-    if (pendingConnectionsCount.value[userId] !== undefined && pendingConnectionsCount.value[userId] > 0) {
-      pendingConnectionsCount.value[userId]--
+    if (pendingConnectionsCount.value[userId] !== undefined) {
+      pendingConnectionsCount.value[userId] = Math.max(0, pendingConnectionsCount.value[userId] - 1)
     }
+  }
+
+  // Validate if agent and client can interact (schedule tasks, tours, etc.)
+  function validateAgentClientInteraction(agentId, clientId) {
+    return areUsersConnected(clientId, 'client', agentId, 'agent')
+  }
+
+  // Validate multiple agents and clients for group interactions
+  function validateMultipleInteractions(agentIds, clientIds) {
+    // Every client must be connected to at least one agent in the list
+    return clientIds.every(clientId =>
+      agentIds.some(agentId =>
+        validateAgentClientInteraction(agentId, clientId)
+      )
+    )
   }
 
   return {
@@ -276,6 +291,8 @@ export const useConnectionStore = defineStore('connectionStore', () => {
     // Actions
     requestConnection,
     acceptConnection,
-    rejectConnection
+    rejectConnection,
+    validateAgentClientInteraction,
+    validateMultipleInteractions
   }
 })

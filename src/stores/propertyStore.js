@@ -16,18 +16,15 @@ export const usePropertyStore = defineStore('propertyStore', {
         type: 'Residential',
         isFavorite: true,
         status: 'For Sale',
-        image:
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png',
+        image: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800&auto=format&fit=crop&q=60',
         description: 'A beautiful residential estate located in Austin, Texas.',
         images: [
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1718259997/house1_eogyom.jpg',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548284/Rectangle_227_ncwnmz.png',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1718259997/house1_eogyom.jpg',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548284/Rectangle_227_ncwnmz.png',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png'
+          'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800&auto=format&fit=crop&q=60',
+          'https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=800&auto=format&fit=crop&q=60',
+          'https://images.unsplash.com/photo-1575517111839-3a3843ee7f5d?w=800&auto=format&fit=crop&q=60',
+          'https://images.unsplash.com/photo-1592928302636-c83cf1e1c887?w=800&auto=format&fit=crop&q=60',
+          'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800&auto=format&fit=crop&q=60',
+          'https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=800&auto=format&fit=crop&q=60'
         ]
       },
       {
@@ -42,18 +39,13 @@ export const usePropertyStore = defineStore('propertyStore', {
         type: 'Commercial',
         isFavorite: false,
         status: 'For Rent',
-        image:
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png',
+        image: 'https://images.unsplash.com/photo-1592595896551-12b371d546d5?w=800&auto=format&fit=crop&q=60',
         description: 'A spacious commercial villa in Boulder, Colorado.',
         images: [
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1718259997/house1_eogyom.jpg',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548284/Rectangle_227_ncwnmz.png',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1718259997/house1_eogyom.jpg',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548284/Rectangle_227_ncwnmz.png',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png'
+          'https://images.unsplash.com/photo-1592595896551-12b371d546d5?w=800&auto=format&fit=crop&q=60',
+          'https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=800&auto=format&fit=crop&q=60',
+          'https://images.unsplash.com/photo-1575517111839-3a3843ee7f5d?w=800&auto=format&fit=crop&q=60',
+          'https://images.unsplash.com/photo-1592928302636-c83cf1e1c887?w=800&auto=format&fit=crop&q=60'
         ]
       },
       {
@@ -68,18 +60,13 @@ export const usePropertyStore = defineStore('propertyStore', {
         type: 'Residential',
         isFavorite: true,
         status: 'New',
-        image:
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548284/Rectangle_227_ncwnmz.png',
+        image: 'https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=800&auto=format&fit=crop&q=60',
         description: 'A cozy residential cottage in Portland, Oregon.',
         images: [
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1718259997/house1_eogyom.jpg',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548284/Rectangle_227_ncwnmz.png',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1718259997/house1_eogyom.jpg',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548284/Rectangle_227_ncwnmz.png',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png'
+          'https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=800&auto=format&fit=crop&q=60',
+          'https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=800&auto=format&fit=crop&q=60',
+          'https://images.unsplash.com/photo-1575517111839-3a3843ee7f5d?w=800&auto=format&fit=crop&q=60',
+          'https://images.unsplash.com/photo-1592928302636-c83cf1e1c887?w=800&auto=format&fit=crop&q=60'
         ]
       },
       {
@@ -92,18 +79,13 @@ export const usePropertyStore = defineStore('propertyStore', {
         bathrooms: 7,
         size: 3000,
         type: 'Luxury',
-        image:
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548284/Rectangle_227_ncwnmz.png',
+        image: 'https://images.unsplash.com/photo-1592595896616-c37162298647?w=800&auto=format&fit=crop&q=60',
         description: 'A luxurious mansion located in Seattle, Washington.',
         images: [
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1718259997/house1_eogyom.jpg',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548284/Rectangle_227_ncwnmz.png',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1718259997/house1_eogyom.jpg',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548284/Rectangle_227_ncwnmz.png',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png'
+          'https://images.unsplash.com/photo-1592595896616-c37162298647?w=800&auto=format&fit=crop&q=60',
+          'https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=800&auto=format&fit=crop&q=60',
+          'https://images.unsplash.com/photo-1575517111839-3a3843ee7f5d?w=800&auto=format&fit=crop&q=60',
+          'https://images.unsplash.com/photo-1592928302636-c83cf1e1c887?w=800&auto=format&fit=crop&q=60'
         ]
       },
       {
@@ -116,18 +98,13 @@ export const usePropertyStore = defineStore('propertyStore', {
         bathrooms: 2,
         size: 1200,
         type: 'Apartment',
-        image:
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548284/Rectangle_227_ncwnmz.png',
+        image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&auto=format&fit=crop&q=60',
         description: 'Modern apartments in the heart of San Francisco, California.',
         images: [
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1718259997/house1_eogyom.jpg',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548284/Rectangle_227_ncwnmz.png',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1718259997/house1_eogyom.jpg',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548284/Rectangle_227_ncwnmz.png',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png'
+          'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&auto=format&fit=crop&q=60',
+          'https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=800&auto=format&fit=crop&q=60',
+          'https://images.unsplash.com/photo-1575517111839-3a3843ee7f5d?w=800&auto=format&fit=crop&q=60',
+          'https://images.unsplash.com/photo-1592928302636-c83cf1e1c887?w=800&auto=format&fit=crop&q=60'
         ]
       },
       {
@@ -140,18 +117,13 @@ export const usePropertyStore = defineStore('propertyStore', {
         bathrooms: 3,
         size: 1500,
         type: 'Residential',
-        image:
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548284/Rectangle_227_ncwnmz.png',
+        image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&auto=format&fit=crop&q=60',
         description: 'A charming residence in Denver, Colorado.',
         images: [
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1718259997/house1_eogyom.jpg',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548284/Rectangle_227_ncwnmz.png',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1718259997/house1_eogyom.jpg',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548284/Rectangle_227_ncwnmz.png',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png'
+          'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&auto=format&fit=crop&q=60',
+          'https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=800&auto=format&fit=crop&q=60',
+          'https://images.unsplash.com/photo-1575517111839-3a3843ee7f5d?w=800&auto=format&fit=crop&q=60',
+          'https://images.unsplash.com/photo-1592928302636-c83cf1e1c887?w=800&auto=format&fit=crop&q=60'
         ]
       },
       {
@@ -164,18 +136,13 @@ export const usePropertyStore = defineStore('propertyStore', {
         bathrooms: 4,
         size: 1800,
         type: 'Villa',
-        image:
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548284/Rectangle_227_ncwnmz.png',
+        image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&auto=format&fit=crop&q=60',
         description: 'A beautiful villa in Salt Lake City, Utah.',
         images: [
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1718259997/house1_eogyom.jpg',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548284/Rectangle_227_ncwnmz.png',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1718259997/house1_eogyom.jpg',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548284/Rectangle_227_ncwnmz.png',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png',
-          'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png'
+          'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&auto=format&fit=crop&q=60',
+          'https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=800&auto=format&fit=crop&q=60',
+          'https://images.unsplash.com/photo-1575517111839-3a3843ee7f5d?w=800&auto=format&fit=crop&q=60',
+          'https://images.unsplash.com/photo-1592928302636-c83cf1e1c887?w=800&auto=format&fit=crop&q=60'
         ]
       },
       // More properties can be added dynamically

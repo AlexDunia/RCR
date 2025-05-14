@@ -1,7 +1,11 @@
 import { defineStore } from 'pinia'
 import { ref, watch } from 'vue'
+import { useConnectionStore } from '@/stores/connectionStore'
 
 export const useTaskStore = defineStore('taskStore', () => {
+  // Use the connection store
+  const connectionStore = useConnectionStore()
+
   // State
   const tasks = ref([])
   const isLoading = ref(false)
@@ -32,13 +36,13 @@ export const useTaskStore = defineStore('taskStore', () => {
             id: 1,
             name: 'Alex Dunia',
             email: 'alex.dunia@example.com',
-            avatar: 'https://randomuser.me/api/portraits/men/32.jpg'
+            avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790261/300_e7yggy.jpg'
           },
           {
             id: 3,
             name: 'Robert Johnson',
             email: 'robert.johnson@example.com',
-            avatar: 'https://randomuser.me/api/portraits/men/65.jpg'
+            avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790261/300_1_gdilxy.jpg'
           }
         ],
         agents: [5, 10], // Sarah Johnson and Jessica Ramirez
@@ -47,13 +51,13 @@ export const useTaskStore = defineStore('taskStore', () => {
             id: 5,
             name: 'Sarah Johnson',
             email: 'sarah.johnson@realestateagency.com',
-            avatar: 'https://res.cloudinary.com/example/image/upload/v123456/sarah_johnson.jpg'
+            avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790260/300_3_inul8p.jpg'
           },
           {
             id: 10,
             name: 'Jessica Ramirez',
             email: 'jessica.ramirez@realestateagency.com',
-            avatar: 'https://res.cloudinary.com/example/image/upload/v123456/jessica_ramirez.jpg'
+            avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790260/300_2_rfyiva.jpg'
           }
         ],
         attachments: [],
@@ -78,13 +82,13 @@ export const useTaskStore = defineStore('taskStore', () => {
             id: 2,
             name: 'Jane Smith',
             email: 'jane.smith@example.com',
-            avatar: 'https://randomuser.me/api/portraits/women/42.jpg'
+            avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790261/300_e7yggy.jpg'
           },
           {
             id: 6,
             name: 'Emily Chen',
             email: 'emily.chen@example.com',
-            avatar: 'https://randomuser.me/api/portraits/women/36.jpg'
+            avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790261/300_1_gdilxy.jpg'
           }
         ],
         agents: [8, 12], // Michael Chen and David Thompson
@@ -93,13 +97,13 @@ export const useTaskStore = defineStore('taskStore', () => {
             id: 8,
             name: 'Michael Chen',
             email: 'michael.chen@realestateagency.com',
-            avatar: 'https://res.cloudinary.com/example/image/upload/v123456/michael_chen.jpg'
+            avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790260/300_3_inul8p.jpg'
           },
           {
             id: 12,
             name: 'David Thompson',
             email: 'david.thompson@realestateagency.com',
-            avatar: 'https://res.cloudinary.com/example/image/upload/v123456/david_thompson.jpg'
+            avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790260/300_2_rfyiva.jpg'
           }
         ],
         attachments: [],
@@ -124,13 +128,13 @@ export const useTaskStore = defineStore('taskStore', () => {
             id: 4,
             name: 'Maria Garcia',
             email: 'maria.garcia@example.com',
-            avatar: 'https://randomuser.me/api/portraits/women/28.jpg'
+            avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790261/300_e7yggy.jpg'
           },
           {
             id: 5,
             name: 'James Wilson',
             email: 'james.wilson@example.com',
-            avatar: 'https://randomuser.me/api/portraits/men/55.jpg'
+            avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790261/300_1_gdilxy.jpg'
           }
         ],
         agents: [15, 5], // Olivia Wilson and Sarah Johnson
@@ -139,13 +143,13 @@ export const useTaskStore = defineStore('taskStore', () => {
             id: 15,
             name: 'Olivia Wilson',
             email: 'olivia.wilson@realestateagency.com',
-            avatar: 'https://res.cloudinary.com/example/image/upload/v123456/olivia_wilson.jpg'
+            avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790260/300_3_inul8p.jpg'
           },
           {
             id: 5,
             name: 'Sarah Johnson',
             email: 'sarah.johnson@realestateagency.com',
-            avatar: 'https://res.cloudinary.com/example/image/upload/v123456/sarah_johnson.jpg'
+            avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790260/300_2_rfyiva.jpg'
           }
         ],
         attachments: [],
@@ -326,65 +330,69 @@ export const useTaskStore = defineStore('taskStore', () => {
 
   // Actions
   function createTask(task) {
-    isLoading.value = true
-    error.value = null
-
     try {
+      // Validate connections between agents and clients
+      const areConnected = connectionStore.validateMultipleInteractions(task.agents, task.clients)
+      if (!areConnected) {
+        throw new Error('Tasks can only be created between connected agents and clients')
+      }
+
       const newTask = {
         id: generateTaskId(),
-        status: 'pending',
+        status: 'draft',
+        ...task,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         completedAt: null,
         startedAt: null,
-        agents: [],
-        agentDetails: [],
-        clients: [],
-        clientDetails: [],
-        attachments: [],
-        timerStopped: false,
-        ...task
+        timerStopped: false
       }
 
       tasks.value.push(newTask)
+      localStorage.setItem('tasks', JSON.stringify(tasks.value))
       return newTask.id
-    } catch (err) {
-      console.error('Failed to create task:', err)
-      error.value = 'Failed to create task'
-      return null
-    } finally {
-      isLoading.value = false
+    } catch (error) {
+      console.error('Failed to create task:', error)
+      throw error
     }
   }
 
   function updateTask(id, updates) {
-    isLoading.value = true;
-    error.value = null;
-
     try {
-      const index = tasks.value.findIndex(task => task.id === parseInt(id));
-
-      if (index !== -1) {
-        // Update the task
-        tasks.value[index] = {
-          ...tasks.value[index],
-          ...updates,
-          updatedAt: new Date().toISOString()
-        };
-
-        // Save to localStorage
-        localStorage.setItem('tasks', JSON.stringify(tasks.value));
-
-        return true;
+      const taskIndex = tasks.value.findIndex(task => task.id === id)
+      if (taskIndex === -1) {
+        throw new Error('Task not found')
       }
 
-      return false;
-    } catch (err) {
-      console.error('Failed to update task:', err);
-      error.value = 'Failed to update task';
-      return false;
-    } finally {
-      isLoading.value = false;
+      // If agents or clients are being updated, validate connections
+      if (updates.agents && updates.clients) {
+        const areConnected = connectionStore.validateMultipleInteractions(updates.agents, updates.clients)
+        if (!areConnected) {
+          throw new Error('Tasks can only be updated between connected agents and clients')
+        }
+      } else if (updates.agents && tasks.value[taskIndex].clients) {
+        const areConnected = connectionStore.validateMultipleInteractions(updates.agents, tasks.value[taskIndex].clients)
+        if (!areConnected) {
+          throw new Error('Tasks can only be updated between connected agents and clients')
+        }
+      } else if (updates.clients && tasks.value[taskIndex].agents) {
+        const areConnected = connectionStore.validateMultipleInteractions(tasks.value[taskIndex].agents, updates.clients)
+        if (!areConnected) {
+          throw new Error('Tasks can only be updated between connected agents and clients')
+        }
+      }
+
+      tasks.value[taskIndex] = {
+        ...tasks.value[taskIndex],
+        ...updates,
+        updatedAt: new Date().toISOString()
+      }
+
+      localStorage.setItem('tasks', JSON.stringify(tasks.value))
+      return tasks.value[taskIndex]
+    } catch (error) {
+      console.error('Failed to update task:', error)
+      throw error
     }
   }
 

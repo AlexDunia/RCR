@@ -1,10 +1,10 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
-import { useLayoutStore } from '@/stores/layout';
 import { useRoleStore } from '@/stores/roleStore';
 import DocumentLayout from '@/layouts/DocumentLayout.vue';
 import TasksLayout from '@/layouts/TasksLayout.vue';
 import EducationLayout from '@/layouts/EducationLayout.vue';
 import permissionGuard from './guards/permissionGuard';
+import { setupRouterDebug } from '@/utils/router-debug';
 
 // Lazy-loaded route components
 const routes = [
@@ -137,6 +137,17 @@ const routes = [
     meta: {
       title: 'Favourites',
       description: 'View your saved properties and agents',
+      allowedRoles: ['client']
+    }
+  },
+  // Favourite Agent Profile route (Client-only)
+  {
+    path: '/client-favourites/agent/:id',
+    name: 'FavouriteAgentProfile',
+    component: () => import('@/views/client/AgentProfileView.vue'),
+    meta: {
+      title: 'Agent Profile',
+      description: 'View agent profile from favourites',
       allowedRoles: ['client']
     }
   },
@@ -828,96 +839,71 @@ const routes = [
   }
 ];
 
+// Create router instance
 const router = createRouter({
   history: createWebHashHistory(),
   routes,
   scrollBehavior(to, from, savedPosition) {
-    // If there's a hash, scroll to that element
-    if (to.hash) {
-      return {
-        el: to.hash
-      };
-    }
-
-    // For browser back button, restore position
     if (savedPosition) {
       return savedPosition;
+    } else {
+      return { top: 0 };
     }
-
-    // Find the main scroll container and instantly scroll to top
-    const scrollContainer = document.querySelector('.scroll-container');
-    if (scrollContainer) {
-      scrollContainer.scrollTop = 0;
-    }
-
-    // Return top position without smooth behavior
-    return {
-      top: 0,
-      left: 0
-    };
   }
 });
 
-// Navigation guard for role-based access control
-router.beforeEach(async (to, from, next) => {
-  // Authentication and role checks
-  if (to.meta.requiresAuth) {
-    const isAuthenticated = true; // Replace with real auth check in production
-    if (!isAuthenticated) {
-      next('/login');
-      return;
+// Set up permission guard
+router.beforeEach(permissionGuard);
+
+// Add navigation fail-safe to prevent blank pages
+router.beforeEach((to, from, next) => {
+  // Get current time for navigation timing
+  const navStartTime = Date.now();
+
+  // Store state of previous navigation attempt
+  const previousNavState = sessionStorage.getItem('navInProgress');
+
+  // Mark this navigation as in progress
+  sessionStorage.setItem('navInProgress', JSON.stringify({
+    from: from.path,
+    to: to.path,
+    time: navStartTime
+  }));
+
+  // Check if previous navigation is still in progress (could indicate stuck transition)
+  if (previousNavState) {
+    try {
+      const prevNav = JSON.parse(previousNavState);
+      const timeSincePrevNav = navStartTime - prevNav.time;
+
+      // If previous navigation never completed and it's been more than 3 seconds
+      if (timeSincePrevNav > 3000) {
+        console.warn('Previous navigation appears to be stuck. Clearing router state.');
+
+        // Force release of any resources
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('router:cleanup'));
+        }
+      }
+    } catch (e) {
+      console.error('Error checking navigation state:', e);
     }
-  }
-
-  if (to.meta.allowedRoles) {
-    const { useRoleGuard } = await import('@/composables/useRoleGuard');
-    const { checkAccess } = useRoleGuard();
-    const hasAccess = await checkAccess(to.meta.allowedRoles);
-
-    // Log the access check result
-    console.log(`Route access check for ${to.path}:`, {
-      requiredRoles: to.meta.allowedRoles,
-      hasAccess
-    });
-
-    if (!hasAccess) {
-      console.warn(`Access denied to ${to.path} - redirecting to unauthorized`);
-      next('/unauthorized');
-      return;
-    }
-  }
-
-  // Get the layout store
-  const layoutStore = useLayoutStore();
-
-  // Reset layout when navigating to dashboard or main navigation routes
-  if (to.path === '/' || to.path === '/manage-listings' || to.path === '/view-listings') {
-    layoutStore.resetLayout();
   }
 
   next();
 });
 
-// Handle layout changes after navigation completes to prevent flicker
-router.afterEach((to) => {
-  // Set layout based on route
-  const layoutStore = useLayoutStore();
+// Add navigation completion marker
+router.afterEach((to, from) => {
+  // Clear the in-progress marker
+  sessionStorage.removeItem('navInProgress');
 
-  // Set background color if specified in route meta
-  if (to.meta.background) {
-    layoutStore.setBackgroundColor(to.meta.background);
-  } else {
-    layoutStore.resetBackgroundColor();
-  }
-
-  // Set header visibility
-  if (to.meta.hideHeader !== undefined) {
-    layoutStore.setHeaderVisibility(!to.meta.hideHeader);
-  } else {
-    layoutStore.setHeaderVisibility(true);
-  }
+  // Log completion
+  console.log(`Navigation complete: ${from.path} → ${to.path}`);
 });
 
-router.beforeEach(permissionGuard);
+// Setup debugging hooks
+setupRouterDebug(router);
 
+// Expose router instance
 export default router;

@@ -47,7 +47,20 @@
     <div class="agents-header">
       <h2>Your Client Advisors</h2>
       <p>Connect with the perfect advisor to help you find your dream home</p>
-      <p v-if="agentsFromStore.length === 0" class="error-message">
+      <p v-if="isLoading" class="loading-message">
+        <svg class="loading-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="2" x2="12" y2="6"></line>
+          <line x1="12" y1="18" x2="12" y2="22"></line>
+          <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
+          <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
+          <line x1="2" y1="12" x2="6" y2="12"></line>
+          <line x1="18" y1="12" x2="22" y2="12"></line>
+          <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
+          <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
+        </svg>
+        Loading advisors...
+      </p>
+      <p v-else-if="agentsFromStore.length === 0" class="error-message">
         No agents found. Please check the agent store.
       </p>
       <div v-else class="agent-debug">
@@ -55,10 +68,14 @@
       </div>
     </div>
 
-    <div class="agents-grid">
+    <div v-if="!isLoading" class="agents-grid">
       <div v-for="agent in filteredAgents" :key="agent.id" class="agent-card">
         <div class="agent-photo">
-          <img :src="agent.photo" :alt="agent.name" />
+          <img
+            :src="agent.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(agent.name)}&background=1a4189&color=fff`"
+            :alt="agent.name"
+            @error="handleImageError($event, agent)"
+          />
           <div class="agent-status" :class="{ 'online': agent.status === 'online' }"></div>
         </div>
         <div class="agent-info">
@@ -122,7 +139,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAgentStore } from '@/stores/agentStore';
 
@@ -134,6 +151,7 @@ const filters = reactive({
   location: '',
   experience: ''
 });
+const isLoading = ref(true);
 
 // Get agents from the agentStore
 const agentsFromStore = computed(() => {
@@ -154,6 +172,17 @@ const agentsFromStore = computed(() => {
     specialties: agent.specialties,
     status: agent.status === 'active' ? (Math.random() > 0.5 ? 'online' : 'away') : 'offline'
   }));
+});
+
+// On component mount, fetch the agents
+onMounted(async () => {
+  try {
+    await agentStore.fetchAgents();
+  } catch (error) {
+    console.error('Error loading agents:', error);
+  } finally {
+    isLoading.value = false;
+  }
 });
 
 // Helper function to get agent title based on specialties
@@ -238,6 +267,12 @@ const contactAgent = (agentId) => {
   // In a real app, this would open a contact modal or redirect to a contact page
   console.log('Contact agent:', agentId);
 };
+
+// Handle image loading errors
+function handleImageError(event, agent) {
+  // Replace with fallback image when the original image fails to load
+  event.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(agent.name)}&background=1a4189&color=fff`;
+}
 </script>
 
 <style scoped>
@@ -519,9 +554,30 @@ const contactAgent = (agentId) => {
   margin-top: 8px;
 }
 
+.loading-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 40px 0;
+  color: #1a4189;
+  font-size: 18px;
+}
+
+.loading-icon {
+  margin-right: 12px;
+  animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 .error-message {
   color: #e53e3e;
-  margin-top: 8px;
+  text-align: center;
+  margin: 40px 0;
+  font-size: 16px;
 }
 
 @media (max-width: 768px) {

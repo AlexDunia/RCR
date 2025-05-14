@@ -177,10 +177,12 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useTaskStore } from '@/stores/taskStore';
+import { useConnectionStore } from '@/stores/connectionStore';
 
 const route = useRoute();
 const router = useRouter();
 const taskStore = useTaskStore();
+const connectionStore = useConnectionStore();
 
 const task = ref(null);
 const editedTask = ref(null);
@@ -264,13 +266,45 @@ const confirmRemoveClient = async () => {
 };
 
 const saveTask = async () => {
-  if (!editedTask.value || !isFormValid.value) return;
+  if (!editedTask.value || !isFormValid.value) {
+    alert('Please fill in all required fields');
+    return;
+  }
+
+  // Check if the selected agents and clients are connected
+  if (editedTask.value) {
+    const areConnected = connectionStore.validateMultipleInteractions(
+      editedTask.value.agents,
+      editedTask.value.clients
+    );
+
+    if (!areConnected) {
+      alert('Tasks can only be scheduled between connected agents and clients. Please ensure all clients have a connection with at least one of the selected agents.');
+      return;
+    }
+  }
 
   try {
-    await taskStore.updateTask(editedTask.value.id, editedTask.value);
-    router.push(`/admin/client-task/${editedTask.value.id}?clientId=${route.query.clientId}`);
+    // Continue with existing save logic
+    isSaving.value = true;
+
+    // Simulate API call with timeout
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    // Update local tasks in real app, would make API call
+    taskStore.updateTask(task.value.id, editedTask.value);
+
+    isSaving.value = false;
+    showSuccessMessage.value = true;
+
+    setTimeout(() => {
+      showSuccessMessage.value = false;
+      router.push(`/admin/client-task/${task.value.id}?clientId=${route.query.clientId}`);
+    }, 1500);
   } catch (error) {
     console.error('Error saving task:', error);
+    isSaving.value = false;
+    alert('Failed to save changes. Please try again.');
   }
 };
 

@@ -1,204 +1,251 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
-export const useAgentStore = defineStore('agentStore', () => {
+export const useAgentStore = defineStore('agent', () => {
   // State
+  const favoriteAgents = ref([
+    {
+      id: 1,
+      name: 'James T. Whifield',
+      experience: '5+ Yr of experience',
+      location: 'Columbia, USA',
+      specialty: 'Luxury Real Estate',
+      avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790261/300_e7yggy.jpg',
+      isConnected: true
+    },
+    {
+      id: 2,
+      name: 'Amanda Rodriguez',
+      experience: '8+ Yr of experience',
+      location: 'Miami, USA',
+      specialty: 'Commercial Properties',
+      avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790261/300_1_gdilxy.jpg',
+      isConnected: false
+    },
+    {
+      id: 3,
+      name: 'Michael Chen',
+      experience: '3+ Yr of experience',
+      location: 'Seattle, USA',
+      specialty: 'Residential Properties',
+      avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790260/300_3_inul8p.jpg',
+      isConnected: true
+    }
+  ])
+
+  const connectionRequests = ref([
+    {
+      id: 4,
+      agentId: 4,
+      name: 'Sarah Johnson',
+      experience: '7+ Yr of experience',
+      location: 'Boston, USA',
+      specialty: 'Urban Apartments',
+      avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790260/300_2_rfyiva.jpg',
+      status: 'pending'
+    }
+  ])
+
+  // Full list of agents
   const agents = ref([
     {
-      id: 5,
-      name: 'Sarah Johnson',
-      email: 'sarah.johnson@realestateagency.com',
-      phone: '(555) 123-4567',
-      avatar: '/images/avatar-1.jpg',
-      profilePicture: '/images/avatar-1.jpg',
-      bio: 'Experienced real estate agent specializing in luxury properties with over 10 years in the industry.',
-      specialties: ['Luxury Homes', 'Waterfront Properties', 'Investment Properties'],
-      licenseNumber: 'RE12345678',
-      languages: ['English', 'Spanish'],
-      averageRating: 4.8,
+      id: 1,
+      name: 'James T. Whifield',
+      email: 'james.whifield@example.com',
       location: 'Columbia, USA',
-      status: 'active',
-      yearsOfExperience: 10,
-      reviews: [
-        { id: 1, clientId: 1, rating: 5, comment: 'Excellent service and very knowledgeable!' },
-        { id: 2, clientId: 3, rating: 4.5, comment: 'Sarah helped us find our dream home quickly.' }
-      ]
-    },
-    {
-      id: 8,
-      name: 'Michael Chen',
-      email: 'michael.chen@realestateagency.com',
-      phone: '(555) 987-6543',
-      avatar: '/images/avatar-2.jpg',
-      profilePicture: '/images/avatar-2.jpg',
-      bio: 'Detail-oriented agent with expertise in urban properties and first-time homebuyers.',
-      specialties: ['Urban Properties', 'First-Time Homebuyers', 'Condos'],
-      licenseNumber: 'RE87654321',
-      languages: ['English', 'Mandarin', 'Cantonese'],
-      averageRating: 4.9,
-      location: 'New York, USA',
-      status: 'active',
+      profilePicture: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790261/300_e7yggy.jpg',
+      avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790261/300_e7yggy.jpg',
+      specialties: ['Luxury Homes', 'Waterfront Properties'],
       yearsOfExperience: 8,
-      reviews: [
-        { id: 3, clientId: 2, rating: 5, comment: 'Michael made the home buying process so easy!' },
-        { id: 4, clientId: 4, rating: 4.8, comment: 'Great communication and very responsive.' }
-      ]
+      averageRating: 4.8,
+      status: 'active',
+      bio: 'Luxury real estate specialist with 8 years of experience in high-end properties.',
+      reviews: [{ id: 1, rating: 5 }, { id: 2, rating: 5 }, { id: 3, rating: 4.5 }]
     },
     {
-      id: 10,
-      name: 'Jessica Ramirez',
-      email: 'jessica.ramirez@realestateagency.com',
-      phone: '(555) 789-0123',
-      avatar: '/images/avatar-3.jpg',
-      profilePicture: '/images/avatar-3.jpg',
-      bio: 'Passionate about helping clients find their dream homes in vibrant neighborhoods.',
-      specialties: ['Historic Homes', 'Downtown Properties', 'First-Time Buyers'],
-      licenseNumber: 'RE56781234',
-      languages: ['English', 'Spanish', 'Portuguese'],
-      averageRating: 4.7,
+      id: 2,
+      name: 'Amanda Rodriguez',
+      email: 'amanda.rodriguez@example.com',
       location: 'Miami, USA',
+      profilePicture: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790261/300_1_gdilxy.jpg',
+      avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790261/300_1_gdilxy.jpg',
+      specialties: ['Commercial Properties', 'Investment Properties'],
+      yearsOfExperience: 10,
+      averageRating: 4.5,
       status: 'active',
-      yearsOfExperience: 6,
-      reviews: [
-        { id: 5, clientId: 5, rating: 5, comment: 'Jessica was amazing throughout our entire buying process!' },
-        { id: 6, clientId: 6, rating: 4.5, comment: 'Very knowledgeable about the local market.' }
-      ]
+      bio: 'Commercial property expert specializing in investment opportunities.',
+      reviews: [{ id: 1, rating: 4 }, { id: 2, rating: 5 }, { id: 3, rating: 4.5 }]
     },
     {
-      id: 12,
-      name: 'David Thompson',
-      email: 'david.thompson@realestateagency.com',
-      phone: '(555) 456-7890',
-      avatar: '/images/avatar-4.jpg',
-      profilePicture: '/images/avatar-4.jpg',
-      bio: 'Specializing in luxury properties and high-end real estate investments.',
-      specialties: ['Luxury Estates', 'Investment Properties', 'Commercial Real Estate'],
-      licenseNumber: 'RE34567812',
-      languages: ['English', 'French'],
-      averageRating: 4.9,
-      location: 'Los Angeles, USA',
-      status: 'active',
-      yearsOfExperience: 12,
-      reviews: [
-        { id: 7, clientId: 7, rating: 5, comment: 'David helped us find the perfect investment property!' },
-        { id: 8, clientId: 8, rating: 4.8, comment: 'Extremely professional and knowledgeable.' }
-      ]
-    },
-    {
-      id: 15,
-      name: 'Olivia Wilson',
-      email: 'olivia.wilson@realestateagency.com',
-      phone: '(555) 321-0987',
-      avatar: '/images/avatar-5.jpg',
-      profilePicture: '/images/avatar-5.jpg',
-      bio: 'Expert in suburban family homes and relocation services.',
-      specialties: ['Family Homes', 'Relocation Services', 'New Constructions'],
-      licenseNumber: 'RE90876543',
-      languages: ['English'],
-      averageRating: 4.6,
-      location: 'Chicago, USA',
-      status: 'active',
+      id: 3,
+      name: 'Michael Chen',
+      email: 'michael.chen@example.com',
+      location: 'Seattle, USA',
+      profilePicture: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790260/300_3_inul8p.jpg',
+      avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790260/300_3_inul8p.jpg',
+      specialties: ['Residential Properties', 'First-Time Buyers'],
       yearsOfExperience: 5,
-      reviews: [
-        { id: 9, clientId: 9, rating: 4.5, comment: 'Olivia was so helpful during our relocation process.' },
-        { id: 10, clientId: 10, rating: 4.7, comment: 'Found us the perfect family home in our target neighborhood.' }
-      ]
+      averageRating: 4.9,
+      status: 'active',
+      bio: 'Focused on helping first-time buyers find their perfect home.',
+      reviews: [{ id: 1, rating: 5 }, { id: 2, rating: 5 }, { id: 3, rating: 4.7 }]
+    },
+    {
+      id: 4,
+      name: 'Sarah Johnson',
+      email: 'sarah.johnson@example.com',
+      location: 'Boston, USA',
+      profilePicture: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790260/300_2_rfyiva.jpg',
+      avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790260/300_2_rfyiva.jpg',
+      specialties: ['Urban Apartments', 'Luxury Condos'],
+      yearsOfExperience: 7,
+      averageRating: 4.6,
+      status: 'active',
+      bio: 'Urban living specialist with expertise in luxury condos and apartments.',
+      reviews: [{ id: 1, rating: 4 }, { id: 2, rating: 5 }, { id: 3, rating: 4.8 }]
     }
   ])
 
   // Getters
-  const getAgentById = (id) => {
-    return agents.value.find(agent => agent.id === id)
-  }
+  const networkAgents = computed(() => {
+    return favoriteAgents.value.filter(agent => agent.isConnected).map(agent => {
+      // Get full agent details from agents array
+      const fullAgent = agents.value.find(a => a.id === agent.id);
+      return {
+        ...agent,
+        avatar: fullAgent ? fullAgent.avatar : agent.avatar
+      };
+    });
+  })
 
-  const getAllAgents = () => {
-    return agents.value
-  }
-
-  const getTopRatedAgents = () => {
-    return [...agents.value]
-      .sort((a, b) => b.averageRating - a.averageRating)
-      .slice(0, 3) // Return top 3 rated agents
-  }
+  const otherAgents = computed(() => {
+    return favoriteAgents.value.filter(agent => !agent.isConnected).map(agent => {
+      // Get full agent details from agents array
+      const fullAgent = agents.value.find(a => a.id === agent.id);
+      return {
+        ...agent,
+        avatar: fullAgent ? fullAgent.avatar : agent.avatar
+      };
+    });
+  })
 
   // Actions
-  function addAgent(agent) {
-    const newAgent = {
-      id: generateAgentId(),
-      averageRating: 0,
-      reviews: [],
-      status: 'active',
-      yearsOfExperience: 0,
-      ...agent
-    }
-
-    agents.value.push(newAgent)
-    return newAgent.id
-  }
-
-  function updateAgent(id, updates) {
-    const index = agents.value.findIndex(agent => agent.id === id)
-
+  function toggleFavorite(agentId) {
+    const index = favoriteAgents.value.findIndex(agent => agent.id === agentId)
     if (index !== -1) {
-      agents.value[index] = {
-        ...agents.value[index],
-        ...updates
+      favoriteAgents.value.splice(index, 1)
+    } else {
+      // Get agent details from full agents list
+      const agent = agents.value.find(a => a.id === agentId)
+      if (agent) {
+        favoriteAgents.value.push({
+          id: agentId,
+          name: agent.name,
+          experience: `${agent.yearsOfExperience}+ Yr of experience`,
+          location: agent.location,
+          specialty: agent.specialties[0],
+          avatar: agent.avatar,
+          isConnected: false
+        })
+      } else {
+        // Fallback for new agents not in the list
+        favoriteAgents.value.push({
+          id: agentId,
+          name: 'New Agent',
+          experience: '2+ Yr of experience',
+          location: 'New York, USA',
+          specialty: 'Luxury Properties',
+          avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790261/300_e7yggy.jpg',
+          isConnected: false
+        })
       }
-      return true
     }
-
-    return false
   }
 
-  function updateAgentStatus(id, status) {
-    const index = agents.value.findIndex(agent => agent.id === id)
-
-    if (index !== -1) {
-      agents.value[index].status = status
-      return true
-    }
-
-    return false
-  }
-
-  function addReview(agentId, review) {
-    const agent = agents.value.find(agent => agent.id === agentId)
-
+  function sendConnectionRequest(agentId) {
+    const agent = favoriteAgents.value.find(agent => agent.id === agentId)
     if (agent) {
-      const newReview = {
-        id: Math.max(0, ...agent.reviews.map(r => r.id)) + 1,
-        ...review
-      }
-
-      agent.reviews.push(newReview)
-
-      // Recalculate average rating
-      agent.averageRating = agent.reviews.reduce((sum, r) => sum + r.rating, 0) / agent.reviews.length
-
-      return newReview.id
+      connectionRequests.value.push({
+        id: Date.now(),
+        agentId: agentId,
+        name: agent.name,
+        experience: agent.experience,
+        location: agent.location,
+        specialty: agent.specialty,
+        avatar: agent.avatar,
+        status: 'pending'
+      })
     }
-
-    return false
   }
 
-  // Helper method to generate unique agent ID
-  function generateAgentId() {
-    return Math.max(0, ...agents.value.map(agent => agent.id)) + 1
+  function acceptConnection(requestId) {
+    const request = connectionRequests.value.find(req => req.id === requestId)
+    if (request) {
+      // Find agent and update connection status
+      const agent = favoriteAgents.value.find(agent => agent.id === request.agentId)
+      if (agent) {
+        agent.isConnected = true
+      }
+
+      // Remove request
+      const index = connectionRequests.value.findIndex(req => req.id === requestId)
+      if (index !== -1) {
+        connectionRequests.value.splice(index, 1)
+      }
+    }
+  }
+
+  function rejectConnection(requestId) {
+    const index = connectionRequests.value.findIndex(req => req.id === requestId)
+    if (index !== -1) {
+      connectionRequests.value.splice(index, 1)
+    }
+  }
+
+  // Method to get all agents - adding this method fixes the blank page issue
+  function getAllAgents() {
+    return agents.value;
+  }
+
+  // Method to fetch agents from an API (simulated)
+  async function fetchAgents() {
+    // In a real app, this would be an API call
+    console.log('Fetching agents data...');
+    // Using setTimeout to simulate async API call
+    return new Promise(resolve => {
+      setTimeout(() => {
+        console.log('Agents data fetched successfully');
+        resolve(agents.value);
+      }, 500);
+    });
+  }
+
+  function updateAgentStatus(agentId, status) {
+    const agent = agents.value.find(a => a.id === agentId);
+    if (agent) {
+      agent.status = status;
+    }
+  }
+
+  // Method to get a specific agent by ID
+  function getAgentById(id) {
+    // Convert id to number if it's a string
+    const numericId = typeof id === 'string' ? parseInt(id, 10) : id;
+    return agents.value.find(agent => agent.id === numericId) || null;
   }
 
   return {
-    // State
-    agents,
-
-    // Getters
-    getAgentById,
+    favoriteAgents,
+    connectionRequests,
+    networkAgents,
+    otherAgents,
+    toggleFavorite,
+    sendConnectionRequest,
+    acceptConnection,
+    rejectConnection,
     getAllAgents,
-    getTopRatedAgents,
-
-    // Actions
-    addAgent,
-    updateAgent,
+    fetchAgents,
     updateAgentStatus,
-    addReview
+    getAgentById
   }
 })

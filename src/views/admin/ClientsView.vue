@@ -64,7 +64,7 @@
         <div class="client-info">
           <div class="avatar-container">
             <ImageWithFallback
-              :src="client.profilePicture || 'https://randomuser.me/api/portraits/men/32.jpg'"
+              :src="client.profilePicture || 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739408381/Screenshot_2025-02-13_015617_mhjgby.png'"
               :alt="`${client.name}'s avatar`"
               class="client-avatar"
               :forceRefresh="true"

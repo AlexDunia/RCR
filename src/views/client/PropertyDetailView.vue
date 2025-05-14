@@ -136,14 +136,19 @@
         </div>
 
         <div class="property-actions">
-          <button class="action-button schedule-viewing" @click="scheduleViewing">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-              <line x1="16" y1="2" x2="16" y2="6"></line>
-              <line x1="8" y1="2" x2="8" y2="6"></line>
-              <line x1="3" y1="10" x2="21" y2="10"></line>
+          <div class="property-actions-note">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
             </svg>
-            Schedule a Viewing
+            <span>Please contact your agent to schedule viewings.</span>
+          </div>
+          <button class="action-button contact-agent-primary" @click="contactAgent">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            Contact Agent
           </button>
           <button class="action-button request-info" @click="requestInfo">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -226,11 +231,6 @@ const shareProperty = () => {
   }
 };
 
-// Schedule a viewing
-const scheduleViewing = () => {
-  router.push(`/client-appointments/schedule?propertyId=${propertyId.value}`);
-};
-
 // Request more information
 const requestInfo = () => {
   router.push(`/client-messages?requestInfo=${propertyId.value}`);
@@ -238,7 +238,7 @@ const requestInfo = () => {
 
 // Contact agent
 const contactAgent = () => {
-  router.push('/client-messages');
+  router.push(`/client-messages?contactAgent=${propertyId.value}`);
 };
 
 // Navigate back
@@ -673,23 +673,24 @@ onMounted(async () => {
 /* Property Actions */
 .property-actions {
   display: flex;
+  flex-direction: column;
   gap: 1rem;
-  flex-wrap: wrap;
+  width: 100%;
 }
 
-.schedule-viewing {
-  flex: 1;
+.contact-agent-primary {
+  width: 100%;
   background-color: #1a4189;
   color: white;
   border: none;
 }
 
-.schedule-viewing:hover {
+.contact-agent-primary:hover {
   background-color: #133267;
 }
 
 .request-info {
-  flex: 1;
+  width: 100%;
   background-color: white;
   color: #1a4189;
   border: 1px solid #1a4189;
@@ -697,6 +698,25 @@ onMounted(async () => {
 
 .request-info:hover {
   background-color: #f0f7ff;
+}
+
+/* Property Actions Note */
+.property-actions-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 1rem;
+  padding: 10px;
+  border-radius: 6px;
+  background-color: #f9f9fa;
+  font-size: 13px;
+  color: #666;
+}
+
+.property-actions-note svg {
+  color: #1a4189;
+  flex-shrink: 0;
 }
 
 /* Media Queries */

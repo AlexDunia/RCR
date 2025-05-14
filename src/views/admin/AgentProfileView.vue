@@ -367,6 +367,8 @@
 import { ref, onMounted, provide, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAgentStore } from '@/stores/agentStore';
+import { useConnectionStore } from '@/stores/connectionStore';
+import { useClientStore } from '@/stores/clientStore';
 
 // Define the tabs
 const tabs = ['bio', 'listings', 'documents', 'connections', 'tours', 'tasks'];
@@ -376,6 +378,8 @@ const activeTab = ref('bio');
 const route = useRoute();
 const router = useRouter();
 const agentStore = useAgentStore();
+const connectionStore = useConnectionStore();
+const clientStore = useClientStore();
 
 // Get agent data from store based on route parameter
 const agentId = computed(() => parseInt(route.params.id));
@@ -626,7 +630,23 @@ const loadTours = async () => {
 
 const scheduleTour = () => {
   console.log('Scheduling tour for agent:', agentId.value);
-  alert('Tour scheduling functionality would be implemented here.');
+
+  // Get the agent's connected clients
+  const connectedClients = connectionStore.getAcceptedConnectionsByUserId(agentId.value, 'agent')
+    .filter(conn => conn.toType === 'client' || conn.fromType === 'client')
+    .map(conn => {
+      const clientId = conn.fromType === 'client' ? conn.fromId : conn.toId;
+      return clientStore.getClientById(clientId);
+    })
+    .filter(Boolean);
+
+  if (connectedClients.length === 0) {
+    alert('This agent does not have any connected clients. Please establish connections first before scheduling tours.');
+    return;
+  }
+
+  // Continue with tour scheduling logic for connected clients
+  alert(`You can schedule tours for ${connectedClients.length} connected clients with this agent.`);
 };
 
 const formatTourTime = (start, end) => {

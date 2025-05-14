@@ -3,8 +3,8 @@
     <!-- Main content area -->
     <div class="main-content">
       <div class="header">
-        <h1>Find agents</h1>
-        <p>Find and filter agents</p>
+        <h1>Favourites</h1>
+        <p>View your saved properties and agents</p>
       </div>
 
       <!-- Favourite agents section -->
@@ -15,22 +15,42 @@
         </div>
 
         <div class="tabs">
-          <button class="tab-button" :class="{ active: activeTab === 'properties' }" @click="activeTab = 'properties'">
+          <router-link
+            class="tab-button"
+            :class="{ active: tab === 'properties' }"
+            :to="{ path: route.path, query: { ...route.query, tab: 'properties' } }"
+          >
             Properties
-          </button>
-          <button class="tab-button" :class="{ active: activeTab === 'agents' }" @click="activeTab = 'agents'">
+          </router-link>
+          <router-link
+            class="tab-button"
+            :class="{ active: tab === 'agents' }"
+            :to="{ path: route.path, query: { ...route.query, tab: 'agents' } }"
+          >
             Agents
-          </button>
+          </router-link>
         </div>
 
         <!-- Filter options -->
         <div class="filter-options">
-          <button class="filter-button" :class="{ active: activeFilter === 'network' }" @click="activeFilter = 'network'">
-            Your network
-          </button>
-          <button class="filter-button" :class="{ active: activeFilter === 'others' }" @click="activeFilter = 'others'">
-            Others
-          </button>
+          <template v-if="tab === 'agents'">
+            <div class="network-filters">
+              <router-link
+                class="filter-button"
+                :class="{ active: route.query.filter === 'network' || (!route.query.filter && activeFilter === 'network') }"
+                :to="{ path: route.path, query: { ...route.query, filter: 'network' } }"
+              >
+                Your network
+              </router-link>
+              <router-link
+                class="filter-button"
+                :class="{ active: route.query.filter === 'others' }"
+                :to="{ path: route.path, query: { ...route.query, filter: 'others' } }"
+              >
+                Others
+              </router-link>
+            </div>
+          </template>
           <div class="search-box">
             <input type="text" placeholder="Search..." v-model="searchQuery">
             <span class="keyboard-shortcut">⌘ K</span>
@@ -38,11 +58,28 @@
         </div>
 
         <!-- Agents grid -->
-        <div v-if="activeTab === 'agents'" class="agents-grid">
+        <div v-if="tab === 'agents'" class="agents-grid">
+          <div v-if="filteredAgents.length === 0" class="empty-state">
+            <div class="empty-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </div>
+            <h3>No agents found</h3>
+            <p v-if="activeFilter === 'network'">You don't have any connected agents yet.</p>
+            <p v-else>You don't have any favorite agents yet.</p>
+            <router-link to="/client-find-agents" class="browse-btn">Browse Agents</router-link>
+          </div>
+
           <div v-for="agent in filteredAgents" :key="agent.id" class="agent-card">
             <div class="agent-info">
               <div class="agent-avatar">
-                <img :src="agent.avatar" :alt="agent.name">
+                <img
+                  :src="agent.avatar"
+                  :alt="agent.name"
+                  @error="handleImageError($event, agent)"
+                >
               </div>
               <div class="agent-details">
                 <h3>{{ agent.name }} <span class="experience">({{ agent.experience }})</span></h3>
@@ -67,7 +104,10 @@
               </div>
             </div>
             <div class="agent-actions">
-              <button class="action-btn view-profile">
+              <router-link
+                :to="`/client-favourites/agent/${agent.id}`"
+                class="action-btn view-profile"
+              >
                 <span class="action-icon">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -75,8 +115,12 @@
                   </svg>
                 </span>
                 View profile
-              </button>
-              <button class="action-btn request-connect">
+              </router-link>
+              <button
+                class="action-btn request-connect"
+                @click="requestConnect(agent.id)"
+                v-if="activeFilter !== 'network'"
+              >
                 <span class="action-icon">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -87,8 +131,21 @@
                 </span>
                 Request to connect
               </button>
-              <button class="favorite-btn" :class="{ active: agent.favorite }" @click="toggleFavorite(agent.id)">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="agent.favorite ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <button
+                class="action-btn connected-badge"
+                v-else
+                disabled
+              >
+                <span class="action-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                  </svg>
+                </span>
+                Connected
+              </button>
+              <button class="favorite-btn active" @click="toggleFavorite(agent.id)" title="Remove from favorites">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                 </svg>
               </button>
@@ -96,8 +153,8 @@
           </div>
         </div>
 
-        <!-- Properties grid (original code) -->
-        <div v-if="activeTab === 'properties' && savedProperties.length === 0" class="favourites-empty">
+        <!-- Properties grid -->
+        <div v-if="tab === 'properties' && savedProperties.length === 0" class="favourites-empty">
           <div class="empty-icon">
             <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
@@ -108,12 +165,12 @@
           <router-link to="/client-properties" class="browse-btn">Browse Properties</router-link>
         </div>
 
-        <div v-if="activeTab === 'properties' && savedProperties.length > 0" class="properties-grid">
+        <div v-if="tab === 'properties' && savedProperties.length > 0" class="properties-grid">
           <div v-for="property in savedProperties" :key="property.id" class="property-card">
             <div class="property-image">
               <img :src="property.image" :alt="property.name">
               <div class="property-badge">{{ property.status }}</div>
-              <button class="favorite-btn active" @click="removeFromFavorites(property.id)">
+              <button class="favorite-btn active" @click="removeFromFavorites(property.id)" title="Remove from favorites">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                 </svg>
@@ -161,42 +218,30 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, computed, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { usePropertyStore } from '@/stores/propertyStore';
+import { useAgentStore } from '@/stores/agentStore';
 
 const router = useRouter();
+const route = useRoute();
 const propertyStore = usePropertyStore();
+const agentStore = useAgentStore();
 
 // Active tab state
-const activeTab = ref('agents');
-const activeFilter = ref('network');
+const tab = ref(route.query.tab || 'properties');
+const activeFilter = ref(route.query.filter || 'network');
 const searchQuery = ref('');
 
 // Get saved properties from store
 const savedProperties = computed(() => propertyStore.favoriteProperties);
 
-// Mock agent data
-const agents = ref([
-  {
-    id: 1,
-    name: 'James T. Whifield',
-    experience: '5+ Yr of experience',
-    location: 'Columbia, USA',
-    specialty: 'Luxury Real Estate',
-    avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/agent1_asdf123.jpg',
-    favorite: true
-  },
-  {
-    id: 2,
-    name: 'Amanda Rodriguez',
-    experience: '8+ Yr of experience',
-    location: 'Miami, USA',
-    specialty: 'Commercial Properties',
-    avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/agent2_asdf123.jpg',
-    favorite: true
-  }
-]);
+// Get agents from store
+const agents = computed(() => {
+  return activeFilter.value === 'network'
+    ? agentStore.networkAgents
+    : agentStore.otherAgents;
+});
 
 // Filter agents based on search query
 const filteredAgents = computed(() => {
@@ -209,12 +254,16 @@ const filteredAgents = computed(() => {
   );
 });
 
+// Handle image loading errors
+function handleImageError(event, agent) {
+  // Generate a fallback URL using UI Avatars
+  const fallbackUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(agent.name)}&background=0D47A1&color=fff`;
+  event.target.src = fallbackUrl;
+}
+
 // Toggle favorite status
 const toggleFavorite = (agentId) => {
-  const agent = agents.value.find(a => a.id === agentId);
-  if (agent) {
-    agent.favorite = !agent.favorite;
-  }
+  agentStore.toggleFavorite(agentId);
 };
 
 // Remove property from favorites
@@ -227,10 +276,27 @@ const viewProperty = (propertyId) => {
   router.push(`/client-property/${propertyId}`);
 };
 
-// Schedule property viewing
+// Schedule property viewing - now redirects to messages instead
 const scheduleViewing = (propertyId) => {
-  router.push(`/client-appointments/schedule?propertyId=${propertyId}`);
+  router.push(`/client-messages?contactAgent=${propertyId}`);
 };
+
+// Request connect
+const requestConnect = (agentId) => {
+  agentStore.sendConnectionRequest(agentId);
+};
+
+// In the script section, add a watcher to update activeFilter when the route changes
+watch(() => route.query.filter, (newFilter) => {
+  if (tab.value === 'agents') {
+    activeFilter.value = newFilter || 'network';
+  }
+});
+
+// Add a watcher for route.query.tab to keep tab in sync
+watch(() => route.query.tab, (newTab) => {
+  tab.value = newTab || 'properties';
+});
 </script>
 
 <style scoped>
@@ -308,6 +374,7 @@ const scheduleViewing = (propertyId) => {
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 14px;
+  text-decoration: none;
 }
 
 .tab-button.active {
@@ -392,12 +459,14 @@ const scheduleViewing = (propertyId) => {
   height: 60px;
   border-radius: 50%;
   overflow: hidden;
+  background-color: #f0f4f8;
 }
 
 .agent-avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 50%;
 }
 
 .agent-details h3 {
@@ -442,6 +511,8 @@ const scheduleViewing = (propertyId) => {
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s ease;
+  text-decoration: none;
+  color: inherit;
 }
 
 .view-profile {
@@ -454,35 +525,29 @@ const scheduleViewing = (propertyId) => {
   border-color: #0a4d8c;
 }
 
+.connected-badge {
+  background-color: #e6f7ee;
+  color: #28a745;
+  border-color: #c3e6cb;
+  cursor: default;
+}
+
 .favorite-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 8px;
   border: 1px solid #e1e4e8;
   background-color: #fff;
+  border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: #ff3b30;
+  color: #f43f5e;
 }
 
 .favorite-btn.active {
-  background-color: #fff8f8;
-  border-color: #ffcccb;
+  background-color: #fff0f3;
+  border-color: #fecdd3;
 }
 
-.favorite-btn svg {
-  stroke: #ff3b30;
-}
-
-.favorite-btn.active svg {
-  fill: #ff3b30;
-}
-
-/* Preserve property styling from original */
-.favourites-empty {
+.empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -491,40 +556,40 @@ const scheduleViewing = (propertyId) => {
   padding: 60px 20px;
   background-color: white;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-  margin: 30px 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.empty-icon {
-  margin-bottom: 24px;
+.empty-state .empty-icon {
+  margin-bottom: 20px;
   color: #bdc3c7;
 }
 
-.favourites-empty h2 {
-  font-size: 24px;
-  margin-bottom: 12px;
+.empty-state h3 {
+  font-size: 18px;
+  margin-bottom: 8px;
   color: #2c3e50;
 }
 
-.favourites-empty p {
-  font-size: 16px;
+.empty-state p {
+  font-size: 14px;
   color: #7f8c8d;
-  margin-bottom: 24px;
-  max-width: 400px;
+  margin-bottom: 20px;
+  max-width: 300px;
 }
 
 .browse-btn {
-  padding: 12px 24px;
+  display: inline-block;
+  padding: 8px 16px;
   background-color: #0a4d8c;
   color: white;
   border-radius: 4px;
   text-decoration: none;
-  font-weight: 600;
-  transition: background-color 0.2s;
+  font-size: 14px;
+  transition: all 0.2s ease;
 }
 
 .browse-btn:hover {
-  background-color: #083c6d;
+  background-color: #083b6f;
 }
 
 .properties-grid {

@@ -33,7 +33,11 @@
 
     <div class="agent-card">
       <div class="agent-info">
-        <img :src="agent?.avatar || 'https://randomuser.me/api/portraits/women/44.jpg'" alt="Agent" class="agent-avatar" />
+        <img
+          :src="agent?.avatar || 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1739408381/Screenshot_2025-02-13_015617_mhjgby.png'"
+          alt="Agent"
+          class="agent-avatar"
+        />
         <div class="agent-details">
           <h2 class="agent-name">{{ agent?.name || 'Amy Daniels' }}</h2>
           <div class="agent-meta">

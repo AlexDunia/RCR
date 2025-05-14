@@ -20,7 +20,11 @@
       <div class="custom-agent-header">
         <div class="agent-info-section">
           <div class="agent-avatar">
-            <img :src="agent.profilePicture || agent.avatar || '/images/default-avatar.jpg'" :alt="agent.name" />
+            <img
+              :src="agent.profilePicture || agent.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(agent.name) + '&background=1a4189&color=fff'"
+              :alt="agent.name"
+              @error="handleImageError"
+            />
           </div>
           <div class="agent-header-details">
             <h1>{{ agent.name }}</h1>
@@ -120,7 +124,12 @@
             </div>
             <div class="bio-col bio-col-right">
               <div v-if="isConnected || connectionPending" class="agent-bio-image-container">
-                <img :src="agent.profilePicture || agent.avatar" :alt="agent.name" class="agent-bio-image" />
+                <img
+                  :src="agent.profilePicture || agent.avatar || fallbackImageUrl"
+                  :alt="agent.name"
+                  class="agent-bio-image"
+                  @error="handleImageError"
+                />
               </div>
               <div v-else class="agent-bio-image-placeholder"></div>
             </div>
@@ -326,6 +335,9 @@ const connectionPending = ref(false);
 const loadingError = ref(null);
 const sharedDocuments = ref([]);
 const documentsLoading = ref(false);
+
+// Add fallback image URL
+const fallbackImageUrl = ref('https://ui-avatars.com/api/?name=Agent&background=1a4189&color=fff');
 
 // Check if the agent is favorited
 const isAgentFavourite = computed(() => {
@@ -543,6 +555,12 @@ function downloadDocument(document) {
   // In production, this would use proper download APIs
 }
 
+// Handle image loading errors
+function handleImageError(event) {
+  // Replace with fallback image when the original image fails to load
+  event.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(agent.value?.name || 'Agent')}&background=1a4189&color=fff`;
+}
+
 onMounted(async () => {
   loading.value = true;
   loadingError.value = null;
@@ -561,6 +579,9 @@ onMounted(async () => {
     if (!agent.value) {
       loadingError.value = `Agent with ID ${agentId} not found`;
     } else {
+      // Generate fallback image URL based on agent name
+      fallbackImageUrl.value = `https://ui-avatars.com/api/?name=${encodeURIComponent(agent.value.name)}&background=1a4189&color=fff`;
+
       // Load shared documents when agent is found
       await getSharedDocuments();
     }

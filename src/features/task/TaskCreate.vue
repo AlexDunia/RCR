@@ -247,6 +247,7 @@ import { useLayoutStore } from '@/stores/layout'
 import { useTaskStore } from '@/stores/taskStore'
 import { useClientStore } from '@/stores/clientStore'
 import { useAgentStore } from '@/stores/agentStore'
+import { useConnectionStore } from '@/stores/connectionStore'
 import AgentModal from './AgentModal.vue'
 import ClientModal from './ClientModal.vue'
 
@@ -257,6 +258,7 @@ const layoutStore = useLayoutStore()
 const taskStore = useTaskStore()
 const clientStore = useClientStore()
 const agentStore = useAgentStore()
+const connectionStore = useConnectionStore()
 const { ensureFutureDate, isValidFutureDateTime, isValidDateTimeRange } = useDateValidation()
 
 // Loading state
@@ -634,6 +636,13 @@ const handleSubmit = () => {
     }
     if (taskData.clients.length === 0) {
       alert('Please select at least one client')
+      return
+    }
+
+    // Check if the selected agents and clients are connected
+    const areConnected = connectionStore.validateMultipleInteractions(taskData.agents, taskData.clients)
+    if (!areConnected) {
+      alert('Tasks can only be scheduled between connected agents and clients. Please ensure all clients have a connection with at least one of the selected agents.')
       return
     }
 

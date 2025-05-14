@@ -105,7 +105,10 @@
                 <h4>Host</h4>
                 <div class="host-details">
                   <div class="host-avatar">
-                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Host avatar">
+                    <img
+                      src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1739408381/Screenshot_2025-02-13_015617_mhjgby.png"
+                      alt="Host avatar"
+                    >
                   </div>
                   <div class="host-data">
                     <p class="host-name">{{ session.host.name }}</p>
@@ -123,7 +126,11 @@
             <div class="chapter-section">
               <div class="chapter-header">
                 <div class="chapter-info">
-                  <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Chapter image" class="chapter-image">
+                  <img
+                    src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1739408381/Screenshot_2025-02-13_015617_mhjgby.png"
+                    alt="Chapter image"
+                    class="chapter-image"
+                  >
                   <div class="chapter-text">
                     <span class="chapter-label">Chapter</span>
                     <h3 class="chapter-title">{{ session.chapter || 'No chapter specified' }}</h3>
@@ -194,7 +201,10 @@
               <h3 class="section-label">Host</h3>
               <div class="host-details">
                 <div class="host-avatar">
-                  <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Host avatar">
+                  <img
+                    src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1739408381/Screenshot_2025-02-13_015617_mhjgby.png"
+                    alt="Host avatar"
+                  >
                 </div>
                 <div class="host-data">
                   <p class="host-name">{{ session.host?.name || 'No host assigned' }}</p>
