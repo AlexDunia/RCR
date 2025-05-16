@@ -1,5 +1,6 @@
 <template>
-  <section class="agents-hero">
+  <PublicHeader :transparent="true" :is-fixed="isHeaderFixed" />
+  <section id="hero-section" class="agents-hero">
     <div class="agents-hero__content">
       <h1 class="agents-hero__title">Find Your Trusted Agent</h1>
       <p class="agents-hero__subtitle">The right agent makes all the difference. Let us help you connect with someone who truly cares about your journey.</p>
@@ -37,12 +38,16 @@
 </template>
 
 <script setup>
+import PublicHeader from '@/components/PublicHeader.vue';
+import { useFixedHeader } from '@/composables/useFixedHeader';
+
+const { isHeaderFixed } = useFixedHeader('hero-section');
 </script>
 
 <style scoped>
 .agents-hero {
   background: linear-gradient(120deg, #e3f0ff 0%, #f7f8fa 100%);
-  padding: 64px 0 40px 0;
+  padding: 120px 0 40px 0;
   text-align: center;
 }
 .agents-hero__title {

@@ -5,14 +5,14 @@ import TasksLayout from '@/layouts/TasksLayout.vue';
 import EducationLayout from '@/layouts/EducationLayout.vue';
 import permissionGuard from './guards/permissionGuard';
 import { setupRouterDebug } from '@/utils/router-debug';
-
+import LandingPage from '../views/LandingPage.vue';
 // Lazy-loaded route components
 const routes = [
   // Landing page route (accessible to everyone)
   {
     path: '/landing',
     name: 'Landing',
-    component: () => import('@/views/LandingPage.vue'),
+    component: LandingPage,
     meta: {
       title: 'Welcome to RealCity',
       description: 'The ultimate real estate management platform',
@@ -910,9 +910,13 @@ const routes = [
   },
   {
     path: '/blog',
-    name: 'Blog',
-    component: () => import('@/views/public/BlogView.vue'),
-    meta: { title: 'Blog' }
+    name: 'blog',
+    component: () => import('../views/BlogView.vue')
+  },
+  {
+    path: '/blog/:id',
+    name: 'blog-detail',
+    component: () => import('../views/BlogDetailView.vue')
   },
   {
     path: '/careers',

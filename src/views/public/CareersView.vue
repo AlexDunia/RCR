@@ -1,5 +1,6 @@
 <template>
-  <section class="careers-hero">
+  <PublicHeader :transparent="true" :is-fixed="isHeaderFixed" />
+  <section id="hero-section" class="careers-hero">
     <div class="careers-hero__content">
       <h1 class="careers-hero__title">Grow With Real City</h1>
       <p class="careers-hero__subtitle">Shape the future of real estate. Build your career with purpose, innovation, and heart.</p>
@@ -37,12 +38,16 @@
 </template>
 
 <script setup>
+import PublicHeader from '@/components/PublicHeader.vue';
+import { useFixedHeader } from '@/composables/useFixedHeader';
+
+const { isHeaderFixed } = useFixedHeader('hero-section');
 </script>
 
 <style scoped>
 .careers-hero {
   background: linear-gradient(120deg, #e3f0ff 0%, #f7f8fa 100%);
-  padding: 64px 0 40px 0;
+  padding: 120px 0 40px 0;
   text-align: center;
 }
 .careers-hero__title {

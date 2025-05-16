@@ -1,370 +1,209 @@
 <template>
-  <div class="blog-page">
-    <!-- Header (copied from landing page, keep role-switcher) -->
-    <header class="header">
-      <div class="container header__container header__container--figma">
-        <!-- Logo Left -->
-        <div class="header__logo">
-          <h2>Real City</h2>
-          <span class="header__tagline">realty inc brokerage</span>
-        </div>
-        <!-- Nav Center -->
-        <nav class="header__nav header__nav--center">
-          <router-link to="#" class="header__nav-link">Buy</router-link>
-          <router-link to="#" class="header__nav-link">Rent</router-link>
-          <router-link to="#" class="header__nav-link">Sell</router-link>
-          <div class="header__nav-dropdown">
-            <router-link to="#" class="header__nav-link">Agent <span class="dropdown-arrow">▼</span></router-link>
-          </div>
-        </nav>
-        <!-- Role Switcher (leave as is) -->
-        <div class="role-switcher">
-          <!-- Leave your toggle roles button/component here -->
-        </div>
-        <!-- Auth Buttons Right -->
-        <div class="header__auth header__auth--figma">
-          <router-link to="/signup" class="header__sign-up header__sign-up--figma">Sign in</router-link>
-          <router-link to="/login" class="header__login header__login--figma">Login</router-link>
-        </div>
+  <div class="blogs-page">
+    <PublicHeader transparent />
+
+    <!-- Hero Section -->
+    <section class="blog-hero">
+      <div class="blog-hero__overlay"></div>
+      <div class="container blog-hero__container">
+        <h1 class="blog-hero__title">Real City Realty Blogs</h1>
+        <p class="blog-hero__subtitle">Get the latest information about homes and find an opportunity to make the move.</p>
       </div>
-    </header>
-    <!-- Hero Section with Overlay -->
-    <div class="hero">
-      <div class="overlay"></div>
-      <div class="hero-content">
-        <h1>Real City <span>Realty Blogs</span></h1>
-        <p>Get the latest information about homes and find an opportunity to make the move.</p>
-      </div>
-    </div>
-    <!-- Main Content -->
-    <div class="main-content">
-      <div class="tabs-and-posts">
-        <!-- Tabs -->
-        <div class="tabs">
-          <button
-            v-for="(cat, idx) in categories"
-            :key="cat"
-            :class="{ active: selectedCategory === idx }"
-            @click="selectedCategory = idx"
-          >
-            {{ cat }}
-          </button>
-        </div>
-        <!-- Blog Cards Grid -->
-        <div class="blog-grid">
-          <div
-            v-for="(post, i) in filteredPosts"
-            :key="i"
-            class="blog-card"
-          >
-            <img :src="post.image" alt="Blog" />
-            <div class="card-content">
-              <span class="category">{{ post.category }}</span>
-              <h3>{{ post.title }}</h3>
-              <p class="excerpt">{{ post.excerpt }}</p>
-              <div class="author-row">
-                <img class="author-img" :src="post.authorImg" alt="author" />
-                <span class="author">{{ post.author }}</span>
-                <span class="date">{{ post.date }}</span>
-              </div>
-            </div>
+    </section>
+
+    <!-- Blog Categories -->
+    <section class="blog-categories">
+      <div class="container">
+        <div class="blog-categories__list">
+          <button class="blog-category-item blog-category-item--active">Market updates</button>
+          <button class="blog-category-item">Buyer and seller tips</button>
+          <button class="blog-category-item">Neighbourhood insights</button>
+          <button class="blog-category-item">Investments advise</button>
+
+          <!-- Search Bar -->
+          <div class="blog-search">
+            <span class="search-icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M17.5 17.5L13.875 13.875M15.8333 9.16667C15.8333 12.8486 12.8486 15.8333 9.16667 15.8333C5.48477 15.8333 2.5 12.8486 2.5 9.16667C2.5 5.48477 5.48477 2.5 9.16667 2.5C12.8486 2.5 15.8333 5.48477 15.8333 9.16667Z" stroke="#94A3B8" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <input type="text" placeholder="Search..." class="blog-search__input">
+            <span class="blog-search__shortcut">⌘K</span>
           </div>
         </div>
       </div>
-      <!-- Sidebar -->
-      <aside class="sidebar">
-        <div class="search-box">
-          <input type="text" placeholder="Search..." v-model="search" />
-        </div>
-        <div class="sidebar-categories">
-          <button
-            v-for="(cat, idx) in categories"
-            :key="cat + '-side'"
-            :class="{ active: selectedCategory === idx }"
-            @click="selectedCategory = idx"
-          >
-            {{ cat }}
-          </button>
-        </div>
-      </aside>
-    </div>
+    </section>
+
+    <!-- Latest Posts Section -->
+    <section class="blog-posts">
+      <div class="container">
+        <h2 class="blog-posts__title">Latest</h2>
+        <!-- Blog posts grid will go here -->
+      </div>
+    </section>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-
-const categories = [
-  'Market updates',
-  'Buyer and seller tips',
-  'Neighbourhood insights',
-  'Investments advise',
-];
-const selectedCategory = ref(0);
-const search = ref('');
-const posts = [
-  {
-    image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80',
-    category: 'Berita Properti',
-    title: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit,',
-    excerpt: 'KONTAN.CO.ID - JAKARTA. PT Bank Tabungan Negara Tbk (BTN) semakin gencar mendorong peningkatan pangsa pasar kredit...',
-    author: 'Admin',
-    authorImg: 'https://randomuser.me/api/portraits/men/32.jpg',
-    date: '10 Juli 2023',
-    catIdx: 0,
-  },
-  {
-    image: 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80',
-    category: 'Berita Properti',
-    title: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit,',
-    excerpt: 'KONTAN.CO.ID - JAKARTA. PT Bank Tabungan Negara Tbk (BTN) semakin gencar mendorong peningkatan pangsa pasar kredit...',
-    author: 'Admin',
-    authorImg: 'https://randomuser.me/api/portraits/women/44.jpg',
-    date: '10 Juli 2023',
-    catIdx: 0,
-  },
-  {
-    image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80',
-    category: 'Berita Properti',
-    title: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit,',
-    excerpt: 'KONTAN.CO.ID - JAKARTA. PT Bank Tabungan Negara Tbk (BTN) semakin gencar mendorong peningkatan pangsa pasar kredit...',
-    author: 'Admin',
-    authorImg: 'https://randomuser.me/api/portraits/men/32.jpg',
-    date: '10 Juli 2023',
-    catIdx: 0,
-  },
-  {
-    image: 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80',
-    category: 'Berita Properti',
-    title: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit,',
-    excerpt: 'KONTAN.CO.ID - JAKARTA. PT Bank Tabungan Negara Tbk (BTN) semakin gencar mendorong peningkatan pangsa pasar kredit...',
-    author: 'Admin',
-    authorImg: 'https://randomuser.me/api/portraits/women/44.jpg',
-    date: '10 Juli 2023',
-    catIdx: 0,
-  },
-];
-const filteredPosts = computed(() =>
-  posts.filter(
-    (p) =>
-      p.catIdx === selectedCategory.value &&
-      (search.value === '' ||
-        p.title.toLowerCase().includes(search.value.toLowerCase()) ||
-        p.excerpt.toLowerCase().includes(search.value.toLowerCase()))
-  )
-);
+import PublicHeader from '@/components/PublicHeader.vue';
 </script>
 
 <style scoped>
-.blog-page {
-  font-family: 'Montserrat', Arial, sans-serif;
-  background: #f7f7f7;
+.blogs-page {
   min-height: 100vh;
-}
-.hero {
-  background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat;
-  position: relative;
-  height: 420px;
-  color: #fff;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-}
-.overlay {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.45);
-  z-index: 1;
-}
-.hero-content {
-  position: relative;
-  z-index: 2;
-  margin-top: 80px;
-  text-align: left;
-  padding-left: 60px;
-}
-.hero-content h1 {
-  font-size: 3.2rem;
-  font-weight: 800;
-  margin-bottom: 12px;
-  letter-spacing: -2px;
-}
-.hero-content h1 span {
-  color: #fff;
-}
-.hero-content p {
-  font-size: 1.1rem;
-  font-weight: 400;
-  color: #e0e0e0;
+  background: #fff;
 }
 
-.main-content {
-  display: flex;
-  gap: 32px;
-  max-width: 1400px;
-  margin: -60px auto 0 auto;
-  padding: 0 40px 40px 40px;
-}
-.tabs-and-posts {
-  flex: 1 1 0;
-}
-.tabs {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 18px;
-}
-.tabs button {
-  background: #f2f6fa;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 24px;
-  font-size: 1rem;
-  font-weight: 500;
-  color: #222;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-}
-.tabs button.active {
-  background: #1a73e8;
-  color: #fff;
-}
-.blog-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 32px;
-}
-.blog-card {
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 2px 16px 0 rgba(0,0,0,0.06);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  transition: box-shadow 0.2s;
-}
-.blog-card:hover {
-  box-shadow: 0 6px 32px 0 rgba(26,115,232,0.10);
-}
-.blog-card img {
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
-}
-.card-content {
-  padding: 18px 18px 12px 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.category {
-  color: #1a73e8;
-  font-size: 0.95rem;
-  font-weight: 600;
-}
-.card-content h3 {
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin: 0;
-  color: #222;
-}
-.excerpt {
-  font-size: 0.98rem;
-  color: #666;
-  margin-bottom: 8px;
-}
-.author-row {
+/* Hero Section */
+.blog-hero {
+  position: relative;
+  height: 480px;
+  background-image: url('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2075&q=80');
+  background-size: cover;
+  background-position: center;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.95rem;
-  color: #888;
-}
-.author-img {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-.sidebar {
-  width: 270px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-.search-box {
-  background: #fff;
-  border-radius: 10px;
-  padding: 16px 14px;
-  box-shadow: 0 2px 8px 0 rgba(0,0,0,0.04);
-}
-.search-box input {
-  width: 100%;
-  border: none;
-  outline: none;
-  font-size: 1rem;
-  background: transparent;
-}
-.sidebar-categories {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.sidebar-categories button {
-  background: #f2f6fa;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 18px;
-  font-size: 1rem;
-  font-weight: 500;
-  color: #222;
-  cursor: pointer;
-  text-align: left;
-  transition: background 0.2s, color 0.2s;
-}
-.sidebar-categories button.active {
-  background: #1a73e8;
   color: #fff;
 }
-@media (max-width: 1100px) {
-  .main-content {
-    flex-direction: column;
-    gap: 0;
-    padding: 0 10px 40px 10px;
-  }
-  .sidebar {
-    width: 100%;
-    flex-direction: row;
-    gap: 16px;
-    margin-bottom: 24px;
-  }
+
+.blog-hero__overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.6));
+  z-index: 1;
 }
-@media (max-width: 800px) {
-  .hero-content {
-    padding-left: 20px;
-    margin-top: 40px;
-  }
-  .main-content {
-    padding: 0 0 40px 0;
-  }
+
+.blog-hero__container {
+  position: relative;
+  z-index: 2;
+  text-align: center;
 }
-@media (max-width: 600px) {
-  .hero {
-    height: 260px;
+
+.blog-hero__title {
+  font-size: 72px;
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+  font-family: 'Poppins', sans-serif;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.blog-hero__subtitle {
+  font-size: 1.125rem;
+  max-width: 600px;
+  margin: 0 auto;
+  opacity: 0.9;
+  line-height: 1.5;
+}
+
+/* Blog Categories */
+.blog-categories {
+  background: #fff;
+  padding: 1.5rem 0;
+  margin-top: -1px;
+}
+
+.blog-categories__list {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.blog-category-item {
+  font-size: 1rem;
+  color: #64748b;
+  background: none;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 0.375rem;
+  transition: all 0.2s;
+}
+
+.blog-category-item--active {
+  color: #0066cc;
+  background: #EBF5FF;
+}
+
+/* Search Bar */
+.blog-search {
+  margin-left: auto;
+  position: relative;
+  width: 300px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+}
+
+.blog-search__input {
+  width: 100%;
+  padding: 0.75rem 3rem 0.75rem 2.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  color: #1e293b;
+  transition: all 0.2s;
+  background: #fff;
+}
+
+.blog-search__input:focus {
+  outline: none;
+  border-color: #0066cc;
+  box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
+}
+
+.blog-search__shortcut {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.75rem;
+  color: #94a3b8;
+  background: #f1f5f9;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+}
+
+/* Blog Posts Section */
+.blog-posts {
+  padding: 3rem 0;
+}
+
+.blog-posts__title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 2rem 0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+@media (max-width: 768px) {
+  .blog-hero__title {
+    font-size: 48px;
   }
-  .hero-content h1 {
-    font-size: 2rem;
+
+  .blog-categories__list {
+    flex-wrap: wrap;
+    gap: 1rem;
   }
-  .main-content {
-    padding: 0 0 24px 0;
-  }
-  .sidebar {
-    flex-direction: column;
+
+  .blog-search {
     width: 100%;
-  }
-  .blog-grid {
-    grid-template-columns: 1fr;
+    margin-top: 1rem;
   }
 }
 </style>

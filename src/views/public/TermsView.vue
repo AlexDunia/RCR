@@ -1,5 +1,6 @@
 <template>
-  <section class="terms-hero">
+  <PublicHeader :transparent="true" :is-fixed="isHeaderFixed" />
+  <section id="hero-section" class="terms-hero">
     <div class="terms-hero__content">
       <h1 class="terms-hero__title">Terms of Service</h1>
       <p class="terms-hero__subtitle">Clarity, fairness, and trust—our promise to every Real City user.</p>
@@ -37,12 +38,16 @@
 </template>
 
 <script setup>
+import PublicHeader from '@/components/PublicHeader.vue';
+import { useFixedHeader } from '@/composables/useFixedHeader';
+
+const { isHeaderFixed } = useFixedHeader('hero-section');
 </script>
 
 <style scoped>
 .terms-hero {
   background: linear-gradient(120deg, #e3f0ff 0%, #f7f8fa 100%);
-  padding: 64px 0 40px 0;
+  padding: 120px 0 40px 0;
   text-align: center;
 }
 .terms-hero__title {

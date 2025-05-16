@@ -1,5 +1,6 @@
 <template>
-  <section class="about-hero">
+  <PublicHeader :transparent="true" :is-fixed="isHeaderFixed" />
+  <section id="hero-section" class="about-hero">
     <div class="about-hero__content">
       <h1 class="about-hero__title">Our Story</h1>
       <p class="about-hero__subtitle">Empowering dreams, building communities, and redefining real estate for everyone.</p>
@@ -40,12 +41,16 @@
 </template>
 
 <script setup>
+import PublicHeader from '@/components/PublicHeader.vue';
+import { useFixedHeader } from '@/composables/useFixedHeader';
+
+const { isHeaderFixed } = useFixedHeader('hero-section');
 </script>
 
 <style scoped>
 .about-hero {
   background: linear-gradient(120deg, #e3f0ff 0%, #f7f8fa 100%);
-  padding: 64px 0 40px 0;
+  padding: 120px 0 40px 0;
   text-align: center;
 }
 .about-hero__title {

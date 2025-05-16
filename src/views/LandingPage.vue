@@ -752,7 +752,7 @@ a {
 .hero__search-wrapper {
   background: #fff;
   border-radius: 12px;
-  overflow: hidden;
+  overflow: visible;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   max-width: 1140px;
   margin: 0 auto;
@@ -763,28 +763,44 @@ a {
 
 .hero__search-tabs {
   display: flex;
-  gap: 32px;
-  padding: 0 24px;
-  border-bottom: 1px solid #edf2f7;
+  padding: 0;
+  position: absolute;
+  top: -40px;
+  left: 0;
+  gap: 1px;
 }
 
 .hero__tab-btn {
-  padding: 16px 8px;
-  background: transparent;
+  padding: 16px 40px;
+  padding-bottom: 20px;
+  background: rgba(255, 255, 255, 0.25);
   border: none;
   font-weight: 500;
   font-size: 15px;
   cursor: pointer;
-  color: #64748b;
+  color: #fff;
   position: relative;
   transition: all 0.2s ease;
   font-family: 'Inter', sans-serif;
+  min-width: 120px;
+  text-align: center;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  margin-bottom: -8px;
+}
+
+.hero__tab-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .hero__tab-btn--active {
-  color: #0052a5;
+  background: #fff;
+  color: #0066cc;
   font-weight: 600;
-  border-bottom: 2px solid #0052a5;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  padding-bottom: 24px;
+  margin-bottom: -12px;
 }
 
 .hero__search-form {
@@ -792,6 +808,8 @@ a {
   display: flex;
   gap: 16px;
   background: white;
+  border-radius: 12px;
+  position: relative;
 }
 
 .search-input-group {
