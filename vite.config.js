@@ -8,7 +8,7 @@ import { dirname, resolve } from 'path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
-  base: './', // Use relative paths for GitHub Pages
+  base: '/RCR/', // Use absolute base path for correct routing
   plugins: [
     vue(),
     vueJsx(),

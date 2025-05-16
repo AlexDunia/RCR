@@ -17,7 +17,7 @@
             <a href="#" class="header__nav-link">Agent <span class="dropdown-arrow">▼</span></a>
           </div>
         </nav>
-        <!-- Role Switcher (for frontend testing) -->
+        <!-- Role Switcher (add back, white text/icons) -->
         <div class="role-switcher">
           <div class="profile-section" @click="toggleRoleMenu">
             <img class="profile-image"
@@ -51,8 +51,8 @@
         </div>
         <!-- Auth Buttons Right -->
         <div class="header__auth header__auth--figma">
-          <a href="#" class="header__sign-up header__sign-up--figma">Sign in</a>
-          <a href="#" class="header__login header__login--figma">Login</a>
+          <router-link to="/signup" class="header__sign-in header__sign-in--figma">Sign in</router-link>
+          <router-link to="/login" class="header__login header__login--figma">Login</router-link>
         </div>
       </div>
     </header>
@@ -66,9 +66,14 @@
         </div>
         <div class="hero__search-wrapper">
           <div class="hero__search-tabs">
-            <button class="hero__tab-btn hero__tab-btn--active">Sell</button>
-            <button class="hero__tab-btn">Rent</button>
-            <button class="hero__tab-btn">Buy</button>
+            <button
+              v-for="tab in ['Sell', 'Rent', 'Buy']"
+              :key="tab"
+              :class="['hero__tab-btn', { 'hero__tab-btn--active': activeTab === tab }]"
+              @click="activeTab = tab"
+            >
+              {{ tab }}
+            </button>
           </div>
           <div class="hero__search-form">
             <div class="search-input-group">
@@ -79,8 +84,6 @@
                 <input type="text" class="search-input" placeholder="Property type">
                 <span class="search-dropdown-icon">▼</span>
               </div>
-            </div>
-            <div class="search-input-group search-input-group--location">
               <div class="search-input-wrapper">
                 <span class="search-icon">
                   <i class="fas fa-search"></i>
@@ -207,7 +210,7 @@
           <div class="benefit-card--figma">
             <div class="benefit-card__icon--figma">
               <!-- Magnifying glass SVG -->
-              <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><circle cx="22" cy="22" r="12" stroke="#8c8c8c" stroke-width="3"/><line x1="34.071" y1="34.485" x2="28.485" y2="28.899" stroke="#8c8c8c" stroke-width="3" stroke-linecap="round"/></svg>
+              <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><circle cx="22" cy="22" r="12" stroke="#8c8c8c" stroke-width="3"/><line x1="34.071" y1="34.485" x2="28.485" y2="28.899" stroke="#8c8c8c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </div>
             <div class="benefit-card__text--figma">Search for homes with ease</div>
           </div>
@@ -262,16 +265,19 @@
         <div class="footer__col footer__col--service">
           <div class="footer__heading--figma">Service</div>
           <ul class="footer__list--figma">
-            <li><a href="#">About us</a></li>
-            <li><a href="#">Careers</a></li>
-            <li><a href="#">Terms & Conditions</a></li>
-            <li><a href="#">Privacy & Policy</a></li>
+            <li><router-link to="/about">About us</router-link></li>
+            <li><router-link to="/careers">Careers</router-link></li>
+            <li><router-link to="/terms">Terms & Conditions</router-link></li>
+            <li><router-link to="/privacy">Privacy & Policy</router-link></li>
+            <li><router-link to="/blog">Blog</router-link></li>
+            <li><router-link to="/signup">Sign up</router-link></li>
+            <li><router-link to="/login">Login</router-link></li>
           </ul>
         </div>
         <div class="footer__col footer__col--community">
           <div class="footer__heading--figma">Community</div>
           <ul class="footer__list--figma">
-            <li><a href="#">Find agents</a></li>
+            <li><router-link to="/find-agents">Find agents</router-link></li>
             <li><a href="#">Lifestyle</a></li>
             <li><a href="#">Legal notice</a></li>
           </ul>
@@ -382,6 +388,8 @@ const openIdx = ref(null);
 function toggleFaq(idx) {
   openIdx.value = openIdx.value === idx ? null : idx;
 }
+
+const activeTab = ref('Sell');
 </script>
 
 <style scoped>
@@ -489,7 +497,7 @@ a {
   top: 0;
   left: 0;
   right: 0;
-  padding: 20px 0;
+  padding: 40px 0;
   z-index: 10;
 }
 
@@ -497,6 +505,7 @@ a {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  width: 100%;
 }
 
 .header__logo {
@@ -526,13 +535,13 @@ a {
 
 .header__nav {
   display: flex;
-  gap: 35px;
-  margin-right: auto;
-  margin-left: 100px;
+  gap: 48px;
+  flex: 1 1 auto;
+  justify-content: center;
 }
 
 .header__nav-link {
-  color: var(--color-white);
+  color: #fff !important;
   font-weight: 500;
   font-size: 15px;
   transition: opacity 0.3s ease;
@@ -542,6 +551,7 @@ a {
 .dropdown-arrow {
   font-size: 10px;
   margin-left: 4px;
+  color: #fff;
 }
 
 .header__auth {
@@ -550,152 +560,152 @@ a {
   gap: 15px;
 }
 
-.header__sign-up {
-  color: var(--color-white);
+.header__sign-in--figma {
+  background: #fff;
+  color: #0052a5;
   font-weight: 500;
-  padding: 8px 16px;
-  border-radius: 4px;
-  font-size: 14px;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  background: transparent;
+  padding: 8px 32px;
+  border-radius: 6px;
+  font-size: 16px;
+  border: 2px solid #0052a5;
+  margin-right: 12px;
+  transition: background 0.2s, color 0.2s;
+}
+.header__sign-in--figma:hover {
+  background: #f0f7ff;
+  color: #003b7a;
 }
 
-.header__login {
+.header__login--figma {
   background: #0052a5;
-  color: var(--color-white);
+  color: #fff;
   font-weight: 500;
-  padding: 8px 20px;
-  border-radius: 4px;
-  font-size: 14px;
-  transition: all 0.3s ease;
+  padding: 8px 32px;
+  border-radius: 6px;
+  font-size: 16px;
+  border: none;
+  transition: background 0.2s;
+}
+.header__login--figma:hover {
+  background: #003b7a;
 }
 
-/* Role Switcher */
+/* Role Switcher - compact, toggle style, white text/icon */
 .role-switcher {
   position: relative;
-  margin-left: auto;
-  margin-right: 20px;
+  margin-left: 24px;
+  margin-right: 16px;
+  display: flex;
+  align-items: center;
 }
-
 .profile-section {
   display: flex;
   align-items: center;
   gap: 10px;
   cursor: pointer;
-  padding: 5px 10px;
+  padding: 5px 12px;
   border-radius: 20px;
+  background: rgba(255,255,255,0.08);
   transition: background-color 0.3s ease;
 }
-
 .profile-section:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.18);
 }
-
 .profile-image {
   width: 32px;
   height: 32px;
   border-radius: 50%;
   object-fit: cover;
+  border: 2px solid #fff;
+  background: #fff;
 }
-
 .profile-name {
   font-size: 14px;
   font-weight: 500;
-  color: var(--color-white);
+  color: #fff;
 }
-
 .dropdown-icon {
   width: 20px;
   height: 20px;
-  fill: var(--color-white);
+  fill: #fff;
 }
-
 .role-switcher-menu {
   position: absolute;
   top: 100%;
   right: 0;
-  background: white;
+  background: #fff;
   border-radius: 10px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.10);
   width: 200px;
   margin-top: 10px;
   z-index: 10;
+  padding: 0;
+  overflow: hidden;
 }
-
 .role-switcher-header {
-  padding: 12px 16px;
-  font-size: 14px;
+  padding: 14px 18px 10px 18px;
+  font-size: 16px;
   color: #666;
+  font-weight: 600;
   border-bottom: 1px solid #eee;
+  background: #fff;
 }
-
 .role-option {
   display: flex;
   align-items: center;
-  padding: 12px 16px;
+  padding: 14px 18px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.2s;
+  background: #fff;
 }
-
 .role-option:hover {
-  background-color: #f5f5f5;
+  background: #f5faff;
 }
-
 .role-option.active {
-  background-color: #f0f7ff;
+  background: #f0f7ff;
 }
-
 .role-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  margin-right: 12px;
-  font-weight: 600;
-  font-size: 12px;
+  margin-right: 14px;
+  font-weight: 700;
+  font-size: 15px;
+  color: #fff;
 }
-
 .all-icon {
   background-color: #6c757d;
-  color: white;
 }
-
 .admin-icon {
   background-color: #ff6b6b;
-  color: white;
 }
-
 .agent-icon {
-  background-color: #5aa6f9;
-  color: white;
+  background-color: #2196f3;
 }
-
 .client-icon {
-  background-color: #2ec4b6;
-  color: white;
+  background-color: #43c943;
 }
-
 .role-name {
-  font-size: 14px;
+  font-size: 16px;
+  color: #222;
+  font-weight: 500;
 }
 
 /* Hero Section */
 .hero {
   position: relative;
-  height: 620px;
-  min-height: 620px;
-  max-height: 620px;
+  height: 500px;
+  min-height: auto;
   display: flex;
-  align-items: center;
-  background-image: url('https://images.unsplash.com/photo-1560185007-c5ca9d2c014d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1950&q=80');
+  align-items: flex-start;
+  background-image: url('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2075&q=80');
   background-size: cover;
   background-position: center;
   color: var(--color-white);
   padding: 0;
-  overflow: hidden;
 }
 
 .hero__overlay {
@@ -704,7 +714,7 @@ a {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.5));
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.65) 100%);
   z-index: 1;
 }
 
@@ -713,72 +723,74 @@ a {
   z-index: 2;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   height: 100%;
-  padding-top: 60px;
+  padding-top: 140px;
 }
 
 .hero__content {
-  max-width: 1000px;
+  max-width: 900px;
   margin: 0;
   text-align: left;
-  margin-bottom: 40px;
-  padding-left: 30px;
+  margin-bottom: 48px;
+  padding-left: 0;
 }
 
 .hero__title {
-  font-size: 56px;
-  font-weight: 800;
+  font-size: 72px;
+  font-weight: 700;
   text-align: left;
   color: #fff;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  line-height: 1.2;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  line-height: 1.1;
   margin: 0;
-  letter-spacing: -0.5px;
+  letter-spacing: -1px;
+  font-family: 'Poppins', sans-serif;
 }
 
-/* Search tabs design to match Figma */
+/* Search wrapper redesign to match Figma exactly */
 .hero__search-wrapper {
-  background: rgba(255, 255, 255, 1);
-  border-radius: 4px;
+  background: #fff;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-  max-width: 1180px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  max-width: 1140px;
   margin: 0 auto;
   width: 100%;
   position: relative;
+  transform: translateY(50%);
 }
 
 .hero__search-tabs {
   display: flex;
+  gap: 32px;
+  padding: 0 24px;
+  border-bottom: 1px solid #edf2f7;
 }
 
 .hero__tab-btn {
-  padding: 15px 0;
-  background: #f0f0f0;
+  padding: 16px 8px;
+  background: transparent;
   border: none;
   font-weight: 500;
   font-size: 15px;
   cursor: pointer;
-  flex: 1;
-  max-width: 140px;
-  color: #444;
-  text-align: center;
+  color: #64748b;
   position: relative;
+  transition: all 0.2s ease;
+  font-family: 'Inter', sans-serif;
 }
 
 .hero__tab-btn--active {
-  background: white;
   color: #0052a5;
   font-weight: 600;
-  border-bottom: 3px solid #0052a5;
+  border-bottom: 2px solid #0052a5;
 }
 
 .hero__search-form {
-  padding: 24px 20px;
+  padding: 24px;
   display: flex;
-  flex-direction: column;
-  gap: 20px;
+  gap: 16px;
   background: white;
 }
 
@@ -786,37 +798,39 @@ a {
   display: flex;
   gap: 16px;
   width: 100%;
-}
-
-.search-input-group--location {
   align-items: center;
 }
 
 .search-input-wrapper {
   display: flex;
   align-items: center;
-  border: 1px solid #e6e6e6;
-  border-radius: 4px;
-  padding: 13px 15px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px 16px;
   flex: 1;
-  background: #f8f8f8;
+  background: #fff;
+  transition: all 0.2s ease;
+}
+
+.search-input-wrapper:first-child {
+  max-width: 240px;
 }
 
 .search-icon {
   display: flex;
   align-items: center;
-  margin-right: 10px;
-  color: #777;
-  font-size: 14px;
+  margin-right: 12px;
+  color: #94a3b8;
 }
 
 .search-input {
   width: 100%;
   padding: 0;
   border: none;
-  font-size: 14px;
+  font-size: 15px;
   background: transparent;
-  color: #333;
+  color: #1e293b;
+  font-family: 'Inter', sans-serif;
 }
 
 .search-input:focus {
@@ -824,68 +838,92 @@ a {
 }
 
 .search-input::placeholder {
-  color: #777;
+  color: #94a3b8;
   font-weight: 400;
 }
 
 .search-dropdown-icon {
   margin-left: auto;
-  font-size: 10px;
-  color: #777;
+  font-size: 12px;
+  color: #94a3b8;
 }
 
 .search-btn {
   background: #0052a5;
-  color: var(--color-white);
+  color: #fff;
   border: none;
-  padding: 13px 32px;
-  border-radius: 4px;
+  padding: 0 32px;
+  border-radius: 8px;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 15px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  height: 44px;
+  min-width: 100px;
+  font-family: 'Inter', sans-serif;
+}
+
+.search-btn:hover {
+  background: #003b7a;
 }
 
 /* Property type filter pills */
 .property-types-section {
   background: #fff;
-  padding: 32px 0 16px 0;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
-  margin-bottom: 0;
+  padding: 24px 0;
+  margin-top: 120px;
+  position: relative;
+  z-index: 1;
 }
+
 .property-types-row {
   display: flex;
-  flex-wrap: wrap;
   gap: 12px;
   justify-content: flex-start;
-  margin-bottom: 32px;
 }
+
 .property-type-item {
-  background: transparent;
-  color: #222;
-  padding: 10px 22px;
+  background: #f1f5f9;
+  color: #64748b;
+  padding: 8px 16px;
   border-radius: 8px;
-  text-decoration: none;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 500;
   border: none;
-  transition: all 0.2s;
-  box-shadow: none;
-  outline: none;
-  cursor: pointer;
-  display: inline-block;
+  transition: all 0.2s ease;
+  font-family: 'Inter', sans-serif;
 }
+
 .property-type-item--active {
-  background: #b3d4fc;
+  background: #e0f2fe;
   color: #0052a5;
-  border: none;
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
-.property-type-item:hover:not(.property-type-item--active) {
-  background: #f0f7ff;
-  color: #0052a5;
+
+@media (max-width: 768px) {
+  .hero {
+    min-height: 700px;
+  }
+
+  .hero__title {
+    font-size: 48px;
+  }
+
+  .hero__search-form {
+    flex-direction: column;
+  }
+
+  .search-input-group {
+    flex-direction: column;
+  }
+
+  .search-btn {
+    width: 100%;
+  }
+
+  .hero__tab-btn {
+    padding: 0 24px;
+  }
 }
 
 /* Featured Properties Section */

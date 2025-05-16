@@ -27,8 +27,9 @@ export default function permissionGuard(to, from, next) {
     return next();
   }
 
-  // Special handling for 'all' role - redirect to landing instead of unauthorized
-  if (userRole === 'all' && to.path !== '/landing') {
+  // Special handling for 'all' role - allow public pages
+  const publicPaths = ['/landing', '/login', '/signup', '/blog', '/careers', '/terms', '/about', '/privacy', '/find-agents'];
+  if (userRole === 'all' && !publicPaths.includes(to.path)) {
     console.log(`Redirecting 'all' role from ${to.path} to landing page`);
     return next('/landing');
   }

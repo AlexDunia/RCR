@@ -888,7 +888,62 @@ const routes = [
       hideHeader: false
     }
   },
-
+  {
+    path: '/login',
+    name: 'Login',
+    component: () => import('@/views/auth/LoginView.vue'),
+    meta: {
+      title: 'Login',
+      hideHeader: true,
+      allowedRoles: ['all', 'admin', 'agent', 'client']
+    }
+  },
+  {
+    path: '/signup',
+    name: 'Signup',
+    component: () => import('@/views/auth/SignupView.vue'),
+    meta: {
+      title: 'Sign Up',
+      hideHeader: true,
+      allowedRoles: ['all', 'admin', 'agent', 'client']
+    }
+  },
+  {
+    path: '/blog',
+    name: 'Blog',
+    component: () => import('@/views/public/BlogView.vue'),
+    meta: { title: 'Blog' }
+  },
+  {
+    path: '/careers',
+    name: 'Careers',
+    component: () => import('@/views/public/CareersView.vue'),
+    meta: { title: 'Careers', allowedRoles: ['all', 'admin', 'agent', 'client'] }
+  },
+  {
+    path: '/terms',
+    name: 'Terms',
+    component: () => import('@/views/public/TermsView.vue'),
+    meta: { title: 'Terms of Service', allowedRoles: ['all', 'admin', 'agent', 'client'] }
+  },
+  {
+    path: '/about',
+    name: 'About',
+    component: () => import('@/views/public/AboutView.vue'),
+    meta: { title: 'About Us', allowedRoles: ['all', 'admin', 'agent', 'client'] }
+  },
+  {
+    path: '/privacy',
+    name: 'Privacy',
+    component: () => import('@/views/public/PrivacyView.vue'),
+    meta: { title: 'Privacy Policy', allowedRoles: ['all', 'admin', 'agent', 'client'] }
+  },
+  {
+    path: '/find-agents',
+    name: 'FindAgents',
+    component: () => import('@/views/public/FindAgentsView.vue'),
+    meta: { title: 'Find Agents', allowedRoles: ['all', 'admin', 'agent', 'client'] }
+  },
   // 404 route - must be the last route
   {
     path: '/:pathMatch(.*)*',

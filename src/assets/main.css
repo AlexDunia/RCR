@@ -1,0 +1,97 @@
+body.auth-bg {
+  background: url('https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png') no-repeat center center fixed;
+  background-size: cover;
+  min-height: 100vh;
+}
+
+.auth-container {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  box-shadow: 0 4px 32px rgba(0,0,0,0.12);
+  max-width: 420px;
+  margin: 40px auto;
+  padding: 2.5rem 2rem 2rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.auth-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #003366;
+  margin-bottom: 1.5rem;
+}
+
+.auth-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.auth-form input {
+  padding: 0.8rem 1rem;
+  border: 1px solid #cfd8dc;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.auth-form button, .auth-social-btn {
+  padding: 0.9rem 1rem;
+  border: none;
+  border-radius: 8px;
+  background: #0056a3;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: background 0.2s;
+}
+
+.auth-form button:hover, .auth-social-btn:hover {
+  background: #003366;
+}
+
+.auth-divider {
+  text-align: center;
+  margin: 1.5rem 0 1rem 0;
+  color: #888;
+  position: relative;
+}
+
+.auth-divider:before, .auth-divider:after {
+  content: '';
+  display: inline-block;
+  width: 40%;
+  height: 1px;
+  background: #e0e0e0;
+  vertical-align: middle;
+  margin: 0 8px;
+}
+
+.auth-social-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  background: #f5f5f5;
+  color: #222;
+  border: 1px solid #cfd8dc;
+  margin-bottom: 0.7rem;
+}
+
+.auth-social-btn img {
+  width: 22px;
+  height: 22px;
+}
+
+.auth-link {
+  color: #0056a3;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-left: 0.3rem;
+}
