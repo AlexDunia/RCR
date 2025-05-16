@@ -26,6 +26,11 @@ const isNavigating = ref(false);
 // Initialize task timer functionality
 const { showNotification, currentNotification, dismissNotification } = useTaskTimer();
 
+// Check if on landing page
+const isLandingPage = computed(() => {
+  return route.path === '/landing' || route.name === 'Landing' || roleStore.currentRole === 'all';
+});
+
 // Check if user is an admin - use only roleStore
 const isAdmin = computed(() => {
   return roleStore.currentRole === 'admin';
@@ -38,11 +43,13 @@ const isClient = computed(() => {
 
 // Determine if any sidebar is visible
 const hasSidebar = computed(() => {
+  // Don't show sidebar on landing page
+  if (isLandingPage.value) return false;
   return isAdmin.value || isClient.value || (!isAdmin.value && !isClient.value); // Agent has sidebar too
 });
 
 // Computed properties for layout settings
-const hideHeader = computed(() => layoutStore.hideHeader);
+const hideHeader = computed(() => layoutStore.hideHeader || isLandingPage.value);
 const background = computed(() => layoutStore.background);
 
 // Get the current active sidebar component based on role
@@ -64,24 +71,30 @@ onMounted(() => {
     window.location.reload(true);
   }
 
-  // Add global navigation handler
+  // Add global navigation handler with improved timing
   router.beforeEach((to, from, next) => {
     isNavigating.value = true;
+    // Check if we are trying to navigate to the same page - prevent unnecessary transitions
+    if (to.path === from.path && to.hash === from.hash) {
+      isNavigating.value = false;
+      return next(false);
+    }
+
     next();
   });
 
   router.afterEach(() => {
-    // Set a small delay to ensure components are fully rendered
+    // Small delay to ensure components are fully rendered before removing navigation state
     setTimeout(() => {
       isNavigating.value = false;
-    }, 100);
+    }, 50); // Reduced from 100ms for faster response
   });
 
   // Listen for router cleanup events
   window.addEventListener('router:cleanup', clearRouterCache);
 });
 
-// Clear any router cache that might be causing issues
+// Enhanced router cache clearing function
 const clearRouterCache = () => {
   console.log('Cleaning up router cache');
   // Force Vue's next tick to clear any pending renders
@@ -92,6 +105,9 @@ const clearRouterCache = () => {
       const currentPath = router.currentRoute.value.fullPath;
       router.replace(currentPath + '?t=' + Date.now());
     }
+
+    // Reset navigation state in case it got stuck
+    isNavigating.value = false;
   });
 };
 
@@ -116,12 +132,26 @@ const handleRouteChange = () => {
     mainContent.scrollTop = 0;
   }
 };
+
+// Add transition hooks for better performance
+const handleBeforeLeave = () => {
+  // Make sure we're in navigating state when transition starts
+  isNavigating.value = true;
+};
+
+const handleAfterEnter = () => {
+  // Clear navigation state when transition completes
+  isNavigating.value = false;
+
+  // Reset scroll position
+  handleRouteChange();
+};
 </script>
 
 <template>
   <div class="app-container" :style="{ background: background }">
-    <!-- Dynamic sidebar based on role -->
-    <component :is="activeSidebar" :key="'sidebar-' + roleStore.currentRole" />
+    <!-- Dynamic sidebar based on role (only when not on landing page) -->
+    <component v-if="!isLandingPage" :is="activeSidebar" :key="'sidebar-' + roleStore.currentRole" />
 
     <!-- Main content container with sidebar-adjusted class -->
     <div class="main-content" :class="{ 'with-sidebar': hasSidebar }">
@@ -129,11 +159,10 @@ const handleRouteChange = () => {
 
       <div class="scroll-container" :class="{ 'navigating': isNavigating }">
         <router-view v-slot="{ Component, route }">
-          <transition name="fade" mode="out-in">
-            <keep-alive v-if="route.meta.keepAlive">
+          <transition name="fade" mode="out-in" @before-leave="handleBeforeLeave" @after-enter="handleAfterEnter">
+            <keep-alive include="AdminDashboardView,AgentDashboardView,ClientDashboardView">
               <component :is="Component" :key="route.fullPath" />
             </keep-alive>
-            <component v-else :is="Component" :key="route.fullPath" />
           </transition>
         </router-view>
 
@@ -179,7 +208,7 @@ html, body {
   position: fixed;
   left: 0;
   top: 0;
-  width: 260px;
+  width: 250px; /* Match sidebar width from AdminSidebar.vue */
   height: 100vh;
   z-index: 10;
 }
@@ -198,8 +227,7 @@ html, body {
 
 /* Apply sidebar margin when any sidebar is visible */
 .main-content.with-sidebar {
-  width: calc(100% - 260px);
-  margin-left: 260px;
+  width: 100%;
 }
 
 .scroll-container {
@@ -211,16 +239,23 @@ html, body {
 
 .navigating {
   pointer-events: none;
+  opacity: 0.8; /* Allow content to remain slightly visible during navigation */
+  transition: opacity 0.2s ease; /* Smooth transition when navigation state changes */
 }
 
-/* Fade transition */
+/* Improved fade transition */
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.15s ease;
+  transition: opacity 0.2s ease;
 }
 
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+.fade-enter-to,
+.fade-leave-from {
+  opacity: 1;
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div class="client-dashboard">
+  <div class="client-dashboard" :class="{ 'is-mounted': isMounted }">
     <h1>Welcome to Your Client Dashboard</h1>
 
     <div class="dashboard-cards">
@@ -147,14 +147,28 @@
 </template>
 
 <script setup>
+import { ref, onMounted, defineComponent } from 'vue';
 import { useRouter } from 'vue-router';
 
+// Define component name for keep-alive caching
+defineComponent({
+  name: 'ClientDashboardView'
+})
+
 const router = useRouter();
+const isMounted = ref(false);
 
 // View property details
 const viewProperty = (propertyId) => {
   router.push(`/client-property/${propertyId}`);
 };
+
+onMounted(() => {
+  // Set mounted flag to true to show content
+  setTimeout(() => {
+    isMounted.value = true;
+  }, 50); // Small delay to ensure component is fully rendered
+});
 </script>
 
 <style scoped>
@@ -162,6 +176,12 @@ const viewProperty = (propertyId) => {
   padding: 24px;
   max-width: 1400px;
   margin: 0 auto;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.client-dashboard.is-mounted {
+  opacity: 1;
 }
 
 h1 {
@@ -183,6 +203,18 @@ h1 {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
   overflow: hidden;
   height: 100%;
+  animation: cardFadeIn 0.4s ease forwards;
+}
+
+@keyframes cardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .card-header {

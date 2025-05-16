@@ -8,41 +8,91 @@ import { setupRouterDebug } from '@/utils/router-debug';
 
 // Lazy-loaded route components
 const routes = [
+  // Landing page route (accessible to everyone)
+  {
+    path: '/landing',
+    name: 'Landing',
+    component: () => import('@/views/LandingPage.vue'),
+    meta: {
+      title: 'Welcome to RealCity',
+      description: 'The ultimate real estate management platform',
+      hideHeader: true,
+      allowedRoles: ['admin', 'agent', 'client', 'all']
+    }
+  },
+  // Home route redirect to landing
+  {
+    path: '/home',
+    redirect: '/landing'
+  },
+  // Root path - redirect based on user role
+  {
+    path: '/',
+    name: 'Root',
+    redirect: () => {
+      const roleStore = useRoleStore();
+      const currentRole = roleStore.currentRole;
+
+      if (currentRole === 'admin') {
+        return '/admin-dashboard';
+      } else if (currentRole === 'agent') {
+        return '/agent-dashboard';
+      } else if (currentRole === 'client') {
+        return '/client-dashboard';
+      } else {
+        return '/landing';
+      }
+    }
+  },
   // Agents management route (Admin-only)
   {
     path: '/agents',
     name: 'Agents',
     component: () => import('@/views/admin/AgentsView.vue'),
+    beforeEnter: (to, from, next) => {
+      const roleStore = useRoleStore();
+      if (roleStore.currentRole === 'admin') {
+        next();
+      } else {
+        next('/'); // Redirect to root which will handle based on role
+      }
+    },
     meta: {
       title: 'Find Agents',
       allowedRoles: ['admin']
     }
   },
-  // Dashboard route with role-based component
+  // Admin dashboard
   {
-    path: '/',
+    path: '/admin-dashboard',
     name: 'Dashboard',
     component: () => import('@/views/dashboard/AdminDashboardView.vue'),
     beforeEnter: (to, from, next) => {
       const roleStore = useRoleStore();
       if (roleStore.currentRole === 'admin') {
         next();
-      } else if (roleStore.currentRole === 'client') {
-        next('/client-dashboard');
       } else {
-        next('/agent-dashboard');
+        next('/'); // Redirect to root which will handle based on role
       }
     },
     meta: {
       title: 'Dashboard',
       description: 'View your performance metrics and important updates',
-      allowedRoles: ['admin', 'agent', 'client']
+      allowedRoles: ['admin']
     }
   },
   {
     path: '/agent-dashboard',
     name: 'AgentDashboardView',
     component: () => import('@/views/dashboard/AgentDashboardView.vue'),
+    beforeEnter: (to, from, next) => {
+      const roleStore = useRoleStore();
+      if (roleStore.currentRole === 'agent') {
+        next();
+      } else {
+        next('/'); // Redirect to root which will handle based on role
+      }
+    },
     meta: {
       title: 'Agent Dashboard',
       description: 'View your listings, clients, and performance metrics',
@@ -55,6 +105,14 @@ const routes = [
     path: '/client-dashboard',
     name: 'ClientDashboard',
     component: () => import('@/views/dashboard/ClientDashboardView.vue'),
+    beforeEnter: (to, from, next) => {
+      const roleStore = useRoleStore();
+      if (roleStore.currentRole === 'client') {
+        next();
+      } else {
+        next('/'); // Redirect to root which will handle based on role
+      }
+    },
     meta: {
       title: 'Client Dashboard',
       description: 'View your properties, documents, and communications',
@@ -890,11 +948,35 @@ router.beforeEach((to, from, next) => {
     }
   }
 
+  // If we're navigating to the same path with the same hash, cancel navigation
+  if (to.path === from.path && to.hash === from.hash) {
+    // Already on this page, so prevent unnecessary re-render
+    sessionStorage.removeItem('navInProgress');
+    return next(false);
+  }
+
+  // Add a timeout to detect stalled navigations
+  const navigationTimeout = setTimeout(() => {
+    console.warn('Navigation timeout reached for', to.path);
+    // Force navigation to complete to prevent blank page
+    sessionStorage.removeItem('navInProgress');
+    window.dispatchEvent(new CustomEvent('router:cleanup'));
+  }, 5000); // 5 second timeout
+
+  // Store the timeout ID to clear it on successful navigation
+  window._navigationTimeoutId = navigationTimeout;
+
   next();
 });
 
 // Add navigation completion marker
 router.afterEach((to, from) => {
+  // Clear any navigation timeout
+  if (window._navigationTimeoutId) {
+    clearTimeout(window._navigationTimeoutId);
+    window._navigationTimeoutId = null;
+  }
+
   // Clear the in-progress marker
   sessionStorage.removeItem('navInProgress');
 

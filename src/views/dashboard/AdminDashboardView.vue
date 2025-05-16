@@ -1,6 +1,11 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, defineComponent } from 'vue'
 import { useRoleStore } from '@/stores/roleStore'
+
+// Define component name for keep-alive caching
+defineComponent({
+  name: 'AdminDashboardView'
+})
 
 const roleStore = useRoleStore()
 
@@ -29,18 +34,22 @@ const performanceMetrics = ref({
   serverLoad: '45%'
 })
 
+// Flag to track component mounted state
+const isMounted = ref(false)
+
 // Ensure only admins can access this dashboard
 onMounted(() => {
   if (roleStore.currentRole !== 'admin') {
-    // Redirect to appropriate dashboard based on role
-    // You might want to implement this redirect logic
     console.warn('Unauthorized access to admin dashboard')
   }
+
+  // Set mounted flag to true to show content
+  isMounted.value = true
 })
 </script>
 
 <template>
-  <div class="admin-dashboard">
+  <div class="admin-dashboard" :class="{ 'is-mounted': isMounted }">
     <div class="welcome-card">
       <h2>Hi Admin, Welcome.</h2>
       <p>Here, you get over view on how your app is doing, and what clients and agents are up to.</p>
@@ -90,6 +99,12 @@ onMounted(() => {
   padding: 32px 40px;
   background: #F8FAFC;
   min-height: 100vh;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.admin-dashboard.is-mounted {
+  opacity: 1;
 }
 
 .dashboard-header {

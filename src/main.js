@@ -5,6 +5,7 @@ import router from './router'
 import tooltipDirective from './directives/tooltip'
 import permissionDirective from './directives/permission'
 import { patchHistoryAPI, enhanceRouter } from './utils/navigation-fixer'
+import { useRoleStore } from './stores/roleStore'
 
 // Apply navigation fixes
 patchHistoryAPI()
@@ -39,6 +40,21 @@ app.config.errorHandler = (err, vm, info) => {
 app.use(pinia)
 app.use(router)
 app.mount('#app')
+
+// Initialize with 'all' role and redirect to landing page
+const initializeApp = () => {
+  const roleStore = useRoleStore()
+  // Force default role to 'all' and redirect to landing
+  roleStore.setRole('all')
+
+  // Redirect to landing page if at root
+  if (router.currentRoute.value.path === '/') {
+    router.push('/landing')
+  }
+}
+
+// Run initialization after app is mounted
+setTimeout(initializeApp, 100)
 
 // Create a global navigation recovery function
 window.__recoverNavigation = () => {

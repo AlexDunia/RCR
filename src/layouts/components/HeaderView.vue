@@ -22,16 +22,24 @@ const currentRole = computed(() => roleStore.currentRole);
 
 // Change user role
 const changeRole = (role) => {
+  // First set the role in the store
   roleStore.setRole(role);
+
+  // Close the menu
   showRoleMenu.value = false;
-  // Redirect to home after role change
-  if (role === 'client') {
-    router.push('/client-dashboard');
-  } else if (role === 'admin') {
-    router.push('/');
-  } else {
-    router.push('/agent-dashboard');
-  }
+
+  // Redirect based on role
+  setTimeout(() => {
+    if (role === 'all') {
+      router.push('/landing');
+    } else if (role === 'client') {
+      router.push('/client-dashboard');
+    } else if (role === 'admin') {
+      router.push('/agents'); // Admin dashboard
+    } else {
+      router.push('/agent-dashboard');
+    }
+  }, 100); // Small delay to ensure role change is processed
 };
 
 // Function to go back to previous page
@@ -336,7 +344,7 @@ const isEducationCreatePage = computed(() => isRoutePath('/admin/education-train
       <img class="profile-image"
         src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1739408381/Screenshot_2025-02-13_015617_mhjgby.png"
         alt="Profile" />
-      <span class="profile-name">{{ currentRole === 'admin' ? 'Admin' : currentRole === 'agent' ? 'Agent' : 'Client' }}</span>
+      <span class="profile-name">{{ currentRole === 'admin' ? 'Admin' : currentRole === 'agent' ? 'Agent' : currentRole === 'client' ? 'Client' : 'All' }}</span>
       <svg class="dropdown-icon" viewBox="0 0 24 24">
         <path d="M7 10l5 5 5-5z" />
       </svg>
@@ -344,6 +352,10 @@ const isEducationCreatePage = computed(() => isRoutePath('/admin/education-train
       <!-- Role switcher dropdown -->
       <div v-if="showRoleMenu" class="role-switcher-menu">
         <div class="role-switcher-header">Switch Role</div>
+        <div class="role-option" :class="{ 'active': currentRole === 'all' }" @click="changeRole('all')">
+          <span class="role-icon all-icon">All</span>
+          <span class="role-name">All</span>
+        </div>
         <div class="role-option" :class="{ 'active': currentRole === 'admin' }" @click="changeRole('admin')">
           <span class="role-icon admin-icon">A</span>
           <span class="role-name">Admin</span>
@@ -660,23 +672,28 @@ input {
 }
 
 .role-option.active {
-  background-color: #e6f7ff;
+  background-color: #f0f7ff;
 }
 
 .role-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   margin-right: 12px;
   font-weight: 600;
   font-size: 12px;
 }
 
+.all-icon {
+  background-color: #6c757d;
+  color: white;
+}
+
 .admin-icon {
-  background-color: #f56a00;
+  background-color: #FF6B6B;
   color: white;
 }
 

@@ -17,9 +17,20 @@ export default function permissionGuard(to, from, next) {
   const roleStore = useRoleStore();
   const userRole = roleStore.currentRole;
 
+  // Special handling for landing page - always allow
+  if (to.path === '/landing') {
+    return next();
+  }
+
   // Skip permission check if route doesn't specify requiredPermissions or allowedRoles
   if (!to.meta.requiredPermissions && !to.meta.allowedRoles) {
     return next();
+  }
+
+  // Special handling for 'all' role - redirect to landing instead of unauthorized
+  if (userRole === 'all' && to.path !== '/landing') {
+    console.log(`Redirecting 'all' role from ${to.path} to landing page`);
+    return next('/landing');
   }
 
   // Layer 1: Check specific role restrictions if defined

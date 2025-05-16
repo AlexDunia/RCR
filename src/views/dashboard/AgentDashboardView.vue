@@ -1,17 +1,23 @@
 re<!-- eslint-disable vue/no-unused-vars -->
 <!-- eslint-disable vue/no-unused-vars -->
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, defineComponent } from 'vue';
 import { useRouter } from 'vue-router';
 import { useLayoutStore } from '@/stores/layout';
 import PropertyList from "@/features/property/PropertyList.vue";
 import SkeletonLoader from "@/ui/SkeletonLoader.vue";
+
+// Define component name for keep-alive caching
+defineComponent({
+  name: 'AgentDashboardView'
+})
 
 const router = useRouter();
 const layoutStore = useLayoutStore();
 
 // Single loading state for the entire dashboard
 const isLoading = ref(true);
+const isMounted = ref(false);
 
 // Metrics Data
 const metrics = ref([
@@ -55,6 +61,9 @@ const handleMarketingToolClick = (tool) => {
 };
 
 onMounted(() => {
+  // Set mounted state immediately
+  isMounted.value = true;
+
   // Ensure layout is properly set
   layoutStore.resetLayout();
 
@@ -65,15 +74,15 @@ onMounted(() => {
     background: '#F4F4F4'
   });
 
-  // Simulate one-time loading rather than staggered loading
+  // Reduce loading time for better UX
   setTimeout(() => {
     isLoading.value = false;
-  }, 600);
+  }, 300); // Reduced from 600ms for faster loading
 });
 </script>
 
 <template>
-  <div class="dashboard-container">
+  <div class="dashboard-container" :class="{ 'is-mounted': isMounted }">
     <div v-if="isLoading" class="dashboard-skeleton">
       <!-- Greeting skeleton -->
       <div class="skeleton-container">
@@ -173,6 +182,12 @@ onMounted(() => {
   margin: 0 auto;
   padding: 20px;
   min-height: calc(100vh - 80px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.dashboard-container.is-mounted {
+  opacity: 1;
 }
 
 .dashboard-skeleton,
@@ -183,8 +198,8 @@ onMounted(() => {
 }
 
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .skeleton-container {
