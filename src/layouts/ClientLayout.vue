@@ -103,18 +103,12 @@
     </div>
 
     <!-- Main Content Area -->
-    <div class="content-area">
-      <!-- Top Header Bar - Conditionally displayed based on layout store -->
+    <div class="client-content-wrapper">
+      <!-- Top Header Bar -->
       <header v-if="!layoutStore.hideHeader" class="header">
-        <div class="search-container">
-          <div class="search-box">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-            <input type="text" placeholder="Search..." class="search-input" />
-            <div class="shortcut">⌘ K</div>
-          </div>
+        <div class="header-left">
+          <h1 class="page-title">{{ pageTitle }}</h1>
+          <p class="page-subtitle" v-if="pageTitle === 'Manage Listings'">Here you can add, remove, and edit properties on your profile</p>
         </div>
 
         <div class="header-actions">
@@ -123,25 +117,25 @@
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
               <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
             </svg>
-            <span class="notification-badge">50</span>
+            <span class="notification-badge">2</span>
           </div>
 
           <div class="messages-icon">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
             </svg>
-            <span class="notification-badge">8+</span>
+            <span class="notification-badge">3</span>
           </div>
 
           <div class="user-dropdown">
             <div class="user-avatar">
               <img
-                src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790261/300_e7yggy.jpg"
-                alt="Alex Dunia"
+                :src="userAvatar"
+                :alt="userName"
               />
             </div>
-            <span class="username">Alex Dunia</span>
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="dropdown-icon">
+            <span class="username">{{ userName }}</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
           </div>
@@ -149,9 +143,9 @@
       </header>
 
       <!-- Main Content -->
-      <main class="main-content">
+      <div class="client-content-area">
         <router-view></router-view>
-      </main>
+      </div>
     </div>
   </div>
 </template>
@@ -208,35 +202,62 @@ watch(
   },
   { immediate: true }
 );
+
+// Add userAvatar computed property
+const userAvatar = computed(() => {
+  return 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790261/300_e7yggy.jpg';
+});
 </script>
 
 <style scoped>
+/* Add these global styles at the top of your style section */
+:root {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+  margin: 0;
+  padding: 0;
+}
+
 /* Main Layout */
 .client-layout {
   display: flex;
   min-height: 100vh;
   background-color: #ffffff;
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  position: relative;
 }
 
 /* Sidebar Styles */
 .sidebar {
-  width: 280px;
-  background-color: #0a4d8c;
+  width: 300px;
+  background: linear-gradient(180deg, #0a4d8c 0%, #063a6d 100%);
   color: white;
   display: flex;
   flex-direction: column;
   position: fixed;
+  left: 0;
+  top: 0;
   height: 100vh;
   z-index: 10;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
 }
 
 .logo-container {
-  padding: 25px 20px;
+  padding: 28px 24px;
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .logo {
@@ -245,56 +266,69 @@ watch(
 }
 
 .company-name {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
   color: white;
   line-height: 1;
+  letter-spacing: -0.5px;
 }
 
 .tagline {
-  font-size: 10px;
-  letter-spacing: 0.5px;
-  opacity: 0.7;
+  font-size: 11px;
+  letter-spacing: 1px;
+  opacity: 0.8;
+  margin-top: 4px;
 }
 
 .sidebar-nav {
   flex-grow: 1;
   overflow-y: auto;
-  padding-top: 10px;
+  padding-top: 16px;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
-  padding: 14px 20px;
-  margin: 4px 0;
-  color: rgba(255, 255, 255, 0.8);
+  padding: 14px 24px;
+  margin: 4px 16px;
+  color: rgba(255, 255, 255, 0.9);
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   position: relative;
+  border-radius: 8px;
+  font-weight: 500;
 }
 
-.nav-item:hover, .nav-item.active {
+.nav-item:hover {
   color: white;
   background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-item.active {
+  color: white;
+  background: rgba(255, 255, 255, 0.15);
+  font-weight: 600;
 }
 
 .nav-item.active::before {
   content: '';
   position: absolute;
-  left: 0;
-  top: 0;
-  height: 100%;
+  left: -16px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 24px;
   width: 4px;
   background-color: white;
+  border-radius: 0 4px 4px 0;
 }
 
 .nav-icon {
-  margin-right: 14px;
+  margin-right: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 24px;
+  opacity: 0.9;
 }
 
 .section-label {
@@ -351,97 +385,109 @@ watch(
   opacity: 0.7;
 }
 
-/* Content Area Styles */
-.content-area {
+/* Client Content Wrapper - matches main-content from App.vue */
+.client-content-wrapper {
   flex: 1;
-  margin-left: 280px;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  height: 100vh;
+  position: relative;
+  transition: all 0.3s ease;
+  width: calc(100% - 300px);
+  margin-left: 300px;
+}
+
+/* Client Content Area - for the actual content */
+.client-content-area {
+  flex: 1;
+  padding: 30px;
+  overflow-y: auto;
+  background-color: #f8fafc;
 }
 
 .header {
-  height: 70px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 30px;
-  border-bottom: 1px solid #eaecef;
+  padding: 0 32px;
   background-color: white;
+  border-bottom: 1px solid #eaecef;
   position: sticky;
   top: 0;
   z-index: 5;
 }
 
-.search-container {
-  flex: 1;
-  max-width: 500px;
-}
-
-.search-box {
+.header-left {
   display: flex;
-  align-items: center;
-  background-color: #f1f3f5;
-  border-radius: 8px;
-  padding: 0 15px;
-  height: 40px;
-  width: 100%;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.search-icon {
-  color: #6c757d;
-  margin-right: 10px;
+.page-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
 }
 
-.search-input {
-  flex: 1;
-  height: 100%;
-  border: none;
-  background: transparent;
+.page-subtitle {
   font-size: 14px;
-  outline: none;
-}
-
-.shortcut {
-  color: #6c757d;
-  background-color: #e9ecef;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 12px;
-  margin-left: 10px;
+  color: #6b7280;
+  margin: 0;
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 25px;
+  gap: 24px;
 }
 
-.notification-icon, .messages-icon {
+.notification-icon,
+.messages-icon {
   position: relative;
-  color: #343a40;
+  color: #64748b;
   cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.notification-icon:hover,
+.messages-icon:hover {
+  background-color: #f1f5f9;
 }
 
 .notification-badge {
   position: absolute;
-  top: -8px;
-  right: -8px;
-  background-color: #ff3b30;
+  top: -2px;
+  right: -2px;
+  background-color: #ef4444;
   color: white;
-  font-size: 10px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 500;
   border-radius: 10px;
   padding: 2px 6px;
-  min-width: 14px;
+  min-width: 18px;
   text-align: center;
 }
 
 .user-dropdown {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.user-dropdown:hover {
+  background-color: #f1f5f9;
 }
 
 .user-avatar {
@@ -449,7 +495,6 @@ watch(
   height: 36px;
   border-radius: 50%;
   overflow: hidden;
-  border: 1px solid #eaecef;
 }
 
 .user-avatar img {
@@ -461,19 +506,13 @@ watch(
 .username {
   font-size: 14px;
   font-weight: 500;
-}
-
-.main-content {
-  flex: 1;
-  padding: 30px;
-  overflow-y: auto;
-  background-color: #f8f9fa;
+  color: #1a1a1a;
 }
 
 /* Responsive Design */
 @media (max-width: 991px) {
   .sidebar {
-    width: 70px;
+    width: 80px;
     overflow: hidden;
   }
 
@@ -495,8 +534,9 @@ watch(
     margin-right: 0;
   }
 
-  .content-area {
-    margin-left: 70px;
+  .client-content-wrapper {
+    width: calc(100% - 80px);
+    margin-left: 80px;
   }
 
   .user-profile {
@@ -516,7 +556,8 @@ watch(
     transition: transform 0.3s ease;
   }
 
-  .content-area {
+  .client-content-wrapper {
+    width: 100%;
     margin-left: 0;
   }
 
@@ -530,6 +571,24 @@ watch(
 
   .main-content {
     padding: 20px 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    padding: 0 16px;
+  }
+
+  .page-subtitle {
+    display: none;
+  }
+
+  .header-actions {
+    gap: 16px;
+  }
+
+  .username {
+    display: none;
   }
 }
 </style>

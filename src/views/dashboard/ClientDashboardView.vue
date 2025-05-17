@@ -1,143 +1,103 @@
 <template>
   <div class="client-dashboard" :class="{ 'is-mounted': isMounted }">
-    <h1>Welcome to Your Client Dashboard</h1>
+    <!-- Welcome Banner -->
+    <div class="welcome-banner">
+      <h1>Hi {{ userName }}, Welcome.</h1>
+      <p>Here's an overview of your real estate journey and recent activities.</p>
+    </div>
 
-    <div class="dashboard-cards">
-      <!-- Property Summary Card -->
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-header">SAVED PROPERTIES</div>
+        <div class="stat-value">12</div>
+        <div class="stat-action">
+          <span>view</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">VIEWINGS</div>
+        <div class="stat-value">5</div>
+        <div class="stat-action">
+          <span>view</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">DOCUMENTS</div>
+        <div class="stat-value">8</div>
+        <div class="stat-action">
+          <span>view</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-header">MESSAGES</div>
+        <div class="stat-value">3</div>
+        <div class="stat-action">
+          <span>view</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard-grid">
+      <!-- Featured Properties -->
       <div class="dashboard-card">
         <div class="card-header">
-          <h2>My Properties</h2>
-          <router-link to="/client-properties" class="view-all">View All</router-link>
+          <h2>Featured Properties</h2>
+          <router-link to="/client/properties" class="view-all">View All Properties</router-link>
         </div>
-        <div class="card-content">
-          <div class="property-stats">
-            <div class="stat">
-              <span class="stat-number">2</span>
-              <span class="stat-label">Active Searches</span>
-            </div>
-            <div class="stat">
-              <span class="stat-number">3</span>
-              <span class="stat-label">Saved Properties</span>
-            </div>
-            <div class="stat">
-              <span class="stat-number">1</span>
-              <span class="stat-label">Upcoming Tours</span>
-            </div>
-          </div>
-
-          <!-- Sample Properties Preview -->
-          <div class="sample-properties">
-            <div class="sample-property" @click="viewProperty(1)">
-              <div class="property-image">
-                <img src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png" alt="Cedar Grove Estates">
-                <span class="status-badge new">New</span>
-              </div>
-              <div class="property-info">
-                <h3>Cedar Grove Estates</h3>
-                <p>Austin, Texas</p>
-              </div>
-            </div>
-            <div class="sample-property" @click="viewProperty(2)">
-              <div class="property-image">
-                <img src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548284/Rectangle_227_ncwnmz.png" alt="Willow Creek Villa">
-                <span class="status-badge saved">Saved</span>
-              </div>
-              <div class="property-info">
-                <h3>Willow Creek Villa</h3>
-                <p>Boulder, Colorado</p>
-              </div>
+        <div class="property-list">
+          <div class="property-item" v-for="property in featuredProperties" :key="property.id">
+            <img :src="property.image" :alt="property.name" class="property-image">
+            <div class="property-details">
+              <h3>{{ property.name }}</h3>
+              <p class="property-location">{{ property.location }}</p>
+              <p class="property-price">${{ property.price.toLocaleString() }}</p>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Documents Card -->
+      <!-- Recent Documents -->
       <div class="dashboard-card">
         <div class="card-header">
-          <h2>Documents</h2>
-          <router-link to="/client-documents" class="view-all">View All</router-link>
+          <h2>Recent Documents</h2>
+          <router-link to="/client/documents" class="view-all">View All</router-link>
         </div>
-        <div class="card-content">
-          <div class="document-list">
-            <div class="document">
-              <div class="document-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <polyline points="14 2 14 8 20 8"></polyline>
-                  <line x1="16" y1="13" x2="8" y2="13"></line>
-                  <line x1="16" y1="17" x2="8" y2="17"></line>
-                  <polyline points="10 9 9 9 8 9"></polyline>
-                </svg>
-              </div>
-              <div class="document-details">
-                <span class="document-name">Purchase Agreement.pdf</span>
-                <span class="document-date">Added: Jun 2, 2023</span>
-              </div>
+        <div class="documents-list">
+          <div class="document-item" v-for="doc in recentDocuments" :key="doc.id">
+            <div class="document-icon" :class="doc.type">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
             </div>
-            <div class="document">
-              <div class="document-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <polyline points="14 2 14 8 20 8"></polyline>
-                  <line x1="16" y1="13" x2="8" y2="13"></line>
-                  <line x1="16" y1="17" x2="8" y2="17"></line>
-                  <polyline points="10 9 9 9 8 9"></polyline>
-                </svg>
-              </div>
-              <div class="document-details">
-                <span class="document-name">Mortgage Approval.pdf</span>
-                <span class="document-date">Added: May 27, 2023</span>
-              </div>
+            <div class="document-info">
+              <h4>{{ doc.name }}</h4>
+              <p>{{ doc.date }}</p>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Appointments Card -->
+      <!-- Upcoming Viewings -->
       <div class="dashboard-card">
         <div class="card-header">
-          <h2>Upcoming Appointments</h2>
-          <router-link to="/client-appointments" class="view-all">View All</router-link>
+          <h2>Upcoming Viewings</h2>
+          <router-link to="/client/viewings" class="view-all">View Calendar</router-link>
         </div>
-        <div class="card-content">
-          <div class="appointments-note">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"></circle>
-              <line x1="12" y1="16" x2="12" y2="12"></line>
-              <line x1="12" y1="8" x2="12.01" y2="8"></line>
-            </svg>
-            <span>Please contact your agent to schedule viewings.</span>
-          </div>
-          <div class="appointment">
-            <div class="appointment-date">
-              <span class="day">12</span>
-              <span class="month">JUN</span>
+        <div class="viewings-list">
+          <div class="viewing-item" v-for="viewing in upcomingViewings" :key="viewing.id">
+            <div class="viewing-date">
+              <span class="date">{{ viewing.date }}</span>
+              <span class="time">{{ viewing.time }}</span>
             </div>
-            <div class="appointment-details">
-              <h3>Property Viewing</h3>
-              <p>123 Lake View Drive, 2:00 PM</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Messages Card -->
-      <div class="dashboard-card">
-        <div class="card-header">
-          <h2>Recent Messages</h2>
-          <router-link to="/client-messages" class="view-all">View All</router-link>
-        </div>
-        <div class="card-content">
-          <div class="message">
-            <div class="message-avatar">
-              <img src="/images/default-avatar.jpg" alt="Agent avatar">
-            </div>
-            <div class="message-content">
-              <div class="message-header">
-                <span class="message-sender">John Smith (Agent)</span>
-                <span class="message-time">2 hours ago</span>
-              </div>
-              <p class="message-text">I've scheduled a viewing for the property on Lake View Drive next week. Let me know if that works for you.</p>
+            <div class="viewing-details">
+              <h4>{{ viewing.propertyName }}</h4>
+              <p>{{ viewing.address }}</p>
             </div>
           </div>
         </div>
@@ -147,34 +107,84 @@
 </template>
 
 <script setup>
-import { ref, onMounted, defineComponent } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, onMounted, computed } from 'vue';
+import { useRoleStore } from '@/stores/roleStore';
 
-// Define component name for keep-alive caching
-defineComponent({
-  name: 'ClientDashboardView'
-})
-
-const router = useRouter();
+const roleStore = useRoleStore();
 const isMounted = ref(false);
 
-// View property details
-const viewProperty = (propertyId) => {
-  router.push(`/client-property/${propertyId}`);
-};
+// Get user name from role store
+const userName = computed(() => {
+  const user = roleStore.getCurrentUser();
+  return user?.name || 'Client';
+});
+
+// Sample data
+const featuredProperties = [
+  {
+    id: 1,
+    name: "Luxury Waterfront Villa",
+    location: "Miami Beach, FL",
+    price: 1250000,
+    image: "https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548295/newtwoimage1_2_ti4hfi.png"
+  },
+  {
+    id: 2,
+    name: "Modern Downtown Loft",
+    location: "New York, NY",
+    price: 850000,
+    image: "https://res.cloudinary.com/dnuhjsckk/image/upload/v1739548284/Rectangle_227_ncwnmz.png"
+  }
+];
+
+const upcomingViewings = [
+  {
+    id: 1,
+    date: 'Jun 15',
+    time: '2:00 PM',
+    propertyName: 'Luxury Waterfront Villa',
+    address: '123 Ocean Drive, Miami Beach'
+  }
+];
+
+const recentDocuments = [
+  {
+    id: 1,
+    name: 'Purchase Agreement.pdf',
+    type: 'pdf',
+    date: 'Added Jun 12, 2023'
+  },
+  {
+    id: 2,
+    name: 'Property Inspection Report',
+    type: 'doc',
+    date: 'Added Jun 10, 2023'
+  },
+  {
+    id: 3,
+    name: 'Mortgage Pre-Approval',
+    type: 'pdf',
+    date: 'Added Jun 8, 2023'
+  },
+  {
+    id: 4,
+    name: 'Property Tax Statement',
+    type: 'doc',
+    date: 'Added Jun 5, 2023'
+  }
+];
 
 onMounted(() => {
-  // Set mounted flag to true to show content
   setTimeout(() => {
     isMounted.value = true;
-  }, 50); // Small delay to ensure component is fully rendered
+  }, 50);
 });
 </script>
 
 <style scoped>
 .client-dashboard {
   padding: 24px;
-  max-width: 1400px;
+  max-width: 1600px;
   margin: 0 auto;
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -184,313 +194,249 @@ onMounted(() => {
   opacity: 1;
 }
 
-h1 {
+.welcome-banner {
+  background: linear-gradient(to right, #e6ffe6, #e6f3ff);
+  padding: 24px;
+  border-radius: 12px;
   margin-bottom: 24px;
-  font-size: 28px;
-  font-weight: 600;
-  color: #333;
 }
 
-.dashboard-cards {
+.welcome-banner h1 {
+  font-size: 24px;
+  color: #1a237e;
+  margin: 0;
+  font-weight: 600;
+}
+
+.welcome-banner p {
+  margin: 8px 0 0;
+  color: #546e7a;
+  font-size: 16px;
+}
+
+.stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.stat-header {
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  font-size: 32px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 8px;
+}
+
+.stat-action {
+  color: #3b82f6;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.stat-action:hover {
+  text-decoration: underline;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 24px;
 }
 
 .dashboard-card {
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   overflow: hidden;
-  height: 100%;
-  animation: cardFadeIn 0.4s ease forwards;
-}
-
-@keyframes cardFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .card-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid #eee;
 }
 
 .card-header h2 {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
+  color: #1e293b;
   margin: 0;
-  color: #333;
 }
 
 .view-all {
-  color: #1a4189;
-  font-size: 14px;
+  color: #3b82f6;
   text-decoration: none;
+  font-size: 14px;
 }
 
 .view-all:hover {
   text-decoration: underline;
 }
 
-.card-content {
+/* Property List */
+.property-list {
   padding: 20px;
 }
 
-/* Property Stats */
-.property-stats {
-  display: flex;
-  justify-content: space-around;
-  margin-bottom: 20px;
-}
-
-.stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-
-.stat-number {
-  font-size: 24px;
-  font-weight: 600;
-  color: #1a4189;
-}
-
-.stat-label {
-  font-size: 14px;
-  color: #666;
-  margin-top: 4px;
-}
-
-/* Sample Properties Styles */
-.sample-properties {
+.property-item {
   display: flex;
   gap: 16px;
-  overflow-x: auto;
-  padding-bottom: 8px;
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
 }
 
-.sample-property {
-  flex: 0 0 200px;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.sample-property:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+.property-item:last-child {
+  border-bottom: none;
 }
 
 .property-image {
-  position: relative;
-  height: 120px;
-}
-
-.property-image img {
-  width: 100%;
-  height: 100%;
+  width: 120px;
+  height: 80px;
   object-fit: cover;
+  border-radius: 8px;
 }
 
-.status-badge {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 11px;
+.property-details h3 {
+  margin: 0 0 4px;
+  font-size: 15px;
   font-weight: 600;
-  background-color: rgba(255, 255, 255, 0.85);
+  color: #1e293b;
 }
 
-.status-badge.new {
-  background-color: #f9f0ff;
-  color: #722ed1;
-}
-
-.status-badge.saved {
-  background-color: #f6ffed;
-  color: #52c41a;
-}
-
-.property-info {
-  padding: 12px;
-}
-
-.property-info h3 {
-  margin: 0 0 4px 0;
+.property-location {
+  margin: 0 0 4px;
   font-size: 14px;
-  font-weight: 600;
-  color: #333;
+  color: #64748b;
 }
 
-.property-info p {
+.property-price {
   margin: 0;
-  font-size: 12px;
-  color: #666;
+  font-size: 16px;
+  font-weight: 600;
+  color: #0f766e;
 }
 
-/* Document Styles */
-.document-list {
+/* Viewings List */
+.viewings-list {
+  padding: 20px;
+}
+
+.viewing-item {
+  display: flex;
+  gap: 16px;
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.viewing-item:last-child {
+  border-bottom: none;
+}
+
+.viewing-date {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  min-width: 80px;
 }
 
-.document {
+.viewing-date .date {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.viewing-date .time {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.viewing-details h4 {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.viewing-details p {
+  margin: 0;
+  font-size: 14px;
+  color: #64748b;
+}
+
+/* Documents List */
+.documents-list {
+  padding: 20px;
+}
+
+.document-item {
   display: flex;
-  align-items: center;
   gap: 12px;
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  align-items: center;
+}
+
+.document-item:last-child {
+  border-bottom: none;
 }
 
 .document-icon {
-  color: #1a4189;
-}
-
-.document-details {
-  display: flex;
-  flex-direction: column;
-}
-
-.document-name {
-  font-weight: 500;
-  color: #333;
-}
-
-.document-date {
-  font-size: 12px;
-  color: #666;
-}
-
-/* Appointments Note Styles */
-.appointments-note {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-  padding: 10px;
-  border-radius: 6px;
-  background-color: #f9f9fa;
-  font-size: 13px;
-  color: #666;
-}
-
-.appointments-note svg {
-  color: #1a4189;
-  flex-shrink: 0;
-}
-
-/* Appointment Styles */
-.appointment {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.appointment-date {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 50px;
+  width: 36px;
+  height: 36px;
   border-radius: 8px;
-  overflow: hidden;
-  background: #f5f5f5;
-}
-
-.day {
-  font-size: 20px;
-  font-weight: 600;
-  background: #1a4189;
-  color: white;
-  width: 100%;
-  text-align: center;
-  padding: 4px 0;
-}
-
-.month {
-  font-size: 14px;
-  color: #333;
-  padding: 4px 0;
-  text-align: center;
-  width: 100%;
-}
-
-.appointment-details h3 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 500;
-  color: #333;
-}
-
-.appointment-details p {
-  margin: 4px 0 0;
-  font-size: 14px;
-  color: #666;
-}
-
-/* Message Styles */
-.message {
+  background-color: #f1f5f9;
   display: flex;
-  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  color: #3b82f6;
 }
 
-.message-avatar img {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.message-content {
-  flex: 1;
-}
-
-.message-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 4px;
-}
-
-.message-sender {
-  font-weight: 500;
-  color: #333;
-}
-
-.message-time {
-  font-size: 12px;
-  color: #666;
-}
-
-.message-text {
-  margin: 0;
+.document-info h4 {
+  margin: 0 0 4px;
   font-size: 14px;
-  color: #444;
-  line-height: 1.4;
+  font-weight: 500;
+  color: #1e293b;
 }
 
-/* Media Queries */
+.document-info p {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+}
+
 @media (max-width: 1200px) {
-  .dashboard-cards {
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
   }
 }
 
-@media (max-width: 768px) {
-  .dashboard-cards {
+@media (max-width: 640px) {
+  .stats-grid {
     grid-template-columns: 1fr;
+  }
+
+  .welcome-banner {
+    padding: 16px;
   }
 
   .client-dashboard {

@@ -41,15 +41,15 @@ app.use(pinia)
 app.use(router)
 app.mount('#app')
 
-// Initialize with 'all' role and redirect to landing page
+// Initialize with client role and redirect to client dashboard
 const initializeApp = () => {
   const roleStore = useRoleStore()
-  // Force default role to 'all' and redirect to landing
-  roleStore.setRole('all')
+  // Set default role to client
+  roleStore.setRole('client')
 
-  // Redirect to landing page if at root
+  // Redirect to client dashboard if at root
   if (router.currentRoute.value.path === '/') {
-    router.push('/landing')
+    router.push('/client-dashboard')
   }
 }
 

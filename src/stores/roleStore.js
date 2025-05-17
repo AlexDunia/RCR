@@ -7,12 +7,12 @@ import { ref } from 'vue'
  * Now uses localStorage to persist role between reloads
  */
 export const useRoleStore = defineStore('role', () => {
-  // Get role from localStorage or default to 'all'
+  // Get role from localStorage or default to 'client'
   const storedRole = localStorage.getItem('userRole');
-  const currentRole = ref(storedRole && ['admin', 'agent', 'client', 'all'].includes(storedRole) ? storedRole : 'all');
+  const currentRole = ref(storedRole && ['admin', 'agent', 'client'].includes(storedRole) ? storedRole : 'client');
 
   // Available roles
-  const availableRoles = ['admin', 'agent', 'client', 'all'];
+  const availableRoles = ['admin', 'agent', 'client'];
 
   // Function to change the current role and save to localStorage
   const setRole = (role) => {
@@ -40,7 +40,7 @@ export const useRoleStore = defineStore('role', () => {
       role: currentRole.value,
       name: currentRole.value === 'admin' ? 'Admin User' :
             currentRole.value === 'agent' ? 'Agent User' :
-            currentRole.value === 'client' ? 'Client User' : 'User'
+            'Client User'
     };
   };
 
@@ -54,11 +54,6 @@ export const useRoleStore = defineStore('role', () => {
 
 // Simple utility for changing roles directly
 export const roleUtil = {
-  setAll: () => {
-    const store = useRoleStore();
-    store.setRole('all');
-    console.log('Role set to all.');
-  },
   setAdmin: () => {
     const store = useRoleStore();
     store.setRole('admin');

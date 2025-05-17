@@ -5,44 +5,14 @@ import TasksLayout from '@/layouts/TasksLayout.vue';
 import EducationLayout from '@/layouts/EducationLayout.vue';
 import permissionGuard from './guards/permissionGuard';
 import { setupRouterDebug } from '@/utils/router-debug';
-import LandingPage from '../views/LandingPage.vue';
+
 // Lazy-loaded route components
 const routes = [
-  // Landing page route (accessible to everyone)
-  {
-    path: '/landing',
-    name: 'Landing',
-    component: LandingPage,
-    meta: {
-      title: 'Welcome to RealCity',
-      description: 'The ultimate real estate management platform',
-      hideHeader: true,
-      allowedRoles: ['admin', 'agent', 'client', 'all']
-    }
-  },
-  // Home route redirect to landing
-  {
-    path: '/home',
-    redirect: '/landing'
-  },
-  // Root path - redirect based on user role
+  // Root path - redirect to client dashboard
   {
     path: '/',
     name: 'Root',
-    redirect: () => {
-      const roleStore = useRoleStore();
-      const currentRole = roleStore.currentRole;
-
-      if (currentRole === 'admin') {
-        return '/admin-dashboard';
-      } else if (currentRole === 'agent') {
-        return '/agent-dashboard';
-      } else if (currentRole === 'client') {
-        return '/client-dashboard';
-      } else {
-        return '/landing';
-      }
-    }
+    redirect: '/client-dashboard'
   },
   // Agents management route (Admin-only)
   {

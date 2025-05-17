@@ -30,9 +30,7 @@ const changeRole = (role) => {
 
   // Redirect based on role
   setTimeout(() => {
-    if (role === 'all') {
-      router.push('/landing');
-    } else if (role === 'client') {
+    if (role === 'client') {
       router.push('/client-dashboard');
     } else if (role === 'admin') {
       router.push('/agents'); // Admin dashboard

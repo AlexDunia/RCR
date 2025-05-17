@@ -253,7 +253,13 @@ onMounted(() => {
 .client-dashboard {
   padding: 24px;
   background-color: #f8fafc;
-  min-height: 100vh;
+  min-height: calc(100vh - 48px); /* Account for padding */
+  width: 100%;
+  max-width: 1200px; /* Reduced from 1400px */
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding-left: 40px; /* Add padding to prevent content from touching edges */
+  padding-right: 40px;
 }
 
 .welcome-card {

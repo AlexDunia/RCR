@@ -28,7 +28,7 @@ const { showNotification, currentNotification, dismissNotification } = useTaskTi
 
 // Check if on landing page
 const isLandingPage = computed(() => {
-  return route.path === '/landing' || route.name === 'Landing' || roleStore.currentRole === 'all';
+  return false; // Landing page no longer exists
 });
 
 // Check if user is an admin - use only roleStore
@@ -49,7 +49,7 @@ const hasSidebar = computed(() => {
 });
 
 // Computed properties for layout settings
-const hideHeader = computed(() => layoutStore.hideHeader || isLandingPage.value);
+const hideHeader = computed(() => false); // Always show header
 const background = computed(() => layoutStore.background);
 
 // Get the current active sidebar component based on role
@@ -177,40 +177,54 @@ const handleAfterEnter = () => {
 </template>
 
 <style>
+/* Reset and base styles */
 html, body {
   margin: 0;
   padding: 0;
-  height: 100%;
-  width: 100%;
+  height: 100vh;
+  width: 100vw;
   overflow: hidden;
+  box-sizing: border-box;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f8fafc;
 }
 
 #app {
-  height: 100%;
-  width: 100%;
+  height: 100vh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 
 .app-container {
   display: flex;
   height: 100vh;
   width: 100vw;
-  background: #F4F4F4;
+  background: #f8fafc;
   overflow: hidden;
-  transition: background 0.3s ease;
-}
-
-.hidden {
-  display: none !important;
+  margin: 0;
+  padding: 0;
 }
 
 /* Sidebar base styles */
-.admin-sidebar, .agent-sidebar, .client-sidebar {
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 250px; /* Match sidebar width from AdminSidebar.vue */
+.admin-sidebar,
+.agent-sidebar,
+.client-sidebar {
+  width: 280px;
+  min-width: 280px;
   height: 100vh;
-  z-index: 10;
+  background-color: #0a4d8c;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-content {
+  padding: 0 24px;
 }
 
 /* Main content styles */
@@ -219,31 +233,177 @@ html, body {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  background-color: #f8fafc;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* Header styles */
+.header {
+  height: 80px;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  width: 100%;
+  box-sizing: border-box;
   position: relative;
-  transition: all 0.3s ease;
-  width: 100%;
-  margin-left: 0;
+  z-index: 10;
 }
 
-/* Apply sidebar margin when any sidebar is visible */
-.main-content.with-sidebar {
-  width: 100%;
+.header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0; /* Allow shrinking */
 }
 
+.page-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.page-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px; /* Reduced from 24px */
+  margin-left: auto;
+  flex-shrink: 0; /* Prevent shrinking */
+}
+
+.search-container {
+  max-width: 480px;
+  width: 100%;
+  position: relative;
+  margin: 0 16px; /* Add margin instead of using gap */
+  flex-shrink: 1; /* Allow search to shrink if needed */
+}
+
+.search-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 44px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background-color: #f3f4f6;
+  font-size: 14px;
+  color: #111827;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #0a4d8c;
+  background-color: white;
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
+}
+
+.keyboard-shortcut {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 2px 6px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.notification-icon {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.notification-icon:hover {
+  background-color: #f3f4f6;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background-color: #ef4444;
+  color: white;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.user-profile:hover {
+  background-color: #f3f4f6;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.user-role {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* Content area */
 .scroll-container {
   flex: 1;
+  padding: 24px;
+  background-color: #f8fafc;
   overflow-y: auto;
   overflow-x: hidden;
-  position: relative;
 }
 
-.navigating {
-  pointer-events: none;
-  opacity: 0.8; /* Allow content to remain slightly visible during navigation */
-  transition: opacity 0.2s ease; /* Smooth transition when navigation state changes */
-}
-
-/* Improved fade transition */
+/* Transitions */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.2s ease;
@@ -257,5 +417,120 @@ html, body {
 .fade-enter-to,
 .fade-leave-from {
   opacity: 1;
+}
+
+/* Responsive styles */
+@media (max-width: 991px) {
+  .admin-sidebar,
+  .agent-sidebar,
+  .client-sidebar {
+    width: 80px;
+    min-width: 80px;
+  }
+
+  .sidebar-content {
+    padding: 0 16px;
+  }
+}
+
+@media (max-width: 767px) {
+  .admin-sidebar,
+  .agent-sidebar,
+  .client-sidebar {
+    display: none;
+  }
+
+  .header,
+  .scroll-container,
+  .sidebar-content {
+    padding: 0 16px;
+  }
+
+  .welcome-banner {
+    margin: -16px -16px 16px -16px;
+    padding: 24px 16px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .search-container {
+    max-width: 320px; /* Smaller on medium screens */
+  }
+  .header {
+    padding: 0 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .search-container {
+    display: none; /* Hide search on mobile */
+  }
+  .header-right {
+    gap: 8px;
+  }
+}
+
+/* Scrollbar styles */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Make sure router view content aligns properly */
+.router-view-container {
+  width: 100%;
+  max-width: 1920px;
+  margin: 0 auto;
+}
+
+/* Welcome banner styles */
+.welcome-banner {
+  margin: -24px -24px 24px -24px;
+  padding: 32px 24px;
+  background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+  color: white;
+}
+
+.welcome-banner h1 {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  line-height: 1.2;
+}
+
+.welcome-banner p {
+  font-size: 14px;
+  margin: 0;
+  opacity: 0.9;
+  line-height: 1.4;
+}
+
+/* Content sections */
+.content-section {
+  margin-bottom: 24px;
+}
+
+.content-section:last-child {
+  margin-bottom: 0;
+}
+
+/* Stats grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+  margin-bottom: 24px;
 }
 </style>

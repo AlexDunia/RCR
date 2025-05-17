@@ -17,21 +17,9 @@ export default function permissionGuard(to, from, next) {
   const roleStore = useRoleStore();
   const userRole = roleStore.currentRole;
 
-  // Special handling for landing page - always allow
-  if (to.path === '/landing') {
-    return next();
-  }
-
   // Skip permission check if route doesn't specify requiredPermissions or allowedRoles
   if (!to.meta.requiredPermissions && !to.meta.allowedRoles) {
     return next();
-  }
-
-  // Special handling for 'all' role - allow public pages
-  const publicPaths = ['/landing', '/login', '/signup', '/blog', '/careers', '/terms', '/about', '/privacy', '/find-agents'];
-  if (userRole === 'all' && !publicPaths.includes(to.path)) {
-    console.log(`Redirecting 'all' role from ${to.path} to landing page`);
-    return next('/landing');
   }
 
   // Layer 1: Check specific role restrictions if defined
@@ -42,27 +30,15 @@ export default function permissionGuard(to, from, next) {
     }
   }
 
-  // Layer 2: Check permissions
+  // Layer 2: Check specific permissions if defined
   if (to.meta.requiredPermissions) {
-    const requiredPermissions = to.meta.requiredPermissions;
-    const hasRequiredPermission = Array.isArray(requiredPermissions)
-      ? requiredPermissions.some(permission => hasPermission(permission, userRole))
-      : hasPermission(requiredPermissions, userRole);
-
-    if (!hasRequiredPermission) {
-      console.error(`Access denied: User lacks required permissions for ${to.path}`);
+    const hasRequiredPermissions = hasPermission(to.meta.requiredPermissions);
+    if (!hasRequiredPermissions) {
+      console.error(`Access denied: Missing required permissions for ${to.path}`);
       return next({ name: 'Unauthorized', query: { redirect: to.fullPath, reason: 'permission' } });
     }
   }
 
-  // Layer 3: Special protection for sensitive routes
-  if (to.path.includes('/marketing-tools/create')) {
-    if (userRole !== 'admin' || !hasPermission('create-marketing-plans', userRole)) {
-      console.error(`Security breach attempt: Unauthorized access to ${to.path}`);
-      return next({ name: 'Unauthorized', query: { redirect: to.fullPath, reason: 'security' } });
-    }
-  }
-
-  // All checks passed, allow access
+  // If all checks pass, allow navigation
   next();
 }
