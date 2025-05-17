@@ -23,6 +23,21 @@
       </nav>
       <!-- Auth Buttons Right -->
       <div class="header__auth">
+        <div v-if="roleStore.currentRole === 'all'" class="role-switcher">
+          <button @click="toggleRoleDropdown" class="role-switcher__button">
+            {{ roleStore.currentRole }} <span class="dropdown-arrow">▼</span>
+          </button>
+          <div v-if="showRoleDropdown" class="role-switcher__dropdown">
+            <button
+              v-for="role in roleStore.availableRoles"
+              :key="role"
+              @click="switchRole(role)"
+              :class="['role-switcher__option', { 'role-switcher__option--active': roleStore.currentRole === role }]"
+            >
+              {{ role }}
+            </button>
+          </div>
+        </div>
         <router-link to="/signup" class="header__sign-in">Sign in</router-link>
         <router-link to="/login" class="header__login">Login</router-link>
       </div>
@@ -31,7 +46,13 @@
 </template>
 
 <script setup>
-import { defineProps } from 'vue';
+import { defineProps, ref, onMounted, onUnmounted } from 'vue';
+import { useRoleStore } from '@/stores/roleStore';
+import { useRouter } from 'vue-router';
+
+const roleStore = useRoleStore();
+const router = useRouter();
+const showRoleDropdown = ref(false);
 
 defineProps({
   transparent: {
@@ -42,6 +63,50 @@ defineProps({
     type: Boolean,
     default: false
   }
+});
+
+const toggleRoleDropdown = () => {
+  showRoleDropdown.value = !showRoleDropdown.value;
+};
+
+const switchRole = async (role) => {
+  roleStore.setRole(role);
+  showRoleDropdown.value = false;
+
+  // Navigate based on role
+  switch (role) {
+    case 'admin':
+      await router.push('/admin-dashboard');
+      break;
+    case 'agent':
+      await router.push('/agent-dashboard');
+      break;
+    case 'client':
+      await router.push('/client-dashboard');
+      break;
+    case 'all':
+      await router.push('/landing');
+      break;
+    default:
+      await router.push('/landing');
+  }
+};
+
+// Close dropdown when clicking outside
+const handleClickOutside = (event) => {
+  const dropdown = document.querySelector('.role-switcher');
+  if (dropdown && !dropdown.contains(event.target)) {
+    showRoleDropdown.value = false;
+  }
+};
+
+// Add and remove click outside listener
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside);
 });
 </script>
 
@@ -168,5 +233,73 @@ defineProps({
   .header__nav {
     display: none;
   }
+}
+
+.role-switcher {
+  position: relative;
+  margin-right: 1rem;
+}
+
+.role-switcher__button {
+  padding: 0.625rem 1.5rem;
+  border-radius: 0.5rem;
+  border: none;
+  background: var(--role-switcher-bg, #f3f4f6);
+  color: #1a1a1a;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background 0.2s;
+}
+
+.transparent .role-switcher__button {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.role-switcher__button:hover {
+  background: var(--role-switcher-hover-bg, #e5e7eb);
+}
+
+.role-switcher__dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 0.5rem;
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  min-width: 120px;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.role-switcher__option {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: none;
+  color: #1a1a1a;
+  font-size: 0.875rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.role-switcher__option:hover {
+  background: #f3f4f6;
+}
+
+.role-switcher__option--active {
+  background: #e5e7eb;
+  font-weight: 500;
+}
+
+.dropdown-arrow {
+  font-size: 0.75rem;
+  opacity: 0.7;
 }
 </style>

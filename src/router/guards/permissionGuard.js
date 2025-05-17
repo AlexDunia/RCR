@@ -17,28 +17,49 @@ export default function permissionGuard(to, from, next) {
   const roleStore = useRoleStore();
   const userRole = roleStore.currentRole;
 
-  // Skip permission check if route doesn't specify requiredPermissions or allowedRoles
+  // Allow access to public routes regardless of role
+  if (to.meta.publicAccess || to.path === '/landing') {
+    return next();
+  }
+
+  // If role is 'all', only allow access to landing and public routes
+  if (userRole === 'all' && !to.meta.publicAccess) {
+    return next('/landing');
+  }
+
+  // Skip permission check if no permissions are required
   if (!to.meta.requiredPermissions && !to.meta.allowedRoles) {
     return next();
   }
 
-  // Layer 1: Check specific role restrictions if defined
-  if (to.meta.allowedRoles && Array.isArray(to.meta.allowedRoles)) {
-    if (!to.meta.allowedRoles.includes(userRole)) {
-      console.error(`Access denied: User role ${userRole} not in allowed roles for ${to.path}`);
-      return next({ name: 'Unauthorized', query: { redirect: to.fullPath, reason: 'role' } });
-    }
+  // Check if user has required role
+  if (to.meta.allowedRoles && !to.meta.allowedRoles.includes(userRole)) {
+    return next({
+      path: '/unauthorized',
+      query: {
+        redirect: to.fullPath,
+        reason: 'role'
+      }
+    });
   }
 
-  // Layer 2: Check specific permissions if defined
+  // Check if user has required permissions
   if (to.meta.requiredPermissions) {
-    const hasRequiredPermissions = hasPermission(to.meta.requiredPermissions);
-    if (!hasRequiredPermissions) {
-      console.error(`Access denied: Missing required permissions for ${to.path}`);
-      return next({ name: 'Unauthorized', query: { redirect: to.fullPath, reason: 'permission' } });
+    const hasRequiredPermission = to.meta.requiredPermissions.every(permission =>
+      hasPermission(permission)
+    );
+
+    if (!hasRequiredPermission) {
+      return next({
+        path: '/unauthorized',
+        query: {
+          redirect: to.fullPath,
+          reason: 'permission'
+        }
+      });
     }
   }
 
-  // If all checks pass, allow navigation
+  // If all checks pass, proceed with navigation
   next();
 }

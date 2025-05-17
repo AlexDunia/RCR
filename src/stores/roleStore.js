@@ -9,10 +9,10 @@ import { ref } from 'vue'
 export const useRoleStore = defineStore('role', () => {
   // Get role from localStorage or default to 'client'
   const storedRole = localStorage.getItem('userRole');
-  const currentRole = ref(storedRole && ['admin', 'agent', 'client'].includes(storedRole) ? storedRole : 'client');
+  const currentRole = ref(storedRole && ['all', 'admin', 'agent', 'client'].includes(storedRole) ? storedRole : 'client');
 
   // Available roles
-  const availableRoles = ['admin', 'agent', 'client'];
+  const availableRoles = ['all', 'admin', 'agent', 'client'];
 
   // Function to change the current role and save to localStorage
   const setRole = (role) => {
@@ -40,6 +40,7 @@ export const useRoleStore = defineStore('role', () => {
       role: currentRole.value,
       name: currentRole.value === 'admin' ? 'Admin User' :
             currentRole.value === 'agent' ? 'Agent User' :
+            currentRole.value === 'all' ? 'All Access User' :
             'Client User'
     };
   };

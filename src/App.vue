@@ -10,7 +10,7 @@ import Sidebar from './layouts/components/SidebarView.vue';
 import AdminSidebar from './layouts/components/AdminSidebar.vue'; // Import Admin Sidebar
 import ClientSidebar from './layouts/components/ClientSidebar.vue'; // Import Client Sidebar
 import Header from './layouts/components/HeaderView.vue';
-// import AdminHeader from './layouts/admin/AdminHeader.vue';
+import PublicHeader from '@/components/PublicHeader.vue';
 import TaskNotification from './components/TaskNotification.vue';
 
 import '@fontsource/poppins';
@@ -28,7 +28,7 @@ const { showNotification, currentNotification, dismissNotification } = useTaskTi
 
 // Check if on landing page
 const isLandingPage = computed(() => {
-  return false; // Landing page no longer exists
+  return roleStore.currentRole === 'all' || route.path === '/landing';
 });
 
 // Check if user is an admin - use only roleStore
@@ -80,6 +80,10 @@ onMounted(() => {
       return next(false);
     }
 
+    if (to.path === '/landing') {
+      roleStore.setRole('all');
+    }
+
     next();
   });
 
@@ -111,22 +115,12 @@ const clearRouterCache = () => {
   });
 };
 
-// Watch route changes to update header title
-watch(route, (to) => {
-  if (to.meta && to.meta.title) {
-    headerStore.setTitle(to.meta.title);
-  } else {
-    headerStore.setTitle('Dashboard');
-  }
-
-  console.log(`App.vue - Route changed to: ${to.path}`);
-
-  // Reset scroll position
-  handleRouteChange();
-}, { immediate: true });
-
 // Add scroll management
 const handleRouteChange = () => {
+  // Force scroll to top
+  window.scrollTo(0, 0);
+
+  // Also reset scroll position of main content
   const mainContent = document.querySelector('.main-content');
   if (mainContent) {
     mainContent.scrollTop = 0;
@@ -137,32 +131,82 @@ const handleRouteChange = () => {
 const handleBeforeLeave = () => {
   // Make sure we're in navigating state when transition starts
   isNavigating.value = true;
+  // Force scroll to top before transition
+  window.scrollTo(0, 0);
 };
 
 const handleAfterEnter = () => {
   // Clear navigation state when transition completes
   isNavigating.value = false;
-
-  // Reset scroll position
-  handleRouteChange();
+  // Ensure scroll position is reset and component is properly mounted
+  nextTick(() => {
+    window.scrollTo(0, 0);
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) {
+      mainContent.scrollTop = 0;
+    }
+  });
 };
+
+// Watch route changes to update header title and handle scroll
+watch(route, (to) => {
+  if (to.meta && to.meta.title) {
+    headerStore.setTitle(to.meta.title);
+  } else {
+    headerStore.setTitle('Dashboard');
+  }
+
+  console.log(`App.vue - Route changed to: ${to.path}`);
+
+  // Reset scroll position on route change
+  handleRouteChange();
+}, { immediate: true });
+
+// Watch route changes
+watch(
+  () => route.path,
+  (newPath) => {
+    if (newPath === '/landing') {
+      // Force role update when landing on landing page
+      roleStore.setRole('all');
+      // Force immediate scroll reset for landing page
+      nextTick(() => {
+        window.scrollTo(0, 0);
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) {
+          mainContent.scrollTop = 0;
+        }
+      });
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
   <div class="app-container" :style="{ background: background }">
+    <!-- Show PublicHeader for 'all' role or landing page -->
+    <PublicHeader v-if="roleStore.currentRole === 'all' || route.path === '/landing'" :transparent="true" :is-fixed="true" />
+
     <!-- Dynamic sidebar based on role (only when not on landing page) -->
     <component v-if="!isLandingPage" :is="activeSidebar" :key="'sidebar-' + roleStore.currentRole" />
 
     <!-- Main content container with sidebar-adjusted class -->
-    <div class="main-content" :class="{ 'with-sidebar': hasSidebar }">
-      <Header v-if="!hideHeader"/>
+    <div class="main-content" :class="{ 'with-sidebar': hasSidebar && !isLandingPage, 'landing-page': isLandingPage }">
+      <Header v-if="!hideHeader && !isLandingPage"/>
 
       <div class="scroll-container" :class="{ 'navigating': isNavigating }">
-        <router-view v-slot="{ Component, route }">
-          <transition name="fade" mode="out-in" @before-leave="handleBeforeLeave" @after-enter="handleAfterEnter">
-            <keep-alive include="AdminDashboardView,AgentDashboardView,ClientDashboardView">
-              <component :is="Component" :key="route.fullPath" />
-            </keep-alive>
+        <router-view v-slot="{ Component }">
+          <transition
+            :name="route.path === '/landing' ? 'none' : 'fade'"
+            mode="out-in"
+            @before-leave="handleBeforeLeave"
+            @after-enter="handleAfterEnter"
+          >
+            <component
+              :is="Component"
+              :key="route.fullPath + (route.path === '/landing' ? Date.now() : '')"
+            />
           </transition>
         </router-view>
 
@@ -236,6 +280,35 @@ html, body {
   background-color: #f8fafc;
   max-width: 100vw;
   overflow-x: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+/* When role is 'all', remove sidebar and header spacing */
+.main-content:not(.with-sidebar) {
+  margin-left: 0;
+  padding-left: 0;
+}
+
+/* Ensure full width for landing page */
+.main-content.landing-page {
+  width: 100vw;
+  max-width: 100vw;
+  overflow-x: hidden;
+  padding: 0;
+  margin: 0;
+  background-color: #fff;
+  position: relative;
+}
+
+.main-content.landing-page .scroll-container {
+  padding: 0;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: #fff;
+  position: relative;
+  z-index: 1;
 }
 
 /* Header styles */
@@ -246,7 +319,7 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
+  padding: 12px 24px;
   width: 100%;
   box-sizing: border-box;
   position: relative;
@@ -401,12 +474,13 @@ html, body {
   background-color: #f8fafc;
   overflow-y: auto;
   overflow-x: hidden;
+  position: relative;
 }
 
 /* Transitions */
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.2s ease;
+  transition: opacity 0.15s ease;
 }
 
 .fade-enter-from,
@@ -414,9 +488,20 @@ html, body {
   opacity: 0;
 }
 
-.fade-enter-to,
-.fade-leave-from {
+/* No transition for landing page */
+.none-enter-active,
+.none-leave-active {
+  transition: none;
+}
+
+.none-enter-from,
+.none-leave-to {
   opacity: 1;
+}
+
+/* Navigation state */
+.navigating {
+  pointer-events: none;
 }
 
 /* Responsive styles */
@@ -457,7 +542,7 @@ html, body {
     max-width: 320px; /* Smaller on medium screens */
   }
   .header {
-    padding: 0 16px;
+    padding: 12px 16px;
   }
 }
 
@@ -532,5 +617,15 @@ html, body {
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 24px;
   margin-bottom: 24px;
+}
+
+/* Add PublicHeader styles */
+.public-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: transparent;
 }
 </style>

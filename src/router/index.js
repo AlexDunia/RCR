@@ -8,11 +8,49 @@ import { setupRouterDebug } from '@/utils/router-debug';
 
 // Lazy-loaded route components
 const routes = [
-  // Root path - redirect to client dashboard
+  // Landing page - accessible to all
+  {
+    path: '/landing',
+    name: 'Landing',
+    component: () => import('@/views/LandingPage.vue'),
+    meta: {
+      hideHeader: true,
+      hideSidebar: true,
+      layout: 'public',
+      shouldReload: true,
+      noCache: true
+    },
+    beforeEnter: (to, from, next) => {
+      const roleStore = useRoleStore();
+      // Force role to 'all' when entering landing page
+      roleStore.setRole('all');
+      // Clear any cached components
+      if (from.name) {
+        to.meta.reload = true;
+      }
+      next();
+    }
+  },
+  // Root path - redirect based on role
   {
     path: '/',
     name: 'Root',
-    redirect: '/client-dashboard'
+    beforeEnter: (to, from, next) => {
+      const roleStore = useRoleStore();
+      const role = roleStore.currentRole;
+
+      if (role === 'all') {
+        next('/landing');
+      } else if (role === 'admin') {
+        next('/agents');
+      } else if (role === 'agent') {
+        next('/agent-dashboard');
+      } else if (role === 'client') {
+        next('/client-dashboard');
+      } else {
+        next('/landing');
+      }
+    }
   },
   // Agents management route (Admin-only)
   {
@@ -879,39 +917,63 @@ const routes = [
     }
   },
   {
-    path: '/blog',
-    name: 'blog',
-    component: () => import('../views/BlogView.vue')
-  },
-  {
-    path: '/blog/:id',
-    name: 'blog-detail',
-    component: () => import('../views/BlogDetailView.vue')
+    path: '/about',
+    name: 'About',
+    component: () => import('@/views/public/AboutView.vue'),
+    meta: {
+      title: 'About Us',
+      description: 'Learn more about our company',
+      publicAccess: true
+    }
   },
   {
     path: '/careers',
     name: 'Careers',
     component: () => import('@/views/public/CareersView.vue'),
-    meta: { title: 'Careers', allowedRoles: ['all', 'admin', 'agent', 'client'] }
+    meta: {
+      title: 'Careers',
+      description: 'Join our team',
+      publicAccess: true
+    }
   },
   {
     path: '/terms',
     name: 'Terms',
     component: () => import('@/views/public/TermsView.vue'),
-    meta: { title: 'Terms of Service', allowedRoles: ['all', 'admin', 'agent', 'client'] }
-  },
-  {
-    path: '/about',
-    name: 'About',
-    component: () => import('@/views/public/AboutView.vue'),
-    meta: { title: 'About Us', allowedRoles: ['all', 'admin', 'agent', 'client'] }
+    meta: {
+      title: 'Terms & Conditions',
+      description: 'Read our terms and conditions',
+      publicAccess: true
+    }
   },
   {
     path: '/privacy',
     name: 'Privacy',
     component: () => import('@/views/public/PrivacyView.vue'),
-    meta: { title: 'Privacy Policy', allowedRoles: ['all', 'admin', 'agent', 'client'] }
+    meta: {
+      title: 'Privacy Policy',
+      description: 'Read our privacy policy',
+      publicAccess: true
+    }
   },
+      {
+      path: '/blog',
+      name: 'Blog',
+      component: () => import('@/views/BlogView.vue'),
+      meta: {
+        title: 'Blog',
+        description: 'Read our latest updates and insights',
+        publicAccess: true
+      }
+    },
+      {
+      path: '/blog/:id',
+      name: 'BlogDetail',
+      component: () => import('@/views/BlogDetailView.vue'),
+      meta: {
+        publicAccess: true
+      }
+    },
   {
     path: '/find-agents',
     name: 'FindAgents',
@@ -930,13 +992,23 @@ const routes = [
 const router = createRouter({
   history: createWebHashHistory(),
   routes,
-  scrollBehavior(to, from, savedPosition) {
-    if (savedPosition) {
-      return savedPosition;
-    } else {
-      return { top: 0 };
+  scrollBehavior() {
+    return { top: 0 }
+  }
+});
+
+// Add global navigation guard for landing page
+router.beforeEach((to, from, next) => {
+  // If navigating to landing page
+  if (to.path === '/landing') {
+    // Force component reload by adding timestamp to the route
+    to.query = { ...to.query, _t: Date.now() };
+    // Clear any cached components
+    if (from.name) {
+      to.meta.reload = true;
     }
   }
+  next();
 });
 
 // Set up permission guard

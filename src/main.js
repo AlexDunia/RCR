@@ -44,12 +44,23 @@ app.mount('#app')
 // Initialize with client role and redirect to client dashboard
 const initializeApp = () => {
   const roleStore = useRoleStore()
-  // Set default role to client
-  roleStore.setRole('client')
+  const currentRole = localStorage.getItem('userRole')
 
-  // Redirect to client dashboard if at root
-  if (router.currentRoute.value.path === '/') {
-    router.push('/client-dashboard')
+  // Only set default role if none exists
+  if (!currentRole) {
+    roleStore.setRole('client')
+  }
+
+  // Only redirect to dashboard if not in 'all' role and at root
+  if (router.currentRoute.value.path === '/' && roleStore.currentRole !== 'all') {
+    const role = roleStore.currentRole
+    if (role === 'admin') {
+      router.push('/agents')
+    } else if (role === 'agent') {
+      router.push('/agent-dashboard')
+    } else if (role === 'client') {
+      router.push('/client-dashboard')
+    }
   }
 }
 

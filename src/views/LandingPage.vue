@@ -1,64 +1,7 @@
 <template>
   <div class="landing-page">
-    <!-- Header with Role Switcher -->
-    <header class="header">
-      <div class="container header__container header__container--figma">
-        <!-- Logo Left -->
-        <div class="header__logo">
-          <h2>Real City</h2>
-          <span class="header__tagline">realty inc brokerage</span>
-        </div>
-        <!-- Nav Center -->
-        <nav class="header__nav header__nav--center">
-          <a href="#" class="header__nav-link">Buy</a>
-          <a href="#" class="header__nav-link">Rent</a>
-          <a href="#" class="header__nav-link">Sell</a>
-          <div class="header__nav-dropdown">
-            <a href="#" class="header__nav-link">Agent <span class="dropdown-arrow">▼</span></a>
-          </div>
-        </nav>
-        <!-- Role Switcher (add back, white text/icons) -->
-        <div class="role-switcher">
-          <div class="profile-section" @click="toggleRoleMenu">
-            <img class="profile-image"
-              src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1739408381/Screenshot_2025-02-13_015617_mhjgby.png"
-              alt="Profile" />
-            <span class="profile-name">{{ currentRole === 'all' ? 'All' : currentRole === 'admin' ? 'Admin' : currentRole === 'agent' ? 'Agent' : 'Client' }}</span>
-            <svg class="dropdown-icon" viewBox="0 0 24 24">
-              <path d="M7 10l5 5 5-5z" />
-            </svg>
-            <!-- Role switcher dropdown -->
-            <div v-if="showRoleMenu" class="role-switcher-menu">
-              <div class="role-switcher-header">Switch Role</div>
-              <div class="role-option" :class="{ 'active': currentRole === 'all' }" @click="changeRole('all')">
-                <span class="role-icon all-icon">All</span>
-                <span class="role-name">All</span>
-              </div>
-              <div class="role-option" :class="{ 'active': currentRole === 'admin' }" @click="changeRole('admin')">
-                <span class="role-icon admin-icon">A</span>
-                <span class="role-name">Admin</span>
-              </div>
-              <div class="role-option" :class="{ 'active': currentRole === 'agent' }" @click="changeRole('agent')">
-                <span class="role-icon agent-icon">Ag</span>
-                <span class="role-name">Agent</span>
-              </div>
-              <div class="role-option" :class="{ 'active': currentRole === 'client' }" @click="changeRole('client')">
-                <span class="role-icon client-icon">C</span>
-                <span class="role-name">Client</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- Auth Buttons Right -->
-        <div class="header__auth header__auth--figma">
-          <router-link to="/signup" class="header__sign-in header__sign-in--figma">Sign in</router-link>
-          <router-link to="/login" class="header__login header__login--figma">Login</router-link>
-        </div>
-      </div>
-    </header>
-
     <!-- Hero Section -->
-    <section class="hero">
+    <section id="hero-section" class="hero">
       <div class="hero__overlay"></div>
       <div class="container hero__container--figma">
         <div class="hero__content">
@@ -114,29 +57,52 @@
     <!-- Featured Properties Section -->
     <section class="featured featured--figma">
       <div class="container">
-        <h2 class="featured__title featured__title--figma">Find the best place for you.</h2>
+        <h2 class="featured__title--figma">Find the best place for you.</h2>
         <div class="property-grid--figma">
-          <template v-if="propertyStore.loading">
-            <div v-for="n in 8" :key="n" class="property-card--figma skeleton-card">
-              <div class="skeleton-img"></div>
-              <div class="skeleton-text skeleton-title"></div>
-              <div class="skeleton-text skeleton-price"></div>
-              <div class="skeleton-text skeleton-address"></div>
+          <div class="property-card--figma">
+            <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9" alt="Cedar Grove Estates" class="property-card__img--figma">
+            <div class="property-card__content--figma">
+              <h3 class="property-card__title--figma">Cedar Grove Estates</h3>
+              <div class="property-card__price--figma">$25,000</div>
+              <div class="property-card__address--figma">
+                <svg class="property-card__address-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                123 Cedar Grove, Austin, TX 78701
             </div>
-          </template>
-          <template v-else>
-            <div v-for="property in propertyStore.properties" :key="property.id" class="property-card--figma">
-              <img :src="property.image" :alt="property.name" class="property-card__img--figma">
+            </div>
+          </div>
+          <div class="property-card--figma">
+            <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6" alt="Willow Creek Villa" class="property-card__img--figma">
               <div class="property-card__content--figma">
-                <h3 class="property-card__title--figma">{{ property.name }}</h3>
-                <div class="property-card__price--figma">{{ property.price }}</div>
+              <h3 class="property-card__title--figma">Willow Creek Villa</h3>
+              <div class="property-card__price--figma">$35,000</div>
                 <div class="property-card__address--figma">
-                  <svg class="property-card__address-icon" width="16" height="16" fill="none" stroke="#0052a5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 10.2C21 16.1 12 22 12 22S3 16.1 3 10.2C3 6.1 7 2 12 2s9 4.1 9 8.2z"/><circle cx="12" cy="10.2" r="2.2"/></svg>
-                  <span>{{ property.address }}</span>
+                <svg class="property-card__address-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                456 Willow Creek, Boulder, CO 80301
                 </div>
               </div>
             </div>
-          </template>
+          <div class="property-card--figma">
+            <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750" alt="Maple Leaf Cottage" class="property-card__img--figma">
+            <div class="property-card__content--figma">
+              <h3 class="property-card__title--figma">Maple Leaf Cottage</h3>
+              <div class="property-card__price--figma">$45,000</div>
+              <div class="property-card__address--figma">
+                <svg class="property-card__address-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                789 Maple Leaf, Portland, OR 97201
+              </div>
+            </div>
+          </div>
+          <div class="property-card--figma">
+            <img src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914" alt="Pine Hill Mansion" class="property-card__img--figma">
+            <div class="property-card__content--figma">
+              <h3 class="property-card__title--figma">Pine Hill Mansion</h3>
+              <div class="property-card__price--figma">$55,000</div>
+              <div class="property-card__address--figma">
+                <svg class="property-card__address-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                101 Pine Hill, Seattle, WA 98101
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -242,7 +208,7 @@
         <div class="faq__right--figma">
           <div v-for="(item, idx) in faqList" :key="item.q" class="faq__item--figma" :class="{ 'faq__item--active': openIdx === idx }">
             <button class="faq__question--figma" @click="toggleFaq(idx)">
-              <span>{{ item.q }}</span>
+              <span class="faq__question-text">{{ item.q }}</span>
               <span class="faq__icon--figma">
                 <svg v-if="openIdx === idx" width="24" height="24" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="2" rx="1" fill="#333"/></svg>
                 <svg v-else width="24" height="24" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="2" rx="1" fill="#333"/><rect x="11" y="5" width="2" height="14" rx="1" fill="#333"/></svg>
@@ -314,57 +280,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRoleStore } from '@/stores/roleStore';
-import { usePropertyStore } from '@/stores/propertyStore';
+import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
 
-const roleStore = useRoleStore();
-const propertyStore = usePropertyStore();
-
-// Role switcher states
-const showRoleMenu = ref(false);
-const currentRole = ref(roleStore.currentRole || 'all');
-
-// Toggle role menu
-const toggleRoleMenu = () => {
-  showRoleMenu.value = !showRoleMenu.value;
-};
-
-// Add click outside handler
-onMounted(() => {
-  // Set role to 'all' when landing page is mounted
-  roleStore.setRole('all');
-  currentRole.value = 'all';
-
-  document.addEventListener('click', (event) => {
-    const profileSection = document.querySelector('.profile-section');
-    if (profileSection && !profileSection.contains(event.target)) {
-      showRoleMenu.value = false;
-    }
-  });
+defineOptions({
+  name: 'LandingPage'
 });
-
-// Change user role
-const changeRole = (role) => {
-  currentRole.value = role;
-  // Set the role in the store
-  roleStore.setRole(role);
-  // Close the menu
-  showRoleMenu.value = false;
-  // Small delay to ensure the role change is processed
-  setTimeout(() => {
-    // Redirect based on role
-    if (role === 'all') {
-      window.location.hash = '/landing';
-    } else if (role === 'client') {
-      window.location.hash = '/client-dashboard';
-    } else if (role === 'admin') {
-      window.location.hash = '/admin-dashboard';
-    } else {
-      window.location.hash = '/agent-dashboard';
-    }
-  }, 100);
-};
 
 const faqList = [
   {
@@ -384,317 +304,43 @@ const faqList = [
     a: 'Use our advanced filters, instant alerts, and agent recommendations to quickly find the best properties for you.'
   }
 ];
+
+const isVisible = ref(false);
 const openIdx = ref(null);
+const activeTab = ref('Buy');
+
 function toggleFaq(idx) {
   openIdx.value = openIdx.value === idx ? null : idx;
 }
 
-const activeTab = ref('Sell');
+onMounted(async () => {
+  // Reset all reactive states
+  openIdx.value = null;
+  activeTab.value = 'Buy';
+
+  // Force scroll to top
+  window.scrollTo(0, 0);
+
+  // Ensure component is visible after mount
+  await nextTick();
+  isVisible.value = true;
+});
+
+onBeforeUnmount(() => {
+  // Clean up component state
+  isVisible.value = false;
+  openIdx.value = null;
+});
 </script>
 
 <style scoped>
-/* Root Variables */
-:root {
-  --color-primary: #004fa3;
-  --color-primary-dark: #003b7a;
-  --color-secondary: #4f46e5;
-  --color-accent: #f97316;
-  --color-white: #ffffff;
-  --color-black: #000000;
-  --color-text: #333333;
-  --color-text-light: #666666;
-  --color-light-gray: #f5f5f5;
-  --color-border: #e5e5e5;
-
-  --spacing-xs: 4px;
-  --spacing-sm: 8px;
-  --spacing-md: 16px;
-  --spacing-lg: 24px;
-  --spacing-xl: 32px;
-  --spacing-xxl: 48px;
-  --spacing-section: 80px;
-
-  --font-size-xs: 12px;
-  --font-size-sm: 14px;
-  --font-size-md: 16px;
-  --font-size-lg: 18px;
-  --font-size-xl: 20px;
-  --font-size-xxl: 24px;
-  --font-size-h1: 48px;
-  --font-size-h2: 36px;
-
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.05);
-
-  --help-bg: #e3f2fd;
-  --help-white: #fff;
-  --help-black: #111;
-  --help-radius: 22px;
-  --help-gap: 72px;
-  --help-max-width: 1200px;
-  --help-section-padding: 72px 0;
-  --help-container-padding: 0 32px;
-  --help-img-box-width: 500px;
-  --help-img-box-height: 340px;
-  --help-content-box-width: 500px;
-  --help-content-box-padding: 64px 56px;
-  --help-title-size: 2.4rem;
-  --help-title-weight: 700;
-  --help-list-gap: 36px;
-  --help-item-size: 1.22rem;
-  --help-icon-size: 24px;
-  --help-mobile-padding: 18px;
-
-  --neigh-title-size: 2.6rem;
-  --neigh-title-weight: 700;
-  --neigh-card-radius: 16px;
-  --neigh-label-bg: #d6edff;
-  --neigh-label-color: #222;
-  --neigh-label-radius: 10px;
-  --neigh-label-padding: 8px 22px;
-  --neigh-label-font-size: 1.08rem;
-  --neigh-label-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  --neigh-grid-gap: 48px;
-  --neigh-card-aspect: 16 / 9;
-  --neigh-card-width: 370px;
-  --neigh-card-label-top: 18px;
-  --neigh-card-label-left: 18px;
-}
-
-/* Base Styles */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  font-family: 'Poppins', sans-serif;
-  color: var(--color-text);
-  line-height: 1.5;
-}
-
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 15px;
-  width: 100%;
-}
-
-a {
-  text-decoration: none;
-  color: inherit;
-}
-
-/* Header */
-.header {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  padding: 40px 0;
-  z-index: 10;
-}
-
-.header__container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-}
-
-.header__logo {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  color: var(--color-white);
-}
-
-.header__logo h2 {
-  font-weight: 700;
-  font-size: 24px;
-  margin: 0;
-  line-height: 1;
-  letter-spacing: -0.5px;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-}
-
-.header__tagline {
-  font-weight: 400;
-  font-size: 11px;
-  opacity: 0.9;
-  line-height: 1;
-  margin-top: 2px;
-  letter-spacing: 0.2px;
-}
-
-.header__nav {
-  display: flex;
-  gap: 48px;
-  flex: 1 1 auto;
-  justify-content: center;
-}
-
-.header__nav-link {
-  color: #fff !important;
-  font-weight: 500;
-  font-size: 15px;
-  transition: opacity 0.3s ease;
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
-}
-
-.dropdown-arrow {
-  font-size: 10px;
-  margin-left: 4px;
-  color: #fff;
-}
-
-.header__auth {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.header__sign-in--figma {
-  background: #fff;
-  color: #0052a5;
-  font-weight: 500;
-  padding: 8px 32px;
-  border-radius: 6px;
-  font-size: 16px;
-  border: 2px solid #0052a5;
-  margin-right: 12px;
-  transition: background 0.2s, color 0.2s;
-}
-.header__sign-in--figma:hover {
-  background: #f0f7ff;
-  color: #003b7a;
-}
-
-.header__login--figma {
-  background: #0052a5;
-  color: #fff;
-  font-weight: 500;
-  padding: 8px 32px;
-  border-radius: 6px;
-  font-size: 16px;
-  border: none;
-  transition: background 0.2s;
-}
-.header__login--figma:hover {
-  background: #003b7a;
-}
-
-/* Role Switcher - compact, toggle style, white text/icon */
-.role-switcher {
-  position: relative;
-  margin-left: 24px;
-  margin-right: 16px;
-  display: flex;
-  align-items: center;
-}
-.profile-section {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  padding: 5px 12px;
-  border-radius: 20px;
-  background: rgba(255,255,255,0.08);
-  transition: background-color 0.3s ease;
-}
-.profile-section:hover {
-  background-color: rgba(255, 255, 255, 0.18);
-}
-.profile-image {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #fff;
+/* Update styles to remove header-related styles */
+.landing-page {
+  min-height: 100vh;
   background: #fff;
 }
-.profile-name {
-  font-size: 14px;
-  font-weight: 500;
-  color: #fff;
-}
-.dropdown-icon {
-  width: 20px;
-  height: 20px;
-  fill: #fff;
-}
-.role-switcher-menu {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.10);
-  width: 200px;
-  margin-top: 10px;
-  z-index: 10;
-  padding: 0;
-  overflow: hidden;
-}
-.role-switcher-header {
-  padding: 14px 18px 10px 18px;
-  font-size: 16px;
-  color: #666;
-  font-weight: 600;
-  border-bottom: 1px solid #eee;
-  background: #fff;
-}
-.role-option {
-  display: flex;
-  align-items: center;
-  padding: 14px 18px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  background: #fff;
-}
-.role-option:hover {
-  background: #f5faff;
-}
-.role-option.active {
-  background: #f0f7ff;
-}
-.role-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  margin-right: 14px;
-  font-weight: 700;
-  font-size: 15px;
-  color: #fff;
-}
-.all-icon {
-  background-color: #6c757d;
-}
-.admin-icon {
-  background-color: #ff6b6b;
-}
-.agent-icon {
-  background-color: #2196f3;
-}
-.client-icon {
-  background-color: #43c943;
-}
-.role-name {
-  font-size: 16px;
-  color: #222;
-  font-weight: 500;
-}
 
-/* Hero Section */
+/* Hero section styles need to be adjusted for the PublicHeader */
 .hero {
   position: relative;
   height: 500px;
@@ -706,6 +352,13 @@ a {
   background-position: center;
   color: var(--color-white);
   padding: 0;
+  margin-top: 0;
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
 }
 
 .hero__overlay {
@@ -726,6 +379,11 @@ a {
   justify-content: flex-start;
   height: 100%;
   padding-top: 140px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  padding-left: 2rem;
+  padding-right: 2rem;
 }
 
 .hero__content {
@@ -889,15 +547,34 @@ a {
 .property-types-section {
   background: #fff;
   padding: 24px 0;
-  margin-top: 120px;
+  margin-top: 60px;
   position: relative;
-  z-index: 1;
+  width: 100vw;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.property-types-section .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
 }
 
 .property-types-row {
   display: flex;
   gap: 12px;
   justify-content: flex-start;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.property-types-row::-webkit-scrollbar {
+  display: none;
 }
 
 .property-type-item {
@@ -907,7 +584,8 @@ a {
   border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
-  border: none;
+  text-decoration: none;
+  white-space: nowrap;
   transition: all 0.2s ease;
   font-family: 'Inter', sans-serif;
 }
@@ -918,38 +596,49 @@ a {
   font-weight: 600;
 }
 
+.property-type-item:hover {
+  background: #e0f2fe;
+  color: #0052a5;
+}
+
 @media (max-width: 768px) {
-  .hero {
-    min-height: 700px;
+  .property-types-section {
+    padding: 16px 0;
+    margin-top: 40px;
   }
 
-  .hero__title {
-    font-size: 48px;
+  .property-types-section .container {
+    padding: 0 1rem;
   }
 
-  .hero__search-form {
-    flex-direction: column;
+  .property-types-row {
+    gap: 8px;
   }
 
-  .search-input-group {
-    flex-direction: column;
-  }
-
-  .search-btn {
-    width: 100%;
-  }
-
-  .hero__tab-btn {
-    padding: 0 24px;
+  .property-type-item {
+    padding: 6px 12px;
+    font-size: 13px;
   }
 }
 
 /* Featured Properties Section */
 .featured--figma {
   background: linear-gradient(135deg, #f7f8fa 60%, #e3f0ff 100%);
-  padding-top: 48px;
-  padding-bottom: 64px;
+  padding: 48px 0 64px 0;
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
 }
+
+.featured .container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
 .featured__title--figma {
   font-size: 2.5rem;
   font-weight: 700;
@@ -959,123 +648,65 @@ a {
   text-align: left;
   font-family: 'Poppins', sans-serif;
 }
+
 .property-grid--figma {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 32px;
-  row-gap: 40px;
-  background: transparent;
-  border-radius: 24px;
-  padding: 8px 0;
+  gap: 24px;
+  row-gap: 24px;
 }
+
 .property-card--figma {
-  background: rgba(255,255,255,0.95);
-  border-radius: 18px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  background: #fff;
+  border-radius: 12px;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  transition: box-shadow 0.25s cubic-bezier(.4,2,.3,1),
-              transform 0.22s cubic-bezier(.4,2,.3,1),
-              border 0.22s cubic-bezier(.4,2,.3,1);
-  padding-bottom: 18px;
-  border: none;
-  position: relative;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
 }
+
 .property-card--figma:hover {
-  box-shadow: 0 8px 32px 0 rgba(0,82,165,0.10), 0 2px 8px 0 rgba(0,0,0,0.06);
-  border: 2px solid rgba(0,82,165,0.18);
-  z-index: 2;
-  transform: scale(1.025) translateY(-2px);
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
+
 .property-card__img--figma {
   width: 100%;
-  height: 180px;
+  height: 200px;
   object-fit: cover;
-  border-radius: 16px 16px 0 0;
-  margin-bottom: 18px;
-  background: linear-gradient(120deg, #e3f0ff 0%, #f7f8fa 100%);
-  transition: filter 0.22s;
 }
-.property-card--figma:hover .property-card__img--figma {
-  filter: brightness(1.04) saturate(1.08);
-}
+
 .property-card__content--figma {
-  padding: 0 18px;
-  width: 100%;
-  text-align: left;
+  padding: 16px;
 }
+
 .property-card__title--figma {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #23272f;
-  margin: 0;
-  font-family: 'Poppins', sans-serif;
-  margin-bottom: 2px;
-}
-.property-card__price--figma {
-  color: #0052a5;
+  font-size: 1.25rem;
   font-weight: 600;
-  font-size: 1.1rem;
-  margin: 8px 0 0 0;
-  letter-spacing: 0.5px;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+  font-family: 'Poppins', sans-serif;
 }
+
+.property-card__price--figma {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0052a5;
+  margin: 0 0 12px 0;
+}
+
 .property-card__address--figma {
   display: flex;
   align-items: center;
-  color: #666;
-  font-size: 0.98rem;
-  margin-top: 6px;
   gap: 6px;
+  color: #666;
+  font-size: 0.9rem;
 }
+
 .property-card__address-icon {
-  min-width: 16px;
-  min-height: 16px;
-  margin-right: 2px;
-}
-
-/* Skeleton Loader Styles */
-.skeleton-card {
-  background: rgba(255,255,255,0.85);
-  border-radius: 18px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-bottom: 18px;
-  border: none;
-  position: relative;
-  min-height: 280px;
-  animation: skeleton-fade 1.2s infinite alternate;
-}
-.skeleton-img {
-  width: 100%;
-  height: 180px;
-  border-radius: 16px 16px 0 0;
-  background: linear-gradient(90deg, #e3f0ff 25%, #f7f8fa 50%, #e3f0ff 75%);
-  margin-bottom: 18px;
-  animation: skeleton-shimmer 1.5s infinite linear;
-}
-.skeleton-text {
-  height: 18px;
-  width: 80%;
-  border-radius: 6px;
-  background: linear-gradient(90deg, #e3f0ff 25%, #f7f8fa 50%, #e3f0ff 75%);
-  margin: 8px 0;
-  animation: skeleton-shimmer 1.5s infinite linear;
-}
-.skeleton-title { width: 60%; height: 22px; }
-.skeleton-price { width: 40%; height: 18px; }
-.skeleton-address { width: 70%; height: 16px; }
-
-@keyframes skeleton-shimmer {
-  0% { background-position: -200px 0; }
-  100% { background-position: 200px 0; }
-}
-@keyframes skeleton-fade {
-  0% { opacity: 0.85; }
-  100% { opacity: 1; }
+  width: 16px;
+  height: 16px;
+  color: #0052a5;
 }
 
 @media (max-width: 1200px) {
@@ -1083,23 +714,39 @@ a {
     grid-template-columns: repeat(3, 1fr);
   }
 }
+
 @media (max-width: 900px) {
   .property-grid--figma {
     grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
   }
+
+  .featured__title--figma {
+    font-size: 2rem;
+    margin-bottom: 24px;
 }
+}
+
 @media (max-width: 600px) {
+  .featured--figma {
+    padding: 32px 0;
+  }
+
+  .featured .container {
+    padding: 0 1rem;
+  }
+
   .property-grid--figma {
     grid-template-columns: 1fr;
     gap: 16px;
   }
+
   .featured__title--figma {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     margin-bottom: 20px;
   }
+
   .property-card__img--figma {
-    height: 140px;
+    height: 180px;
   }
 }
 
@@ -1670,5 +1317,10 @@ a {
     width: 36px;
     height: 36px;
   }
+}
+
+.faq__question-text {
+  flex: 1;
+  margin-right: 16px;
 }
 </style>
