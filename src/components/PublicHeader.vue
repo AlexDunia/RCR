@@ -1,7 +1,7 @@
 <template>
   <header :class="[
     'public-header',
-    { 'public-header--transparent': transparent && !isFixed },
+    { 'public-header--transparent': isLandingPage },
     { 'public-header--fixed': isFixed }
   ]">
     <div class="container header__container">
@@ -38,20 +38,21 @@
             </button>
           </div>
         </div>
-        <router-link to="/signup" class="header__sign-in">Sign in</router-link>
-        <router-link to="/login" class="header__login">Login</router-link>
+        <router-link to="/login" class="header__sign-in" @click="handleAuthClick">Sign in</router-link>
+        <router-link to="/signup" class="header__login" @click="handleAuthClick">Login</router-link>
       </div>
     </div>
   </header>
 </template>
 
 <script setup>
-import { defineProps, ref, onMounted, onUnmounted } from 'vue';
+import { defineProps, ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRoleStore } from '@/stores/roleStore';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 
 const roleStore = useRoleStore();
 const router = useRouter();
+const route = useRoute();
 const showRoleDropdown = ref(false);
 
 defineProps({
@@ -63,6 +64,10 @@ defineProps({
     type: Boolean,
     default: false
   }
+});
+
+const isLandingPage = computed(() => {
+  return route.path === '/landing' || route.path === '/';
 });
 
 const toggleRoleDropdown = () => {
@@ -108,6 +113,10 @@ onMounted(() => {
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside);
 });
+
+const handleAuthClick = () => {
+  // Handle authentication click
+};
 </script>
 
 <style scoped>
@@ -116,35 +125,74 @@ onUnmounted(() => {
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1000;
+  width: 100%;
+  z-index: 9999;
   background: #fff;
   padding: 1rem 2rem;
   transition: all 0.3s ease;
-  transform: translateY(-100%);
-  opacity: 0;
 }
 
 .public-header--transparent {
   background: transparent;
-  position: absolute;
+  box-shadow: none;
+}
+
+.public-header--transparent .header__logo h2,
+.public-header--transparent .header__tagline,
+.public-header--transparent .header__nav-link,
+.public-header--transparent .role-switcher__button {
+  color: #fff;
+}
+
+.public-header--transparent .role-switcher__button {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.public-header--transparent .role-switcher__button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.public-header--transparent .header__sign-in {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.public-header--transparent .header__sign-in:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.public-header--transparent .header__login {
+  background: #0066cc;
+  color: #fff;
+  border: none;
+}
+
+.public-header--transparent .header__login:hover {
+  background: #0052a5;
 }
 
 .public-header--fixed {
-  transform: translateY(0);
+  transform: none;
   opacity: 1;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0;
+  width: 100%;
 }
 
 .header__container {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  position: relative;
+  z-index: 9999;
+  width: 100%;
+  height: 100%;
 }
 
 .header__logo {
@@ -159,19 +207,11 @@ onUnmounted(() => {
   margin: 0;
 }
 
-.transparent .header__logo h2 {
-  color: #fff;
-}
-
 .header__tagline {
   color: var(--tagline-color, #64748b);
   font-size: 0.75rem;
   opacity: 0.8;
   margin-top: 0.25rem;
-}
-
-.transparent .header__tagline {
-  color: #fff;
 }
 
 .header__nav {
@@ -189,18 +229,12 @@ onUnmounted(() => {
   transition: opacity 0.2s;
 }
 
-.transparent .header__nav-link {
-  color: #fff;
-}
-
-.header__nav-link:hover {
-  opacity: 0.8;
-}
-
 .header__auth {
   display: flex;
   gap: 0.75rem;
   align-items: center;
+  position: relative;
+  z-index: 1001;
 }
 
 .header__sign-in {
@@ -210,12 +244,21 @@ onUnmounted(() => {
   font-weight: 500;
   font-size: 0.875rem;
   color: #1a1a1a;
-  background: var(--sign-in-bg, #f3f4f6);
-  transition: background 0.2s;
+  background: #fff;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: 1px solid #e5e7eb;
+  position: relative;
+  z-index: 1001;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.transparent .header__sign-in {
-  background: #fff;
+.header__sign-in:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  transform: translateY(-1px);
 }
 
 .header__login {
@@ -226,7 +269,19 @@ onUnmounted(() => {
   font-size: 0.875rem;
   color: #fff;
   background: #0066cc;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
+  position: relative;
+  z-index: 1001;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header__login:hover {
+  background: #0052a5;
+  transform: translateY(-1px);
 }
 
 @media (max-width: 768px) {
@@ -253,11 +308,6 @@ onUnmounted(() => {
   align-items: center;
   gap: 0.5rem;
   transition: background 0.2s;
-}
-
-.transparent .role-switcher__button {
-  background: rgba(255, 255, 255, 0.2);
-  color: #fff;
 }
 
 .role-switcher__button:hover {

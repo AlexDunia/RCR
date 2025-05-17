@@ -236,8 +236,8 @@
             <li><router-link to="/terms">Terms & Conditions</router-link></li>
             <li><router-link to="/privacy">Privacy & Policy</router-link></li>
             <li><router-link to="/blog">Blog</router-link></li>
-            <li><router-link to="/signup">Sign up</router-link></li>
-            <li><router-link to="/login">Login</router-link></li>
+            <li><router-link to="/signup" class="footer__link">Sign up</router-link></li>
+            <li><router-link to="/login" class="footer__link">Login</router-link></li>
           </ul>
         </div>
         <div class="footer__col footer__col--community">
@@ -343,22 +343,17 @@ onBeforeUnmount(() => {
 /* Hero section styles need to be adjusted for the PublicHeader */
 .hero {
   position: relative;
-  height: 500px;
-  min-height: auto;
+  height: 100vh;
+  min-height: 600px;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   background-image: url('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2075&q=80');
   background-size: cover;
   background-position: center;
-  color: var(--color-white);
+  color: #fff;
+  margin: 0;
   padding: 0;
-  margin-top: 0;
-  width: 100vw;
-  position: relative;
-  left: 50%;
-  right: 50%;
-  margin-left: -50vw;
-  margin-right: -50vw;
+  width: 100%;
 }
 
 .hero__overlay {
@@ -367,7 +362,7 @@ onBeforeUnmount(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.65) 100%);
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.6) 100%);
   z-index: 1;
 }
 
@@ -376,14 +371,12 @@ onBeforeUnmount(() => {
   z-index: 2;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
+  justify-content: center;
+  align-items: flex-start;
   height: 100%;
-  padding-top: 140px;
   max-width: 1200px;
   margin: 0 auto;
-  width: 100%;
-  padding-left: 2rem;
-  padding-right: 2rem;
+  padding: 0 2rem;
 }
 
 .hero__content {
@@ -391,7 +384,6 @@ onBeforeUnmount(() => {
   margin: 0;
   text-align: left;
   margin-bottom: 48px;
-  padding-left: 0;
 }
 
 .hero__title {

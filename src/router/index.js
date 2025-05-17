@@ -885,6 +885,29 @@ const routes = [
     component: () => import('@/features/tour/TourCreate.vue'),
     meta: { requiresAuth: true }
   },
+  // Auth routes
+  {
+    path: '/login',
+    name: 'Login',
+    component: () => import('@/views/auth/LoginView.vue'),
+    meta: {
+      hideHeader: true,
+      hideSidebar: true,
+      layout: 'public',
+      publicAccess: true
+    }
+  },
+  {
+    path: '/signup',
+    name: 'Signup',
+    component: () => import('@/views/auth/SignupView.vue'),
+    meta: {
+      hideHeader: true,
+      hideSidebar: true,
+      layout: 'public',
+      publicAccess: true
+    }
+  },
   // Error and fallback routes
   {
     path: '/unauthorized',
@@ -894,26 +917,6 @@ const routes = [
     meta: {
       title: 'Unauthorized Access',
       hideHeader: false
-    }
-  },
-  {
-    path: '/login',
-    name: 'Login',
-    component: () => import('@/views/auth/LoginView.vue'),
-    meta: {
-      title: 'Login',
-      hideHeader: true,
-      allowedRoles: ['all', 'admin', 'agent', 'client']
-    }
-  },
-  {
-    path: '/signup',
-    name: 'Signup',
-    component: () => import('@/views/auth/SignupView.vue'),
-    meta: {
-      title: 'Sign Up',
-      hideHeader: true,
-      allowedRoles: ['all', 'admin', 'agent', 'client']
     }
   },
   {

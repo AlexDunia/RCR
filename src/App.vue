@@ -185,8 +185,13 @@ watch(
 
 <template>
   <div class="app-container" :style="{ background: background }">
-    <!-- Show PublicHeader for 'all' role or landing page -->
-    <PublicHeader v-if="roleStore.currentRole === 'all' || route.path === '/landing'" :transparent="true" :is-fixed="true" />
+    <!-- Show PublicHeader for 'all' role or landing page, but not on login/signup -->
+    <PublicHeader
+      v-if="(roleStore.currentRole === 'all' || route.path === '/landing') && !route.path.includes('login') && !route.path.includes('signup')"
+      :transparent="route.path === '/landing'"
+      :is-fixed="true"
+      class="z-50"
+    />
 
     <!-- Dynamic sidebar based on role (only when not on landing page) -->
     <component v-if="!isLandingPage" :is="activeSidebar" :key="'sidebar-' + roleStore.currentRole" />
