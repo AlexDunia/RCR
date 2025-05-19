@@ -1,0 +1,1 @@
+import{r as i,o as a,p as c}from"./vendor.BJMWqcbk.js";function u(r="hero-section"){const o=i(!1);return a(()=>{const t={threshold:0,rootMargin:"-80px 0px 0px 0px"},n=new IntersectionObserver(([s])=>{o.value=!s.isIntersecting},t),e=document.getElementById(r);e&&n.observe(e),c(()=>{e&&n.unobserve(e)})}),{isHeaderFixed:o}}export{u};
