@@ -6,6 +6,8 @@ import tooltipDirective from './directives/tooltip'
 import permissionDirective from './directives/permission'
 import { patchHistoryAPI, enhanceRouter } from './utils/navigation-fixer'
 import { useRoleStore } from './stores/roleStore'
+import ToastPlugin from 'vue-toast-notification';
+import 'vue-toast-notification/dist/theme-default.css';
 
 // Apply navigation fixes
 patchHistoryAPI()
@@ -17,6 +19,9 @@ const pinia = createPinia()
 // Register global directives
 app.directive('tooltip', tooltipDirective)
 app.directive('can', permissionDirective)
+
+// Register toast plugin
+app.use(ToastPlugin)
 
 // Add global error handler for component rendering issues
 app.config.errorHandler = (err, vm, info) => {

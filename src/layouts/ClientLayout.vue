@@ -120,13 +120,6 @@
             <span class="notification-badge">2</span>
           </div>
 
-          <div class="messages-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-            </svg>
-            <span class="notification-badge">3</span>
-          </div>
-
           <div class="user-dropdown">
             <div class="user-avatar">
               <img
@@ -406,11 +399,11 @@ const userAvatar = computed(() => {
 }
 
 .header {
-  height: 80px;
+  height: 100px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 32px;
+  padding: 24px 32px;
   background-color: white;
   border-bottom: 1px solid #eaecef;
   position: sticky;
@@ -443,8 +436,7 @@ const userAvatar = computed(() => {
   gap: 24px;
 }
 
-.notification-icon,
-.messages-icon {
+.notification-icon {
   position: relative;
   color: #64748b;
   cursor: pointer;
@@ -454,12 +446,13 @@ const userAvatar = computed(() => {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
 }
 
-.notification-icon:hover,
-.messages-icon:hover {
+.notification-icon:hover {
   background-color: #f1f5f9;
+  color: #1a4189;
+  transform: translateY(-1px);
 }
 
 .notification-badge {
@@ -590,5 +583,25 @@ const userAvatar = computed(() => {
   .username {
     display: none;
   }
+}
+
+.icon-container {
+  position: relative;
+  color: #64748b;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.icon-container:hover {
+  background-color: #f1f5f9;
+  color: #1a4189;
+  transform: translateY(-1px);
 }
 </style>

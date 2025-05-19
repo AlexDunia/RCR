@@ -321,13 +321,13 @@ const isEducationCreatePage = computed(() => isRoutePath('/admin/education-train
     <!-- Wrapping both icons in a flex container -->
     <div class="icon-wrapper">
       <!-- Message Icon -->
-      <div class="icon-container">
+      <router-link to="/client-messages" class="icon-container">
         <svg viewBox="0 0 24 24">
           <path d="M4 4h16v12H4z" />
           <path d="M4 4l8 6 8-6" />
         </svg>
         <div class="notification-badge">50</div>
-      </div>
+      </router-link>
 
       <!-- Bell Notification Icon -->
       <div class="icon-container">
@@ -378,7 +378,7 @@ const isEducationCreatePage = computed(() => isRoutePath('/admin/education-train
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 30px 38px;
+  padding: 40px 38px;
   background: white;
   border-bottom: 1px solid #ddd;
   position: relative;
@@ -533,11 +533,16 @@ input {
   align-items: center;
   justify-content: center;
   width: 40px;
-  /* Adjust for better spacing */
   height: 40px;
   background: #f0f0f0;
-  /* Light grey background */
   border-radius: 50%;
+  text-decoration: none;
+  color: inherit;
+}
+
+.icon-container:hover {
+  background: #e5e5e5;
+  transition: background-color 0.2s ease;
 }
 
 .icon-container svg {

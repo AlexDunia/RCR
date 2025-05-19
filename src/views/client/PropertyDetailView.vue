@@ -751,4 +751,295 @@ onMounted(async () => {
     height: 45px;
   }
 }
+
+.property-detail {
+  padding: 24px 32px;
+  background: #F8F9FB;
+  min-height: 100vh;
+}
+
+.property-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.header-left {
+  flex: 1;
+  min-width: 280px;
+}
+
+.property-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1A1A1A;
+  margin: 0 0 8px 0;
+}
+
+.property-location {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666666;
+  font-size: 16px;
+}
+
+.header-right {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.action-button {
+  height: 40px;
+  padding: 0 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.property-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+}
+
+.main-content {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #E5E5E5;
+  overflow: hidden;
+}
+
+.image-gallery {
+  position: relative;
+  aspect-ratio: 16/9;
+  overflow: hidden;
+}
+
+.main-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thumbnail-strip {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.thumbnail {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  cursor: pointer;
+  object-fit: cover;
+  transition: opacity 0.2s;
+}
+
+.property-info {
+  padding: 24px;
+}
+
+.info-section {
+  margin-bottom: 32px;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1A1A1A;
+  margin: 0 0 16px 0;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #F8F9FB;
+  border-radius: 8px;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sidebar-card {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #E5E5E5;
+  padding: 24px;
+}
+
+.price-section {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.price {
+  font-size: 28px;
+  font-weight: 600;
+  color: #1A1A1A;
+  margin: 0;
+}
+
+.price-details {
+  color: #666666;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1A1A1A;
+}
+
+.form-input {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid #E5E5E5;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.form-textarea {
+  width: 100%;
+  height: 100px;
+  padding: 12px;
+  border: 1px solid #E5E5E5;
+  border-radius: 8px;
+  font-size: 14px;
+  resize: vertical;
+}
+
+.submit-button {
+  width: 100%;
+  height: 40px;
+  background: #1849A9;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.submit-button:hover {
+  background: #0F3175;
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 1200px) {
+  .property-content {
+    grid-template-columns: 3fr 2fr;
+  }
+}
+
+@media (max-width: 992px) {
+  .property-content {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .sidebar-card {
+    flex: 1;
+    min-width: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .property-detail {
+    padding: 16px;
+  }
+
+  .property-header {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .header-right {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .action-button {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .property-title {
+    font-size: 20px;
+  }
+
+  .property-location {
+    font-size: 14px;
+  }
+
+  .property-info {
+    padding: 16px;
+  }
+
+  .features-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+
+  .sidebar-card {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .thumbnail {
+    width: 60px;
+    height: 60px;
+  }
+
+  .feature-item {
+    padding: 8px;
+    font-size: 13px;
+  }
+
+  .price {
+    font-size: 24px;
+  }
+}
 </style>
