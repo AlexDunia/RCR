@@ -205,9 +205,11 @@ const experienceLevels = [
 ];
 
 const ratingLevels = [
-  { value: 4.5, label: '4.5+ Stars' },
-  { value: 4.0, label: '4.0+ Stars' },
-  { value: 3.5, label: '3.5+ Stars' }
+  { value: 5, label: '5 Stars' },
+  { value: 4, label: '4 Stars' },
+  { value: 3, label: '3 Stars' },
+  { value: 2, label: '2 Stars' },
+  { value: 1, label: '1 Star' }
 ];
 
 // Active filters
@@ -278,9 +280,12 @@ const filteredAgents = computed(() => {
 
   // Apply rating filter
   if (selectedFilters.value.rating) {
-    result = result.filter(agent =>
-      (agent.averageRating || 0) >= selectedFilters.value.rating
-    );
+    const min = selectedFilters.value.rating;
+    const max = min < 5 ? min + 1 : 5.1; // 5.1 to include 5.0 ratings
+    result = result.filter(agent => {
+      const rating = agent.averageRating || 0;
+      return rating >= min && rating < max;
+    });
   }
 
   return result;
