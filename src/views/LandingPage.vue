@@ -3,7 +3,23 @@
     <!-- Hero Section -->
     <section id="hero-section" class="hero">
       <div class="hero__overlay"></div>
-      <div class="container hero__container--figma">
+      <div class="boxed-container">
+        <!-- Header Navigation -->
+        <nav class="main-nav">
+          <div class="main-nav__logo">Real City</div>
+          <div class="main-nav__center">
+            <a href="#" class="main-nav__link">Buy</a>
+            <a href="#" class="main-nav__link">Rent</a>
+            <a href="#" class="main-nav__link">Sell</a>
+            <router-link to="/allagents" class="main-nav__link">Find Agents</router-link>
+            <a href="#" class="main-nav__link">Join Us</a>
+          </div>
+          <div class="main-nav__right">
+            <button class="main-nav__button">Sign in</button>
+            <button class="main-nav__button main-nav__button--primary">Login</button>
+          </div>
+        </nav>
+
         <div class="hero__content">
           <h1 class="hero__title">Discover Homes You'll Love</h1>
         </div>
@@ -40,27 +56,25 @@
       </div>
     </section>
 
-    <!-- Add new section for property type filter pills below hero -->
+    <!-- Property type filter pills -->
     <section class="property-types-section">
-      <div class="container">
+      <div class="boxed-container">
         <div class="property-types-row">
-          <a href="#" class="property-type-item property-type-item--active">Single-family homes</a>
-          <a href="#" class="property-type-item">Condos and townhouses</a>
-          <a href="#" class="property-type-item">Luxury and high-end properties</a>
-          <a href="#" class="property-type-item">Multi-family homes</a>
-          <a href="#" class="property-type-item">New developments</a>
-          <a href="#" class="property-type-item">Vacation homes</a>
+          <a href="#" class="property-type-item property-type-item--active">Single Family Homes</a>
+          <a href="#" class="property-type-item">Townhouses</a>
+          <a href="#" class="property-type-item">Condos</a>
+          <a href="#" class="property-type-item">Pre-Construction</a>
         </div>
       </div>
     </section>
 
     <!-- Featured Properties Section -->
-    <section class="featured featured--figma">
-      <div class="container">
+    <section class="featured featured--figma reveal">
+      <div class="boxed-container">
         <h2 class="featured__title--figma">Find the best place for you.</h2>
         <div class="property-grid--figma">
           <div class="property-card--figma">
-            <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9" alt="Cedar Grove Estates" class="property-card__img--figma">
+            <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=600&q=60" alt="Cedar Grove Estates" class="property-card__img--figma" loading="lazy">
             <div class="property-card__content--figma">
               <h3 class="property-card__title--figma">Cedar Grove Estates</h3>
               <div class="property-card__price--figma">$25,000</div>
@@ -71,7 +85,7 @@
             </div>
           </div>
           <div class="property-card--figma">
-            <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6" alt="Willow Creek Villa" class="property-card__img--figma">
+            <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=600&q=60" alt="Willow Creek Villa" class="property-card__img--figma" loading="lazy">
               <div class="property-card__content--figma">
               <h3 class="property-card__title--figma">Willow Creek Villa</h3>
               <div class="property-card__price--figma">$35,000</div>
@@ -82,7 +96,7 @@
               </div>
             </div>
           <div class="property-card--figma">
-            <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750" alt="Maple Leaf Cottage" class="property-card__img--figma">
+            <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=600&q=60" alt="Maple Leaf Cottage" class="property-card__img--figma" loading="lazy">
             <div class="property-card__content--figma">
               <h3 class="property-card__title--figma">Maple Leaf Cottage</h3>
               <div class="property-card__price--figma">$45,000</div>
@@ -93,7 +107,7 @@
             </div>
           </div>
           <div class="property-card--figma">
-            <img src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914" alt="Pine Hill Mansion" class="property-card__img--figma">
+            <img src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=600&q=60" alt="Pine Hill Mansion" class="property-card__img--figma" loading="lazy">
             <div class="property-card__content--figma">
               <h3 class="property-card__title--figma">Pine Hill Mansion</h3>
               <div class="property-card__price--figma">$55,000</div>
@@ -110,7 +124,7 @@
     <!-- How We Can Help Section (Pixel Perfect, Figma Accurate, Cleaned Up) -->
     <section class="help-section">
       <div class="help-section__bg">
-        <div class="help-section__container" style="display: flex; align-items: flex-start; justify-content: center; gap: 48px; background: transparent; box-shadow: none; padding: 64px 0;">
+        <div class="boxed-container" style="display: flex; align-items: flex-start; justify-content: center; gap: 48px; background: transparent; box-shadow: none; padding: 64px 0;">
           <div style="display: flex; flex-direction: row; gap: 0;">
             <img src="https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&w=600&q=80" alt="Interior 1" style="width: 220px; height: 320px; object-fit: cover; border-radius: 0; margin: 0;" />
             <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80" alt="Interior 2" style="width: 220px; height: 320px; object-fit: cover; border-radius: 0; margin: 0; margin-left: 0;" />
@@ -143,33 +157,55 @@
     </section>
 
     <!-- Neighborhoods Section (Pixel Perfect, Figma Accurate) -->
-    <section class="neighborhoods neighborhoods--figma">
-      <div class="container neighborhoods__container">
+    <section class="neighborhoods neighborhoods--figma reveal">
+      <div class="boxed-container">
         <h2 class="neighborhoods__title neighborhoods__title--figma">Find the area that feels like home</h2>
         <div class="neighborhoods__grid neighborhoods__grid--figma">
           <div class="neighborhood-card neighborhood-card--figma">
-            <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80" alt="New England" class="neighborhood-card__img neighborhood-card__img--figma" />
+            <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=60" alt="New England" class="neighborhood-card__img neighborhood-card__img--figma" loading="lazy" />
             <div class="neighborhood-card__label--figma">New England</div>
           </div>
           <div class="neighborhood-card neighborhood-card--figma">
-            <img src="https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=800&q=80" alt="Silicon Valley" class="neighborhood-card__img neighborhood-card__img--figma" />
+            <img src="https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=60" alt="Silicon Valley" class="neighborhood-card__img neighborhood-card__img--figma" loading="lazy" />
             <div class="neighborhood-card__label--figma">Silicon Valley</div>
           </div>
           <div class="neighborhood-card neighborhood-card--figma">
-            <img src="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=800&q=80" alt="Pacific Northwest" class="neighborhood-card__img neighborhood-card__img--figma" />
+            <img src="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=60" alt="Pacific Northwest" class="neighborhood-card__img neighborhood-card__img--figma" loading="lazy" />
             <div class="neighborhood-card__label--figma">Pacific Northwest</div>
           </div>
         </div>
       </div>
     </section>
 
+    <!-- Agent Carousel Section -->
+    <section class="agent-carousel-section">
+      <div class="boxed-container">
+        <h2 class="agent-carousel__title">Meet Our Top Agents</h2>
+        <div class="agent-carousel__subtitle">Handpicked professionals ready to help you find your dream home</div>
+        <div class="agent-carousel__wrapper">
+          <transition-group name="agent-fade" tag="div" class="agent-carousel__track">
+            <div
+              v-for="agent in visibleAgents"
+              :key="agent.id"
+              class="agent-card"
+            >
+              <div class="agent-card__img-box">
+                <img :src="agent.avatar || agent.profilePicture" :alt="agent.name" class="agent-card__img" />
+              </div>
+              <div class="agent-card__name">{{ agent.name }}</div>
+            </div>
+          </transition-group>
+        </div>
+        <router-link to="/allagents" class="agent-carousel__view-more">View More</router-link>
+      </div>
+    </section>
+
     <!-- Platform Benefits Section -->
-    <section class="benefits benefits--figma">
-      <div class="benefits__container">
+    <section class="benefits benefits--figma reveal">
+      <div class="boxed-container benefits__container">
         <div class="benefits__left">
-          <h2 class="benefits__title--figma">
-            A platform built for you to<br />
-            find a home with <span class="benefits__highlight--figma">little effort</span>
+          <h2 class="benefits__title--figma" style="white-space: pre-line; text-align: left;">
+            A platform built for\nyou to find a home with\nlittle effort
           </h2>
         </div>
         <div class="benefits__right">
@@ -192,29 +228,52 @@
               <!-- Bell SVG -->
               <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><path d="M24 40c2.21 0 4-1.79 4-4h-8c0 2.21 1.79 4 4 4zm12-8V22c0-6.08-4.93-11-11-11S14 15.92 14 22v10l-4 4v2h32v-2l-4-4z" fill="#bdbdbd"/></svg>
             </div>
-            <div class="benefit-card__text--figma">Get alerts on the best deals</div>
+            <div class="benefit-card__text--figma">Get alerts on new pre-construction projects</div>
           </div>
         </div>
       </div>
     </section>
 
+    <!-- Blog Section (Below FAQ) -->
+    <section class="blog-section--worldclass reveal">
+      <div class="boxed-container blog-section__container">
+        <h2 class="blog-section__title blog-section__title--worldclass">Latest from our Blog</h2>
+        <div class="blog-section__tiles blog-section__tiles--worldclass">
+          <div v-for="blog in blogList.slice(0, 3)" :key="blog.id" class="blog-tile blog-tile--worldclass reveal">
+            <div class="blog-tile__accent-bar"></div>
+            <div class="blog-tile__title-worldclass">{{ blog.title }}</div>
+            <div class="blog-tile__desc-worldclass">{{ blog.desc }}</div>
+            <div class="blog-tile__meta-worldclass">
+              <span class="blog-tile__meta-icon-worldclass">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#e0f2fe"/><path d="M12 12c1.656 0 3-1.344 3-3s-1.344-3-3-3-3 1.344-3 3 1.344 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V20h14v-2.5c0-2.33-4.67-3.5-7-3.5z" fill="#0052a5"/></svg>
+              </span>
+              <span class="blog-tile__meta-author-worldclass">Real City Team</span>
+              <span class="blog-tile__meta-dot-worldclass">|</span>
+              <span class="blog-tile__meta-date-worldclass">June 2024</span>
+              </div>
+            <a :href="blog.link" class="blog-tile__readmore-worldclass">Read More &gt;</a>
+            </div>
+        </div>
+      </div>
+    </section>
+
     <!-- FAQ Section -->
-    <section class="faq-section faq-section--figma">
-      <div class="faq__container--figma">
+    <section class="faq-section--figma.world-class-faq-grid">
+      <div class="boxed-container faq__container--figma">
         <div class="faq__left--figma">
-          <h2 class="faq__title--figma">Frequently Asked Questions</h2>
+          <h2 class="faq__title--figma.world-class-faq-title">Frequently Asked Questions</h2>
           <p class="faq__subtitle--figma">If there are questions you want to ask.<br>We will answer all your questions.</p>
         </div>
-        <div class="faq__right--figma">
-          <div v-for="(item, idx) in faqList" :key="item.q" class="faq__item--figma" :class="{ 'faq__item--active': openIdx === idx }">
-            <button class="faq__question--figma" @click="toggleFaq(idx)">
+        <div class="faq__right--figma.faq__right--grid">
+          <div v-for="(item, idx) in faqList" :key="item.q" class="faq__item--figma world-class-faq-item-grid" :class="{ 'faq__item--active': openIdx === idx }">
+            <button class="faq__question--figma world-class-faq-question-grid" @click="toggleFaq(idx)">
               <span class="faq__question-text">{{ item.q }}</span>
-              <span class="faq__icon--figma">
-                <svg v-if="openIdx === idx" width="24" height="24" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="2" rx="1" fill="#333"/></svg>
-                <svg v-else width="24" height="24" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="2" rx="1" fill="#333"/><rect x="11" y="5" width="2" height="14" rx="1" fill="#333"/></svg>
+              <span class="faq__icon--figma world-class-faq-chevron-grid">
+                <svg v-if="openIdx === idx" width="24" height="24" viewBox="0 0 24 24"><polyline points="6 15 12 9 18 15" fill="none" stroke="#0052a5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <svg v-else width="24" height="24" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" fill="none" stroke="#0052a5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </span>
             </button>
-            <div v-if="openIdx === idx" class="faq__answer--figma">{{ item.a }}</div>
+            <div v-if="openIdx === idx" class="faq__answer--figma world-class-faq-answer-grid">{{ item.a }}</div>
           </div>
         </div>
       </div>
@@ -222,65 +281,88 @@
 
     <!-- Footer -->
     <footer class="footer--figma">
-      <div class="footer__container--figma">
-        <div class="footer__col footer__col--brand">
-          <div class="footer__logo--figma">Real City</div>
-          <div class="footer__tagline--figma">realty inc brokerage</div>
-          <div class="footer__desc--figma">We have built our reputation as true local area experts.</div>
-        </div>
-        <div class="footer__col footer__col--service">
-          <div class="footer__heading--figma">Service</div>
-          <ul class="footer__list--figma">
-            <li><router-link to="/about">About us</router-link></li>
-            <li><router-link to="/careers">Careers</router-link></li>
-            <li><router-link to="/terms">Terms & Conditions</router-link></li>
-            <li><router-link to="/privacy">Privacy & Policy</router-link></li>
-            <li><router-link to="/blog">Blog</router-link></li>
-            <li><router-link to="/signup" class="footer__link">Sign up</router-link></li>
-            <li><router-link to="/login" class="footer__link">Login</router-link></li>
-          </ul>
-        </div>
-        <div class="footer__col footer__col--community">
-          <div class="footer__heading--figma">Community</div>
-          <ul class="footer__list--figma">
-            <li><router-link to="/find-agents">Find agents</router-link></li>
-            <li><a href="#">Lifestyle</a></li>
-            <li><a href="#">Legal notice</a></li>
-          </ul>
-        </div>
-        <div class="footer__col footer__col--social">
-          <div class="footer__heading--figma">Follow us on</div>
-          <div class="footer__socials--figma">
-            <a href="#" class="footer__social-icon--figma" aria-label="Instagram">
-              <span class="footer__icon-bg--figma">
-                <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M16.5 7.5H16.51M11 15.5C13.4853 15.5 15.5 13.4853 15.5 11C15.5 8.51472 13.4853 6.5 11 6.5C8.51472 6.5 6.5 8.51472 6.5 11C6.5 13.4853 8.51472 15.5 11 15.5ZM11 22C16.5228 22 21 17.5228 21 12C21 6.47715 16.5228 2 11 2C5.47715 2 1 6.47715 1 12C1 17.5228 5.47715 22 11 22Z" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </span>
-            </a>
-            <a href="#" class="footer__social-icon--figma" aria-label="YouTube">
-              <span class="footer__icon-bg--figma">
-                <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M21.5 6.5C21.5 6.5 21.3 4.5 20.5 3.7C19.5 2.7 18.5 2.7 18 2.5C15.5 2 11 2 11 2C11 2 6.5 2 4 2.5C3.5 2.7 2.5 2.7 1.5 3.7C0.7 4.5 0.5 6.5 0.5 6.5C0.5 6.5 0.3 8.7 0.3 10.9V13.1C0.3 15.3 0.5 17.5 0.5 17.5C0.5 17.5 0.7 19.5 1.5 20.3C2.5 21.3 3.5 21.3 4 21.5C5.5 21.9 11 22 11 22C11 22 15.5 21.9 18 21.5C18.5 21.3 19.5 21.3 20.5 20.3C21.3 19.5 21.5 17.5 21.5 17.5C21.5 17.5 21.7 15.3 21.7 13.1V10.9C21.7 8.7 21.5 6.5 21.5 6.5ZM8.8 15.1V8.9L14.5 12L8.8 15.1Z" fill="#fff"/>
-                </svg>
-              </span>
-            </a>
-            <a href="#" class="footer__social-icon--figma" aria-label="Facebook">
-              <span class="footer__icon-bg--figma">
-                <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M21.5 11C21.5 5.5 16.8 1 11 1C5.2 1 0.5 5.5 0.5 11C0.5 15.9 4.1 20 8.8 21V14.5H6.5V11H8.8V8.3C8.8 5.3 10.5 3.8 13.2 3.8C14.4 3.8 15.7 4 15.7 4V6.5H14.3C12.9 6.5 12.5 7.2 12.5 8V11H15.5L15 14.5H12.5V21C17.2 20 21.5 15.9 21.5 11Z" fill="#fff"/>
-                </svg>
-              </span>
-            </a>
+      <div class="boxed-container">
+        <div class="footer__container--figma">
+          <div class="footer__col footer__col--brand">
+            <div class="footer__logo--figma">Real City</div>
+            <div class="footer__tagline--figma">realty inc brokerage</div>
+            <div class="footer__desc--figma">We have built our reputation as true local area experts.</div>
+          </div>
+          <div class="footer__col footer__col--service">
+            <div class="footer__heading--figma">Service</div>
+            <ul class="footer__list--figma">
+              <li><router-link to="/about">About us</router-link></li>
+              <li><router-link to="/careers">Careers</router-link></li>
+              <li><router-link to="/terms">Terms & Conditions</router-link></li>
+              <li><router-link to="/privacy">Privacy & Policy</router-link></li>
+              <li><router-link to="/blog">Blog</router-link></li>
+              <li><router-link to="/signup" class="footer__link">Sign up</router-link></li>
+              <li><router-link to="/login" class="footer__link">Login</router-link></li>
+            </ul>
+          </div>
+          <div class="footer__col footer__col--community">
+            <div class="footer__heading--figma">Community</div>
+            <ul class="footer__list--figma">
+              <li><router-link to="/find-agents">Find agents</router-link></li>
+              <li><a href="#">Lifestyle</a></li>
+              <li><a href="#">Legal notice</a></li>
+            </ul>
+          </div>
+          <div class="footer__col footer__col--social">
+            <div class="footer__heading--figma">Follow us on</div>
+            <div class="footer__socials--figma">
+              <a href="#" class="footer__social-icon--figma" aria-label="Instagram">
+                <span class="footer__icon-bg--figma">
+                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M16.5 7.5H16.51M11 15.5C13.4853 15.5 15.5 13.4853 15.5 11C15.5 8.51472 13.4853 6.5 11 6.5C8.51472 6.5 6.5 8.51472 6.5 11C6.5 13.4853 8.51472 15.5 11 15.5ZM11 22C16.5228 22 21 17.5228 21 12C21 6.47715 16.5228 2 11 2C5.47715 2 1 6.47715 1 12C1 17.5228 5.47715 22 11 22Z" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </span>
+              </a>
+              <a href="#" class="footer__social-icon--figma" aria-label="YouTube">
+                <span class="footer__icon-bg--figma">
+                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21.5 6.5C21.5 6.5 21.3 4.5 20.5 3.7C19.5 2.7 18.5 2.7 18 2.5C15.5 2 11 2 11 2C11 2 6.5 2 4 2.5C3.5 2.7 2.5 2.7 1.5 3.7C0.7 4.5 0.5 6.5 0.5 6.5C0.5 6.5 0.3 8.7 0.3 10.9V13.1C0.3 15.3 0.5 17.5 0.5 17.5C0.5 17.5 0.7 19.5 1.5 20.3C2.5 21.3 3.5 21.3 4 21.5C5.5 21.9 11 22 11 22C11 22 15.5 21.9 18 21.5C18.5 21.3 19.5 21.3 20.5 20.3C21.3 19.5 21.5 17.5 21.5 17.5C21.5 17.5 21.7 15.3 21.7 13.1V10.9C21.7 8.7 21.5 6.5 21.5 6.5ZM8.8 15.1V8.9L14.5 12L8.8 15.1Z" fill="#fff"/>
+                  </svg>
+                </span>
+              </a>
+              <a href="#" class="footer__social-icon--figma" aria-label="Facebook">
+                <span class="footer__icon-bg--figma">
+                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21.5 11C21.5 5.5 16.8 1 11 1C5.2 1 0.5 5.5 0.5 11C0.5 15.9 4.1 20 8.8 21V14.5H6.5V11H8.8V8.3C8.8 5.3 10.5 3.8 13.2 3.8C14.4 3.8 15.7 4 15.7 4V6.5H14.3C12.9 6.5 12.5 7.2 12.5 8V11H15.5L15 14.5H12.5V21C17.2 20 21.5 15.9 21.5 11Z" fill="#fff"/>
+                  </svg>
+                </span>
+              </a>
+            </div>
           </div>
         </div>
       </div>
     </footer>
+
+    <!-- Fixed Navigation -->
+    <nav class="fixed-nav" :class="{ 'fixed-nav--visible': showFixedNav }" v-show="showFixedNav" style="display: none;">
+      <div class="boxed-container">
+        <div class="fixed-nav__content">
+          <div class="fixed-nav__logo">Real City</div>
+          <div class="fixed-nav__center">
+            <a href="#" class="fixed-nav__link">Buy</a>
+            <a href="#" class="fixed-nav__link">Rent</a>
+            <a href="#" class="fixed-nav__link">Sell</a>
+            <a href="#" class="fixed-nav__link">Agent</a>
+            <a href="#" class="fixed-nav__link">Join Us</a>
+          </div>
+          <div class="fixed-nav__right">
+            <button class="fixed-nav__button">Sign in</button>
+            <button class="fixed-nav__button fixed-nav__button--primary">Login</button>
+          </div>
+        </div>
+      </div>
+    </nav>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
+import { useAgentStore } from '@/stores/agentStore';
 
 defineOptions({
   name: 'LandingPage'
@@ -308,39 +390,213 @@ const faqList = [
 const isVisible = ref(false);
 const openIdx = ref(null);
 const activeTab = ref('Buy');
+const showFixedNav = ref(false);
 
-function toggleFaq(idx) {
-  openIdx.value = openIdx.value === idx ? null : idx;
-}
+const agentStore = useAgentStore();
+const allAgents = ref([]);
+const visibleAgents = ref([]);
+const carouselSize = ref(4); // Show 3-5 at a time, default 4
+let carouselInterval = null;
 
+// Use Intersection Observer for sticky nav
+let observer = null;
 onMounted(async () => {
   // Reset all reactive states
   openIdx.value = null;
   activeTab.value = 'Buy';
+      showFixedNav.value = false;
+
+  // Intersection Observer for sticky nav
+  await nextTick();
+  const heroSection = document.getElementById('hero-section');
+  if (heroSection) {
+    observer = new window.IntersectionObserver(
+      ([entry]) => {
+        showFixedNav.value = !entry.isIntersecting;
+      },
+      { threshold: 0, rootMargin: '-80px 0px 0px 0px' }
+    );
+    observer.observe(heroSection);
+  }
 
   // Force scroll to top
   window.scrollTo(0, 0);
 
   // Ensure component is visible after mount
-  await nextTick();
   isVisible.value = true;
+
+  // Load agents from store
+  if (typeof agentStore.fetchAgents === 'function') {
+    await agentStore.fetchAgents();
+  }
+  allAgents.value = agentStore.getAllAgents ? agentStore.getAllAgents() : (agentStore.agents || []);
+  pickVisibleAgents();
+  // Start carousel after page is visible and idle
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(() => startCarousel());
+  } else {
+    setTimeout(() => startCarousel(), 200);
+  }
 });
 
 onBeforeUnmount(() => {
-  // Clean up component state
+  // Clean up component state and event listeners
+  if (observer) observer.disconnect();
   isVisible.value = false;
   openIdx.value = null;
+  showFixedNav.value = false;
+  stopCarousel();
 });
+
+const blogList = [
+  {
+    id: 1,
+    title: '5 Tips for First-Time Home Buyers',
+    desc: 'Buying your first home can be overwhelming. Here are five essential tips to help you navigate the process, from budgeting to closing the deal. Learn how to make your first purchase a success. These tips will help you avoid common pitfalls and make informed decisions throughout your home buying journey.',
+    link: '#',
+  },
+  {
+    id: 2,
+    title: 'How to Choose the Right Neighborhood',
+    desc: 'Choosing the right neighborhood is just as important as the home itself. Discover what factors to consider, from schools to amenities, and how to find the perfect fit for your lifestyle. Our guide will help you make the best choice for your family.',
+    link: '#',
+  },
+  {
+    id: 3,
+    title: 'Understanding Pre-Construction Projects',
+    desc: 'Pre-construction projects offer unique opportunities and risks. Learn what you need to know before investing, including timelines, contracts, and how to spot the best deals. Get the most out of your investment with our expert advice.',
+    link: '#',
+  }
+];
+
+function shuffleAgents(agents) {
+  // Fisher-Yates shuffle
+  const arr = agents.slice();
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function pickVisibleAgents() {
+  if (!allAgents.value.length) return;
+  const shuffled = shuffleAgents(allAgents.value);
+  visibleAgents.value = shuffled.slice(0, carouselSize.value);
+}
+
+function startCarousel() {
+  carouselInterval = setInterval(() => {
+    pickVisibleAgents();
+  }, 5000); // 5 seconds for a more relaxed, world-class feel
+}
+
+function stopCarousel() {
+  if (carouselInterval) clearInterval(carouselInterval);
+}
+
+function toggleFaq(idx) {
+  openIdx.value = openIdx.value === idx ? null : idx;
+}
+
+// Scroll-to-reveal composable
+
+
+function useRevealOnScroll(selector = '.reveal') {
+  let observer = null;
+  onMounted(() => {
+    observer = new window.IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('revealed');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll(selector).forEach(el => {
+      observer.observe(el);
+    });
+  });
+onBeforeUnmount(() => {
+    if (observer) observer.disconnect();
+  });
+}
+
+// Use for main sections and blog cards
+useRevealOnScroll('.reveal');
 </script>
 
 <style scoped>
-/* Update styles to remove header-related styles */
 .landing-page {
   min-height: 100vh;
   background: #fff;
 }
 
-/* Hero section styles need to be adjusted for the PublicHeader */
+/* Main Navigation */
+.main-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 0;
+  width: 100%;
+}
+
+.main-nav__logo {
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.main-nav__center {
+  display: flex;
+  gap: 32px;
+  justify-content: center;
+  align-items: center;
+}
+
+.main-nav__link {
+  color: #fff;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+
+.main-nav__link:hover {
+  opacity: 0.8;
+}
+
+.main-nav__right {
+  display: flex;
+  gap: 16px;
+}
+
+.main-nav__button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.main-nav__button--primary {
+  background: #0066cc;
+  border: none;
+}
+
+.main-nav__button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.main-nav__button--primary:hover {
+  background: #0052a5;
+}
+
+/* Hero section styles */
 .hero {
   position: relative;
   height: 85vh;
@@ -348,18 +604,11 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: flex-start;
   background-image: url('https://res.cloudinary.com/dnuhjsckk/image/upload/v1743087291/Designer_8_1_fjvyi0.png');
-  background-size: 110% auto;
-  background-position: center 20%;
+  background-size: cover;
+  background-position: center;
   color: #fff;
   margin: 0;
   padding: 0;
-  width: 100vw;
-  position: relative;
-  left: 50%;
-  right: 50%;
-  margin-left: -50vw;
-  margin-right: -50vw;
-  margin-bottom: -100px;
 }
 
 .hero__overlay {
@@ -372,26 +621,19 @@ onBeforeUnmount(() => {
   z-index: 1;
 }
 
-.hero .container {
+.hero .boxed-container {
   position: relative;
   z-index: 2;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  align-items: flex-start;
   height: 100%;
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 0 80px;
-  width: 100%;
 }
 
 .hero__content {
-  max-width: 1440px;
-  width: 100%;
+  max-width: 600px;
   text-align: left;
-  margin-bottom: 6rem;
-  margin-top: 200px;
+  margin-top: 120px;
+  margin-bottom: 48px;
 }
 
 .hero__title {
@@ -404,7 +646,6 @@ onBeforeUnmount(() => {
   margin: 0;
   letter-spacing: -0.5px;
   font-family: 'Poppins', sans-serif;
-  white-space: nowrap;
 }
 
 /* Search wrapper redesign */
@@ -413,12 +654,10 @@ onBeforeUnmount(() => {
   border-radius: 12px;
   overflow: visible;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  width: 100%;
+  width: 50%;
   position: relative;
-  margin: 0;
+  margin: 0 auto;
   padding: 0;
-  margin-top: 6rem;
-  z-index: 3;
 }
 
 .hero__search-tabs {
@@ -950,7 +1189,7 @@ onBeforeUnmount(() => {
   justify-content: flex-start;
 }
 .benefit-card--figma {
-  background: #e5e5e5;
+  background: #e0f2fe; /* Light blue tint */
   border-radius: 8px;
   width: 220px;
   height: 220px;
@@ -1023,15 +1262,13 @@ onBeforeUnmount(() => {
 }
 
 /* FAQ Section */
-.faq-section--figma {
-  background: linear-gradient(135deg, #fafbfc 80%, #f5f7fa 100%);
-  padding: 110px 0 90px 0;
-  width: 100vw;
+.faq-section--figma.world-class-faq-grid {
+  background: linear-gradient(135deg, #fafbfc 80%, #e3f0ff 100%);
+  padding: 120px 0 110px 0; /* More vertical padding */
+  border-radius: 0 0 32px 32px;
+  box-shadow: 0 8px 48px rgba(0,82,165,0.07);
   position: relative;
-  left: 50%;
-  right: 50%;
-  margin-left: -50vw;
-  margin-right: -50vw;
+  z-index: 2;
 }
 .faq__container--figma {
   max-width: 1200px;
@@ -1050,131 +1287,117 @@ onBeforeUnmount(() => {
   justify-content: center;
   gap: 18px;
 }
-.faq__title--figma {
+.faq__title--figma.world-class-faq-title {
   font-family: 'Poppins', 'Inter', Arial, sans-serif;
-  font-size: 2.6rem;
-  font-weight: 800;
-  color: #23272f;
+  font-size: 2.8rem;
+  font-weight: 900;
+  color: #0052a5;
   margin: 0 0 18px 0;
-  line-height: 1.15;
+  line-height: 1.12;
   letter-spacing: -0.5px;
   text-align: left;
+  padding-bottom: 8px;
 }
 .faq__subtitle--figma {
   color: #7a7a7a;
-  font-size: 1.18rem;
+  font-size: 1.22rem;
   font-family: 'Poppins', 'Inter', Arial, sans-serif;
   font-weight: 400;
-  margin: 0;
+  margin: 0 0 12px 0;
   line-height: 1.7;
   letter-spacing: 0.01em;
 }
-.faq__right--figma {
-  flex: 2;
+.faq__right--figma.faq__right--grid {
   display: flex;
   flex-direction: column;
-  gap: 32px;
-  min-width: 340px;
+  gap: 32px; /* More space between cards */
+  margin-top: 36px;
 }
-.faq__item--figma {
+.world-class-faq-item-grid {
   background: #fff;
-  border: 1.5px solid #ededed;
-  border-radius: 12px;
-  padding: 0;
-  transition: border-color 0.22s, box-shadow 0.22s, transform 0.22s;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+  border: 1.5px solid #e0f2fe;
+  border-radius: 22px;
+  box-shadow: 0 4px 24px rgba(0,82,165,0.08);
+  transition: border-color 0.22s, box-shadow 0.22s, transform 0.22s, background 0.18s;
   will-change: box-shadow, border-color, transform;
+  margin-bottom: 0;
+  position: relative;
+  overflow: hidden;
 }
-.faq__item--figma:hover, .faq__item--figma:focus-within {
+.world-class-faq-item-grid:hover, .world-class-faq-item-grid:focus-within {
   border-color: #0052a5;
-  box-shadow: 0 6px 32px rgba(0,82,165,0.07);
+  box-shadow: 0 12px 48px rgba(0,82,165,0.13);
   transform: translateY(-2px) scale(1.012);
+  background: linear-gradient(90deg, #f7f8fa 80%, #e0f2fe 100%);
 }
-.faq__item--active {
-  border-color: #0052a5;
-}
-.faq__question--figma {
-  width: 100%;
+.world-class-faq-question-grid {
+  font-size: 1.13rem;
+  font-weight: 700;
+  color: #0052a5;
+  font-family: 'Poppins', 'Inter', Arial, sans-serif;
+  padding: 28px 32px;
+  border-radius: 22px;
   background: none;
   border: none;
   outline: none;
-  font-family: 'Poppins', 'Inter', Arial, sans-serif;
-  font-size: 0.98rem;
-  font-weight: 500;
-  color: #23272f;
+  width: 100%;
   text-align: left;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 20px;
-  border-radius: 12px;
   cursor: pointer;
   transition: background 0.18s;
-  filter: none;
-  opacity: 1;
 }
-.faq__item--figma:hover .faq__question--figma,
-.faq__item--figma:focus-within .faq__question--figma {
-  filter: none;
-  opacity: 1;
-}
-.faq__icon--figma {
+.world-class-faq-chevron-grid {
   margin-left: 18px;
   display: flex;
   align-items: center;
 }
-.faq__answer--figma {
-  font-family: 'Poppins', 'Inter', Arial, sans-serif;
-  font-size: 0.95rem;
-  color: #444;
-  font-weight: 400;
-  padding: 0 20px 20px 20px;
-  line-height: 1.6;
-  border-radius: 0 0 12px 12px;
+.world-class-faq-answer-grid {
+  font-size: 1.04rem;
+  color: #23272f;
+  font-family: 'Inter', 'Poppins', Arial, sans-serif;
+  padding: 0 32px 24px 32px;
+  border-radius: 0 0 22px 22px;
   max-height: 500px;
   opacity: 1;
-  transition: max-height 0.35s cubic-bezier(.4,2,.3,1), opacity 0.25s;
+  transition: max-height 0.45s cubic-bezier(.4,2,.3,1), opacity 0.32s, padding 0.32s;
   overflow: hidden;
+  background: #f7f8fa;
 }
-.faq__item--figma:not(.faq__item--active) .faq__answer--figma {
+.world-class-faq-item-grid:not(.faq__item--active) .world-class-faq-answer-grid {
   max-height: 0;
   opacity: 0;
   padding-bottom: 0;
 }
-@media (max-width: 1100px) {
+@media (max-width: 900px) {
+  .faq-section--figma.world-class-faq-grid {
+    padding: 60px 0 60px 0;
+  }
   .faq__container--figma {
     flex-direction: column;
-    gap: 60px;
-    align-items: stretch;
+    gap: 40px;
+    padding: 0 8px;
   }
-  .faq__right--figma {
-    min-width: 0;
+  .faq__right--figma.faq__right--grid {
+    gap: 18px;
   }
-}
-@media (max-width: 600px) {
-  .faq-section--figma {
-    padding: 36px 0 24px 0;
-  }
-  .faq__container--figma {
-    padding: 0 4px;
-    gap: 24px;
-  }
-  .faq__title--figma {
-    font-size: 1.3rem;
+  .faq__title--figma.world-class-faq-title {
+    font-size: 1.7rem;
   }
   .faq__subtitle--figma {
-    font-size: 1.02rem;
+    font-size: 1rem;
   }
-  .faq__question--figma {
+  .world-class-faq-question-grid {
+    font-size: 1rem;
+    padding: 16px 12px;
+  }
+  .world-class-faq-answer-grid {
     font-size: 0.92rem;
-    padding: 14px 10px;
+    padding: 0 12px 12px 12px;
   }
-  .faq__answer--figma {
-    font-size: 0.88rem;
-    padding: 0 10px 14px 10px;
-  }
-  .faq__item--figma {
-    border-radius: 8px;
+  .world-class-faq-item-grid {
+    border-radius: 14px;
   }
 }
 
@@ -1327,4 +1550,368 @@ onBeforeUnmount(() => {
   flex: 1;
   margin-right: 16px;
 }
+
+/* Fixed Navigation */
+.fixed-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  z-index: 1000;
+  transform: translateY(-100%);
+  transition: transform 0.3s ease-in-out;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.fixed-nav--visible {
+  transform: translateY(0);
+  opacity: 1;
+  visibility: visible;
+}
+
+.fixed-nav__content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  width: 100%;
+}
+
+.fixed-nav__logo {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0066cc;
+}
+
+.fixed-nav__center {
+  display: flex;
+  gap: 32px;
+  justify-content: center;
+  align-items: center;
+}
+
+.fixed-nav__link {
+  color: #333;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.fixed-nav__link:hover {
+  color: #0066cc;
+}
+
+.fixed-nav__right {
+  display: flex;
+  gap: 16px;
+}
+
+.fixed-nav__button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  color: #333;
+}
+
+.fixed-nav__button--primary {
+  background: #0066cc;
+  border: none;
+  color: #fff;
+}
+
+.fixed-nav__button:hover {
+  background: #f8fafc;
+}
+
+.fixed-nav__button--primary:hover {
+  background: #0052a5;
+}
+
+.boxed-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  width: 100%;
+}
+
+/* Agent Carousel Styles */
+.agent-carousel-section {
+  background: #232229;
+  padding: 64px 0 40px 0;
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  box-shadow: 0 8px 32px rgba(0,82,165,0.07);
+}
+.agent-carousel__title {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 12px;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+  letter-spacing: -0.5px;
+}
+.agent-carousel__subtitle {
+  font-size: 1.18rem;
+  color: #fff;
+  text-align: center;
+  margin-bottom: 36px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+.agent-carousel__wrapper {
+  overflow: hidden;
+  width: 100%;
+  margin: 0 auto 18px auto;
+  border-radius: 24px;
+  box-shadow: 0 4px 24px rgba(0,82,165,0.08);
+  padding: 32px 0 24px 0;
+}
+.agent-carousel__track {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  align-items: stretch;
+  min-height: 220px;
+}
+.agent-card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0,82,165,0.10);
+  padding: 24px 18px 18px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 200px;
+  max-width: 240px;
+  width: 100%;
+  margin: 0 4px;
+  transition: transform 0.25s cubic-bezier(.4,2,.3,1), box-shadow 0.25s;
+  border: 1.5px solid #e0f2fe;
+  position: relative;
+}
+.agent-card:hover {
+  transform: translateY(-8px) scale(1.035);
+  box-shadow: 0 8px 32px rgba(0,82,165,0.13);
+  border-color: #4f8edc;
+  z-index: 2;
+}
+.agent-card__img-box {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-bottom: 18px;
+  border: 4px solid #e0f2fe;
+  background: #e0f2fe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,82,165,0.07);
+}
+.agent-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  transition: transform 0.3s cubic-bezier(.4,2,.3,1);
+}
+.agent-card__name {
+  margin-top: 10px;
+  font-size: 1.18rem;
+  font-weight: 700;
+  color: #1a4189;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+  letter-spacing: 0.01em;
+}
+.agent-carousel__view-more {
+  display: block;
+  margin: 32px auto 0 auto;
+  background: linear-gradient(90deg, #0066cc 0%, #4f8edc 100%);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 14px 44px;
+  font-size: 1.18rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,82,165,0.08);
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.agent-carousel__view-more:hover {
+  background: linear-gradient(90deg, #0052a5 0%, #0066cc 100%);
+  box-shadow: 0 4px 16px rgba(0,82,165,0.13);
+}
+/* Fade/slide animation for carousel */
+.agent-fade-enter-active, .agent-fade-leave-active {
+  transition: all 0.7s cubic-bezier(.4,2,.3,1);
+}
+.agent-fade-enter-from {
+  opacity: 0;
+  transform: translateY(30px) scale(0.98);
+}
+.agent-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-30px) scale(0.98);
+}
+
+/* Blog Section (Below FAQ) */
+.blog-section--worldclass {
+  background: linear-gradient(135deg, #f7f8fa 60%, #e3f0ff 100%);
+  padding: 80px 0 80px 0;
+}
+.blog-section__title--worldclass {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin-bottom: 36px;
+  text-align: left;
+  font-family: 'Poppins', sans-serif;
+}
+.blog-section__tiles--worldclass {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 56px;
+  margin-top: 36px;
+}
+@media (max-width: 1100px) {
+  .blog-section__tiles--worldclass {
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+}
+@media (max-width: 700px) {
+  .blog-section__tiles--worldclass {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+}
+.blog-tile--worldclass {
+  background: linear-gradient(120deg, rgba(240,247,255,0.55) 80%, rgba(224,242,254,0.35) 100%);
+  border-radius: 24px;
+  box-shadow: 0 2px 8px rgba(0,82,165,0.07);
+  border: 1.5px solid #e0f2fe;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  min-height: 320px;
+  height: 320px;
+  max-width: 320px;
+  width: 100%;
+  padding: 28px 22px 18px 22px;
+  position: relative;
+  transition: box-shadow 0.25s, transform 0.25s;
+  overflow: hidden;
+}
+.blog-tile--worldclass:hover {
+  box-shadow: 0 12px 48px rgba(0,82,165,0.18), 0 2px 8px rgba(0,82,165,0.10);
+  transform: translateY(-8px) scale(1.03);
+}
+.blog-tile__accent-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 60px;
+  height: 6px;
+  border-radius: 0 0 12px 12px;
+  background: linear-gradient(90deg, #0066cc 0%, #4f8edc 100%);
+  z-index: 2;
+}
+.blog-tile__title-worldclass {
+  font-size: 1.32rem;
+  font-weight: 800;
+  color: #0052a5;
+  margin-bottom: 18px;
+  font-family: 'Poppins', sans-serif;
+  line-height: 1.25;
+  letter-spacing: -0.5px;
+}
+.blog-tile__desc-worldclass {
+  font-size: 1.08rem;
+  color: #444;
+  margin-bottom: auto;
+  font-family: 'Inter', sans-serif;
+  line-height: 1.7;
+  max-height: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+.blog-tile__meta-worldclass {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 28px 0 18px 0;
+  font-size: 1rem;
+  color: #64748b;
+  font-family: 'Inter', sans-serif;
+}
+.blog-tile__meta-icon-worldclass {
+  display: flex;
+  align-items: center;
+  margin-right: 4px;
+}
+.blog-tile__meta-author-worldclass {
+  font-weight: 600;
+  color: #0052a5;
+}
+.blog-tile__meta-dot-worldclass {
+  margin: 0 4px;
+  color: #bdbdbd;
+}
+.blog-tile__meta-date-worldclass {
+  color: #64748b;
+}
+.blog-tile__readmore-worldclass {
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 1rem;
+  margin-top: 18px;
+  border-radius: 999px;
+  padding: 12px 32px;
+  background: linear-gradient(90deg, #0066cc 0%, #4f8edc 100%);
+  align-self: flex-start;
+  box-shadow: 0 2px 8px rgba(0,82,165,0.08);
+  transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+  border: none;
+  outline: none;
+  display: inline-block;
+}
+.blog-tile__readmore-worldclass:hover {
+  background: linear-gradient(90deg, #0052a5 0%, #0066cc 100%);
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(0,82,165,0.13);
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(80px) scale(0.96);
+  filter: blur(6px);
+}
+.revealed {
+  opacity: 1;
+  transform: none;
+  filter: none;
+  transition: all 0.55s cubic-bezier(.4,2,.3,1);
+}
 </style>
+

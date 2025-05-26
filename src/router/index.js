@@ -31,26 +31,40 @@ const routes = [
       next();
     }
   },
+  // All Agents page - accessible to all
+  {
+    path: '/allagents',
+    name: 'AllAgents',
+    component: () => import('@/views/AllAgents.vue'),
+    meta: {
+      hideHeader: true,
+      hideSidebar: true,
+      layout: 'public',
+      title: 'Find Your Perfect Agent',
+      allowedRoles: ['all', 'admin', 'agent', 'client']
+    },
+    beforeEnter: (to, from, next) => {
+      // Allow access regardless of role
+      next();
+    }
+  },
+  // Public Agent Profile page - accessible to all
+  {
+    path: '/agent-profile/:id',
+    name: 'PublicAgentProfile',
+    component: () => import('@/views/public/AgentProfileView.vue'),
+    meta: {
+      hideHeader: true,
+      hideSidebar: true,
+      layout: 'public',
+      title: 'Agent Profile'
+    }
+  },
   // Root path - redirect based on role
   {
     path: '/',
     name: 'Root',
-    beforeEnter: (to, from, next) => {
-      const roleStore = useRoleStore();
-      const role = roleStore.currentRole;
-
-      if (role === 'all') {
-        next('/landing');
-      } else if (role === 'admin') {
-        next('/agents');
-      } else if (role === 'agent') {
-        next('/agent-dashboard');
-      } else if (role === 'client') {
-        next('/client-dashboard');
-      } else {
-        next('/landing');
-      }
-    }
+    redirect: '/landing'
   },
   // Agents management route (Admin-only)
   {
@@ -152,48 +166,13 @@ const routes = [
   // Client Agent Profile route (Client-only)
   {
     path: '/client-find-agents/:id',
+    name: 'ClientAgentProfile',
     component: () => import('@/views/client/AgentProfileView.vue'),
     meta: {
       title: 'Agent Profile',
       description: 'View detailed information about an agent',
       allowedRoles: ['client']
-    },
-    children: [
-      {
-        path: '',
-        name: 'ClientAgentProfile',
-        redirect: to => {
-          return { name: 'AgentBio', params: { id: to.params.id } };
-        }
-      },
-      {
-        path: 'bio',
-        name: 'AgentBio',
-        component: () => import('@/views/client/AgentProfileView.vue'),
-        meta: {
-          tab: 'bio',
-          allowedRoles: ['client']
-        }
-      },
-      {
-        path: 'listings',
-        name: 'AgentListings',
-        component: () => import('@/views/client/AgentProfileView.vue'),
-        meta: {
-          tab: 'listings',
-          allowedRoles: ['client']
-        }
-      },
-      {
-        path: 'documents',
-        name: 'AgentDocuments',
-        component: () => import('@/views/client/AgentProfileView.vue'),
-        meta: {
-          tab: 'documents',
-          allowedRoles: ['client']
-        }
-      }
-    ]
+    }
   },
   // Client Favourites route (Client-only)
   {
@@ -803,7 +782,7 @@ const routes = [
   // Admin Agent Profile route (Admin-only)
   {
     path: '/admin/agent/:id',
-    name: 'AdminAgentProfileDetail',
+    name: 'AdminAgentProfile',
     component: () => import('@/views/admin/AgentProfileView.vue'),
     meta: {
       title: 'Agent Profile',
@@ -993,10 +972,14 @@ const routes = [
 
 // Create router instance
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHashHistory('/RCR/'),
   routes,
-  scrollBehavior() {
-    return { top: 0 }
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition;
+    } else {
+      return { top: 0 };
+    }
   }
 });
 

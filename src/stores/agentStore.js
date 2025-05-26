@@ -202,22 +202,27 @@ export const useAgentStore = defineStore('agent', () => {
     }
   }
 
-  // Method to get all agents - adding this method fixes the blank page issue
   function getAllAgents() {
-    return agents.value;
+    return agents.value.map(agent => ({
+      ...agent,
+      propertiesSold: Math.floor(Math.random() * 50) + 10, // Simulated data
+      yearsExperience: agent.yearsOfExperience,
+      rating: agent.averageRating,
+      title: `${agent.specialties[0]} Specialist`,
+      isVerified: true,
+      isTopAgent: agent.averageRating >= 4.8
+    }));
   }
 
-  // Method to fetch agents from an API (simulated)
   async function fetchAgents() {
-    // In a real app, this would be an API call
-    console.log('Fetching agents data...');
-    // Using setTimeout to simulate async API call
-    return new Promise(resolve => {
-      setTimeout(() => {
-        console.log('Agents data fetched successfully');
-        resolve(agents.value);
-      }, 500);
-    });
+    try {
+      // In a real app, this would be an API call
+      // For now, we'll just use the static data
+      return Promise.resolve(agents.value);
+    } catch (error) {
+      console.error('Error fetching agents:', error);
+      return [];
+    }
   }
 
   function updateAgentStatus(agentId, status) {
@@ -227,11 +232,8 @@ export const useAgentStore = defineStore('agent', () => {
     }
   }
 
-  // Method to get a specific agent by ID
   function getAgentById(id) {
-    // Convert id to number if it's a string
-    const numericId = typeof id === 'string' ? parseInt(id, 10) : id;
-    return agents.value.find(agent => agent.id === numericId) || null;
+    return agents.value.find(agent => agent.id === id);
   }
 
   return {
