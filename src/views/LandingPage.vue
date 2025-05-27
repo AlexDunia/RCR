@@ -6,7 +6,9 @@
       <div class="boxed-container">
         <!-- Header Navigation -->
         <nav class="main-nav">
-          <div class="main-nav__logo">Real City</div>
+          <div class="main-nav__logo">
+            <img src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1748316444/rclogo_l7oiod.png" alt="Real City Logo" class="main-nav__logo-img" />
+          </div>
           <div class="main-nav__center">
             <a href="#" class="main-nav__link">Buy</a>
             <a href="#" class="main-nav__link">Rent</a>
@@ -73,51 +75,22 @@
       <div class="boxed-container">
         <h2 class="featured__title--figma">Find the best place for you.</h2>
         <div class="property-grid--figma">
-          <div class="property-card--figma">
-            <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=600&q=60" alt="Cedar Grove Estates" class="property-card__img--figma" loading="lazy">
+          <div class="property-card--figma" v-for="property in featuredProperties" :key="property.id">
+            <img :src="property.image" :alt="property.name" class="property-card__img--figma" loading="lazy">
             <div class="property-card__content--figma">
-              <h3 class="property-card__title--figma">Cedar Grove Estates</h3>
-              <div class="property-card__price--figma">$25,000</div>
+              <h3 class="property-card__title--figma">{{ property.name }}</h3>
+              <div class="property-card__price--figma">{{ property.price }}</div>
               <div class="property-card__address--figma">
                 <svg class="property-card__address-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                123 Cedar Grove, Austin, TX 78701
+                {{ property.address }}
             </div>
             </div>
           </div>
-          <div class="property-card--figma">
-            <img src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=600&q=60" alt="Willow Creek Villa" class="property-card__img--figma" loading="lazy">
-              <div class="property-card__content--figma">
-              <h3 class="property-card__title--figma">Willow Creek Villa</h3>
-              <div class="property-card__price--figma">$35,000</div>
-                <div class="property-card__address--figma">
-                <svg class="property-card__address-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                456 Willow Creek, Boulder, CO 80301
                 </div>
-              </div>
-            </div>
-          <div class="property-card--figma">
-            <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=600&q=60" alt="Maple Leaf Cottage" class="property-card__img--figma" loading="lazy">
-            <div class="property-card__content--figma">
-              <h3 class="property-card__title--figma">Maple Leaf Cottage</h3>
-              <div class="property-card__price--figma">$45,000</div>
-              <div class="property-card__address--figma">
-                <svg class="property-card__address-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                789 Maple Leaf, Portland, OR 97201
-              </div>
-            </div>
-          </div>
-          <div class="property-card--figma">
-            <img src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=600&q=60" alt="Pine Hill Mansion" class="property-card__img--figma" loading="lazy">
-            <div class="property-card__content--figma">
-              <h3 class="property-card__title--figma">Pine Hill Mansion</h3>
-              <div class="property-card__price--figma">$55,000</div>
-              <div class="property-card__address--figma">
-                <svg class="property-card__address-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                101 Pine Hill, Seattle, WA 98101
-              </div>
-            </div>
-          </div>
-        </div>
+        <router-link to="/allproperties" class="featured__view-more">
+          View More
+          <svg style="margin-left: 8px;" width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" stroke="#0052a5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </router-link>
       </div>
     </section>
 
@@ -339,10 +312,12 @@
     </footer>
 
     <!-- Fixed Navigation -->
-    <nav class="fixed-nav" :class="{ 'fixed-nav--visible': showFixedNav }" v-show="showFixedNav" style="display: none;">
+    <nav class="fixed-nav" :class="{ 'fixed-nav--visible': showFixedNav }" v-show="showFixedNav">
       <div class="boxed-container">
         <div class="fixed-nav__content">
-          <div class="fixed-nav__logo">Real City</div>
+          <div class="fixed-nav__logo">
+            <img src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1748316444/rclogo_l7oiod.png" alt="Real City Logo" class="fixed-nav__logo-img" />
+          </div>
           <div class="fixed-nav__center">
             <a href="#" class="fixed-nav__link">Buy</a>
             <a href="#" class="fixed-nav__link">Rent</a>
@@ -361,8 +336,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
+import { ref, onMounted, onBeforeUnmount, nextTick, computed } from 'vue';
 import { useAgentStore } from '@/stores/agentStore';
+import { usePropertyStore } from '@/stores/propertyStore';
 
 defineOptions({
   name: 'LandingPage'
@@ -524,6 +500,9 @@ onBeforeUnmount(() => {
 
 // Use for main sections and blog cards
 useRevealOnScroll('.reveal');
+
+const propertyStore = usePropertyStore();
+const featuredProperties = computed(() => propertyStore.properties.slice(0, 4));
 </script>
 
 <style scoped>
@@ -542,9 +521,13 @@ useRevealOnScroll('.reveal');
 }
 
 .main-nav__logo {
-  font-size: 24px;
-  font-weight: 700;
-  color: #fff;
+  display: flex;
+  align-items: center;
+}
+
+.main-nav__logo-img {
+  height: 50px;
+  width: auto;
 }
 
 .main-nav__center {
@@ -630,10 +613,9 @@ useRevealOnScroll('.reveal');
 }
 
 .hero__content {
-  max-width: 600px;
   text-align: left;
   margin-top: 120px;
-  margin-bottom: 48px;
+  margin-bottom: 90px;
 }
 
 .hero__title {
@@ -1581,9 +1563,13 @@ useRevealOnScroll('.reveal');
 }
 
 .fixed-nav__logo {
-  font-size: 24px;
-  font-weight: 700;
-  color: #0066cc;
+  display: flex;
+  align-items: center;
+}
+
+.fixed-nav__logo-img {
+  height: 50px;
+  width: auto;
 }
 
 .fixed-nav__center {
@@ -1912,6 +1898,22 @@ useRevealOnScroll('.reveal');
   transform: none;
   filter: none;
   transition: all 0.55s cubic-bezier(.4,2,.3,1);
+}
+
+.featured__view-more {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 24px;
+  font-weight: 700;
+  color: #0052a5;
+  font-size: 1.1rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.featured__view-more:hover {
+  color: #003d7a;
+  text-decoration: underline;
 }
 </style>
 

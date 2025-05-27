@@ -1,5 +1,5 @@
 <template>
-  <header :class="[
+  <header v-if="!isLandingPage" :class="[
     'public-header',
     { 'public-header--transparent': isLandingPage },
     { 'public-header--fixed': isFixed }
@@ -13,7 +13,7 @@
       </div>
       <!-- Nav Center -->
       <nav class="header__nav">
-        <router-link to="/buy" class="header__nav-link">Buy</router-link>
+        <router-link to="/buy" class="header__nav-link">Buy me</router-link>
         <router-link to="/rent" class="header__nav-link">Rent</router-link>
         <router-link to="/sell" class="header__nav-link">Sell</router-link>
         <div class="header__nav-dropdown">

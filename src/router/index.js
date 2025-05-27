@@ -962,6 +962,28 @@ const routes = [
     component: () => import('@/views/public/FindAgentsView.vue'),
     meta: { title: 'Find Agents', allowedRoles: ['all', 'admin', 'agent', 'client'] }
   },
+  {
+    path: '/allproperties',
+    name: 'AllProperties',
+    component: () => import('@/views/public/AllProperties.vue'),
+    meta: {
+      title: 'All Properties',
+      publicAccess: true
+    }
+  },
+  // All Properties public details page
+  {
+    path: '/allproperties/:slug',
+    name: 'AllPropertiesDetails',
+    component: () => import('@/views/public/AllPropertiesDetails.vue'),
+    meta: {
+      hideHeader: false,
+      hideSidebar: true,
+      layout: 'public',
+      title: 'Property Details',
+      allowedRoles: ['all', 'admin', 'agent', 'client']
+    }
+  },
   // 404 route - must be the last route
   {
     path: '/:pathMatch(.*)*',
