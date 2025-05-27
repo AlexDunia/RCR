@@ -1,5 +1,11 @@
 <template>
   <div class="all-agents-page">
+    <!-- Hero Section -->
+    <div class="agents-hero world-class-hero">
+      <div class="hero-bg-decor"></div>
+      <h2 class="agents-hero__title">Find Agent</h2>
+      <p class="agents-hero__caption">Easily search, filter, and connect with the best real estate agents for your needs.</p>
+    </div>
     <!-- Main Content -->
     <section class="agents-content">
       <div class="boxed-container">
@@ -15,18 +21,6 @@
                 v-model="searchQuery"
                 class="search-input"
                 placeholder="Search agents by name, location, or specialty..."
-                @input="handleSearch"
-              >
-            </div>
-            <div class="search-input-wrapper search-input-wrapper--location">
-              <span class="search-icon">
-                <i class="fas fa-map-marker-alt"></i>
-              </span>
-              <input
-                type="text"
-                v-model="locationFilter"
-                class="search-input"
-                placeholder="Filter by location..."
                 @input="handleSearch"
               >
             </div>
@@ -101,7 +95,6 @@
               v-for="agent in filteredAgents"
               :key="agent.id"
               class="agent-card"
-              @click="viewAgentProfile(agent.id)"
             >
               <div class="agent-card__header">
                 <div class="agent-card__img-box">
@@ -159,10 +152,6 @@
                 <button class="agent-card__contact-btn" @click.stop="contactAgent">
                   <i class="fas fa-envelope"></i>
                   Contact Agent
-                </button>
-                <button class="agent-card__view-btn" @click.stop="viewAgentProfile(agent.id)">
-                  <i class="fas fa-user"></i>
-                  View Profile
                 </button>
               </div>
             </div>
@@ -258,7 +247,6 @@ const agentStore = useAgentStore();
 
 // Search and filter state
 const searchQuery = ref('');
-const locationFilter = ref('');
 const selectedSpecialties = ref([]);
 const selectedExperience = ref([]);
 const selectedLanguages = ref([]);
@@ -311,21 +299,16 @@ onMounted(async () => {
 const filteredAgents = computed(() => {
   let filtered = agents.value;
 
+  // Sanitize input for security
+  const sanitize = (str) => str.replace(/[^a-zA-Z0-9\s\-.,]/g, "");
+
   // Filter by search query
   if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase();
+    const query = sanitize(searchQuery.value.toLowerCase());
     filtered = filtered.filter(agent =>
       agent.name.toLowerCase().includes(query) ||
       agent.location.toLowerCase().includes(query) ||
       agent.specialties.some(s => s.toLowerCase().includes(query))
-    );
-  }
-
-  // Filter by location
-  if (locationFilter.value) {
-    const location = locationFilter.value.toLowerCase();
-    filtered = filtered.filter(agent =>
-      agent.location.toLowerCase().includes(location)
     );
   }
 
@@ -361,8 +344,8 @@ function contactAgent() {
   router.push('/login');
 }
 
-function viewAgentProfile(agentId) {
-  router.push(`/agent-profile/${Number(agentId)}`);
+function viewProfile(agent) {
+  router.push(`/agent/${agent.id}`);
 }
 </script>
 
@@ -371,6 +354,34 @@ function viewAgentProfile(agentId) {
   min-height: 100vh;
   background: #f8fafc;
   padding: 40px 0;
+}
+
+/* Hero Section */
+.agents-hero {
+  margin: 24px auto 32px auto;
+  max-width: 1240px;
+  padding: 24px 32px 36px 32px;
+  border-radius: 20px;
+  background: linear-gradient(120deg, #f0fdfa 0%, #f8fafc 100%);
+  border: 1px solid #d1fae5;
+  box-shadow: 0 2px 12px rgba(0, 124, 240, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.agents-hero__title {
+  font-size: calc(2rem - 1.5px);
+  font-weight: 700;
+  color: #0e3a5e;
+  margin-bottom: 4px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.agents-hero__caption {
+  color: #64748b;
+  font-size: calc(1.08rem - 1.5px);
+  margin: 0;
 }
 
 /* Search Bar */
@@ -385,7 +396,7 @@ function viewAgentProfile(agentId) {
 
 .search-input-group {
   display: grid;
-  grid-template-columns: 1.5fr 1fr auto;
+  grid-template-columns: 1.5fr auto;
   gap: 20px;
   align-items: center;
 }
@@ -761,35 +772,46 @@ function viewAgentProfile(agentId) {
 .agent-card__footer {
   padding: 16px 20px;
   background: #f8fafc;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  /* margin-top: auto; */
+  display: flex;
+  flex-direction: column;
+  gap: 0;
   border-top: 1px solid rgba(0, 0, 0, 0.03);
 }
 
-.agent-card__contact-btn,
-.agent-card__view-btn {
-  padding: 12px 18px;
-  border-radius: 8px;
+.agent-card__contact-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #007cf0 0%, #0052d4 100%);
+  color: #fff;
+  border: none;
+  padding: 12px 36px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition:
+    background 0.3s cubic-bezier(.4,2,.6,1),
+    transform 0.18s cubic-bezier(.4,2,.6,1),
+    box-shadow 0.18s cubic-bezier(.4,2,.6,1);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
+  box-shadow: 0 8px 24px rgba(0, 124, 240, 0.18), 0 1.5px 6px rgba(0,0,0,0.04);
+  outline: none;
+  border: 2px solid transparent;
 }
 
-.agent-card__contact-btn i,
-.agent-card__view-btn i {
-  font-size: 1.1em;
-  vertical-align: middle;
-  line-height: 1;
+.agent-card__contact-btn:hover,
+.agent-card__contact-btn:focus {
+  background: linear-gradient(135deg, #0052d4 0%, #007cf0 100%);
+  transform: translateY(-3px) scale(1.04);
+  box-shadow: 0 12px 32px rgba(0, 124, 240, 0.22), 0 2px 8px rgba(0,0,0,0.06);
+  border-color: #bae6fd;
 }
 
-.agent-card__contact-btn {
-  background: #0066cc;
-  color: #fff;
-  border: none;
-  box-shadow: 0 4px 12px rgba(0, 102, 204, 0.15);
+.agent-card__contact-btn:active {
+  transform: scale(0.98);
+  box-shadow: 0 4px 12px rgba(0, 124, 240, 0.12);
 }
 
 .agent-card__view-btn {
@@ -1081,5 +1103,45 @@ function viewAgentProfile(agentId) {
   margin: 0 auto;
   padding-left: 24px;
   padding-right: 24px;
+}
+
+.world-class-hero {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(120deg, #0f2027 0%, #2c5364 100%); /* dark blue gradient */
+  border-radius: 24px;
+  padding: 64px 40px 56px 40px;
+  margin-bottom: 32px;
+  box-shadow: 0 8px 40px 0 rgba(0, 102, 204, 0.07);
+  text-align: left;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.hero-bg-decor {
+  display: none;
+}
+
+.agents-hero__title {
+  font-size: 2.8rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 12px;
+  margin-top: 0;
+  z-index: 1;
+  letter-spacing: -1px;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.18);
+  font-family: 'Poppins', sans-serif;
+}
+
+.agents-hero__caption {
+  color: #e0e7ff;
+  font-size: 1.25rem;
+  margin: 0;
+  z-index: 1;
+  max-width: 600px;
+  line-height: 1.6;
 }
 </style>

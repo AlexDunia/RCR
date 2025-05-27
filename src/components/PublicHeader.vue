@@ -7,8 +7,9 @@
     <div class="container header__container">
       <!-- Logo Left -->
       <div class="header__logo">
-        <h2>Real City</h2>
-        <span class="header__tagline">realty inc brokerage</span>
+        <router-link to="/">
+          <img src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1748316444/rclogo_l7oiod.png" alt="Real City Logo" class="header__logo-img" />
+        </router-link>
       </div>
       <!-- Nav Center -->
       <nav class="header__nav">
@@ -130,6 +131,11 @@ const handleAuthClick = () => {
   background: #fff;
   padding: 1rem 2rem;
   transition: all 0.3s ease;
+  height: 50px;
+  max-height: 50px;
+  overflow: visible;
+  display: flex;
+  align-items: center;
 }
 
 .public-header--transparent {
@@ -178,11 +184,12 @@ const handleAuthClick = () => {
   opacity: 1;
 }
 
-.container {
+.container,
+.boxed-container {
   max-width: 1200px;
-  margin: 0 auto;
+  margin-left: 2rem;
   padding: 0;
-  width: 100%;
+  width: calc(100% - 2rem);
 }
 
 .header__container {
@@ -351,5 +358,14 @@ const handleAuthClick = () => {
 .dropdown-arrow {
   font-size: 0.75rem;
   opacity: 0.7;
+}
+
+.header__logo-img {
+  height: 110px;
+  width: 110px;
+  object-fit: contain;
+  display: block;
+  margin-top: -27px;
+  margin-bottom: -27px;
 }
 </style>
