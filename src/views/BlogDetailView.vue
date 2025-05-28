@@ -1,31 +1,6 @@
 <template>
   <div class="blog-detail">
-    <!-- Fixed Header -->
-    <header class="fixed-header">
-      <div class="header-content">
-        <div class="logo">
-          <img src="@/assets/images/logo.svg" alt="Real City" class="logo-image">
-          <span class="logo-text">Real City</span>
-          <span class="logo-subtext">realty inc brokerage</span>
-        </div>
-        <nav class="main-nav">
-          <a href="#" class="nav-link">Buy</a>
-          <a href="#" class="nav-link">Rent</a>
-          <a href="#" class="nav-link">Sell</a>
-          <div class="nav-link dropdown">
-            Agent
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-        </nav>
-        <div class="auth-buttons">
-          <button class="btn-sign-in">Sign in</button>
-          <button class="btn-login">Login</button>
-        </div>
-      </div>
-    </header>
-
+    <GlobalHeader />
     <div class="blog-header">
       <div class="header-content">
         <div class="category-date">
@@ -84,6 +59,7 @@
 </template>
 
 <script setup>
+import GlobalHeader from '@/components/GlobalHeader.vue';
 // Component logic will go here
 </script>
 

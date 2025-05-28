@@ -1,10 +1,11 @@
-import { createRouter, createWebHashHistory } from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router';
 import { useRoleStore } from '@/stores/roleStore';
 import DocumentLayout from '@/layouts/DocumentLayout.vue';
 import TasksLayout from '@/layouts/TasksLayout.vue';
 import EducationLayout from '@/layouts/EducationLayout.vue';
 import permissionGuard from './guards/permissionGuard';
 import { setupRouterDebug } from '@/utils/router-debug';
+import { publicGuard } from './guards/publicGuard';
 
 // Lazy-loaded route components
 const routes = [
@@ -24,11 +25,21 @@ const routes = [
       const roleStore = useRoleStore();
       // Force role to 'all' when entering landing page
       roleStore.setRole('all');
-      // Clear any cached components
-      if (from.name) {
-        to.meta.reload = true;
-      }
       next();
+    }
+  },
+  // New Buy Properties page - accessible to all
+  {
+    path: '/newbuyproperties',
+    name: 'NewBuyProperties',
+    component: () => import('@/views/public/NewBuyProperties.vue'),
+    meta: {
+      hideHeader: true,
+      hideSidebar: true,
+      layout: 'public',
+      title: 'Buy Properties',
+      publicAccess: true,
+      allowedRoles: ['all', 'admin', 'agent', 'client']
     }
   },
   // All Agents page - accessible to all
@@ -64,7 +75,13 @@ const routes = [
   {
     path: '/',
     name: 'Root',
-    redirect: '/landing'
+    redirect: (to) => {
+      // Allow direct access to buy and rent properties
+      if (to.path === '/buy' || to.path === '/rent') {
+        return to.path;
+      }
+      return '/landing';
+    }
   },
   // Agents management route (Admin-only)
   {
@@ -905,7 +922,11 @@ const routes = [
     meta: {
       title: 'About Us',
       description: 'Learn more about our company',
-      publicAccess: true
+      publicAccess: true,
+      hideHeader: true,
+      hideSidebar: true,
+      layout: 'public',
+      noCache: true
     }
   },
   {
@@ -915,7 +936,11 @@ const routes = [
     meta: {
       title: 'Careers',
       description: 'Join our team',
-      publicAccess: true
+      publicAccess: true,
+      hideHeader: true,
+      hideSidebar: true,
+      layout: 'public',
+      noCache: true
     }
   },
   {
@@ -938,24 +963,24 @@ const routes = [
       publicAccess: true
     }
   },
-      {
-      path: '/blog',
-      name: 'Blog',
-      component: () => import('@/views/BlogView.vue'),
-      meta: {
-        title: 'Blog',
-        description: 'Read our latest updates and insights',
-        publicAccess: true
-      }
-    },
-      {
-      path: '/blog/:id',
-      name: 'BlogDetail',
-      component: () => import('@/views/BlogDetailView.vue'),
-      meta: {
-        publicAccess: true
-      }
-    },
+  {
+    path: '/blog',
+    name: 'Blog',
+    component: () => import('@/views/BlogView.vue'),
+    meta: {
+      title: 'Blog',
+      description: 'Read our latest updates and insights',
+      publicAccess: true
+    }
+  },
+  {
+    path: '/blog/:id',
+    name: 'BlogDetail',
+    component: () => import('@/views/BlogDetailView.vue'),
+    meta: {
+      publicAccess: true
+    }
+  },
   {
     path: '/find-agents',
     name: 'FindAgents',
@@ -981,7 +1006,58 @@ const routes = [
       hideSidebar: true,
       layout: 'public',
       title: 'Property Details',
-      allowedRoles: ['all', 'admin', 'agent', 'client']
+      allowedRoles: ['all', 'admin', 'agent', 'client'],
+      publicAccess: true
+    }
+  },
+  {
+    path: '/buy',
+    name: 'buy-properties',
+    component: () => import('@/views/public/BuyProperties.vue'),
+    meta: {
+      requiresAuth: false,
+      title: 'Properties for Sale',
+      publicAccess: true
+    },
+    beforeEnter: publicGuard
+  },
+  {
+    path: '/rent',
+    name: 'rent-properties',
+    component: () => import('@/views/public/RentProperties.vue'),
+    meta: {
+      requiresAuth: false,
+      title: 'Properties for Rent',
+      publicAccess: true
+    },
+    beforeEnter: publicGuard
+  },
+  {
+    path: '/lifestyle',
+    name: 'Lifestyle',
+    component: () => import('@/views/public/LifestyleView.vue'),
+    meta: {
+      title: 'Lifestyle & Community',
+      description: 'Discover our vibrant communities and lifestyle opportunities',
+      publicAccess: true,
+      hideHeader: true,
+      hideSidebar: true,
+      layout: 'public',
+      noCache: true
+    }
+  },
+  {
+    path: '/legal-notice',
+    name: 'LegalNotice',
+    component: () => import('@/views/public/LegalNoticeView.vue'),
+    meta: {
+      title: 'Legal Notice',
+      description: 'Important legal information about our services',
+      publicAccess: true,
+      hideHeader: true,
+      hideSidebar: true,
+      layout: 'public',
+      noCache: true
     }
   },
   // 404 route - must be the last route
@@ -994,7 +1070,7 @@ const routes = [
 
 // Create router instance
 const router = createRouter({
-  history: createWebHashHistory('/RCR/'),
+  history: createWebHistory('/RCR/'), // Explicitly set base path for SPA chunk loading
   routes,
   scrollBehavior(to, from, savedPosition) {
     if (savedPosition) {
@@ -1007,14 +1083,10 @@ const router = createRouter({
 
 // Add global navigation guard for landing page
 router.beforeEach((to, from, next) => {
-  // If navigating to landing page
-  if (to.path === '/landing') {
-    // Force component reload by adding timestamp to the route
-    to.query = { ...to.query, _t: Date.now() };
-    // Clear any cached components
-    if (from.name) {
-      to.meta.reload = true;
-    }
+  // If navigating to landing page or buy/rent properties
+  if (to.path === '/landing' || to.path === '/buy' || to.path === '/rent') {
+    // Do not mutate to.query or to.meta.reload
+    // Just allow navigation
   }
   next();
 });

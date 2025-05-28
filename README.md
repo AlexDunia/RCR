@@ -33,3 +33,16 @@ npm run build
 ```sh
 npm run lint
 ```
+
+## SPA Routing and Static File Serving
+
+If you deploy this app to a static server (e.g., Netlify, Vercel, GitHub Pages, or your own server), you must ensure that all routes under `/RCR/*` serve `index.html` (the main app entry point). This is required for client-side navigation to work correctly in a Single Page Application (SPA).
+
+For example, in Nginx:
+```
+location /RCR/ {
+  try_files $uri $uri/ /RCR/index.html;
+}
+```
+
+If you use another server, consult its documentation for SPA fallback configuration.

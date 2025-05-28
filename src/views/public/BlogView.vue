@@ -1,6 +1,6 @@
 <template>
   <div class="blogs-page">
-    <PublicHeader transparent />
+    <GlobalHeader />
 
     <!-- Hero Section -->
     <section class="blog-hero">
@@ -45,7 +45,7 @@
 </template>
 
 <script setup>
-import PublicHeader from '@/components/PublicHeader.vue';
+import GlobalHeader from '@/components/GlobalHeader.vue';
 </script>
 
 <style scoped>

@@ -49,7 +49,6 @@ const hasSidebar = computed(() => {
 });
 
 // Computed properties for layout settings
-const hideHeader = computed(() => false); // Always show header
 const background = computed(() => layoutStore.background);
 
 // Get the current active sidebar component based on role
@@ -125,6 +124,17 @@ const handleRouteChange = () => {
   if (mainContent) {
     mainContent.scrollTop = 0;
   }
+
+  // Force component reload for landing page
+  if (route.path === '/landing') {
+    nextTick(() => {
+      window.scrollTo(0, 0);
+      const mainContent = document.querySelector('.main-content');
+      if (mainContent) {
+        mainContent.scrollTop = 0;
+      }
+    });
+  }
 };
 
 // Add transition hooks for better performance
@@ -185,9 +195,9 @@ watch(
 
 <template>
   <div class="app-container" :style="{ background: background }">
-    <!-- Show PublicHeader for 'all' role or landing page, but not on login/signup -->
+    <!-- Show PublicHeader for 'all' role or landing page, but not on login/signup, and not if hideHeader is true -->
     <PublicHeader
-      v-if="(roleStore.currentRole === 'all' || route.path === '/landing') && !route.path.includes('login') && !route.path.includes('signup')"
+      v-if="!route.meta.hideHeader && (roleStore.currentRole === 'all' || route.path === '/landing') && !route.path.includes('login') && !route.path.includes('signup')"
       :transparent="route.path === '/landing'"
       :is-fixed="true"
       class="z-50"
@@ -198,7 +208,8 @@ watch(
 
     <!-- Main content container with sidebar-adjusted class -->
     <div class="main-content" :class="{ 'with-sidebar': hasSidebar && !isLandingPage, 'landing-page': isLandingPage }">
-      <Header v-if="!hideHeader && !isLandingPage"/>
+      <!-- Show global header only if not hidden and not on landing page and not for 'all' role -->
+      <Header v-if="!route.meta.hideHeader && !isLandingPage && roleStore.currentRole !== 'all'"/>
 
       <div class="scroll-container" :class="{ 'navigating': isNavigating }">
         <router-view v-slot="{ Component }">

@@ -1,145 +1,314 @@
 <template>
-  <PublicHeader :transparent="true" :is-fixed="isHeaderFixed" />
-  <section id="hero-section" class="terms-hero">
-    <div class="terms-hero__content">
-      <h1 class="terms-hero__title">Terms of Service</h1>
-      <p class="terms-hero__subtitle">Clarity, fairness, and trust—our promise to every Real City user.</p>
-    </div>
-  </section>
-  <section class="terms-commitments">
-    <div class="terms-commitments__container">
-      <h2>Our Commitments to You</h2>
-      <div class="terms-commitments__grid">
-        <div class="terms-commitment">
-          <span class="terms-commitment__icon">🤝</span>
-          <h3>Transparency</h3>
-          <p>We believe in clear, honest communication. Our terms are written to be understood, not hidden in fine print.</p>
-        </div>
-        <div class="terms-commitment">
-          <span class="terms-commitment__icon">⚖️</span>
-          <h3>Fairness</h3>
-          <p>We treat every user with respect and fairness, ensuring a safe and equitable experience for all.</p>
-        </div>
-        <div class="terms-commitment">
-          <span class="terms-commitment__icon">🔍</span>
-          <h3>Accountability</h3>
-          <p>We stand by our word. If you have questions or concerns, our team is here to help.</p>
-        </div>
+  <div class="terms-container">
+    <GlobalHeader />
+    <!-- Hero Section -->
+    <div class="hero-section">
+      <div class="hero-content">
+        <h1 class="hero-title">Terms & Conditions</h1>
+        <p class="hero-subtitle">Please read these terms carefully before using our services. By accessing our platform, you agree to be bound by these terms.</p>
       </div>
-      <p class="terms-legal">By using Real City, you agree to our terms. Please review the full policy below.</p>
     </div>
-  </section>
-  <section class="terms-cta">
-    <div class="terms-cta__content">
-      <h2>Questions about our terms?</h2>
-      <p>Contact us at <a href="mailto:legal@realcity.com">legal@realcity.com</a>—we're here to help.</p>
+
+    <!-- Main Content Section -->
+    <div class="terms-content">
+      <div class="content-wrapper">
+        <!-- Introduction Section -->
+        <section class="terms-section">
+          <h2 class="section-title">Introduction</h2>
+          <div class="story-content">
+            <p>Welcome to Real City Realty. These terms and conditions outline the rules and regulations for the use of our website and services.</p>
+            <p>By accessing this website, we assume you accept these terms and conditions in full. Do not continue to use Real City Realty's website if you do not accept all of the terms and conditions stated on this page.</p>
+          </div>
+        </section>
+
+        <!-- Key Terms Section -->
+        <section class="terms-section">
+          <h2 class="section-title">Key Terms</h2>
+          <div class="terms-grid">
+            <div class="term-card">
+              <span class="term-icon">📝</span>
+              <h3>Definitions</h3>
+              <p>"Website" refers to Real City Realty, accessible from realcityrealty.com</p>
+              <p>"Service" refers to the Company's website and real estate services</p>
+              <p>"User" refers to the individual accessing or using the Service</p>
+            </div>
+            <div class="term-card">
+              <span class="term-icon">🔒</span>
+              <h3>Privacy Policy</h3>
+              <p>Your use of our Service is also governed by our Privacy Policy. Please review our Privacy Policy, which also governs the Site and informs users of our data collection practices.</p>
+            </div>
+            <div class="term-card">
+              <span class="term-icon">📋</span>
+              <h3>User Responsibilities</h3>
+              <p>Users must provide accurate information and maintain the security of their accounts. Users are responsible for all activities that occur under their account.</p>
+            </div>
+            <div class="term-card">
+              <span class="term-icon">⚖️</span>
+              <h3>Legal Compliance</h3>
+              <p>Users must comply with all applicable laws and regulations while using our Service. Any violation may result in immediate termination of access.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Detailed Terms Section -->
+        <section class="terms-section">
+          <h2 class="section-title">Detailed Terms</h2>
+          <div class="detailed-terms">
+            <div class="term-block">
+              <h3>1. Intellectual Property</h3>
+              <p>The Service and its original content, features, and functionality are owned by Real City Realty and are protected by international copyright, trademark, patent, trade secret, and other intellectual property laws.</p>
+            </div>
+            <div class="term-block">
+              <h3>2. User Accounts</h3>
+              <p>When you create an account with us, you must provide accurate and complete information. You are responsible for maintaining the security of your account and password.</p>
+            </div>
+            <div class="term-block">
+              <h3>3. Service Usage</h3>
+              <p>Our Service is provided "as is" and "as available" without any warranties, expressed or implied. We reserve the right to modify or discontinue the Service at any time.</p>
+            </div>
+            <div class="term-block">
+              <h3>4. Limitation of Liability</h3>
+              <p>In no event shall Real City Realty be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section class="terms-section cta-section">
+          <h2>Questions About Our Terms?</h2>
+          <p>If you have any questions about these Terms and Conditions, please contact our legal team.</p>
+          <button class="cta-button">Contact Legal Team</button>
+        </section>
+      </div>
     </div>
-  </section>
+  </div>
 </template>
 
 <script setup>
-import PublicHeader from '@/components/PublicHeader.vue';
-import { useFixedHeader } from '@/composables/useFixedHeader';
-
-const { isHeaderFixed } = useFixedHeader('hero-section');
+import GlobalHeader from '@/components/GlobalHeader.vue';
 </script>
 
 <style scoped>
-.terms-hero {
-  background: linear-gradient(120deg, #e3f0ff 0%, #f7f8fa 100%);
-  padding: 120px 0 40px 0;
-  text-align: center;
+.terms-container {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #f9fafb;
 }
-.terms-hero__title {
-  font-size: 2.6rem;
-  font-weight: 800;
-  color: #003366;
-  margin-bottom: 0.5rem;
+
+.hero-section {
+  position: relative;
+  height: 60vh;
+  width: 100%;
+  background-image: url('https://images.unsplash.com/photo-1589829545856-d10d557cf95f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  margin-bottom: 0;
 }
-.terms-hero__subtitle {
-  font-size: 1.25rem;
-  color: #0052a5;
-  font-weight: 500;
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.4));
 }
-.terms-commitments__container {
-  max-width: 1100px;
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 1280px;
+  width: 100%;
   margin: 0 auto;
-  padding: 40px 16px 32px 16px;
-  text-align: center;
+  padding: 0 2rem;
+  text-align: left;
 }
-.terms-commitments__container h2 {
+
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 1rem;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  max-width: 600px;
+}
+
+.hero-subtitle {
+  font-size: 1.125rem;
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 400;
+  line-height: 1.5;
+  max-width: 500px;
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.terms-content {
+  padding: 4rem 0;
+}
+
+.content-wrapper {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.terms-section {
+  margin-bottom: 4rem;
+}
+
+.section-title {
   font-size: 2rem;
   font-weight: 700;
-  color: #003366;
-  margin-bottom: 1.2rem;
+  color: #111827;
+  margin-bottom: 2rem;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
 }
-.terms-commitments__grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 32px;
-  justify-content: center;
-  margin-top: 2.5rem;
+
+.story-content {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: #374151;
 }
-.terms-commitment {
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.07);
-  padding: 32px 24px;
-  flex: 1 1 260px;
-  min-width: 260px;
-  max-width: 320px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  transition: box-shadow 0.2s, transform 0.2s;
+
+.story-content p {
+  margin-bottom: 1.5rem;
 }
-.terms-commitment__icon {
-  font-size: 2.2rem;
+
+.terms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.term-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.term-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.term-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.term-card h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.75rem;
+}
+
+.term-card p {
+  color: #6b7280;
+  line-height: 1.6;
   margin-bottom: 1rem;
 }
-.terms-commitment h3 {
-  font-size: 1.18rem;
-  font-weight: 700;
-  color: #0052a5;
-  margin: 0 0 0.2rem 0;
+
+.detailed-terms {
+  display: grid;
+  gap: 2rem;
+  margin-top: 2rem;
 }
-.terms-commitment p {
-  color: #444;
-  font-size: 1rem;
-  margin: 0 0 0.5rem 0;
+
+.term-block {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
-.terms-legal {
-  color: #888;
-  font-size: 0.98rem;
-  margin-top: 2.2rem;
+
+.term-block h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 1rem;
 }
-.terms-cta {
-  background: #0052a5;
-  color: #fff;
-  padding: 48px 0;
+
+.term-block p {
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+.cta-section {
   text-align: center;
+  background: linear-gradient(135deg, #f7f8fa 0%, #e3f0ff 100%);
+  padding: 4rem 2rem;
+  border-radius: 12px;
+  margin-top: 4rem;
 }
-.terms-cta__content h2 {
+
+.cta-section h2 {
   font-size: 2rem;
   font-weight: 700;
-  margin-bottom: 0.7rem;
+  color: #111827;
+  margin-bottom: 1rem;
 }
-.terms-cta__content p {
-  font-size: 1.1rem;
-  margin-bottom: 1.2rem;
+
+.cta-section p {
+  font-size: 1.125rem;
+  color: #4b5563;
+  margin-bottom: 2rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
-.terms-cta__content a {
-  color: #fff;
-  text-decoration: underline;
+
+.cta-button {
+  display: inline-block;
+  background: #0066cc;
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }
-.terms-cta__content a:hover {
-  color: #b3d4fc;
+
+.cta-button:hover {
+  background: #0052a5;
 }
-@media (max-width: 900px) {
-  .terms-commitments__grid {
-    flex-direction: column;
-    gap: 24px;
-    align-items: center;
+
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.5rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+
+  .terms-content {
+    padding: 2rem 0;
+  }
+
+  .section-title {
+    font-size: 1.75rem;
+  }
+
+  .terms-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cta-section {
+    padding: 3rem 1rem;
   }
 }
 </style>

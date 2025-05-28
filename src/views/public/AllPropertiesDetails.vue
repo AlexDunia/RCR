@@ -4,11 +4,11 @@
     <nav class="main-nav">
       <div class="main-nav__logo">Real City</div>
       <div class="main-nav__center">
-        <router-link to="/allproperties" class="main-nav__link">Buy</router-link>
-        <router-link to="/allproperties" class="main-nav__link">Rent</router-link>
-        <router-link to="/allproperties" class="main-nav__link">Sell</router-link>
+        <router-link to="/buy" class="main-nav__link">Buy</router-link>
+        <router-link to="/rent" class="main-nav__link">Rent</router-link>
+        <router-link to="/sell" class="main-nav__link">Sell</router-link>
         <router-link to="/allagents" class="main-nav__link">Find Agents</router-link>
-        <router-link to="/join" class="main-nav__link">Join Us</router-link>
+        <router-link to="/signup" class="main-nav__link">Join Us</router-link>
       </div>
       <div class="main-nav__right">
         <button class="main-nav__button">Sign in</button>
@@ -55,7 +55,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onActivated } from 'vue';
 import { useRoute } from 'vue-router';
 import { usePropertyStore } from '@/stores/propertyStore';
 
@@ -79,6 +79,18 @@ const property = computed(() => {
   return propertyStore.properties.find(
     p => slugify(p.name) === slug
   );
+});
+
+onMounted(async () => {
+  if (typeof propertyStore.fetchProperties === 'function') {
+    await propertyStore.fetchProperties();
+  }
+});
+
+onActivated(async () => {
+  if (typeof propertyStore.fetchProperties === 'function') {
+    await propertyStore.fetchProperties();
+  }
 });
 </script>
 

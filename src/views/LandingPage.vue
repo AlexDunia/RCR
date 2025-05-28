@@ -10,11 +10,11 @@
             <img src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1748316444/rclogo_l7oiod.png" alt="Real City Logo" class="main-nav__logo-img" />
           </div>
           <div class="main-nav__center">
-            <a href="#" class="main-nav__link">Buy</a>
-            <a href="#" class="main-nav__link">Rent</a>
-            <a href="#" class="main-nav__link">Sell</a>
+            <router-link to="/buy" class="main-nav__link">Buy</router-link>
+            <router-link to="/rent" class="main-nav__link">Rent</router-link>
+            <router-link to="/sell" class="main-nav__link">Sell</router-link>
             <router-link to="/allagents" class="main-nav__link">Find Agents</router-link>
-            <a href="#" class="main-nav__link">Join Us</a>
+            <router-link to="/signup" class="main-nav__link">Join Us</router-link>
           </div>
           <div class="main-nav__right">
             <button class="main-nav__button">Sign in</button>
@@ -319,11 +319,11 @@
             <img src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1748316444/rclogo_l7oiod.png" alt="Real City Logo" class="fixed-nav__logo-img" />
           </div>
           <div class="fixed-nav__center">
-            <a href="#" class="fixed-nav__link">Buy</a>
-            <a href="#" class="fixed-nav__link">Rent</a>
-            <a href="#" class="fixed-nav__link">Sell</a>
-            <a href="#" class="fixed-nav__link">Agent</a>
-            <a href="#" class="fixed-nav__link">Join Us</a>
+            <router-link to="/buy" class="fixed-nav__link">Buy</router-link>
+            <router-link to="/rent" class="fixed-nav__link">Rent</router-link>
+            <router-link to="/sell" class="fixed-nav__link">Sell</router-link>
+            <router-link to="/agent" class="fixed-nav__link">Agent</router-link>
+            <router-link to="/signup" class="fixed-nav__link">Join Us</router-link>
           </div>
           <div class="fixed-nav__right">
             <button class="fixed-nav__button">Sign in</button>
@@ -336,7 +336,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, nextTick, computed } from 'vue';
+import { ref, onMounted, onBeforeUnmount, nextTick, computed, onActivated } from 'vue';
 import { useAgentStore } from '@/stores/agentStore';
 import { usePropertyStore } from '@/stores/propertyStore';
 
@@ -422,6 +422,18 @@ onBeforeUnmount(() => {
   openIdx.value = null;
   showFixedNav.value = false;
   stopCarousel();
+});
+
+onActivated(async () => {
+  // Always refetch agents and properties when activated (e.g., after navigating back)
+  if (typeof agentStore.fetchAgents === 'function') {
+    await agentStore.fetchAgents();
+  }
+  allAgents.value = agentStore.getAllAgents ? agentStore.getAllAgents() : (agentStore.agents || []);
+  pickVisibleAgents();
+  if (typeof propertyStore.fetchProperties === 'function') {
+    await propertyStore.fetchProperties();
+  }
 });
 
 const blogList = [

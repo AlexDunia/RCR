@@ -1,143 +1,373 @@
 <template>
-  <PublicHeader :transparent="true" :is-fixed="isHeaderFixed" />
-  <section id="hero-section" class="careers-hero">
-    <div class="careers-hero__content">
-      <h1 class="careers-hero__title">Grow With Real City</h1>
-      <p class="careers-hero__subtitle">Shape the future of real estate. Build your career with purpose, innovation, and heart.</p>
+  <div class="careers-container">
+    <GlobalHeader />
+    <!-- Hero Section -->
+    <div class="hero-section">
+      <div class="hero-content">
+        <h1 class="hero-title">Join Our Team</h1>
+        <p class="hero-subtitle">Build your career with Real City Realty. We're looking for passionate individuals who want to make a difference in real estate.</p>
+      </div>
+    </div>
+
+    <!-- Main Content Section -->
+    <div class="careers-content">
+      <div class="content-wrapper">
+        <!-- Why Join Us Section -->
+        <section class="careers-section">
+          <h2 class="section-title">Why Join Real City Realty?</h2>
+          <div class="story-content">
+            <p>At Real City Realty, we believe in creating an environment where talent thrives and innovation flourishes. We're not just a real estate company – we're a community of professionals dedicated to transforming the industry.</p>
+            <p>Join us and be part of a team that values growth, collaboration, and excellence in everything we do.</p>
     </div>
   </section>
-  <section class="careers-values">
-    <div class="careers-values__container">
-      <h2>Why Join Us?</h2>
-      <div class="careers-values__grid">
-        <div class="careers-value">
-          <span class="careers-value__icon">🌱</span>
-          <h3>Personal Growth</h3>
-          <p>We invest in your development, offering mentorship, learning, and real opportunities to advance.</p>
+
+        <!-- Benefits Section -->
+        <section class="careers-section">
+          <h2 class="section-title">Benefits & Perks</h2>
+          <div class="values-grid">
+            <div class="value-card">
+              <span class="value-icon">💼</span>
+              <h3>Career Growth</h3>
+              <p>Continuous learning opportunities and clear paths for advancement in your career.</p>
         </div>
-        <div class="careers-value">
-          <span class="careers-value__icon">🤝</span>
-          <h3>Meaningful Impact</h3>
-          <p>Your work helps families find homes, agents build careers, and communities thrive. Every day, you make a difference.</p>
+            <div class="value-card">
+              <span class="value-icon">🤝</span>
+              <h3>Work-Life Balance</h3>
+              <p>Flexible schedules and remote work options to maintain a healthy work-life balance.</p>
         </div>
-        <div class="careers-value">
-          <span class="careers-value__icon">💡</span>
-          <h3>Innovative Spirit</h3>
-          <p>We're reimagining real estate with technology, creativity, and a passion for better experiences.</p>
+            <div class="value-card">
+              <span class="value-icon">🏆</span>
+              <h3>Competitive Benefits</h3>
+              <p>Comprehensive health coverage, retirement plans, and performance-based incentives.</p>
         </div>
+            <div class="value-card">
+              <span class="value-icon">🌱</span>
+              <h3>Professional Development</h3>
+              <p>Regular training sessions and mentorship programs to enhance your skills.</p>
       </div>
     </div>
   </section>
-  <section class="careers-cta">
-    <div class="careers-cta__content">
-      <h2>Ready to make your mark?</h2>
-      <p>Join a team that values your story and empowers your future.</p>
-      <a href="mailto:careers@realcity.com" class="careers-cta__button">See Open Roles</a>
+
+        <!-- Open Positions Section -->
+        <section class="careers-section">
+          <h2 class="section-title">Open Positions</h2>
+          <div class="positions-grid">
+            <div class="position-card">
+              <h3>Real Estate Agent</h3>
+              <p class="position-location">Multiple Locations</p>
+              <p class="position-description">Join our team of successful agents and help clients find their dream homes.</p>
+              <ul class="position-requirements">
+                <li>Real estate license required</li>
+                <li>2+ years of experience preferred</li>
+                <li>Strong communication skills</li>
+              </ul>
+              <button class="apply-button">Apply Now</button>
+            </div>
+            <div class="position-card">
+              <h3>Property Manager</h3>
+              <p class="position-location">Headquarters</p>
+              <p class="position-description">Manage our growing portfolio of properties and ensure excellent tenant relations.</p>
+              <ul class="position-requirements">
+                <li>Property management experience</li>
+                <li>Strong organizational skills</li>
+                <li>Customer service oriented</li>
+              </ul>
+              <button class="apply-button">Apply Now</button>
+            </div>
+            <div class="position-card">
+              <h3>Marketing Specialist</h3>
+              <p class="position-location">Remote</p>
+              <p class="position-description">Create compelling marketing campaigns and drive our digital presence.</p>
+              <ul class="position-requirements">
+                <li>Marketing degree or equivalent experience</li>
+                <li>Social media expertise</li>
+                <li>Creative mindset</li>
+              </ul>
+              <button class="apply-button">Apply Now</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="careers-section cta-section">
+          <h2>Ready to Start Your Journey?</h2>
+          <p>Don't see a position that matches your skills? We're always looking for talented individuals to join our team.</p>
+          <button class="cta-button">Send Your Resume</button>
+        </section>
+      </div>
     </div>
-  </section>
+  </div>
 </template>
 
 <script setup>
-import PublicHeader from '@/components/PublicHeader.vue';
-import { useFixedHeader } from '@/composables/useFixedHeader';
-
-const { isHeaderFixed } = useFixedHeader('hero-section');
+import GlobalHeader from '@/components/GlobalHeader.vue';
 </script>
 
 <style scoped>
-.careers-hero {
-  background: linear-gradient(120deg, #e3f0ff 0%, #f7f8fa 100%);
-  padding: 120px 0 40px 0;
-  text-align: center;
+.careers-container {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #f9fafb;
 }
-.careers-hero__title {
-  font-size: 2.6rem;
-  font-weight: 800;
-  color: #003366;
-  margin-bottom: 0.5rem;
-}
-.careers-hero__subtitle {
-  font-size: 1.25rem;
-  color: #0052a5;
-  font-weight: 500;
-}
-.careers-values__container {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 40px 16px 32px 16px;
-  text-align: center;
-}
-.careers-values__grid {
+
+.hero-section {
+  position: relative;
+  height: 60vh;
+  width: 100%;
+  background-image: url('https://images.unsplash.com/photo-1521791136064-7986c2920216?ixlib=rb-4.0.3&auto=format&fit=crop&w=2069&q=80');
+  background-size: cover;
+  background-position: center;
   display: flex;
-  flex-wrap: wrap;
-  gap: 32px;
-  justify-content: center;
-  margin-top: 2.5rem;
-}
-.careers-value {
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.07);
-  padding: 32px 24px;
-  flex: 1 1 260px;
-  min-width: 260px;
-  max-width: 320px;
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  transition: box-shadow 0.2s, transform 0.2s;
+  padding: 0;
+  margin-bottom: 0;
 }
-.careers-value__icon {
-  font-size: 2.2rem;
-  margin-bottom: 1rem;
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.4));
 }
-.careers-value h3 {
-  font-size: 1.18rem;
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 1280px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 2rem;
+  text-align: left;
+}
+
+.hero-title {
+  font-size: 3.5rem;
   font-weight: 700;
-  color: #0052a5;
-  margin: 0 0 0.2rem 0;
+  color: white;
+  margin-bottom: 1rem;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  max-width: 600px;
 }
-.careers-value p {
-  color: #444;
-  font-size: 1rem;
-  margin: 0 0 0.5rem 0;
+
+.hero-subtitle {
+  font-size: 1.125rem;
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 400;
+  line-height: 1.5;
+  max-width: 500px;
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
 }
-.careers-cta {
-  background: #0052a5;
-  color: #fff;
-  padding: 48px 0;
-  text-align: center;
+
+.careers-content {
+  padding: 4rem 0;
 }
-.careers-cta__content h2 {
+
+.content-wrapper {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.careers-section {
+  margin-bottom: 4rem;
+}
+
+.section-title {
   font-size: 2rem;
   font-weight: 700;
-  margin-bottom: 0.7rem;
+  color: #111827;
+  margin-bottom: 2rem;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
 }
-.careers-cta__content p {
-  font-size: 1.1rem;
-  margin-bottom: 1.2rem;
+
+.story-content {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: #374151;
 }
-.careers-cta__button {
-  background: #fff;
-  color: #0052a5;
-  font-weight: 700;
-  padding: 0.9rem 2.2rem;
-  border-radius: 8px;
-  font-size: 1.1rem;
-  text-decoration: none;
-  transition: background 0.2s, color 0.2s;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+
+.story-content p {
+  margin-bottom: 1.5rem;
+}
+
+.values-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.value-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.value-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.value-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.value-card h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.75rem;
+}
+
+.value-card p {
+  color: #6b7280;
+  line-height: 1.6;
+}
+
+.positions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.position-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.position-card h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 0.5rem;
+}
+
+.position-location {
+  color: #0066cc;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.position-description {
+  color: #4b5563;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.position-requirements {
+  list-style-type: none;
+  padding: 0;
+  margin: 0 0 1.5rem 0;
+}
+
+.position-requirements li {
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.position-requirements li::before {
+  content: "•";
+  color: #0066cc;
+  position: absolute;
+  left: 0;
+}
+
+.apply-button {
   display: inline-block;
+  background: #0066cc;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }
-.careers-cta__button:hover {
-  background: #003366;
-  color: #fff;
+
+.apply-button:hover {
+  background: #0052a5;
 }
-@media (max-width: 900px) {
-  .careers-values__grid {
-    flex-direction: column;
-    gap: 24px;
-    align-items: center;
+
+.cta-section {
+  text-align: center;
+  background: linear-gradient(135deg, #f7f8fa 0%, #e3f0ff 100%);
+  padding: 4rem 2rem;
+  border-radius: 12px;
+  margin-top: 4rem;
+}
+
+.cta-section h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 1rem;
+}
+
+.cta-section p {
+  font-size: 1.125rem;
+  color: #4b5563;
+  margin-bottom: 2rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cta-button {
+  display: inline-block;
+  background: #0066cc;
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.cta-button:hover {
+  background: #0052a5;
+}
+
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.5rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+
+  .careers-content {
+    padding: 2rem 0;
+  }
+
+  .section-title {
+    font-size: 1.75rem;
+  }
+
+  .values-grid,
+  .positions-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cta-section {
+    padding: 3rem 1rem;
   }
 }
 </style>

@@ -18,12 +18,12 @@ export default function permissionGuard(to, from, next) {
   const userRole = roleStore.currentRole;
 
   // Allow access to public routes regardless of role
-  if (to.meta.publicAccess || to.path === '/landing' || to.path === '/login' || to.path === '/signup' || to.path === '/allagents') {
+  if (to.meta.publicAccess || to.path === '/landing' || to.path === '/login' || to.path === '/signup' || to.path === '/allagents' || to.path === '/newbuyproperties') {
     return next();
   }
 
-  // If role is 'all', only allow access to landing, login, signup, allagents and public routes
-  if (userRole === 'all' && !to.meta.publicAccess && !['/landing', '/login', '/signup', '/allagents'].includes(to.path)) {
+  // If role is 'all', only allow access to landing, login, signup, allagents, newbuyproperties and public routes
+  if (userRole === 'all' && !to.meta.publicAccess && !['/landing', '/login', '/signup', '/allagents', '/newbuyproperties'].includes(to.path)) {
     return next('/landing');
   }
 
