@@ -9,91 +9,93 @@
       </div>
     </div>
 
-    <!-- Main Content Section -->
-    <div class="careers-content">
-      <div class="content-wrapper">
-        <!-- Why Join Us Section -->
-        <section class="careers-section">
-          <h2 class="section-title">Why Join Real City Realty?</h2>
-          <div class="story-content">
-            <p>At Real City Realty, we believe in creating an environment where talent thrives and innovation flourishes. We're not just a real estate company – we're a community of professionals dedicated to transforming the industry.</p>
-            <p>Join us and be part of a team that values growth, collaboration, and excellence in everything we do.</p>
-    </div>
-  </section>
-
-        <!-- Benefits Section -->
-        <section class="careers-section">
-          <h2 class="section-title">Benefits & Perks</h2>
-          <div class="values-grid">
-            <div class="value-card">
-              <span class="value-icon">💼</span>
-              <h3>Career Growth</h3>
-              <p>Continuous learning opportunities and clear paths for advancement in your career.</p>
-        </div>
-            <div class="value-card">
-              <span class="value-icon">🤝</span>
-              <h3>Work-Life Balance</h3>
-              <p>Flexible schedules and remote work options to maintain a healthy work-life balance.</p>
-        </div>
-            <div class="value-card">
-              <span class="value-icon">🏆</span>
-              <h3>Competitive Benefits</h3>
-              <p>Comprehensive health coverage, retirement plans, and performance-based incentives.</p>
-        </div>
-            <div class="value-card">
-              <span class="value-icon">🌱</span>
-              <h3>Professional Development</h3>
-              <p>Regular training sessions and mentorship programs to enhance your skills.</p>
-      </div>
-    </div>
-  </section>
-
-        <!-- Open Positions Section -->
-        <section class="careers-section">
-          <h2 class="section-title">Open Positions</h2>
-          <div class="positions-grid">
-            <div class="position-card">
-              <h3>Real Estate Agent</h3>
-              <p class="position-location">Multiple Locations</p>
-              <p class="position-description">Join our team of successful agents and help clients find their dream homes.</p>
-              <ul class="position-requirements">
-                <li>Real estate license required</li>
-                <li>2+ years of experience preferred</li>
-                <li>Strong communication skills</li>
-              </ul>
-              <button class="apply-button">Apply Now</button>
+    <div class="main-container">
+      <!-- Main Content Section -->
+      <div class="careers-content">
+        <div class="content-wrapper">
+          <!-- Why Join Us Section -->
+          <section class="careers-section">
+            <h2 class="section-title">Why Join Real City Realty?</h2>
+            <div class="story-content">
+              <p>At Real City Realty, we believe in creating an environment where talent thrives and innovation flourishes. We're not just a real estate company – we're a community of professionals dedicated to transforming the industry.</p>
+              <p>Join us and be part of a team that values growth, collaboration, and excellence in everything we do.</p>
             </div>
-            <div class="position-card">
-              <h3>Property Manager</h3>
-              <p class="position-location">Headquarters</p>
-              <p class="position-description">Manage our growing portfolio of properties and ensure excellent tenant relations.</p>
-              <ul class="position-requirements">
-                <li>Property management experience</li>
-                <li>Strong organizational skills</li>
-                <li>Customer service oriented</li>
-              </ul>
-              <button class="apply-button">Apply Now</button>
-            </div>
-            <div class="position-card">
-              <h3>Marketing Specialist</h3>
-              <p class="position-location">Remote</p>
-              <p class="position-description">Create compelling marketing campaigns and drive our digital presence.</p>
-              <ul class="position-requirements">
-                <li>Marketing degree or equivalent experience</li>
-                <li>Social media expertise</li>
-                <li>Creative mindset</li>
-              </ul>
-              <button class="apply-button">Apply Now</button>
-            </div>
-          </div>
-        </section>
+          </section>
 
-        <!-- CTA Section -->
-        <section class="careers-section cta-section">
-          <h2>Ready to Start Your Journey?</h2>
-          <p>Don't see a position that matches your skills? We're always looking for talented individuals to join our team.</p>
-          <button class="cta-button">Send Your Resume</button>
-        </section>
+          <!-- Benefits Section -->
+          <section class="careers-section">
+            <h2 class="section-title">Benefits & Perks</h2>
+            <div class="values-grid">
+              <div class="value-card">
+                <span class="value-icon">💼</span>
+                <h3>Career Growth</h3>
+                <p>Continuous learning opportunities and clear paths for advancement in your career.</p>
+              </div>
+              <div class="value-card">
+                <span class="value-icon">🤝</span>
+                <h3>Work-Life Balance</h3>
+                <p>Flexible schedules and remote work options to maintain a healthy work-life balance.</p>
+              </div>
+              <div class="value-card">
+                <span class="value-icon">🏆</span>
+                <h3>Competitive Benefits</h3>
+                <p>Comprehensive health coverage, retirement plans, and performance-based incentives.</p>
+              </div>
+              <div class="value-card">
+                <span class="value-icon">🌱</span>
+                <h3>Professional Development</h3>
+                <p>Regular training sessions and mentorship programs to enhance your skills.</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Open Positions Section -->
+          <section class="careers-section">
+            <h2 class="section-title">Open Positions</h2>
+            <div class="positions-grid">
+              <div class="position-card">
+                <h3>Real Estate Agent</h3>
+                <p class="position-location">Multiple Locations</p>
+                <p class="position-description">Join our team of successful agents and help clients find their dream homes.</p>
+                <ul class="position-requirements">
+                  <li>Real estate license required</li>
+                  <li>2+ years of experience preferred</li>
+                  <li>Strong communication skills</li>
+                </ul>
+                <button class="apply-button">Apply Now</button>
+              </div>
+              <div class="position-card">
+                <h3>Property Manager</h3>
+                <p class="position-location">Headquarters</p>
+                <p class="position-description">Manage our growing portfolio of properties and ensure excellent tenant relations.</p>
+                <ul class="position-requirements">
+                  <li>Property management experience</li>
+                  <li>Strong organizational skills</li>
+                  <li>Customer service oriented</li>
+                </ul>
+                <button class="apply-button">Apply Now</button>
+              </div>
+              <div class="position-card">
+                <h3>Marketing Specialist</h3>
+                <p class="position-location">Remote</p>
+                <p class="position-description">Create compelling marketing campaigns and drive our digital presence.</p>
+                <ul class="position-requirements">
+                  <li>Marketing degree or equivalent experience</li>
+                  <li>Social media expertise</li>
+                  <li>Creative mindset</li>
+                </ul>
+                <button class="apply-button">Apply Now</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- CTA Section -->
+          <section class="careers-section cta-section">
+            <h2>Ready to Start Your Journey?</h2>
+            <p>Don't see a position that matches your skills? We're always looking for talented individuals to join our team.</p>
+            <button class="cta-button">Send Your Resume</button>
+          </section>
+        </div>
       </div>
     </div>
   </div>

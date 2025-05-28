@@ -8,7 +8,7 @@
     </div>
     <!-- Main Content -->
     <section class="agents-content">
-      <div class="boxed-container">
+      <div class="main-container">
         <!-- Search and Filter Bar -->
         <div class="agents-search-bar">
           <div class="search-input-group">
@@ -1098,7 +1098,7 @@ function viewProfile(agent) {
   }
 }
 
-.boxed-container {
+.main-container {
   max-width: 1240px;
   margin: 0 auto;
   padding-left: 24px;

@@ -10,7 +10,6 @@ import Sidebar from './layouts/components/SidebarView.vue';
 import AdminSidebar from './layouts/components/AdminSidebar.vue'; // Import Admin Sidebar
 import ClientSidebar from './layouts/components/ClientSidebar.vue'; // Import Client Sidebar
 import Header from './layouts/components/HeaderView.vue';
-import PublicHeader from '@/components/PublicHeader.vue';
 import TaskNotification from './components/TaskNotification.vue';
 
 import '@fontsource/poppins';
@@ -633,15 +632,5 @@ html, body {
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 24px;
   margin-bottom: 24px;
-}
-
-/* Add PublicHeader styles */
-.public-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-  background: transparent;
 }
 </style>

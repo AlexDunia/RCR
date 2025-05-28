@@ -11,36 +11,38 @@
       </div>
     </section>
 
-    <!-- Blog Categories -->
-    <section class="blog-categories">
-      <div class="container">
-        <div class="blog-categories__list">
-          <button class="blog-category-item blog-category-item--active">Market updates</button>
-          <button class="blog-category-item">Buyer and seller tips</button>
-          <button class="blog-category-item">Neighbourhood insights</button>
-          <button class="blog-category-item">Investments advise</button>
+    <div class="main-container">
+      <!-- Blog Categories -->
+      <section class="blog-categories">
+        <div class="container">
+          <div class="blog-categories__list">
+            <button class="blog-category-item blog-category-item--active">Market updates</button>
+            <button class="blog-category-item">Buyer and seller tips</button>
+            <button class="blog-category-item">Neighbourhood insights</button>
+            <button class="blog-category-item">Investments advise</button>
 
-          <!-- Search Bar -->
-          <div class="blog-search">
-            <span class="search-icon">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M17.5 17.5L13.875 13.875M15.8333 9.16667C15.8333 12.8486 12.8486 15.8333 9.16667 15.8333C5.48477 15.8333 2.5 12.8486 2.5 9.16667C2.5 5.48477 5.48477 2.5 9.16667 2.5C12.8486 2.5 15.8333 5.48477 15.8333 9.16667Z" stroke="#94A3B8" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </span>
-            <input type="text" placeholder="Search..." class="blog-search__input">
-            <span class="blog-search__shortcut">⌘K</span>
+            <!-- Search Bar -->
+            <div class="blog-search">
+              <span class="search-icon">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M17.5 17.5L13.875 13.875M15.8333 9.16667C15.8333 12.8486 12.8486 15.8333 9.16667 15.8333C5.48477 15.8333 2.5 12.8486 2.5 9.16667C2.5 5.48477 5.48477 2.5 9.16667 2.5C12.8486 2.5 15.8333 5.48477 15.8333 9.16667Z" stroke="#94A3B8" stroke-width="1.66667" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              <input type="text" placeholder="Search..." class="blog-search__input">
+              <span class="blog-search__shortcut">⌘K</span>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Latest Posts Section -->
-    <section class="blog-posts">
-      <div class="container">
-        <h2 class="blog-posts__title">Latest</h2>
-        <!-- Blog posts grid will go here -->
-      </div>
-    </section>
+      <!-- Latest Posts Section -->
+      <section class="blog-posts">
+        <div class="container">
+          <h2 class="blog-posts__title">Latest</h2>
+          <!-- Blog posts grid will go here -->
+        </div>
+      </section>
+    </div>
   </div>
 </template>
 

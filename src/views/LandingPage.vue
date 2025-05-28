@@ -96,30 +96,30 @@
 
     <!-- How We Can Help Section (Pixel Perfect, Figma Accurate, Cleaned Up) -->
     <section class="help-section">
-      <div class="help-section__bg">
-        <div class="boxed-container" style="display: flex; align-items: flex-start; justify-content: center; gap: 48px; background: transparent; box-shadow: none; padding: 64px 0;">
+      <div class="boxed-container">
+        <div style="display: flex; align-items: flex-start; justify-content: center; gap: 48px; background: transparent; box-shadow: none; padding: 64px 0;">
           <div style="display: flex; flex-direction: row; gap: 0;">
             <img src="https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&w=600&q=80" alt="Interior 1" style="width: 220px; height: 320px; object-fit: cover; border-radius: 0; margin: 0;" />
             <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80" alt="Interior 2" style="width: 220px; height: 320px; object-fit: cover; border-radius: 0; margin: 0; margin-left: 0;" />
           </div>
-          <div style="background: #000; color: #fff; padding: 48px 48px 48px 48px; border-radius: 0; min-width: 420px; display: flex; flex-direction: column; justify-content: center; height: 320px;">
-            <h2 style="font-size: 2rem; font-weight: 700; margin-bottom: 32px; font-family: 'Poppins', sans-serif;">Here's how we can help you</h2>
-            <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 24px;">
-              <li style="display: flex; align-items: center; gap: 16px; font-size: 1.1rem;">
-                <span style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: none;">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#fff" fill-opacity="0.13"/><path d="M7 12.5l3 3 7-7" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="help-section__gradient-box">
+            <h2 class="help-section__title">Here's how we can help you</h2>
+            <ul class="help-section__list">
+              <li class="help-section__item">
+                <span class="help-section__icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#fff" fill-opacity="0.13"/><path d="M7 12.5l3 3 7-7" stroke="#0052a5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </span>
                 <span>Fast search for homes that best suit you.</span>
               </li>
-              <li style="display: flex; align-items: center; gap: 16px; font-size: 1.1rem;">
-                <span style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: none;">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#fff" fill-opacity="0.13"/><path d="M7 12.5l3 3 7-7" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <li class="help-section__item">
+                <span class="help-section__icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#fff" fill-opacity="0.13"/><path d="M7 12.5l3 3 7-7" stroke="#0052a5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </span>
                 <span>Access to the best and experienced agents to guide your decision making.</span>
               </li>
-              <li style="display: flex; align-items: center; gap: 16px; font-size: 1.1rem;">
-                <span style="display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: none;">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#fff" fill-opacity="0.13"/><path d="M7 12.5l3 3 7-7" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <li class="help-section__item">
+                <span class="help-section__icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="12" fill="#fff" fill-opacity="0.13"/><path d="M7 12.5l3 3 7-7" stroke="#0052a5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </span>
                 <span>Be the first to get the best offer.</span>
               </li>
@@ -212,7 +212,7 @@
       <div class="boxed-container blog-section__container">
         <h2 class="blog-section__title blog-section__title--worldclass">Latest from our Blog</h2>
         <div class="blog-section__tiles blog-section__tiles--worldclass">
-          <div v-for="blog in blogList.slice(0, 3)" :key="blog.id" class="blog-tile blog-tile--worldclass reveal">
+          <div v-for="blog in blogs" :key="blog.id" class="blog-tile blog-tile--worldclass reveal" @click="goToBlog(blog)" style="cursor:pointer;">
             <div class="blog-tile__accent-bar"></div>
             <div class="blog-tile__title-worldclass">{{ blog.title }}</div>
             <div class="blog-tile__desc-worldclass">{{ blog.desc }}</div>
@@ -223,30 +223,32 @@
               <span class="blog-tile__meta-author-worldclass">Real City Team</span>
               <span class="blog-tile__meta-dot-worldclass">|</span>
               <span class="blog-tile__meta-date-worldclass">June 2024</span>
-              </div>
-            <a :href="blog.link" class="blog-tile__readmore-worldclass">Read More &gt;</a>
             </div>
+            <button class="blog-tile__readmore-worldclass" @click.stop="goToBlog(blog)">Read More &gt;</button>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- FAQ Section -->
-    <section class="faq-section--figma.world-class-faq-grid">
-      <div class="boxed-container faq__container--figma">
-        <div class="faq__left--figma">
-          <h2 class="faq__title--figma.world-class-faq-title">Frequently Asked Questions</h2>
-          <p class="faq__subtitle--figma">If there are questions you want to ask.<br>We will answer all your questions.</p>
+    <section class="faq-section--saas">
+      <div class="boxed-container faq__container--saas">
+        <div class="faq__left--saas">
+          <h2 class="faq__title--saas">Frequently Asked Questions</h2>
+          <p class="faq__subtitle--saas">If there are questions you want to ask.<br>We will answer all your questions.</p>
         </div>
-        <div class="faq__right--figma.faq__right--grid">
-          <div v-for="(item, idx) in faqList" :key="item.q" class="faq__item--figma world-class-faq-item-grid" :class="{ 'faq__item--active': openIdx === idx }">
-            <button class="faq__question--figma world-class-faq-question-grid" @click="toggleFaq(idx)">
-              <span class="faq__question-text">{{ item.q }}</span>
-              <span class="faq__icon--figma world-class-faq-chevron-grid">
+        <div class="faq__right--saas">
+          <div v-for="(item, idx) in faqList" :key="item.q" class="faq__item--saas" :class="{ 'faq__item--active': openIdx === idx }">
+            <button class="faq__question--saas" @click="toggleFaq(idx)">
+              <span class="faq__question-text--saas">{{ item.q }}</span>
+              <span class="faq__icon--saas">
                 <svg v-if="openIdx === idx" width="24" height="24" viewBox="0 0 24 24"><polyline points="6 15 12 9 18 15" fill="none" stroke="#0052a5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                <svg v-else width="24" height="24" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" fill="none" stroke="#0052a5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <svg v-else width="24" height="24" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" fill="none" stroke="#bdbdbd" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </span>
             </button>
-            <div v-if="openIdx === idx" class="faq__answer--figma world-class-faq-answer-grid">{{ item.a }}</div>
+            <transition name="faq-expand">
+              <div v-if="openIdx === idx" class="faq__answer--saas">{{ item.a }}</div>
+            </transition>
           </div>
         </div>
       </div>
@@ -339,6 +341,8 @@
 import { ref, onMounted, onBeforeUnmount, nextTick, computed, onActivated } from 'vue';
 import { useAgentStore } from '@/stores/agentStore';
 import { usePropertyStore } from '@/stores/propertyStore';
+import { useBlogStore } from '@/stores/blogStore';
+import { useRouter } from 'vue-router';
 
 defineOptions({
   name: 'LandingPage'
@@ -436,26 +440,15 @@ onActivated(async () => {
   }
 });
 
-const blogList = [
-  {
-    id: 1,
-    title: '5 Tips for First-Time Home Buyers',
-    desc: 'Buying your first home can be overwhelming. Here are five essential tips to help you navigate the process, from budgeting to closing the deal. Learn how to make your first purchase a success. These tips will help you avoid common pitfalls and make informed decisions throughout your home buying journey.',
-    link: '#',
-  },
-  {
-    id: 2,
-    title: 'How to Choose the Right Neighborhood',
-    desc: 'Choosing the right neighborhood is just as important as the home itself. Discover what factors to consider, from schools to amenities, and how to find the perfect fit for your lifestyle. Our guide will help you make the best choice for your family.',
-    link: '#',
-  },
-  {
-    id: 3,
-    title: 'Understanding Pre-Construction Projects',
-    desc: 'Pre-construction projects offer unique opportunities and risks. Learn what you need to know before investing, including timelines, contracts, and how to spot the best deals. Get the most out of your investment with our expert advice.',
-    link: '#',
-  }
-];
+const blogStore = useBlogStore();
+const router = useRouter();
+onMounted(() => {
+  blogStore.fetchBlogs();
+});
+const blogs = computed(() => blogStore.blogs.slice(0, 3));
+function goToBlog(blog) {
+  router.push(`/blog/${blog.id}`);
+}
 
 function shuffleAgents(agents) {
   // Fisher-Yates shuffle
@@ -1256,24 +1249,24 @@ const featuredProperties = computed(() => propertyStore.properties.slice(0, 4));
 }
 
 /* FAQ Section */
-.faq-section--figma.world-class-faq-grid {
+.faq-section--saas {
   background: linear-gradient(135deg, #fafbfc 80%, #e3f0ff 100%);
-  padding: 120px 0 110px 0; /* More vertical padding */
+  padding: 100px 0 90px 0;
   border-radius: 0 0 32px 32px;
   box-shadow: 0 8px 48px rgba(0,82,165,0.07);
   position: relative;
   z-index: 2;
 }
-.faq__container--figma {
-  max-width: 1200px;
+.faq__container--saas {
+  max-width: 1100px;
   margin: 0 auto;
   display: flex;
   flex-direction: row;
   align-items: flex-start;
-  gap: 100px;
+  gap: 60px;
   padding: 0 32px;
 }
-.faq__left--figma {
+.faq__left--saas {
   flex: 1.2;
   min-width: 320px;
   display: flex;
@@ -1281,56 +1274,60 @@ const featuredProperties = computed(() => propertyStore.properties.slice(0, 4));
   justify-content: center;
   gap: 18px;
 }
-.faq__title--figma.world-class-faq-title {
+.faq__title--saas {
   font-family: 'Poppins', 'Inter', Arial, sans-serif;
-  font-size: 2.8rem;
-  font-weight: 900;
-  color: #0052a5;
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: #111;
   margin: 0 0 18px 0;
   line-height: 1.12;
   letter-spacing: -0.5px;
   text-align: left;
   padding-bottom: 8px;
 }
-.faq__subtitle--figma {
+.faq__subtitle--saas {
   color: #7a7a7a;
-  font-size: 1.22rem;
+  font-size: 1.08rem;
   font-family: 'Poppins', 'Inter', Arial, sans-serif;
   font-weight: 400;
   margin: 0 0 12px 0;
   line-height: 1.7;
   letter-spacing: 0.01em;
 }
-.faq__right--figma.faq__right--grid {
+.faq__right--saas {
+  flex: 2;
   display: flex;
   flex-direction: column;
-  gap: 32px; /* More space between cards */
-  margin-top: 36px;
+  gap: 18px;
+  margin-top: 0;
 }
-.world-class-faq-item-grid {
+.faq__item--saas {
   background: #fff;
   border: 1.5px solid #e0f2fe;
-  border-radius: 22px;
+  border-radius: 18px;
   box-shadow: 0 4px 24px rgba(0,82,165,0.08);
   transition: border-color 0.22s, box-shadow 0.22s, transform 0.22s, background 0.18s;
-  will-change: box-shadow, border-color, transform;
   margin-bottom: 0;
   position: relative;
   overflow: hidden;
+  min-height: 64px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 }
-.world-class-faq-item-grid:hover, .world-class-faq-item-grid:focus-within {
+.faq__item--saas:hover, .faq__item--saas:focus-within {
   border-color: #0052a5;
   box-shadow: 0 12px 48px rgba(0,82,165,0.13);
   transform: translateY(-2px) scale(1.012);
   background: linear-gradient(90deg, #f7f8fa 80%, #e0f2fe 100%);
 }
-.world-class-faq-question-grid {
-  font-size: 1.13rem;
+.faq__question--saas {
+  font-size: 1.08rem;
   font-weight: 700;
-  color: #0052a5;
+  color: #111;
   font-family: 'Poppins', 'Inter', Arial, sans-serif;
-  padding: 28px 32px;
-  border-radius: 22px;
+  padding: 22px 32px;
+  border-radius: 18px;
   background: none;
   border: none;
   outline: none;
@@ -1342,56 +1339,78 @@ const featuredProperties = computed(() => propertyStore.properties.slice(0, 4));
   cursor: pointer;
   transition: background 0.18s;
 }
-.world-class-faq-chevron-grid {
+.faq__question-text--saas {
+  flex: 1;
+  margin-right: 16px;
+  color: #111;
+  font-size: 1.08rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.faq__icon--saas {
   margin-left: 18px;
   display: flex;
   align-items: center;
 }
-.world-class-faq-answer-grid {
-  font-size: 1.04rem;
-  color: #23272f;
+.faq__answer--saas {
+  font-size: 0.98rem;
+  color: #444;
   font-family: 'Inter', 'Poppins', Arial, sans-serif;
   padding: 0 32px 24px 32px;
-  border-radius: 0 0 22px 22px;
-  max-height: 500px;
+  border-radius: 0 0 18px 18px;
+  background: #f7f8fa;
+  min-height: 48px;
   opacity: 1;
   transition: max-height 0.45s cubic-bezier(.4,2,.3,1), opacity 0.32s, padding 0.32s;
   overflow: hidden;
-  background: #f7f8fa;
+  box-sizing: border-box;
 }
-.world-class-faq-item-grid:not(.faq__item--active) .world-class-faq-answer-grid {
+.faq__item--saas:not(.faq__item--active) .faq__answer--saas {
   max-height: 0;
   opacity: 0;
   padding-bottom: 0;
 }
+.faq-expand-enter-active, .faq-expand-leave-active {
+  transition: max-height 0.45s cubic-bezier(.4,2,.3,1), opacity 0.32s, padding 0.32s;
+}
+.faq-expand-enter-from, .faq-expand-leave-to {
+  max-height: 0;
+  opacity: 0;
+  padding-bottom: 0;
+}
+.faq-expand-enter-to, .faq-expand-leave-from {
+  max-height: 400px;
+  opacity: 1;
+  padding-bottom: 24px;
+}
 @media (max-width: 900px) {
-  .faq-section--figma.world-class-faq-grid {
+  .faq-section--saas {
     padding: 60px 0 60px 0;
   }
-  .faq__container--figma {
+  .faq__container--saas {
     flex-direction: column;
-    gap: 40px;
+    gap: 24px;
     padding: 0 8px;
   }
-  .faq__right--figma.faq__right--grid {
-    gap: 18px;
+  .faq__right--saas {
+    gap: 12px;
   }
-  .faq__title--figma.world-class-faq-title {
-    font-size: 1.7rem;
+  .faq__title--saas {
+    font-size: 1.3rem;
   }
-  .faq__subtitle--figma {
-    font-size: 1rem;
+  .faq__subtitle--saas {
+    font-size: 0.98rem;
   }
-  .world-class-faq-question-grid {
-    font-size: 1rem;
+  .faq__question--saas {
+    font-size: 0.98rem;
     padding: 16px 12px;
   }
-  .world-class-faq-answer-grid {
+  .faq__answer--saas {
     font-size: 0.92rem;
     padding: 0 12px 12px 12px;
   }
-  .world-class-faq-item-grid {
-    border-radius: 14px;
+  .faq__item--saas {
+    border-radius: 12px;
   }
 }
 
@@ -1750,10 +1769,24 @@ const featuredProperties = computed(() => propertyStore.properties.slice(0, 4));
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0,82,165,0.08);
   transition: background 0.2s, box-shadow 0.2s;
+  text-align: center;
+  width: fit-content;
+  min-width: 180px;
+  max-width: 320px;
+  text-decoration: none;
 }
 .agent-carousel__view-more:hover {
   background: linear-gradient(90deg, #0052a5 0%, #0066cc 100%);
   box-shadow: 0 4px 16px rgba(0,82,165,0.13);
+  text-decoration: none;
+}
+@media (max-width: 600px) {
+  .agent-carousel__view-more {
+    padding: 12px 24px;
+    font-size: 1rem;
+    min-width: 120px;
+    max-width: 90vw;
+  }
 }
 /* Fade/slide animation for carousel */
 .agent-fade-enter-active, .agent-fade-leave-active {
@@ -1926,6 +1959,51 @@ const featuredProperties = computed(() => propertyStore.properties.slice(0, 4));
 .featured__view-more:hover {
   color: #003d7a;
   text-decoration: underline;
+}
+
+.help-section__gradient-box {
+  background: linear-gradient(135deg, #f7f8fa 60%, #e3f0ff 100%);
+  color: #0052a5;
+  padding: 48px 48px 48px 48px;
+  border-radius: 18px;
+  min-width: 420px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 320px;
+  box-shadow: 0 2px 8px rgba(0,82,165,0.08);
+}
+.help-section__title {
+  font-size: 1.7rem;
+  font-weight: 900;
+  margin-bottom: 32px;
+  font-family: 'Poppins', 'Inter', Arial, sans-serif;
+  color: #0052a5;
+}
+.help-section__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.help-section__item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 1.13rem;
+  font-family: 'Poppins', 'Inter', Arial, sans-serif;
+  color: #23272f;
+  font-weight: 500;
+}
+.help-section__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: none;
 }
 </style>
 

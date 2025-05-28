@@ -9,78 +9,80 @@
       </div>
     </div>
 
-    <!-- Main Content Section -->
-    <div class="privacy-content">
-      <div class="content-wrapper">
-        <!-- Introduction Section -->
-        <section class="privacy-section">
-          <h2 class="section-title">Introduction</h2>
-          <div class="story-content">
-            <p>At Real City Realty, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website or use our services.</p>
-            <p>Please read this privacy policy carefully. By using our services, you consent to the practices described in this policy.</p>
-          </div>
-        </section>
+    <div class="main-container">
+      <!-- Main Content Section -->
+      <div class="privacy-content">
+        <div class="content-wrapper">
+          <!-- Introduction Section -->
+          <section class="privacy-section">
+            <h2 class="section-title">Introduction</h2>
+            <div class="story-content">
+              <p>At Real City Realty, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website or use our services.</p>
+              <p>Please read this privacy policy carefully. By using our services, you consent to the practices described in this policy.</p>
+            </div>
+          </section>
 
-        <!-- Key Privacy Points Section -->
-        <section class="privacy-section">
-          <h2 class="section-title">Key Privacy Points</h2>
-          <div class="privacy-grid">
-            <div class="privacy-card">
-              <span class="privacy-icon">📊</span>
-              <h3>Information We Collect</h3>
-              <p>We collect personal information such as name, email, phone number, and address when you register or use our services.</p>
-              <p>We also collect usage data and cookies to improve your experience.</p>
+          <!-- Key Privacy Points Section -->
+          <section class="privacy-section">
+            <h2 class="section-title">Key Privacy Points</h2>
+            <div class="privacy-grid">
+              <div class="privacy-card">
+                <span class="privacy-icon">📊</span>
+                <h3>Information We Collect</h3>
+                <p>We collect personal information such as name, email, phone number, and address when you register or use our services.</p>
+                <p>We also collect usage data and cookies to improve your experience.</p>
+              </div>
+              <div class="privacy-card">
+                <span class="privacy-icon">🔐</span>
+                <h3>How We Use Your Data</h3>
+                <p>We use your information to provide and improve our services, communicate with you, and ensure a secure experience.</p>
+                <p>Your data helps us personalize your experience and maintain our services.</p>
+              </div>
+              <div class="privacy-card">
+                <span class="privacy-icon">🤝</span>
+                <h3>Data Sharing</h3>
+                <p>We may share your information with trusted partners and service providers who assist in operating our website and services.</p>
+                <p>We never sell your personal information to third parties.</p>
+              </div>
+              <div class="privacy-card">
+                <span class="privacy-icon">🔒</span>
+                <h3>Data Security</h3>
+                <p>We implement appropriate security measures to protect your personal information from unauthorized access or disclosure.</p>
+                <p>Your data is encrypted and stored securely.</p>
+              </div>
             </div>
-            <div class="privacy-card">
-              <span class="privacy-icon">🔐</span>
-              <h3>How We Use Your Data</h3>
-              <p>We use your information to provide and improve our services, communicate with you, and ensure a secure experience.</p>
-              <p>Your data helps us personalize your experience and maintain our services.</p>
-            </div>
-            <div class="privacy-card">
-              <span class="privacy-icon">🤝</span>
-              <h3>Data Sharing</h3>
-              <p>We may share your information with trusted partners and service providers who assist in operating our website and services.</p>
-              <p>We never sell your personal information to third parties.</p>
-            </div>
-            <div class="privacy-card">
-              <span class="privacy-icon">🔒</span>
-              <h3>Data Security</h3>
-              <p>We implement appropriate security measures to protect your personal information from unauthorized access or disclosure.</p>
-              <p>Your data is encrypted and stored securely.</p>
-            </div>
-          </div>
-        </section>
+          </section>
 
-        <!-- Detailed Privacy Section -->
-        <section class="privacy-section">
-          <h2 class="section-title">Detailed Privacy Information</h2>
-          <div class="detailed-privacy">
-            <div class="privacy-block">
-              <h3>1. Information Collection</h3>
-              <p>We collect information that you provide directly to us, such as when you create an account, fill out forms, or communicate with us. This may include your name, email address, phone number, and other contact information.</p>
+          <!-- Detailed Privacy Section -->
+          <section class="privacy-section">
+            <h2 class="section-title">Detailed Privacy Information</h2>
+            <div class="detailed-privacy">
+              <div class="privacy-block">
+                <h3>1. Information Collection</h3>
+                <p>We collect information that you provide directly to us, such as when you create an account, fill out forms, or communicate with us. This may include your name, email address, phone number, and other contact information.</p>
+              </div>
+              <div class="privacy-block">
+                <h3>2. Cookies and Tracking</h3>
+                <p>We use cookies and similar tracking technologies to track activity on our website and hold certain information. Cookies are files with a small amount of data that may include an anonymous unique identifier.</p>
+              </div>
+              <div class="privacy-block">
+                <h3>3. Data Retention</h3>
+                <p>We retain your personal information for as long as necessary to provide our services and comply with legal obligations. You can request deletion of your data at any time.</p>
+              </div>
+              <div class="privacy-block">
+                <h3>4. Your Rights</h3>
+                <p>You have the right to access, correct, or delete your personal information. You can also object to our processing of your data and request data portability.</p>
+              </div>
             </div>
-            <div class="privacy-block">
-              <h3>2. Cookies and Tracking</h3>
-              <p>We use cookies and similar tracking technologies to track activity on our website and hold certain information. Cookies are files with a small amount of data that may include an anonymous unique identifier.</p>
-            </div>
-            <div class="privacy-block">
-              <h3>3. Data Retention</h3>
-              <p>We retain your personal information for as long as necessary to provide our services and comply with legal obligations. You can request deletion of your data at any time.</p>
-            </div>
-            <div class="privacy-block">
-              <h3>4. Your Rights</h3>
-              <p>You have the right to access, correct, or delete your personal information. You can also object to our processing of your data and request data portability.</p>
-            </div>
-          </div>
-        </section>
+          </section>
 
-        <!-- Contact Section -->
-        <section class="privacy-section cta-section">
-          <h2>Questions About Your Privacy?</h2>
-          <p>If you have any questions about our Privacy Policy or how we handle your data, please contact our privacy team.</p>
-          <button class="cta-button">Contact Privacy Team</button>
-        </section>
+          <!-- Contact Section -->
+          <section class="privacy-section cta-section">
+            <h2>Questions About Your Privacy?</h2>
+            <p>If you have any questions about our Privacy Policy or how we handle your data, please contact our privacy team.</p>
+            <button class="cta-button">Contact Privacy Team</button>
+          </section>
+        </div>
       </div>
     </div>
   </div>

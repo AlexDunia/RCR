@@ -8,99 +8,101 @@
       </div>
     </section>
 
-    <!-- Search and Filter Section -->
-    <section class="search-filter-section">
-      <div class="container">
-        <div class="search-bar">
-          <input
-            type="text"
-            v-model="searchQuery"
-            placeholder="Search by location, property name, or features..."
-            @input="handleSearch"
-          />
-          <button class="search-btn">Search</button>
-        </div>
-
-        <div class="filter-bar">
-          <div class="filter-group">
-            <label>Property Type</label>
-            <select v-model="filters.propertyType">
-              <option value="">All Types</option>
-              <option v-for="type in propertyTypes" :key="type" :value="type">
-                {{ type }}
-              </option>
-            </select>
+    <div class="main-container">
+      <!-- Search and Filter Section -->
+      <section class="search-filter-section">
+        <div class="container">
+          <div class="search-bar">
+            <input
+              type="text"
+              v-model="searchQuery"
+              placeholder="Search by location, property name, or features..."
+              @input="handleSearch"
+            />
+            <button class="search-btn">Search</button>
           </div>
 
-          <div class="filter-group">
-            <label>Monthly Rent</label>
-            <select v-model="filters.rentRange">
-              <option value="">Any Price</option>
-              <option value="0-1000">$0 - $1,000</option>
-              <option value="1000-2000">$1,000 - $2,000</option>
-              <option value="2000-3000">$2,000 - $3,000</option>
-              <option value="3000-5000">$3,000 - $5,000</option>
-              <option value="5000+">$5,000+</option>
-            </select>
-          </div>
-
-          <div class="filter-group">
-            <label>Bedrooms</label>
-            <select v-model="filters.bedrooms">
-              <option value="">Any</option>
-              <option value="1">1+</option>
-              <option value="2">2+</option>
-              <option value="3">3+</option>
-              <option value="4">4+</option>
-              <option value="5">5+</option>
-            </select>
-          </div>
-
-          <div class="filter-group">
-            <label>Bathrooms</label>
-            <select v-model="filters.bathrooms">
-              <option value="">Any</option>
-              <option value="1">1+</option>
-              <option value="2">2+</option>
-              <option value="3">3+</option>
-              <option value="4">4+</option>
-            </select>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Properties Grid -->
-    <section class="properties-grid-section">
-      <div class="container">
-        <div class="properties-grid">
-          <div v-for="property in filteredProperties" :key="property.id" class="property-card" @click="viewProperty(property.id)">
-            <div class="property-image">
-              <img :src="property.image" :alt="property.name">
-              <div class="property-status">For Rent</div>
+          <div class="filter-bar">
+            <div class="filter-group">
+              <label>Property Type</label>
+              <select v-model="filters.propertyType">
+                <option value="">All Types</option>
+                <option v-for="type in propertyTypes" :key="type" :value="type">
+                  {{ type }}
+                </option>
+              </select>
             </div>
-            <div class="property-details">
-              <h3>{{ property.name }}</h3>
-              <p class="property-price">{{ property.price }}/month</p>
-              <p class="property-location">
-                <i class="fas fa-map-marker-alt"></i>
-                {{ property.location }}
-              </p>
-              <div class="property-features">
-                <span><i class="fas fa-bed"></i> {{ property.bedrooms }} beds</span>
-                <span><i class="fas fa-bath"></i> {{ property.bathrooms }} baths</span>
-                <span><i class="fas fa-ruler-combined"></i> {{ property.size }} sqft</span>
+
+            <div class="filter-group">
+              <label>Monthly Rent</label>
+              <select v-model="filters.rentRange">
+                <option value="">Any Price</option>
+                <option value="0-1000">$0 - $1,000</option>
+                <option value="1000-2000">$1,000 - $2,000</option>
+                <option value="2000-3000">$2,000 - $3,000</option>
+                <option value="3000-5000">$3,000 - $5,000</option>
+                <option value="5000+">$5,000+</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label>Bedrooms</label>
+              <select v-model="filters.bedrooms">
+                <option value="">Any</option>
+                <option value="1">1+</option>
+                <option value="2">2+</option>
+                <option value="3">3+</option>
+                <option value="4">4+</option>
+                <option value="5">5+</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label>Bathrooms</label>
+              <select v-model="filters.bathrooms">
+                <option value="">Any</option>
+                <option value="1">1+</option>
+                <option value="2">2+</option>
+                <option value="3">3+</option>
+                <option value="4">4+</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Properties Grid -->
+      <section class="properties-grid-section">
+        <div class="container">
+          <div class="properties-grid">
+            <div v-for="property in filteredProperties" :key="property.id" class="property-card" @click="viewProperty(property.id)">
+              <div class="property-image">
+                <img :src="property.image" :alt="property.name">
+                <div class="property-status">For Rent</div>
+              </div>
+              <div class="property-details">
+                <h3>{{ property.name }}</h3>
+                <p class="property-price">{{ property.price }}/month</p>
+                <p class="property-location">
+                  <i class="fas fa-map-marker-alt"></i>
+                  {{ property.location }}
+                </p>
+                <div class="property-features">
+                  <span><i class="fas fa-bed"></i> {{ property.bedrooms }} beds</span>
+                  <span><i class="fas fa-bath"></i> {{ property.bathrooms }} baths</span>
+                  <span><i class="fas fa-ruler-combined"></i> {{ property.size }} sqft</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div v-if="filteredProperties.length === 0" class="no-results">
-          <h3>No properties found</h3>
-          <p>Try adjusting your search criteria</p>
+          <div v-if="filteredProperties.length === 0" class="no-results">
+            <h3>No properties found</h3>
+            <p>Try adjusting your search criteria</p>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
   </div>
 </template>
 
