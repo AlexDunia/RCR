@@ -281,7 +281,7 @@
           <div class="footer__col footer__col--community">
             <div class="footer__heading--figma">Community</div>
             <ul class="footer__list--figma">
-              <li><router-link to="/find-agents">Find agents</router-link></li>
+              <li><router-link to="/allagents">Find agents</router-link></li>
               <li><a href="#">Lifestyle</a></li>
               <li><a href="#">Legal notice</a></li>
             </ul>

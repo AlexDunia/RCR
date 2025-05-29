@@ -1,5 +1,6 @@
 <template>
   <div class="all-agents-page">
+    <GlobalHeader />
     <!-- Hero Section -->
     <div class="agents-hero world-class-hero">
       <div class="hero-bg-decor"></div>
@@ -241,6 +242,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useAgentStore } from '@/stores/agentStore';
 import { useRouter } from 'vue-router';
+import GlobalHeader from '@/components/GlobalHeader.vue';
 
 const router = useRouter();
 const agentStore = useAgentStore();
@@ -343,23 +345,19 @@ function handleSearch() {
 function contactAgent() {
   router.push('/login');
 }
-
-function viewProfile(agent) {
-  router.push(`/agent/${agent.id}`);
-}
 </script>
 
 <style scoped>
 .all-agents-page {
   min-height: 100vh;
   background: #f8fafc;
-  padding: 40px 0;
+  padding-top: 80px; /* 64px header + extra space */
 }
 
 /* Hero Section */
 .agents-hero {
   margin: 24px auto 32px auto;
-  max-width: 1240px;
+  max-width: 1200px;
   padding: 24px 32px 36px 32px;
   border-radius: 20px;
   background: linear-gradient(120deg, #f0fdfa 0%, #f8fafc 100%);
@@ -1099,10 +1097,10 @@ function viewProfile(agent) {
 }
 
 .main-container {
-  max-width: 1240px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding-left: 24px;
-  padding-right: 24px;
+  padding-left: 32px;
+  padding-right: 32px;
 }
 
 .world-class-hero {
