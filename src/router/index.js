@@ -1072,12 +1072,9 @@ const routes = [
 const router = createRouter({
   history: createWebHistory('/RCR/'), // Explicitly set base path for SPA chunk loading
   routes,
-  scrollBehavior(to, from, savedPosition) {
-    if (savedPosition) {
-      return savedPosition;
-    } else {
-      return { top: 0 };
-    }
+  scrollBehavior() {
+    // Always scroll to top on navigation
+    return { top: 0, behavior: 'smooth' };
   }
 });
 
