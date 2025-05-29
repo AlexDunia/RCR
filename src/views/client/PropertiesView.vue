@@ -103,11 +103,76 @@ function applySearch() {
 </script>
 
 <style scoped>
-@import '../LandingPage.vue';
 .all-properties-page {
   background: #fff;
   min-height: 100vh;
 }
+
+/* Navigation styles */
+.main-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.main-nav__logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0052a5;
+}
+
+.main-nav__center {
+  display: flex;
+  gap: 32px;
+}
+
+.main-nav__link {
+  color: #333;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.main-nav__link:hover {
+  color: #0066cc;
+}
+
+.main-nav__right {
+  display: flex;
+  gap: 16px;
+}
+
+.main-nav__button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  color: #333;
+}
+
+.main-nav__button--primary {
+  background: #0066cc;
+  border: none;
+  color: #fff;
+}
+
+.main-nav__button:hover {
+  background: #f8fafc;
+}
+
+.main-nav__button--primary:hover {
+  background: #0052a5;
+}
+
+/* Existing hero styles */
 .hero--all-properties {
   position: relative;
   height: 340px;
@@ -118,18 +183,21 @@ function applySearch() {
   margin-bottom: 0;
   padding: 0;
 }
+
 .hero__overlay {
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(0, 0, 0, 0.6);
   z-index: 1;
 }
+
 .hero__content {
   position: relative;
   z-index: 2;
   margin-top: 80px;
   margin-bottom: 30px;
 }
+
 .hero__title {
   font-size: 44px;
   font-weight: 700;
@@ -137,12 +205,14 @@ function applySearch() {
   font-family: 'Poppins', sans-serif;
   margin-bottom: 8px;
 }
+
 .hero__subtitle {
   font-size: 1.3rem;
   color: #e0f2fe;
   font-family: 'Inter', sans-serif;
   margin-bottom: 0;
 }
+
 .hero__search-wrapper {
   background: #fff;
   border-radius: 12px;
@@ -156,11 +226,13 @@ function applySearch() {
   flex-direction: column;
   align-items: flex-start;
 }
+
 .property-types-row {
   display: flex;
   gap: 12px;
   margin-bottom: 8px;
 }
+
 .property-type-item {
   background: #f1f5f9;
   color: #64748b;
@@ -175,17 +247,20 @@ function applySearch() {
   border: none;
   cursor: pointer;
 }
+
 .property-type-item--active {
   background: #e0f2fe;
   color: #0052a5;
   font-weight: 600;
 }
+
 .search-input-group {
   display: flex;
   gap: 16px;
   width: 100%;
   align-items: center;
 }
+
 .search-input-wrapper {
   display: flex;
   align-items: center;
@@ -196,6 +271,7 @@ function applySearch() {
   background: #fff;
   transition: all 0.2s ease;
 }
+
 .search-input {
   width: 100%;
   border: none;
@@ -204,6 +280,7 @@ function applySearch() {
   background: transparent;
   outline: none;
 }
+
 .search-btn {
   background: #0066cc;
   color: #fff;
@@ -218,116 +295,125 @@ function applySearch() {
   min-width: 120px;
   white-space: nowrap;
 }
+
 .search-btn:hover {
   background: #0052a5;
 }
+
+/* Property grid styles */
 .property-grid-section {
-  background: linear-gradient(135deg, #f7f8fa 60%, #e3f0ff 100%);
-  padding: 48px 0 64px 0;
-  width: 100vw;
-  position: relative;
-  left: 50%;
-  right: 50%;
-  margin-left: -50vw;
-  margin-right: -50vw;
+  padding: 48px 0;
 }
+
 .property-grid--figma {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
-  row-gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 32px;
+  margin-top: 32px;
 }
+
 .property-card--figma {
   background: #fff;
-  border-radius: 12px;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s, box-shadow 0.2s;
   cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
 }
+
 .property-card--figma:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transform: translateY(-8px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
 }
+
 .property-card__img--figma {
   width: 100%;
   height: 200px;
   object-fit: cover;
 }
+
 .property-card__content--figma {
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  padding: 20px;
 }
+
 .property-card__title--figma {
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   font-weight: 600;
   color: #1a1a1a;
-  margin: 0 0 8px 0;
-  font-family: 'Poppins', sans-serif;
+  margin-bottom: 8px;
 }
+
 .property-card__price--figma {
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   font-weight: 700;
   color: #0052a5;
-  margin: 0 0 12px 0;
+  margin-bottom: 12px;
 }
+
 .property-card__address--figma {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   color: #666;
   font-size: 0.9rem;
 }
+
 .property-card__address-icon {
   width: 16px;
   height: 16px;
-  color: #0052a5;
 }
+
 .view-details-btn {
-  margin-top: 12px;
+  display: inline-block;
+  padding: 10px 20px;
   background: #0066cc;
   color: #fff;
   border: none;
-  padding: 10px 24px;
   border-radius: 8px;
-  font-weight: 600;
-  font-size: 1rem;
+  font-weight: 500;
+  margin-top: 16px;
   cursor: pointer;
   transition: background 0.2s;
-  align-self: flex-start;
 }
+
 .view-details-btn:hover {
   background: #0052a5;
 }
+
 .no-results {
   text-align: center;
-  margin-top: 48px;
+  padding: 48px 0;
 }
-@media (max-width: 1200px) {
-  .property-grid--figma {
-    grid-template-columns: repeat(3, 1fr);
-  }
+
+.no-results h3 {
+  font-size: 1.5rem;
+  color: #1a1a1a;
+  margin-bottom: 8px;
 }
-@media (max-width: 900px) {
-  .property-grid--figma {
-    grid-template-columns: repeat(2, 1fr);
-  }
+
+.no-results p {
+  color: #666;
 }
-@media (max-width: 600px) {
-  .property-grid-section {
-    padding: 32px 0;
-  }
+
+/* Utility classes */
+.boxed-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
   .property-grid--figma {
     grid-template-columns: 1fr;
-    gap: 16px;
   }
-  .property-card__img--figma {
-    height: 180px;
+  
+  .hero--all-properties {
+    height: 280px;
+  }
+  
+  .hero__search-wrapper {
+    width: 90%;
   }
 }
 </style>

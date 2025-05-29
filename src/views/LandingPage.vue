@@ -163,9 +163,9 @@
               class="agent-card"
             >
               <div class="agent-card__img-box">
-                <img :src="agent.avatar || agent.profilePicture" :alt="agent.name" class="agent-card__img" />
+                <img :src="agent.avatar || agent.profilePicture || '/default-avatar.png'" :alt="agent.name || 'Agent'" class="agent-card__img" />
               </div>
-              <div class="agent-card__name">{{ agent.name }}</div>
+              <div class="agent-card__name">{{ agent.name || 'Agent Name' }}</div>
             </div>
           </transition-group>
         </div>
@@ -177,8 +177,11 @@
     <section class="benefits benefits--figma reveal">
       <div class="boxed-container benefits__container">
         <div class="benefits__left">
-          <h2 class="benefits__title--figma" style="white-space: pre-line; text-align: left;">
-            A platform built for\nyou to find a home with\nlittle effort
+          <h2 class="benefits__title--figma">
+            A platform built<br>
+            for you to find a<br>
+            home with little<br>
+            effort
           </h2>
         </div>
         <div class="benefits__right">
