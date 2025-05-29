@@ -282,8 +282,8 @@
             <div class="footer__heading--figma">Community</div>
             <ul class="footer__list--figma">
               <li><router-link to="/allagents">Find agents</router-link></li>
-              <li><a href="#">Lifestyle</a></li>
-              <li><a href="#">Legal notice</a></li>
+              <li><router-link to="/lifestyle">Lifestyle</router-link></li>
+              <li><router-link to="/legal-notice">Legal notice</router-link></li>
             </ul>
           </div>
           <div class="footer__col footer__col--social">

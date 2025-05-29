@@ -1,5 +1,6 @@
 <template>
   <div :key="$route.fullPath" class="buy-properties-page">
+    <GlobalHeader />
     <!-- Hero Section -->
     <section class="hero-section">
       <div class="hero-content">
@@ -110,6 +111,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { usePropertyStore } from '@/stores/propertyStore';
+import GlobalHeader from '@/components/GlobalHeader.vue';
 
 const router = useRouter();
 const propertyStore = usePropertyStore();
