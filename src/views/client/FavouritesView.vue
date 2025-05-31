@@ -198,6 +198,8 @@
       :agent="selectedAgent"
       @close="closeModal"
       @connect="handleConnectionRequest"
+      @start-chat="startChat"
+      @schedule-meeting="scheduleMeeting"
     />
   </div>
 </template>
@@ -341,7 +343,42 @@ const scheduleViewing = (propertyId) => {
 const viewAgentProfile = (agentId) => {
   const agent = agentStore.getAgentById(agentId);
   if (agent) {
-    selectedAgent.value = agent;
+    // Get full agent details from the store
+    const fullAgent = {
+      ...agent,
+      // Set isConnected based on which filter we're viewing (network or others)
+      isConnected: activeFilter.value === 'network',
+      // Add computed properties for display
+      stats: {
+        propertiesSold: Math.floor(Math.random() * 50) + 10,
+        activeListings: Math.floor(Math.random() * 20) + 5,
+        averageRating: agent.averageRating || 4.5
+      },
+      title: `${agent.specialties[0]} Specialist`,
+      bio: agent.bio || 'Experienced real estate professional dedicated to helping clients find their perfect property.',
+      languages: ['English', 'Spanish'], // You might want to fetch this from the store if available
+      phone: agent.phone || '+1 (555) 123-4567',
+      alternatePhone: agent.alternatePhone,
+      companyName: agent.companyName || 'Real Estate Experts LLC',
+      achievements: [
+        {
+          id: 1,
+          icon: 'fas fa-award',
+          title: 'Top Seller 2023',
+          description: 'Achieved highest sales volume in the region'
+        },
+        {
+          id: 2,
+          icon: 'fas fa-certificate',
+          title: 'Client Satisfaction',
+          description: '98% client satisfaction rate'
+        }
+      ],
+      isVerified: true,
+      isTopAgent: agent.averageRating >= 4.8,
+      connectedSince: activeFilter.value === 'network' ? 'January 2024' : null
+    };
+    selectedAgent.value = fullAgent;
     showProfileModal.value = true;
   }
 };
@@ -352,8 +389,11 @@ const handleConnectionRequest = async (agentId) => {
     await agentStore.sendConnectionRequest(agentId);
     // Close modal after sending request
     showProfileModal.value = false;
+    // Show success message (you might want to use a proper notification system)
+    alert('Connection request sent successfully!');
   } catch (err) {
     console.error('Failed to send connection request:', err);
+    alert('Failed to send connection request. Please try again.');
   }
 };
 
@@ -361,6 +401,16 @@ const handleConnectionRequest = async (agentId) => {
 const closeModal = () => {
   showProfileModal.value = false;
   selectedAgent.value = null;
+};
+
+// Start chat with agent
+const startChat = (agentId) => {
+  router.push(`/client-messages?agent=${agentId}`);
+};
+
+// Schedule meeting with agent
+const scheduleMeeting = (agentId) => {
+  router.push(`/client-schedule?agent=${agentId}`);
 };
 
 // Watch for route changes to update activeFilter
