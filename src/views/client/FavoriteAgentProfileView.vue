@@ -1,5 +1,15 @@
 <template>
   <div class="agent-profile-container">
+    <!-- Back button -->
+    <div class="back-nav">
+      <button class="back-button" @click="goBack">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        Back to Favorites
+      </button>
+    </div>
+
     <!-- Hero Section -->
     <div class="profile-hero" :class="{ 'limited-view': !isConnected }">
       <div class="hero-content">
@@ -48,6 +58,15 @@
               <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
             </svg>
             Message
+          </button>
+          <button
+            class="favorite-btn active"
+            @click="toggleFavorite"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
+              <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+            </svg>
+            Remove from Favorites
           </button>
         </div>
       </div>
@@ -200,7 +219,6 @@ const agent = ref(null);
 
 // Computed
 const isConnected = computed(() => agent.value?.isConnected || false);
-const isFavorite = computed(() => agent.value?.isFavorite || false);
 
 const availableTabs = computed(() => [
   { id: 'about', label: 'About' },
@@ -227,7 +245,8 @@ const requestConnection = async () => {
 const toggleFavorite = async () => {
   try {
     await agentStore.toggleFavorite(agent.value.id);
-    agent.value.isFavorite = !agent.value.isFavorite;
+    // After removing from favorites, go back to favorites page
+    goBack();
   } catch (err) {
     console.error('Failed to toggle favorite:', err);
     // Handle error - could show error notification here
@@ -238,15 +257,24 @@ const startChat = () => {
   router.push(`/client-messages?agent=${agent.value.id}`);
 };
 
+const goBack = () => {
+  router.push('/client-favourites');
+};
+
 // Lifecycle
 onMounted(async () => {
   try {
     const agentId = route.params.id;
     agent.value = await agentStore.getAgentProfile(agentId);
+
+    // If agent is not in favorites, redirect to favorites page
+    if (!agent.value?.isFavorite) {
+      router.push('/client-favourites');
+    }
   } catch (err) {
     console.error('Failed to load agent profile:', err);
-    // Handle error and redirect
-    router.push('/client-find-agents');
+    // Handle error and redirect if needed
+    router.push('/client-favourites');
   }
 });
 </script>
@@ -255,6 +283,37 @@ onMounted(async () => {
 .agent-profile-container {
   min-height: 100vh;
   background: #f8fafc;
+}
+
+.back-nav {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  color: #64748b;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.back-button:hover {
+  background: #f8fafc;
+  color: #0f172a;
+  transform: translateY(-1px);
+}
+
+.back-button svg {
+  width: 20px;
+  height: 20px;
 }
 
 .profile-hero {
@@ -383,6 +442,15 @@ onMounted(async () => {
 
 .message-btn:hover {
   background: #f1f5f9;
+}
+
+.favorite-btn {
+  background: #ef4444;
+  color: white;
+}
+
+.favorite-btn:hover {
+  background: #dc2626;
 }
 
 .profile-content {

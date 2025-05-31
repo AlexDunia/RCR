@@ -6,24 +6,24 @@
       <div class="favourite-section">
         <div class="favourite-header-row">
           <div class="favourite-header">
-            <h2>Favourite agents</h2>
-            <p>Agents you like</p>
+            <h2>{{ tab === 'agents' ? 'Favorite Agents' : 'Favorite Properties' }}</h2>
+            <p>{{ tab === 'agents' ? 'Agents you like' : 'Properties you saved' }}</p>
           </div>
           <div class="tabs">
-            <router-link
+            <button
               class="tab-button"
               :class="{ active: tab === 'properties' }"
-              :to="{ path: route.path, query: { ...route.query, tab: 'properties' } }"
+              @click="switchTab('properties')"
             >
               Properties
-            </router-link>
-            <router-link
+            </button>
+            <button
               class="tab-button"
               :class="{ active: tab === 'agents' }"
-              :to="{ path: route.path, query: { ...route.query, tab: 'agents' } }"
+              @click="switchTab('agents')"
             >
               Agents
-            </router-link>
+            </button>
           </div>
           <div class="heart-image">
             <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -38,24 +38,33 @@
       <div class="filter-options">
         <template v-if="tab === 'agents'">
           <div class="network-filters">
-            <router-link
+            <button
+              type="button"
               class="filter-button"
-              :class="{ active: route.query.filter === 'network' || (!route.query.filter && activeFilter === 'network') }"
-              :to="{ path: route.path, query: { ...route.query, filter: 'network' } }"
+              :class="{ active: activeFilter === 'network' }"
+              @click="switchFilter('network')"
             >
               Your network
-            </router-link>
-            <router-link
+            </button>
+            <button
+              type="button"
               class="filter-button"
-              :class="{ active: route.query.filter === 'others' }"
-              :to="{ path: route.path, query: { ...route.query, filter: 'others' } }"
+              :class="{ active: activeFilter === 'others' }"
+              @click="switchFilter('others')"
             >
               Others
-            </router-link>
+            </button>
           </div>
         </template>
         <div class="search-box">
-          <input type="text" placeholder="Search..." v-model="searchQuery">
+          <input
+            type="text"
+            placeholder="Search..."
+            v-model="searchQuery"
+            @input="handleSearchInput"
+            maxlength="100"
+            :disabled="isSearching"
+          >
           <span class="keyboard-shortcut">⌘ K</span>
         </div>
       </div>
@@ -85,72 +94,38 @@
             </div>
             <div class="agent-details">
               <h3>{{ agent.name }} <span class="experience">({{ agent.experience }})</span></h3>
-              <div class="agent-location">
-                <span class="location-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <div class="agent-meta">
+                <div class="meta-item">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                     <circle cx="12" cy="10" r="3"></circle>
                   </svg>
-                </span>
-                {{ agent.location }}
-              </div>
-              <div class="agent-specialty">
-                <span class="specialty-icon">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
+                  {{ agent.location }}
+                </div>
+                <div class="meta-item">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
                   </svg>
-                </span>
-                {{ agent.specialty }}
+                  {{ agent.specialty }}
+                </div>
               </div>
             </div>
-          </div>
-          <div class="agent-actions">
-            <router-link
-              :to="`/client-favourites/agent/${agent.id}`"
-              class="action-btn view-profile"
-            >
-              <span class="action-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                  <circle cx="12" cy="12" r="3"></circle>
+            <div class="agent-actions">
+              <button class="view-profile-btn" @click="viewAgentProfile(agent.id)">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
                 </svg>
-              </span>
-              View profile
-            </router-link>
-            <button
-              class="action-btn request-connect"
-              @click="requestConnect(agent.id)"
-              v-if="activeFilter !== 'network'"
-            >
-              <span class="action-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="8.5" cy="7" r="4"></circle>
-                  <line x1="20" y1="8" x2="20" y2="14"></line>
-                  <line x1="23" y1="11" x2="17" y2="11"></line>
+                View Profile
+              </button>
+              <button class="remove-favorite-btn" @click="toggleFavorite(agent.id)">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                 </svg>
-              </span>
-              Request to connect
-            </button>
-            <button
-              class="action-btn connected-badge"
-              v-else
-              disabled
-            >
-              <span class="action-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                </svg>
-              </span>
-              Connected
-            </button>
-            <button class="favorite-btn active" @click="toggleFavorite(agent.id)" title="Remove from favorites">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-              </svg>
-            </button>
+                Remove
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -215,6 +190,15 @@
         </div>
       </div>
     </div>
+
+    <!-- Add modal component -->
+    <AgentProfileModal
+      v-if="showProfileModal"
+      :show="showProfileModal"
+      :agent="selectedAgent"
+      @close="closeModal"
+      @connect="handleConnectionRequest"
+    />
   </div>
 </template>
 
@@ -223,6 +207,8 @@ import { ref, computed, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { usePropertyStore } from '@/stores/propertyStore';
 import { useAgentStore } from '@/stores/agentStore';
+import { debounce } from 'lodash-es';
+import AgentProfileModal from '@/components/AgentProfileModal.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -233,27 +219,96 @@ const agentStore = useAgentStore();
 const tab = ref(route.query.tab || 'properties');
 const activeFilter = ref(route.query.filter || 'network');
 const searchQuery = ref('');
+const isSearching = ref(false);
 
-// Get saved properties from store
-const savedProperties = computed(() => propertyStore.favoriteProperties);
+// Add state for modal
+const showProfileModal = ref(false);
+const selectedAgent = ref(null);
 
-// Get agents from store
-const agents = computed(() => {
-  return activeFilter.value === 'network'
-    ? agentStore.networkAgents
-    : agentStore.otherAgents;
-});
+// Create debounced search function
+const debouncedSearch = debounce((query) => {
+  isSearching.value = true;
+  try {
+    // Update the filtered results
+    searchQuery.value = query;
+  } finally {
+    isSearching.value = false;
+  }
+}, 300);
 
-// Filter agents based on search query
+// Update the filteredAgents computed property
 const filteredAgents = computed(() => {
-  if (!searchQuery.value) return agents.value;
-  const query = searchQuery.value.toLowerCase();
-  return agents.value.filter(agent =>
+  // First filter by network status
+  const networkFiltered = favoriteAgents.value.filter(agent => {
+    if (activeFilter.value === 'network') {
+      return agent.isConnected;
+    } else {
+      return !agent.isConnected;
+    }
+  });
+
+  // Then apply search filter if there's a search query
+  if (!searchQuery.value) return networkFiltered;
+
+  const query = searchQuery.value.toLowerCase().trim();
+  return networkFiltered.filter(agent =>
     agent.name.toLowerCase().includes(query) ||
     agent.location.toLowerCase().includes(query) ||
     agent.specialty.toLowerCase().includes(query)
   );
 });
+
+// Add input sanitization function
+const sanitizeSearchInput = (input) => {
+  if (!input) return '';
+
+  // Remove any HTML/script tags and trim
+  const sanitized = input
+    .replace(/<[^>]*>/g, '')
+    .replace(/[<>]/g, '')
+    .trim();
+
+  // Limit length to prevent DOS
+  return sanitized.slice(0, 100);
+};
+
+// Add search input handler
+const handleSearchInput = (event) => {
+  const query = event.target.value;
+  // Sanitize input before processing
+  const sanitizedQuery = sanitizeSearchInput(query);
+  debouncedSearch(sanitizedQuery);
+};
+
+// Function to switch tabs
+const switchTab = (newTab) => {
+  tab.value = newTab;
+  router.push({
+    path: route.path,
+    query: {
+      ...route.query,
+      tab: newTab
+    }
+  });
+};
+
+// Function to switch filters
+const switchFilter = (filter) => {
+  activeFilter.value = filter;
+  router.push({
+    path: route.path,
+    query: {
+      ...route.query,
+      filter
+    }
+  });
+};
+
+// Get saved properties from store
+const savedProperties = computed(() => propertyStore.favoriteProperties);
+
+// Get all favorite agents from the store
+const favoriteAgents = computed(() => agentStore.favoriteAgents);
 
 // Handle image loading errors
 function handleImageError(event, agent) {
@@ -282,19 +337,38 @@ const scheduleViewing = (propertyId) => {
   router.push(`/client-messages?contactAgent=${propertyId}`);
 };
 
-// Request connect
-const requestConnect = (agentId) => {
-  agentStore.sendConnectionRequest(agentId);
+// View agent profile
+const viewAgentProfile = (agentId) => {
+  const agent = agentStore.getAgentById(agentId);
+  if (agent) {
+    selectedAgent.value = agent;
+    showProfileModal.value = true;
+  }
 };
 
-// In the script section, add a watcher to update activeFilter when the route changes
-watch(() => route.query.filter, (newFilter) => {
-  if (tab.value === 'agents') {
-    activeFilter.value = newFilter || 'network';
+// Handle connection request
+const handleConnectionRequest = async (agentId) => {
+  try {
+    await agentStore.sendConnectionRequest(agentId);
+    // Close modal after sending request
+    showProfileModal.value = false;
+  } catch (err) {
+    console.error('Failed to send connection request:', err);
   }
+};
+
+// Close modal
+const closeModal = () => {
+  showProfileModal.value = false;
+  selectedAgent.value = null;
+};
+
+// Watch for route changes to update activeFilter
+watch(() => route.query.filter, (newFilter) => {
+  activeFilter.value = newFilter || 'network';
 });
 
-// Add a watcher for route.query.tab to keep tab in sync
+// Watch for route changes to update tab
 watch(() => route.query.tab, (newTab) => {
   tab.value = newTab || 'properties';
 });
@@ -375,37 +449,34 @@ watch(() => route.query.tab, (newTab) => {
 
 .tabs {
   display: flex;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 4px;
-  border-radius: 12px;
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  gap: 12px;
+  align-items: center;
 }
 
 .tab-button {
-  padding: 6px 18px;
-  border: none;
-  background: transparent;
+  padding: 8px 16px;
   border-radius: 8px;
-  font-weight: 600;
+  font-weight: 500;
+  font-size: 14px;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 14px;
-  text-decoration: none;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: rgba(255, 255, 255, 0.8);
-  letter-spacing: 0.3px;
+  backdrop-filter: blur(8px);
 }
 
 .tab-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
   color: white;
-  background: rgba(255, 255, 255, 0.15);
 }
 
 .tab-button.active {
   background: white;
   color: #0a4d8c;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-color: white;
+  font-weight: 600;
 }
 
 .heart-image {
@@ -429,60 +500,85 @@ watch(() => route.query.tab, (newTab) => {
   gap: 16px;
   margin: 24px;
   align-items: center;
-  background: white;
-  padding: 16px;
-  border-radius: 16px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+  border: none;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  backdrop-filter: blur(8px);
 }
 
 .network-filters {
   display: flex;
   gap: 8px;
+  margin-right: auto;
 }
 
 .filter-button {
-  padding: 8px 16px;
-  border: 1px solid #e2e8f0;
-  background-color: white;
-  border-radius: 8px;
+  padding: 10px 20px;
+  background-color: #f8fafc;
+  border: none;
+  border-radius: 12px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
   color: #64748b;
+  position: relative;
+  overflow: hidden;
+}
+
+.filter-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.filter-button:hover::before {
+  transform: translateX(100%);
 }
 
 .filter-button:hover {
-  border-color: #0a4d8c;
-  color: #0a4d8c;
+  background-color: #f1f5f9;
+  color: #0f172a;
+  transform: translateY(-1px);
 }
 
 .filter-button.active {
-  background-color: #0a4d8c;
+  background-color: #0f172a;
   color: white;
-  border-color: #0a4d8c;
+  font-weight: 600;
 }
 
 .search-box {
-  flex: 1;
-  position: relative;
-  max-width: 400px;
+  max-width: 300px;
+  margin-left: auto;
 }
 
 .search-box input {
   width: 100%;
-  padding: 12px 16px;
-  padding-right: 40px;
+  padding: 12px 44px 12px 20px;
   border: 1px solid #e2e8f0;
-  border-radius: 8px;
+  border-radius: 12px;
   font-size: 14px;
+  background-color: white;
   transition: all 0.2s ease;
+  color: #0f172a;
 }
 
 .search-box input:focus {
   outline: none;
-  border-color: #0a4d8c;
-  box-shadow: 0 0 0 3px rgba(10, 77, 140, 0.1);
+  border-color: #94a3b8;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
 }
 
 .keyboard-shortcut {
@@ -490,66 +586,100 @@ watch(() => route.query.tab, (newTab) => {
   right: 12px;
   top: 50%;
   transform: translateY(-50%);
-  background: #f1f5f9;
-  padding: 2px 6px;
-  border-radius: 4px;
   font-size: 12px;
-  color: #64748b;
+  color: #94a3b8;
+  font-weight: 500;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 4px 8px;
+  border-radius: 6px;
 }
 
 .agents-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 24px;
-  padding: 0 24px 40px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0;
+  margin: 24px;
 }
 
 .agent-card {
   background: white;
   border-radius: 16px;
+  border: 1px solid #e2e8f0;
   overflow: hidden;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border: 1px solid #f1f5f9;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  width: 100%;
 }
 
 .agent-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-color: #cbd5e1;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
 }
 
 .agent-info {
   padding: 24px;
+  display: flex;
+  gap: 24px;
+  align-items: center;
 }
 
 .agent-avatar {
-  width: 80px;
-  height: 80px;
-  border-radius: 16px;
-  object-fit: cover;
-  margin-bottom: 16px;
-  border: 3px solid white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  position: relative;
 }
 
-.agent-name {
+.agent-avatar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.agent-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.agent-card:hover .agent-avatar img {
+  transform: scale(1.05);
+}
+
+.agent-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.agent-details h3 {
   font-size: 18px;
   font-weight: 600;
-  color: #1e293b;
-  margin-bottom: 4px;
+  color: #0f172a;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.agent-experience {
+.experience {
   font-size: 14px;
   color: #64748b;
-  margin-bottom: 16px;
+  font-weight: 500;
 }
 
 .agent-meta {
+  margin-top: 8px;
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
 .meta-item {
@@ -558,131 +688,152 @@ watch(() => route.query.tab, (newTab) => {
   gap: 8px;
   color: #64748b;
   font-size: 14px;
+  padding: 6px 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.meta-item:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.meta-item svg {
+  width: 16px;
+  height: 16px;
+  color: #64748b;
+  transition: color 0.2s ease;
+}
+
+.meta-item:hover svg {
+  color: #0f172a;
 }
 
 .agent-actions {
   display: flex;
-  gap: 8px;
-  padding: 16px 24px;
-  background: #f8fafc;
-  border-top: 1px solid #f1f5f9;
+  gap: 12px;
+  margin-top: 16px;
 }
 
-.action-btn {
-  flex: 1;
-  padding: 10px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
+.view-profile-btn,
+.remove-favorite-btn {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 8px;
-  text-decoration: none;
-  color: #64748b;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.action-btn:hover {
-  border-color: #0a4d8c;
-  color: #0a4d8c;
-  background: rgba(10, 77, 140, 0.05);
-}
-
-.action-btn.view-profile {
+.view-profile-btn {
   background: #0a4d8c;
   color: white;
-  border-color: #0a4d8c;
+  border: none;
 }
 
-.action-btn.view-profile:hover {
+.view-profile-btn:hover {
   background: #083b6f;
-  color: white;
+  transform: translateY(-1px);
 }
 
-.action-btn.request-connect {
+.view-profile-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.remove-favorite-btn {
   background: white;
+  color: #ef4444;
+  border: 1px solid #ef4444;
 }
 
-.action-btn.connected-badge {
-  background: #e6f7ee;
-  color: #059669;
-  border-color: #a7f3d0;
-  cursor: default;
+.remove-favorite-btn:hover {
+  background: #fef2f2;
+  transform: translateY(-1px);
 }
 
-.favorite-btn {
-  padding: 10px;
-  border: 1px solid #fecdd3;
-  background-color: #fff0f3;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  color: #f43f5e;
+.remove-favorite-btn svg {
+  width: 16px;
+  height: 16px;
 }
 
-.favorite-btn:hover {
-  background-color: #fecdd3;
-  border-color: #f43f5e;
-}
-
+/* Empty state enhancements */
 .empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   text-align: center;
-  padding: 80px 20px;
+  padding: 64px 24px;
   background: white;
-  border-radius: 16px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  border-radius: 20px;
   margin: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
 }
 
 .empty-state .empty-icon {
-  margin-bottom: 24px;
-  color: #cbd5e1;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 24px;
+  color: #94a3b8;
+  opacity: 0.5;
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
 }
 
 .empty-state h3 {
   font-size: 24px;
   font-weight: 600;
+  color: #0f172a;
   margin-bottom: 12px;
-  color: #1e293b;
 }
 
 .empty-state p {
-  font-size: 16px;
   color: #64748b;
-  margin-bottom: 24px;
+  margin-bottom: 32px;
+  font-size: 16px;
   max-width: 400px;
-  line-height: 1.5;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .browse-btn {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   padding: 12px 24px;
-  background: #0a4d8c;
+  background: #0f172a;
   color: white;
-  border-radius: 8px;
-  text-decoration: none;
-  font-size: 14px;
+  border-radius: 12px;
   font-weight: 500;
+  text-decoration: none;
   transition: all 0.2s ease;
+  gap: 8px;
 }
 
 .browse-btn:hover {
-  background: #083b6f;
+  background: #1e293b;
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+}
+
+.browse-btn svg {
+  width: 18px;
+  height: 18px;
+  margin-right: 4px;
 }
 
 .properties-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 24px;
-  padding: 0 24px 40px 24px;
+  padding: 0;
+  margin: 24px;
 }
 
 .property-card {
@@ -830,7 +981,21 @@ watch(() => route.query.tab, (newTab) => {
   }
 
   .filter-options {
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .network-filters {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .favourite-section,
+  .filter-options,
+  .agents-grid,
+  .empty-state,
+  .properties-grid {
+    margin: 16px;
   }
 }
 </style>
