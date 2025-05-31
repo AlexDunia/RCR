@@ -2,7 +2,9 @@
   <nav :class="['main-nav', { 'main-nav--scrolled': isScrolled }]">
     <div class="main-nav__container">
       <div class="main-nav__logo">
-        <img src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1748316444/rclogo_l7oiod.png" alt="Real City Logo" class="main-nav__logo-img" />
+        <router-link to="/landing">
+          <img src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1748316444/rclogo_l7oiod.png" alt="Real City Logo" class="main-nav__logo-img" />
+        </router-link>
       </div>
       <div class="main-nav__center">
         <router-link to="/buy" class="main-nav__link">Buy</router-link>
@@ -14,6 +16,7 @@
       <div class="main-nav__right">
         <router-link to="/signin" class="main-nav__button" >Sign in</router-link>
         <router-link to="/login" class="main-nav__button main-nav__button--primary">Login</router-link>
+        <RoleSelector />
       </div>
     </div>
   </nav>
@@ -21,6 +24,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
+import RoleSelector from '@/components/RoleSelector.vue';
 
 const isScrolled = ref(false);
 
