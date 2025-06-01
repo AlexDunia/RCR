@@ -1,180 +1,132 @@
 <template>
   <div class="client-profile">
+    <!-- Profile Header -->
     <div class="profile-header">
-      <div class="profile-cover"></div>
-      <div class="profile-avatar">
-        <img :src="client.avatar || 'https://ui-avatars.com/api/?name=John+Smith&background=1a4189&color=fff'" alt="Profile photo" />
-      </div>
-      <div class="profile-info">
-        <h1 class="profile-name">{{ client.name }}</h1>
-        <p class="profile-since">Member since {{ formatDate(client.joinDate) }}</p>
-      </div>
-      <div class="profile-actions">
-        <button class="edit-profile-btn">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
-          </svg>
-          Edit Profile
-        </button>
+      <div class="profile-header-content">
+        <!-- Profile Image -->
+        <div class="profile-image-wrapper">
+          <img
+            :src="profileData?.avatar || '/default-avatar.jpg'"
+            alt="Profile"
+            class="profile-image"
+          />
+          <div class="status-badge"></div>
+        </div>
+
+        <!-- Basic Info -->
+        <div class="profile-info">
+          <div class="info-header">
+            <div class="name-section">
+              <h1>{{ profileData?.fullName }}</h1>
+              <p class="role">{{ profileData?.role || 'Client' }}</p>
+              <p class="location">
+                <i class="location-icon"></i>
+                {{ profileData?.location }}
+              </p>
+            </div>
+            <button
+              @click="editProfile"
+              class="edit-button"
+            >
+              <i class="edit-icon"></i>
+              Edit Profile
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="profile-tabs">
-      <button
-        v-for="tab in tabs"
-        :key="tab.id"
-        @click="activeTab = tab.id"
-        :class="['tab-btn', { active: activeTab === tab.id }]"
-      >
-        {{ tab.label }}
-      </button>
-    </div>
-
+    <!-- Main Content Grid -->
     <div class="profile-content">
-      <!-- Personal Information Tab -->
-      <div v-if="activeTab === 'personal'" class="tab-content">
-        <div class="section-card">
-          <h2 class="section-title">Personal Information</h2>
-          <div class="info-grid">
-            <div class="info-group">
-              <label>Full Name</label>
-              <div class="info-value">{{ client.name }}</div>
+      <div class="content-grid">
+        <!-- Left Column -->
+        <div class="main-content">
+          <!-- Personal Information Card -->
+          <div class="info-card">
+            <div class="card-header">
+              <h2>Personal Information</h2>
+              <button
+                @click="editProfile"
+                class="edit-link"
+              >
+                <i class="edit-icon"></i>
+                Edit
+              </button>
             </div>
-            <div class="info-group">
-              <label>Email</label>
-              <div class="info-value">{{ client.email }}</div>
+
+            <div class="card-body">
+              <div class="info-grid">
+                <div v-for="(field, index) in personalFields" :key="index" class="info-item">
+                  <label>{{ field.label }}</label>
+                  <p>{{ profileData?.[field.key] || 'Not set' }}</p>
+                </div>
+              </div>
             </div>
-            <div class="info-group">
-              <label>Phone</label>
-              <div class="info-value">{{ client.phone }}</div>
+          </div>
+
+          <!-- Property Preferences Card -->
+          <div class="info-card">
+            <div class="card-header">
+              <h2>Property Preferences</h2>
+              <button
+                @click="editProfile"
+                class="edit-link"
+              >
+                <i class="edit-icon"></i>
+                Edit
+              </button>
             </div>
-            <div class="info-group">
-              <label>Address</label>
-              <div class="info-value">{{ client.address }}</div>
-            </div>
-            <div class="info-group">
-              <label>Location</label>
-              <div class="info-value">{{ client.location }}</div>
-            </div>
-            <div class="info-group">
-              <label>Preferred Contact Method</label>
-              <div class="info-value">{{ client.preferredContact }}</div>
+
+            <div class="card-body">
+              <div class="info-grid">
+                <div v-for="(field, index) in propertyFields" :key="index" class="info-item">
+                  <label>{{ field.label }}</label>
+                  <p>{{ profileData?.[field.key] || 'Not set' }}</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Preferences Tab -->
-      <div v-if="activeTab === 'preferences'" class="tab-content">
-        <div class="section-card">
-          <h2 class="section-title">Property Preferences</h2>
-          <div class="preference-section">
-            <h3>Property Type</h3>
-            <div class="preference-tags">
-              <div v-for="(type, index) in client.preferences.propertyTypes" :key="index" class="preference-tag">
-                {{ type }}
-              </div>
-              <button class="add-preference">+ Add</button>
+        <!-- Right Column -->
+        <div class="sidebar">
+          <!-- Quick Actions Card -->
+          <div class="quick-actions-card">
+            <h3>Quick Actions</h3>
+            <div class="actions-list">
+              <button class="action-button">
+                <i class="home-icon"></i>
+                View Saved Properties
+              </button>
+              <button class="action-button">
+                <i class="calendar-icon"></i>
+                Schedule Property Tour
+              </button>
+              <button class="action-button">
+                <i class="phone-icon"></i>
+                Contact Agent
+              </button>
             </div>
           </div>
 
-          <div class="preference-section">
-            <h3>Price Range</h3>
-            <div class="price-range">
-              <span>${{ formatPrice(client.preferences.priceRange.min) }}</span>
-              <div class="price-slider">
-                <div class="price-fill" :style="{ width: getPriceRangePercentage() + '%' }"></div>
+          <!-- Recent Activity Card -->
+          <div class="activity-card">
+            <h3>Recent Activity</h3>
+            <div class="activity-list">
+              <div class="activity-item">
+                <div class="activity-icon home-icon"></div>
+                <div class="activity-content">
+                  <p>Viewed property at 123 Main St</p>
+                  <span>2 hours ago</span>
+                </div>
               </div>
-              <span>${{ formatPrice(client.preferences.priceRange.max) }}</span>
-            </div>
-          </div>
-
-          <div class="preference-section">
-            <h3>Bedrooms</h3>
-            <div class="preferences-buttons">
-              <button v-for="n in 5" :key="n" :class="['preference-button', { active: client.preferences.bedrooms.includes(n) }]">{{ n }}</button>
-              <button :class="['preference-button', { active: client.preferences.bedrooms.includes('5+') }]">5+</button>
-            </div>
-          </div>
-
-          <div class="preference-section">
-            <h3>Bathrooms</h3>
-            <div class="preferences-buttons">
-              <button v-for="n in 4" :key="n" :class="['preference-button', { active: client.preferences.bathrooms.includes(n) }]">{{ n }}</button>
-              <button :class="['preference-button', { active: client.preferences.bathrooms.includes('4+') }]">4+</button>
-            </div>
-          </div>
-
-          <div class="preference-section">
-            <h3>Preferred Locations</h3>
-            <div class="preference-tags">
-              <div v-for="(location, index) in client.preferences.locations" :key="index" class="preference-tag">
-                {{ location }}
+              <div class="activity-item">
+                <div class="activity-icon calendar-icon"></div>
+                <div class="activity-content">
+                  <p>Scheduled tour for 456 Oak Ave</p>
+                  <span>Yesterday</span>
+                </div>
               </div>
-              <button class="add-preference">+ Add</button>
-            </div>
-          </div>
-
-          <div class="preference-section">
-            <h3>Features</h3>
-            <div class="preference-tags">
-              <div v-for="(feature, index) in client.preferences.features" :key="index" class="preference-tag">
-                {{ feature }}
-              </div>
-              <button class="add-preference">+ Add</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Account Settings Tab -->
-      <div v-if="activeTab === 'settings'" class="tab-content">
-        <div class="section-card">
-          <h2 class="section-title">Account Settings</h2>
-
-          <div class="settings-section">
-            <div class="setting-group">
-              <div class="setting-header">
-                <h3>Email Notifications</h3>
-                <p>Receive email updates about new properties, tours, and more</p>
-              </div>
-              <div class="toggle-switch">
-                <label class="switch">
-                  <input type="checkbox" v-model="client.settings.emailNotifications" />
-                  <span class="slider"></span>
-                </label>
-              </div>
-            </div>
-
-            <div class="setting-group">
-              <div class="setting-header">
-                <h3>SMS Notifications</h3>
-                <p>Receive text message alerts for important updates</p>
-              </div>
-              <div class="toggle-switch">
-                <label class="switch">
-                  <input type="checkbox" v-model="client.settings.smsNotifications" />
-                  <span class="slider"></span>
-                </label>
-              </div>
-            </div>
-
-            <div class="setting-group">
-              <div class="setting-header">
-                <h3>Two-Factor Authentication</h3>
-                <p>Add an extra layer of security to your account</p>
-              </div>
-              <div class="toggle-switch">
-                <label class="switch">
-                  <input type="checkbox" v-model="client.settings.twoFactorAuth" />
-                  <span class="slider"></span>
-                </label>
-              </div>
-            </div>
-
-            <div class="password-section">
-              <h3>Change Password</h3>
-              <button class="change-password-btn">Change Password</button>
             </div>
           </div>
         </div>
@@ -184,487 +136,575 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { useClientStore } from '@/stores/clientStore';
+import { useRoleStore } from '@/stores/roleStore';
 
-// Sample client data
-const client = reactive({
-  name: 'John Smith',
-  email: 'john.smith@example.com',
-  phone: '(555) 123-4567',
-  address: '123 Main Street, Apt 4B',
-  location: 'San Francisco, CA',
-  preferredContact: 'Email',
-  joinDate: '2023-01-15',
-  avatar: null,
-  preferences: {
-    propertyTypes: ['Single Family Home', 'Condominium', 'Townhouse'],
-    priceRange: { min: 500000, max: 1200000 },
-    bedrooms: [2, 3],
-    bathrooms: [2],
-    locations: ['San Francisco', 'Oakland', 'San Jose'],
-    features: ['Garage', 'Pool', 'Modern Kitchen', 'Hardwood Floors']
-  },
-  settings: {
-    emailNotifications: true,
-    smsNotifications: false,
-    twoFactorAuth: false
+const router = useRouter();
+const clientStore = useClientStore();
+const roleStore = useRoleStore();
+
+const profileData = ref(null);
+
+const personalFields = [
+  { label: 'First Name', key: 'firstName' },
+  { label: 'Last Name', key: 'lastName' },
+  { label: 'Email Address', key: 'email' },
+  { label: 'Phone Number', key: 'phoneNumber' },
+  { label: 'Date of Birth', key: 'dateOfBirth' },
+  { label: 'Account Type', key: 'role' }
+];
+
+const propertyFields = [
+  { label: 'Property Type', key: 'propertyType' },
+  { label: 'Budget Range', key: 'budget' },
+  { label: 'Preferred Location', key: 'location' },
+  { label: 'Desired Features', key: 'preferences' }
+];
+
+onMounted(async () => {
+  // Ensure we're in client role
+  if (roleStore.currentRole !== 'client') {
+    roleStore.setRole('client');
+  }
+
+  // Get the first client's data (for demo purposes)
+  const clients = clientStore.getAllClients();
+  if (clients.length > 0) {
+    const clientData = clients[0]; // Using Emily R. Thompson's data
+
+    // Map the client data to our profile format
+    profileData.value = {
+      firstName: clientData.name.split(' ')[0],
+      lastName: clientData.name.split(' ').slice(1).join(' '),
+      email: clientData.email,
+      phoneNumber: clientData.phoneNumber || 'Not set',
+      dateOfBirth: 'Not set', // This field isn't in the mock data
+      role: 'Client',
+      propertyType: clientData.preferences[0] || 'Not set',
+      budget: clientData.budget,
+      location: clientData.location,
+      preferences: clientData.preferences.join(', '),
+      fullName: clientData.name,
+      avatar: clientData.avatar
+    };
   }
 });
 
-// Tabs configuration
-const tabs = [
-  { id: 'personal', label: 'Personal Information' },
-  { id: 'preferences', label: 'Preferences' },
-  { id: 'settings', label: 'Account Settings' }
-];
-
-const activeTab = ref('personal');
-
-// Format date
-const formatDate = (dateString) => {
-  const date = new Date(dateString);
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'long',
-    year: 'numeric'
-  }).format(date);
-};
-
-// Format price
-const formatPrice = (price) => {
-  if (price >= 1000000) {
-    return (price / 1000000).toFixed(1) + 'M';
-  } else if (price >= 1000) {
-    return (price / 1000).toFixed(0) + 'K';
-  }
-  return price.toString();
-};
-
-// Calculate price range percentage for the slider
-const getPriceRangePercentage = () => {
-  const priceRange = client.preferences.priceRange;
-  const MAX_PRICE = 2000000; // This would be dynamic in a real app
-  return (priceRange.max / MAX_PRICE) * 100;
+const editProfile = () => {
+  router.push('/client-profile/edit');
 };
 </script>
 
 <style scoped>
+/* Modern CSS Reset and Variables */
+:root {
+  --primary: #1a4189;
+  --primary-light: #e8f0fe;
+  --primary-dark: #153471;
+  --accent: #22c55e;
+  --accent-dark: #16a34a;
+  --surface: #ffffff;
+  --neutral-50: #f8fafc;
+  --neutral-100: #f1f5f9;
+  --neutral-200: #e2e8f0;
+  --neutral-300: #cbd5e1;
+  --neutral-400: #94a3b8;
+  --neutral-500: #64748b;
+  --neutral-600: #475569;
+  --neutral-700: #334155;
+  --neutral-800: #1e293b;
+  --neutral-900: #0f172a;
+}
+
 .client-profile {
-  padding: 24px;
-  max-width: 1000px;
-  margin: 0 auto;
+  min-height: 100vh;
+  background-color: var(--neutral-50);
+  background-image:
+    radial-gradient(at 0% 0%, rgba(26, 65, 137, 0.02) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(34, 197, 94, 0.02) 0px, transparent 50%),
+    linear-gradient(to bottom right, rgba(26, 65, 137, 0.01), rgba(34, 197, 94, 0.01));
+  padding: 20px;
+  color: var(--neutral-800);
 }
 
 .profile-header {
-  position: relative;
-  border-radius: 12px;
-  background-color: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  margin-bottom: 24px;
-  overflow: hidden;
-}
-
-.profile-cover {
-  height: 180px;
-  background: linear-gradient(to right, #1a4189, #4b79a1);
-}
-
-.profile-avatar {
-  position: absolute;
-  left: 32px;
-  top: 120px;
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  border: 4px solid white;
-  overflow: hidden;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.profile-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.profile-info {
-  padding: 80px 32px 24px;
-}
-
-.profile-name {
-  font-size: 24px;
-  font-weight: 600;
-  color: #1e293b;
-  margin: 0 0 4px 0;
-}
-
-.profile-since {
-  font-size: 14px;
-  color: #64748b;
-  margin: 0;
-}
-
-.profile-actions {
-  position: absolute;
-  top: 196px;
-  right: 32px;
-}
-
-.edit-profile-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background-color: #1a4189;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.edit-profile-btn:hover {
-  background-color: #153170;
-}
-
-.profile-tabs {
-  display: flex;
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  margin-bottom: 24px;
-  padding: 4px;
-}
-
-.tab-btn {
-  flex: 1;
-  padding: 12px 16px;
-  background: none;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #64748b;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.tab-btn.active {
-  background-color: #e6f0ff;
-  color: #1a4189;
-  font-weight: 600;
-}
-
-.tab-btn:hover:not(.active) {
-  background-color: #f1f5f9;
-}
-
-.profile-content {
-  margin-bottom: 32px;
-}
-
-.section-card {
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 16px;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.01),
+    0 2px 4px -1px rgba(0, 0, 0, 0.02);
   padding: 24px;
-}
-
-.section-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1e293b;
-  margin: 0 0 24px 0;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-/* Personal Information Tab */
-.info-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
-}
-
-.info-group {
-  margin-bottom: 16px;
-}
-
-.info-group label {
-  display: block;
-  font-size: 14px;
-  color: #64748b;
-  margin-bottom: 8px;
-}
-
-.info-value {
-  font-size: 16px;
-  color: #1e293b;
-  font-weight: 500;
-}
-
-/* Preferences Tab */
-.preference-section {
-  margin-bottom: 24px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.preference-section:last-child {
-  margin-bottom: 0;
-  padding-bottom: 0;
-  border-bottom: none;
-}
-
-.preference-section h3 {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1e293b;
-  margin: 0 0 16px 0;
-}
-
-.preference-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.preference-tag {
-  background-color: #e6f0ff;
-  color: #1a4189;
-  padding: 6px 12px;
-  border-radius: 16px;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.add-preference {
-  background-color: #f1f5f9;
-  color: #64748b;
-  padding: 6px 12px;
-  border-radius: 16px;
-  font-size: 14px;
-  font-weight: 500;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.add-preference:hover {
-  background-color: #e5e7eb;
-  color: #1e293b;
-}
-
-.price-range {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.price-slider {
-  flex: 1;
-  height: 8px;
-  background-color: #e5e7eb;
-  border-radius: 4px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(232, 240, 254, 0.7);
   position: relative;
+  overflow: hidden;
 }
 
-.price-fill {
+.profile-header::before {
+  content: '';
   position: absolute;
-  height: 100%;
-  background-color: #1a4189;
-  border-radius: 4px;
-}
-
-.preferences-buttons {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.preference-button {
-  background-color: #f1f5f9;
-  color: #64748b;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 16px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.preference-button.active {
-  background-color: #1a4189;
-  color: white;
-}
-
-.preference-button:hover:not(.active) {
-  background-color: #e5e7eb;
-  color: #1e293b;
-}
-
-/* Settings Tab */
-.settings-section {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.setting-group {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 24px;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.setting-header h3 {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1e293b;
-  margin: 0 0 4px 0;
-}
-
-.setting-header p {
-  font-size: 14px;
-  color: #64748b;
-  margin: 0;
-}
-
-.toggle-switch {
-  display: flex;
-  align-items: center;
-}
-
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 46px;
-  height: 24px;
-}
-
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  position: absolute;
-  cursor: pointer;
   top: 0;
   left: 0;
   right: 0;
-  bottom: 0;
-  background-color: #e5e7eb;
-  transition: 0.3s;
-  border-radius: 34px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(232, 240, 254, 0) 0%,
+    rgba(232, 240, 254, 0.8) 50%,
+    rgba(232, 240, 254, 0) 100%
+  );
 }
 
-.slider:before {
+.profile-header-content {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  position: relative;
+}
+
+.profile-image-wrapper {
+  position: relative;
+  width: 90px;
+  height: 90px;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.02),
+    0 4px 8px rgba(0, 0, 0, 0.02);
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+}
+
+.profile-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: contrast(1.05);
+}
+
+.profile-image-wrapper:hover .profile-image {
+  transform: scale(1.08);
+  filter: contrast(1.1) brightness(1.1);
+}
+
+.status-badge {
   position: absolute;
-  content: "";
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: 0.3s;
+  bottom: 6px;
+  right: 6px;
+  width: 10px;
+  height: 10px;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  border: 2px solid rgba(255, 255, 255, 0.9);
   border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(34, 197, 94, 0.2);
 }
 
-input:checked + .slider {
-  background-color: #1a4189;
+.profile-info {
+  flex: 1;
 }
 
-input:checked + .slider:before {
-  transform: translateX(22px);
+.info-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
 }
 
-.password-section {
+.name-section h1 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--neutral-900);
+  margin-bottom: 4px;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+
+.role {
+  color: var(--primary);
+  font-weight: 500;
+  margin-bottom: 4px;
+  font-size: 13px;
+  letter-spacing: -0.01em;
+  opacity: 0.9;
+}
+
+.location {
+  color: var(--neutral-500);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  letter-spacing: -0.01em;
+}
+
+.edit-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: 500;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow:
+    0 2px 4px rgba(26, 65, 137, 0.1),
+    0 4px 8px rgba(26, 65, 137, 0.1);
+  opacity: 0.95;
+}
+
+.edit-button:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow:
+    0 4px 8px rgba(26, 65, 137, 0.15),
+    0 8px 16px rgba(26, 65, 137, 0.15);
+  opacity: 1;
+}
+
+.edit-icon {
+  width: 16px;
+  height: 16px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath d='M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.location-icon {
+  width: 16px;
+  height: 16px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z' clip-rule='evenodd'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* Content Grid */
+.profile-content {
+  max-width: 1280px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+  position: relative;
+}
+
+@media (min-width: 1024px) {
+  .content-grid {
+    grid-template-columns: 2fr 1fr;
+    gap: 32px;
+  }
+}
+
+/* Cards */
+.info-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 16px;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.01),
+    0 2px 4px -1px rgba(0, 0, 0, 0.02);
+  margin-bottom: 32px;
+  border: 1px solid rgba(232, 240, 254, 0.7);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 1;
+  height: auto;
+}
+
+.card-header {
+  background: rgba(232, 240, 254, 0.5);
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(232, 240, 254, 0.7);
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.password-section h3 {
-  font-size: 16px;
+.card-header h2 {
+  font-size: 17px;
   font-weight: 600;
-  color: #1e293b;
-  margin: 0;
+  color: var(--neutral-800);
+  letter-spacing: -0.01em;
 }
 
-.change-password-btn {
-  padding: 8px 16px;
-  background-color: #f1f5f9;
-  color: #1e293b;
-  border: none;
-  border-radius: 8px;
+.card-body {
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.95);
+  position: relative;
+  z-index: 2;
+  height: auto;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 24px;
+  position: relative;
+  height: auto;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.info-item label {
+  font-size: 14px;
+  color: var(--neutral-500);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.info-item p {
+  color: var(--neutral-800);
+  font-weight: 500;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+}
+
+/* Buttons */
+.edit-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #1a4189;
   font-size: 14px;
   font-weight: 500;
+  background: none;
+  border: none;
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 
-.change-password-btn:hover {
-  background-color: #e5e7eb;
+.edit-link:hover {
+  color: #153471;
 }
 
+/* Quick Actions */
+.quick-actions-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 16px;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.01),
+    0 2px 4px -1px rgba(0, 0, 0, 0.02);
+  padding: 24px;
+  margin-bottom: 32px;
+  border: 1px solid rgba(232, 240, 254, 0.7);
+  height: auto;
+}
+
+.quick-actions-card h3 {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--neutral-800);
+  margin-bottom: 16px;
+  letter-spacing: -0.01em;
+}
+
+.actions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.action-button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  background: rgba(232, 240, 254, 0.5);
+  color: var(--primary);
+  border: 1px solid rgba(26, 65, 137, 0.08);
+  border-radius: 12px;
+  font-weight: 500;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.action-button:hover {
+  background: rgba(232, 240, 254, 0.8);
+  transform: translateY(-1px);
+  box-shadow:
+    0 4px 8px rgba(26, 65, 137, 0.06),
+    0 2px 4px rgba(26, 65, 137, 0.06);
+}
+
+/* Activity Card */
+.activity-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-radius: 16px;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.01),
+    0 2px 4px -1px rgba(0, 0, 0, 0.02);
+  padding: 24px;
+  margin-bottom: 32px;
+  border: 1px solid rgba(232, 240, 254, 0.7);
+  height: auto;
+}
+
+.activity-card h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--neutral-800);
+  margin-bottom: 16px;
+  letter-spacing: -0.01em;
+}
+
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: auto;
+}
+
+.activity-item {
+  display: flex;
+  gap: 12px;
+  padding: 4px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 8px;
+}
+
+.activity-item:hover {
+  background: rgba(232, 240, 254, 0.3);
+  transform: translateX(4px);
+}
+
+.activity-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(232, 240, 254, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid rgba(26, 65, 137, 0.08);
+}
+
+.activity-content {
+  flex: 1;
+}
+
+.activity-content p {
+  font-size: 15px;
+  color: var(--neutral-800);
+  margin-bottom: 2px;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+
+.activity-content span {
+  font-size: 13px;
+  color: var(--neutral-500);
+  letter-spacing: -0.01em;
+}
+
+/* Modern scrollbar */
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
-  .client-profile {
-    padding: 16px;
-  }
-
-  .profile-avatar {
-    width: 100px;
-    height: 100px;
-    left: 24px;
-    top: 130px;
-  }
-
-  .profile-info {
-    padding: 60px 24px 24px;
-  }
-
-  .profile-actions {
-    position: relative;
-    top: auto;
-    right: auto;
-    margin-top: 16px;
-    padding: 0 24px 24px;
-    display: flex;
-    justify-content: flex-end;
-  }
-
-  .info-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .profile-tabs {
+  .profile-header-content {
     flex-direction: column;
-    gap: 8px;
+    align-items: center;
+    text-align: center;
   }
 
-  .tab-btn {
-    text-align: left;
-  }
-
-  .setting-group {
+  .info-header {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
+    align-items: center;
   }
 
-  .toggle-switch {
-    align-self: flex-end;
+  .profile-image-wrapper {
+    margin-bottom: 16px;
   }
+}
 
-  .password-section {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-  }
+/* Add smooth transitions */
+* {
+  transition: background-color 0.3s ease,
+              transform 0.3s ease,
+              box-shadow 0.3s ease,
+              color 0.3s ease;
+}
+
+/* Add subtle animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.info-card, .quick-actions-card, .activity-card {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* Add loading state styles */
+.loading {
+  position: relative;
+  overflow: hidden;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(232, 240, 254, 0) 0%,
+    rgba(232, 240, 254, 0.2) 50%,
+    rgba(232, 240, 254, 0) 100%
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Add spacing between sections */
+.profile-section {
+  margin-bottom: 32px;
+}
+
+.profile-section:last-child {
+  margin-bottom: 0;
+}
+
+/* Remove any max-height restrictions */
+.main-content,
+.sidebar,
+.profile-content,
+.content-grid {
+  height: auto;
+  min-height: unset;
+  max-height: none;
 }
 </style>

@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
+import { useRoleStore } from './roleStore';
 
 export const useProfileStore = defineStore('profile', () => {
   // State
@@ -9,9 +10,8 @@ export const useProfileStore = defineStore('profile', () => {
 
   // Getters
   const userRole = computed(() => {
-    // This would usually come from an auth store or service
-    // For demo purposes, we're hardcoding it here
-    return 'agent'; // Could be 'admin', 'agent', or 'client'
+    const roleStore = useRoleStore();
+    return roleStore.currentRole;
   });
 
   // Mock data for different roles

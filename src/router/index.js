@@ -162,7 +162,7 @@ const routes = [
   {
     path: '/client-properties',
     name: 'ClientProperties',
-    component: () => import('@/views/client/PropertiesView.vue'),
+    component: () => import('@/views/client/Properties.vue'),
     meta: {
       title: 'My Properties',
       description: 'View and manage your properties',
@@ -1057,6 +1057,35 @@ const routes = [
       hideSidebar: true,
       layout: 'public',
       noCache: true
+    }
+  },
+  // Client Profile routes (Client-only)
+  {
+    path: '/client-profile',
+    name: 'ClientProfile',
+    component: () => import('@/views/client/ClientProfileView.vue'),
+    meta: {
+      title: 'My Profile',
+      allowedRoles: ['client']
+    }
+  },
+  {
+    path: '/client-profile/edit',
+    name: 'ClientProfileEdit',
+    component: () => import('@/views/client/ClientProfileEditView.vue'),
+    meta: {
+      title: 'Edit Profile',
+      allowedRoles: ['client']
+    }
+  },
+  // Add Client Settings route
+  {
+    path: '/client-settings',
+    name: 'ClientSettings',
+    component: () => import('@/views/client/ClientSettingsView.vue'),
+    meta: {
+      title: 'Settings',
+      allowedRoles: ['client']
     }
   },
   // 404 route - must be the last route

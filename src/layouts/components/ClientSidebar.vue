@@ -10,26 +10,15 @@ const roleStore = useRoleStore();
 const activeMenu = ref('');
 let navigationFixCleanup = null;
 
-// Track this component
 const { onMounted: trackMount, onUnmounted: trackUnmount } = trackComponent('ClientSidebar');
 
-// Apply client-specific navigation fixes
 onMounted(() => {
-  // Register component tracking
   trackMount();
-
-  // Apply client navigation fix and store cleanup function
   navigationFixCleanup = applyClientNavFix(router, roleStore);
-
-  // Set initial menu state
   updateActiveMenu();
 
-  // Check if we need navigation recovery
   if (localStorage.getItem('clientNavBroken') === 'true') {
-    console.log('Recovering from broken client navigation');
     localStorage.removeItem('clientNavBroken');
-
-    // Force a reload of the current route
     setTimeout(() => {
       const currentPath = route.path;
       router.replace(currentPath + '?recovered=true');
@@ -37,75 +26,55 @@ onMounted(() => {
   }
 });
 
-// Clean up when component is destroyed
 onUnmounted(() => {
-  // Unregister component tracking
   trackUnmount();
-
-  // Clean up navigation fixes
   if (navigationFixCleanup) {
     navigationFixCleanup();
   }
 });
 
-// Function to determine which menu item should be active based on the current route
 const getActiveMenuFromPath = (path) => {
-  // Sanitize path input
   const sanitizedPath = path.replace(/[^a-zA-Z0-9-/]/g, '');
 
-  // Check for 'from' query parameter to maintain context
   if (route.query.from === 'agents' && (sanitizedPath.startsWith('/client-property') || sanitizedPath.startsWith('/client-properties'))) {
     return 'findagents';
   }
 
   if (sanitizedPath === '/client-dashboard') return 'dashboard';
-  if (sanitizedPath.startsWith('/client-properties') || sanitizedPath.startsWith('/client-property')) return 'properties';
+  if (sanitizedPath.startsWith('/client-properties')) return 'properties';
   if (sanitizedPath.startsWith('/client-find-agents')) return 'findagents';
   if (sanitizedPath.startsWith('/client-favourites')) return 'favourites';
   if (sanitizedPath.startsWith('/client-appointments')) return 'appointments';
-  if (sanitizedPath.startsWith('/client-messages')) return 'messages';
   if (sanitizedPath.startsWith('/client-documents')) return 'documents';
   if (sanitizedPath.startsWith('/client-profile')) return 'profile';
-  if (sanitizedPath.startsWith('/client-settings')) return 'settings';
+  if (sanitizedPath === '/client-settings') return 'settings';
   if (sanitizedPath.startsWith('/logout')) return 'logout';
 
-  // Default to dashboard for any unrecognized paths
   return 'dashboard';
 };
 
-// Enhanced navigation handling
 const navigate = (path) => {
   if (path === route.path) {
-    // Already on this page, no need to navigate
-    console.log('Already on this path, skipping navigation');
     return;
   }
 
-  // Use replace instead of push for same-section navigations to avoid history buildup
   const currentSection = getActiveMenuFromPath(route.path);
   const targetSection = getActiveMenuFromPath(path);
 
   if (currentSection === targetSection) {
-    // Same section, use replace
     router.replace(path);
   } else {
-    // Different section, use push
     router.push(path);
   }
 };
 
-// Set active menu based on current route
 const updateActiveMenu = () => {
   activeMenu.value = getActiveMenuFromPath(route.path);
 };
 
-// Watch for route changes and update active menu
 watch(() => route.path, updateActiveMenu, { immediate: true });
-
-// Also watch for query parameter changes
 watch(() => route.query, updateActiveMenu, { immediate: true });
 
-// Define menu items
 const menuItems = [
   {
     key: 'dashboard',
@@ -145,7 +114,6 @@ const menuItems = [
   }
 ];
 
-// Define settings menu
 const settingsMenu = [
   {
     key: 'profile',
@@ -169,25 +137,18 @@ const settingsMenu = [
 </script>
 
 <template>
-  <aside class="sidebar client-sidebar router-view-container">
+  <aside class="sidebar">
     <div class="logo-container">
       <div class="logo-section">
         <h2 class="logo">Real City</h2>
         <p class="tagline">realty inc brokerage</p>
       </div>
     </div>
+
     <nav class="sidebar-nav">
       <ul>
-        <li
-          v-for="item in menuItems"
-          :key="item.key"
-          :class="{ active: activeMenu === item.key }"
-        >
-          <a
-            href="#"
-            :class="{ active: activeMenu === item.key }"
-            @click.prevent="navigate(item.path)"
-          >
+        <li v-for="item in menuItems" :key="item.key" :class="{ active: activeMenu === item.key }">
+          <a href="#" :class="{ active: activeMenu === item.key }" @click.prevent="navigate(item.path)">
             <span class="icon" v-html="item.icon"></span>
             {{ item.name }}
           </a>
@@ -197,16 +158,8 @@ const settingsMenu = [
       <div class="account-management">
         <h3>Account Management</h3>
         <ul>
-          <li
-            v-for="item in settingsMenu"
-            :key="item.key"
-            :class="{ active: activeMenu === item.key }"
-          >
-            <a
-              href="#"
-              :class="{ active: activeMenu === item.key }"
-              @click.prevent="navigate(item.path)"
-            >
+          <li v-for="item in settingsMenu" :key="item.key" :class="{ active: activeMenu === item.key }">
+            <a href="#" :class="{ active: activeMenu === item.key }" @click.prevent="navigate(item.path)">
               <span class="icon" v-html="item.icon"></span>
               {{ item.name }}
             </a>
@@ -214,19 +167,20 @@ const settingsMenu = [
         </ul>
       </div>
     </nav>
+
     <div class="sidebar-footer">
       <div class="help-section">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"></circle>
-          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-          <line x1="12" y1="17" x2="12.01" y2="17"></line>
-        </svg>
+        <div class="help-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+        </div>
         <span>Need Help?</span>
       </div>
       <div class="user-info">
-        <div class="user-avatar">
-          <span>JD</span>
-        </div>
+        <div class="user-avatar">JD</div>
         <div class="user-details">
           <span class="user-name">John Doe</span>
           <span class="user-role">Client</span>
@@ -237,24 +191,146 @@ const settingsMenu = [
 </template>
 
 <style scoped>
+/* Base typography variables */
+:root {
+  --font-size-xs: 11px;
+  --font-size-sm: 13px;
+  --font-size-base: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+}
+
 .sidebar {
-  width: 260px;
-  min-width: 260px;
-  background-color: #0a4d8c;
+  width: 300px;
+  min-width: 300px;
+  background: #004080;
   color: white;
   display: flex;
   flex-direction: column;
   height: 100vh;
-  z-index: 10;
-  transition: all 0.3s ease;
+  position: relative;
   font-family: 'Inter', sans-serif;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
 }
 
+/* Main heading (h1 equivalent) */
+.logo {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  margin: 0;
+  color: white;
+  line-height: var(--line-height-tight);
+}
+
+/* Subheading (h2 equivalent) */
+.account-management h3 {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0 0 8px 16px;
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+}
+
+/* Body text - primary (navigation items) */
+.sidebar-nav a {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  line-height: var(--line-height-normal);
+}
+
+.sidebar-nav a.active {
+  background: white;
+  color: #004080;
+  font-weight: var(--font-weight-bold);
+}
+
+/* Secondary text (tagline, help text) */
+.tagline {
+  font-size: var(--font-size-xs);
+  margin: 2px 0 0 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-tight);
+}
+
+.help-section {
+  display: flex;
+  align-items: center;
+  padding: 8px 8px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: color 0.2s ease;
+  border-radius: 6px;
+  line-height: var(--line-height-normal);
+}
+
+/* User information typography */
+.user-name {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  color: white;
+  margin-bottom: 1px;
+  line-height: var(--line-height-tight);
+}
+
+.user-role {
+  font-size: var(--font-size-xs);
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-tight);
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: white;
+  margin-right: 12px;
+}
+
+/* Icon styling */
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  margin-right: 12px;
+  opacity: 0.9;
+}
+
+/* Layout spacing */
 .logo-container {
-  padding: 20px;
-  padding-bottom: 10px;
-  padding-top: 15px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 20px 16px;
+  margin-bottom: 8px;
 }
 
 .logo-section {
@@ -262,24 +338,9 @@ const settingsMenu = [
   flex-direction: column;
 }
 
-.logo {
-  font-size: 24px;
-  font-weight: 600;
-  margin: 0 0 2px 0;
-  color: white;
-}
-
-.tagline {
-  font-size: 11px;
-  margin: 0;
-  opacity: 0.7;
-  font-weight: 400;
-  margin-top: -2px;
-}
-
 .sidebar-nav {
-  padding: 10px 0;
-  flex-grow: 1;
+  flex: 1;
+  padding: 0 8px;
   overflow-y: auto;
 }
 
@@ -290,86 +351,45 @@ const settingsMenu = [
 }
 
 .sidebar-nav li {
-  margin-bottom: 1px;
-}
-
-.sidebar-nav a {
-  display: flex;
-  align-items: center;
-  padding: 12px 20px;
-  color: rgba(255, 255, 255, 0.9);
-  text-decoration: none;
-  transition: all 0.2s ease;
-  font-size: 14px;
-  gap: 12px;
-  border-radius: 0;
+  margin-bottom: 2px;
 }
 
 .sidebar-nav a:hover {
-  background-color: rgba(255, 255, 255, 0.08);
-}
-
-.sidebar-nav a.active {
-  background-color: rgba(255, 255, 255, 0.15);
-  font-weight: 500;
+  background: rgba(255, 255, 255, 0.1);
   color: white;
-  border-left: 3px solid white;
-}
-
-.icon {
-  display: flex;
-  align-items: center;
-  opacity: 0.9;
 }
 
 .account-management {
-  margin-top: 20px;
-  padding-top: 10px;
-}
-
-.account-management h3 {
-  padding: 0 20px;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: rgba(255, 255, 255, 0.6);
-  margin-bottom: 10px;
-  font-weight: 500;
+  margin-top: 16px;
+  padding-top: 16px;
 }
 
 .sidebar-footer {
-  padding: 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 16px;
+  margin-top: auto;
 }
 
-.help-section {
+.help-section:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.help-icon {
+  margin-right: 12px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 14px;
-  margin-bottom: 20px;
-  padding: 10px;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  cursor: pointer;
 }
 
 .user-info {
   display: flex;
   align-items: center;
-  gap: 10px;
+  padding: 8px;
+  margin-top: 8px;
+  border-radius: 6px;
 }
 
-.user-avatar {
-  width: 36px;
-  height: 36px;
-  background-color: rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  font-weight: 600;
+.user-info:hover {
+  background: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
 }
 
 .user-details {
@@ -377,105 +397,7 @@ const settingsMenu = [
   flex-direction: column;
 }
 
-.user-name {
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.user-role {
-  font-size: 12px;
-  opacity: 0.7;
-}
-
-/* Switch styling */
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 50px;
-  height: 24px;
-}
-
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(255, 255, 255, 0.2);
-  transition: .4s;
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: .4s;
-}
-
-input:checked + .slider {
-  background-color: #4fc3f7;
-}
-
-input:checked + .slider:before {
-  transform: translateX(26px);
-}
-
-.slider.round {
-  border-radius: 34px;
-}
-
-.slider.round:before {
-  border-radius: 50%;
-}
-
-.toggle-labels {
-  position: absolute;
-  width: 100%;
-  top: 5px;
-  display: flex;
-  justify-content: space-between;
-  padding: 0 6px;
-  box-sizing: border-box;
-  color: white;
-  font-size: 10px;
-  font-weight: bold;
-  z-index: 1;
-}
-
-.toggle-labels span {
-  opacity: 0.9;
-}
-
-.switch.small {
-  width: 40px;
-  height: 20px;
-}
-
-.switch.small .slider:before {
-  height: 14px;
-  width: 14px;
-  left: 3px;
-  bottom: 3px;
-}
-
-.switch.small input:checked + .slider:before {
-  transform: translateX(20px);
-}
-
-.switch.small .toggle-labels {
-  top: 3px;
-  padding: 0 5px;
-  font-size: 9px;
+.sidebar-nav a.active .icon {
+  color: #004080;
 }
 </style>
