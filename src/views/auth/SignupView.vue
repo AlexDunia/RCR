@@ -10,27 +10,94 @@
       <div class="auth-form-container">
         <div class="auth-title">Create your account</div>
         <form class="auth-form" @submit.prevent="onSignup">
-          <input type="text" v-model="name" placeholder="Enter your full name here" required />
-          <input type="email" v-model="email" placeholder="Enter your email address here" required />
-          <input type="password" v-model="password" placeholder="Enter your password here" required />
-          <button type="submit">Sign up</button>
+          <!-- Error Alert -->
+          <div v-if="error" class="auth-error">
+            {{ error }}
+          </div>
+
+          <!-- Name Field -->
+          <div class="form-group">
+            <input
+              type="text"
+              v-model="form.name"
+              placeholder="Enter your full name"
+              :class="{ 'error': validationErrors.name }"
+              @input="clearError('name')"
+              required
+            />
+            <span v-if="validationErrors.name" class="error-message">{{ validationErrors.name[0] }}</span>
+          </div>
+
+          <!-- Email Field -->
+          <div class="form-group">
+            <input
+              type="email"
+              v-model="form.email"
+              placeholder="Enter your email address"
+              :class="{ 'error': validationErrors.email }"
+              @input="clearError('email')"
+              required
+            />
+            <span v-if="validationErrors.email" class="error-message">{{ validationErrors.email[0] }}</span>
+          </div>
+
+          <!-- Password Field -->
+          <div class="form-group">
+            <input
+              type="password"
+              v-model="form.password"
+              placeholder="Enter your password"
+              :class="{ 'error': validationErrors.password }"
+              @input="clearError('password')"
+              required
+            />
+            <span v-if="validationErrors.password" class="error-message">{{ validationErrors.password[0] }}</span>
+            <div class="password-requirements">
+              Password must be at least 8 characters, include uppercase, lowercase, and numbers
+            </div>
+          </div>
+
+          <!-- Role Selection -->
+          <div class="form-group">
+            <div class="role-selector">
+              <label>
+                <input
+                  type="radio"
+                  v-model="form.role"
+                  value="client"
+                  @change="clearError('role')"
+                />
+                <span>Client</span>
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  v-model="form.role"
+                  value="agent"
+                  @change="clearError('role')"
+                />
+                <span>Agent</span>
+              </label>
+            </div>
+            <span v-if="validationErrors.role" class="error-message">{{ validationErrors.role[0] }}</span>
+          </div>
+
+          <button type="submit" :disabled="isLoading">
+            {{ isLoading ? 'Creating Account...' : 'Sign up' }}
+          </button>
         </form>
+
         <div class="auth-divider">or</div>
-        <button class="auth-social-btn" @click="onGoogleSignup">
+
+        <!-- Social Login Buttons -->
+        <button class="auth-social-btn" @click="onGoogleSignup" :disabled="isLoading">
           <span class="icon-svg">
             <!-- Google SVG icon -->
-            <svg width="22" height="22" viewBox="0 0 48 48"><g><path fill="#4285F4" d="M44.5 20H24v8.5h11.7C34.7 33.9 29.8 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21c10.5 0 20-7.7 20-21 0-1.3-.1-2.7-.3-4z"/><path fill="#34A853" d="M6.3 14.7l7 5.1C15.5 16.1 19.4 13 24 13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3c-7.2 0-13 5.8-13 13 0 2.1.5 4.1 1.3 5.7z"/><path fill="#FBBC05" d="M24 44c5.6 0 10.6-1.9 14.5-5.1l-6.7-5.5C29.8 37 24 37 24 37c-5.8 0-10.7-3.1-13.2-7.5l-7 5.4C7.9 41.1 15.4 44 24 44z"/><path fill="#EA4335" d="M44.5 20H24v8.5h11.7c-1.6 4.1-6.1 7.5-11.7 7.5-5.8 0-10.7-3.1-13.2-7.5l-7 5.4C7.9 41.1 15.4 44 24 44c10.5 0 20-7.7 20-21 0-1.3-.1-2.7-.3-4z"/></g></svg>
+            <svg width="22" height="22" viewBox="0 0 48 48"><g><path fill="#4285F4" d="M44.5 20H24v8.5h11.7C34.7 33.9 29.8 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21c10.5 0 20-7.7 20-21 0-1.3-.1-2.7-.3-4z"/></g></svg>
           </span>
           Sign up with Google
         </button>
-        <button class="auth-social-btn" @click="onYahooSignup">
-          <span class="icon-svg"><svg width="22" height="22" viewBox="0 0 32 32"><g fill="none" fill-rule="evenodd"><rect width="32" height="32" rx="16" fill="#5F01D1"/><path d="M10.5 10.5h2.1l3.4 5.7 3.4-5.7h2.1l-4.5 7.5v3.5h-2v-3.5z" fill="#FFF"/></g></svg></span>
-          Sign up with Yahoo
-        </button>
-        <button class="auth-social-btn" @click="onHotmailSignup">
-          <span class="icon-svg"><svg width="22" height="22" viewBox="0 0 32 32"><g fill="none" fill-rule="evenodd"><rect width="32" height="32" rx="16" fill="#0072C6"/><path d="M8 10.5h16v11H8z" fill="#FFF"/><path d="M8 10.5l8 6.5 8-6.5" stroke="#0072C6" stroke-width="1.5" fill="none"/></g></svg></span>
-          Sign up with Hotmail
-        </button>
+
         <div class="auth-bottom-text">
           By continuing you indicate that you read and agreed to the Terms of Use
         </div>
@@ -44,27 +111,150 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, reactive, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import axiosInstance from '@/utils/axios';
+import { generateDeviceName } from '@/utils/deviceFingerprint';
+import { useAuthStore } from '@/stores/authStore';
 
-const name = ref('');
-const email = ref('');
-const password = ref('');
+const router = useRouter();
+const authStore = useAuthStore();
+const isLoading = ref(false);
+const error = ref(null);
+const validationErrors = ref({});
 
-function onSignup() {
-  // TODO: Implement signup logic
-  alert(`Signup with ${email.value}`);
+const form = reactive({
+  name: '',
+  email: '',
+  password: '',
+  role: 'client',
+  device_name: ''
+});
+
+// Password validation regex
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+onMounted(() => {
+  // Generate device name
+  form.device_name = generateDeviceName();
+});
+
+function clearError(field) {
+  if (validationErrors.value[field]) {
+    delete validationErrors.value[field];
+  }
+  error.value = null;
 }
+
+function validateForm() {
+  const errors = {};
+
+  // Name validation
+  if (!form.name.trim()) {
+    errors.name = ['Name is required'];
+  }
+
+  // Email validation
+  if (!form.email.trim()) {
+    errors.email = ['Email is required'];
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+    errors.email = ['Please enter a valid email address'];
+  }
+
+  // Password validation
+  if (!form.password) {
+    errors.password = ['Password is required'];
+  } else if (!passwordRegex.test(form.password)) {
+    errors.password = ['Password must be at least 8 characters and include uppercase, lowercase, and numbers'];
+  }
+
+  // Role validation
+  if (!form.role) {
+    errors.role = ['Please select a role'];
+  }
+
+  return errors;
+}
+
+async function initializeCsrf() {
+  try {
+    await axiosInstance.get('/sanctum/csrf-cookie');
+  } catch (err) {
+    console.error('Failed to initialize CSRF protection:', err);
+    throw err;
+  }
+}
+
+async function onSignup() {
+  try {
+    error.value = null;
+    validationErrors.value = {};
+
+    // Client-side validation
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      validationErrors.value = errors;
+      return;
+    }
+
+    isLoading.value = true;
+
+    // Initialize CSRF protection before making the request
+    await initializeCsrf();
+
+    // Sanitize input
+    const sanitizedForm = {
+      name: form.name.trim(),
+      email: form.email.trim().toLowerCase(),
+      password: form.password,
+      role: form.role,
+      device_name: form.device_name
+    };
+
+    const response = await axiosInstance.post('/api/auth/register', sanitizedForm);
+
+    // Store the token securely
+    const token = response.data.token;
+    localStorage.setItem('auth_token', token);
+
+    // Update auth store
+    await authStore.setUser(response.data.user);
+
+    // Redirect based on role
+    router.push(form.role === 'agent' ? '/agent-dashboard' : '/client-dashboard');
+
+  } catch (err) {
+    console.error('Registration error:', err);
+
+    if (err.response) {
+      switch (err.response.status) {
+        case 422: // Validation errors
+          validationErrors.value = err.response.data.errors;
+          break;
+        case 429: // Rate limiting
+          error.value = 'Too many attempts. Please try again later.';
+          break;
+        case 500: // Server error
+          error.value = 'An unexpected error occurred. Please try again.';
+          break;
+        default:
+          if (err.response.data.message) {
+            error.value = err.response.data.message;
+          } else {
+            error.value = 'Failed to create account. Please try again.';
+          }
+      }
+    } else {
+      error.value = 'Network error. Please check your connection.';
+    }
+  } finally {
+    isLoading.value = false;
+  }
+}
+
 function onGoogleSignup() {
-  // TODO: Implement Google signup
-  alert('Google signup');
-}
-function onYahooSignup() {
-  // TODO: Implement Yahoo signup
-  alert('Yahoo signup');
-}
-function onHotmailSignup() {
-  // TODO: Implement Hotmail signup
-  alert('Hotmail signup');
+  // Implement social login
+  console.log('Google signup - to be implemented');
 }
 </script>
 
@@ -233,5 +423,74 @@ function onHotmailSignup() {
   .auth-form-container {
     margin: 32px 0;
   }
+}
+
+.form-group {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.error {
+  border-color: #dc2626 !important;
+}
+
+.error-message {
+  color: #dc2626;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.auth-error {
+  background-color: #fee2e2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 0.75rem;
+  border-radius: 0.375rem;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+
+.password-requirements {
+  color: #64748b;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.role-selector {
+  display: flex;
+  gap: 1.5rem;
+  margin: 0.5rem 0;
+}
+
+.role-selector label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.role-selector input[type="radio"] {
+  width: 1rem;
+  height: 1rem;
+}
+
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.auth-form input {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1px solid #cfd8dc;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
+}
+
+.auth-form input:focus {
+  outline: none;
+  border-color: #0056a3;
 }
 </style>

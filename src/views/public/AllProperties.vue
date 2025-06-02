@@ -11,8 +11,8 @@
         <router-link to="/signup" class="main-nav__link">Join Us</router-link>
       </div>
       <div class="main-nav__right">
-        <button class="main-nav__button">Sign in</button>
-        <button class="main-nav__button main-nav__button--primary">Login</button>
+        <router-link to="/signup" class="main-nav__button">Sign up</router-link>
+        <router-link to="/login" class="main-nav__button main-nav__button--primary">Login</router-link>
       </div>
     </nav>
 
