@@ -116,9 +116,11 @@ import { useRouter } from 'vue-router';
 import axiosInstance from '@/utils/axios';
 import { generateDeviceName } from '@/utils/deviceFingerprint';
 import { useAuthStore } from '@/stores/authStore';
+import { useRoleStore } from '@/stores/roleStore';
 
 const router = useRouter();
 const authStore = useAuthStore();
+const roleStore = useRoleStore();
 const isLoading = ref(false);
 const error = ref(null);
 const validationErrors = ref({});
@@ -213,15 +215,27 @@ async function onSignup() {
 
     const response = await axiosInstance.post('/api/auth/register', sanitizedForm);
 
-    // Store the token securely
+    // Store the token
     const token = response.data.token;
-    localStorage.setItem('auth_token', token);
+    authStore.setToken(token);
 
-    // Update auth store
+    // Set user in auth store
     await authStore.setUser(response.data.user);
 
+    // Set role in role store
+    roleStore.setRole(response.data.user.role);
+
     // Redirect based on role
-    router.push(form.role === 'agent' ? '/agent-dashboard' : '/client-dashboard');
+    switch (response.data.user.role) {
+      case 'agent':
+        router.push('/agent-dashboard');
+        break;
+      case 'client':
+        router.push('/client-dashboard');
+        break;
+      default:
+        router.push('/');
+    }
 
   } catch (err) {
     console.error('Registration error:', err);

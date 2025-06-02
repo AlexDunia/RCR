@@ -4,6 +4,7 @@ import DocumentLayout from '@/layouts/DocumentLayout.vue';
 import TasksLayout from '@/layouts/TasksLayout.vue';
 import EducationLayout from '@/layouts/EducationLayout.vue';
 import permissionGuard from './guards/permissionGuard';
+import { authGuard } from './guards/authGuard';
 import { setupRouterDebug } from '@/utils/router-debug';
 import { publicGuard } from './guards/publicGuard';
 
@@ -1098,13 +1099,16 @@ const routes = [
 
 // Create router instance
 const router = createRouter({
-  history: createWebHistory('/RCR/'), // Explicitly set base path for SPA chunk loading
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes,
   scrollBehavior() {
     // Always scroll to top on navigation
     return { top: 0, behavior: 'smooth' };
   }
 });
+
+// Apply global navigation guard
+router.beforeEach(authGuard);
 
 // Add global navigation guard for landing page
 router.beforeEach((to, from, next) => {

@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AllblogpostController;
 use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\AgentController;
+use App\Http\Controllers\API\ClientController;
 
 // Public routes
 Route::middleware(['throttle:60,1'])->group(function () {
@@ -30,13 +32,21 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
     });
 
-    // Agent-only routes
-    Route::middleware(['role:agent'])->group(function () {
-        // Add agent-specific routes here
+    // Agent routes
+    Route::middleware(['role:agent'])->prefix('agent')->group(function () {
+        Route::get('/dashboard', [AgentController::class, 'dashboard']);
+        Route::post('/listings', [AgentController::class, 'createListing']);
+        Route::put('/profile', [AgentController::class, 'updateProfile']);
+        
+        // Add more agent-specific routes here
     });
 
-    // Client-only routes
-    Route::middleware(['role:client'])->group(function () {
-        // Add client-specific routes here
+    // Client routes
+    Route::middleware(['role:client'])->prefix('client')->group(function () {
+        Route::get('/dashboard', [ClientController::class, 'dashboard']);
+        Route::post('/favorites', [ClientController::class, 'addToFavorites']);
+        Route::get('/favorites', [ClientController::class, 'getFavorites']);
+        
+        // Add more client-specific routes here
     });
 }); 
