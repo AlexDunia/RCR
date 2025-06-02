@@ -117,6 +117,8 @@ import axiosInstance from '@/utils/axios';
 import { generateDeviceName } from '@/utils/deviceFingerprint';
 import { useAuthStore } from '@/stores/authStore';
 import { useRoleStore } from '@/stores/roleStore';
+import validationService from '@/services/validationService';
+import { sanitizeInput } from '@/utils/validators';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -133,9 +135,6 @@ const form = reactive({
   device_name: ''
 });
 
-// Password validation regex
-const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-
 onMounted(() => {
   // Generate device name
   form.device_name = generateDeviceName();
@@ -149,33 +148,18 @@ function clearError(field) {
 }
 
 function validateForm() {
-  const errors = {};
+  const { isValid, errors } = validationService.validateSignupForm(form);
 
-  // Name validation
-  if (!form.name.trim()) {
-    errors.name = ['Name is required'];
+  // Convert errors to array format to match the UI expectations
+  const formattedErrors = {};
+  for (const [key, value] of Object.entries(errors)) {
+    formattedErrors[key] = [value];
   }
 
-  // Email validation
-  if (!form.email.trim()) {
-    errors.email = ['Email is required'];
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-    errors.email = ['Please enter a valid email address'];
-  }
-
-  // Password validation
-  if (!form.password) {
-    errors.password = ['Password is required'];
-  } else if (!passwordRegex.test(form.password)) {
-    errors.password = ['Password must be at least 8 characters and include uppercase, lowercase, and numbers'];
-  }
-
-  // Role validation
-  if (!form.role) {
-    errors.role = ['Please select a role'];
-  }
-
-  return errors;
+  return {
+    isValid,
+    errors: formattedErrors
+  };
 }
 
 async function initializeCsrf() {
@@ -192,9 +176,9 @@ async function onSignup() {
     error.value = null;
     validationErrors.value = {};
 
-    // Client-side validation
-    const errors = validateForm();
-    if (Object.keys(errors).length > 0) {
+    // Client-side validation using validationService
+    const { isValid, errors } = validateForm();
+    if (!isValid) {
       validationErrors.value = errors;
       return;
     }
@@ -206,9 +190,9 @@ async function onSignup() {
 
     // Sanitize input
     const sanitizedForm = {
-      name: form.name.trim(),
-      email: form.email.trim().toLowerCase(),
-      password: form.password,
+      name: sanitizeInput(form.name.trim()),
+      email: sanitizeInput(form.email.trim().toLowerCase()),
+      password: form.password, // Don't sanitize password
       role: form.role,
       device_name: form.device_name
     };
@@ -242,7 +226,7 @@ async function onSignup() {
 
     if (err.response) {
       switch (err.response.status) {
-        case 422: // Validation errors
+        case 422: // Validation errors from backend
           validationErrors.value = err.response.data.errors;
           break;
         case 429: // Rate limiting
@@ -266,9 +250,17 @@ async function onSignup() {
   }
 }
 
-function onGoogleSignup() {
-  // Implement social login
-  console.log('Google signup - to be implemented');
+async function onGoogleSignup() {
+  try {
+    isLoading.value = true;
+    const response = await axiosInstance.get('/api/auth/google/url');
+    window.location.href = response.data.url;
+  } catch (err) {
+    console.error('Google signup error:', err);
+    error.value = 'Failed to initialize Google signup. Please try again.';
+  } finally {
+    isLoading.value = false;
+  }
 }
 </script>
 

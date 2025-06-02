@@ -1,19 +1,6 @@
+import { validateEmail, validatePassword, validateName } from '@/utils/validators';
+
 const validationService = {
-  validateEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  },
-
-  validatePassword(password) {
-    // At least 8 characters, 1 uppercase, 1 lowercase, 1 number, and allow special characters
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[\w\W]{8,}$/;
-    return passwordRegex.test(password);
-  },
-
-  validateName(name) {
-    return name.length >= 2 && name.length <= 50;
-  },
-
   validateRole(role) {
     const validRoles = ['agent', 'client']; // Only allow agent and client for registration
     return validRoles.includes(role);
@@ -22,24 +9,35 @@ const validationService = {
   validateSignupForm(formData) {
     const errors = {};
 
+    // Name validation
     if (!formData.name) {
       errors.name = 'Name is required';
-    } else if (!this.validateName(formData.name)) {
-      errors.name = 'Name must be between 2 and 50 characters';
+    } else if (!validateName(formData.name)) {
+      errors.name = 'Name can only contain letters and spaces';
     }
 
+    // Email validation
     if (!formData.email) {
       errors.email = 'Email is required';
-    } else if (!this.validateEmail(formData.email)) {
+    } else if (!validateEmail(formData.email)) {
       errors.email = 'Please enter a valid email address';
     }
 
+    // Password validation
     if (!formData.password) {
       errors.password = 'Password is required';
-    } else if (!this.validatePassword(formData.password)) {
-      errors.password = 'Password must be at least 8 characters long and contain uppercase, lowercase, and numbers';
+    } else {
+      const passwordValidation = validatePassword(formData.password);
+      if (!passwordValidation.isValid) {
+        errors.password = 'Password must:';
+        if (passwordValidation.errors.length) errors.password += '\n- Be at least 8 characters long';
+        if (passwordValidation.errors.uppercase) errors.password += '\n- Contain at least one uppercase letter';
+        if (passwordValidation.errors.lowercase) errors.password += '\n- Contain at least one lowercase letter';
+        if (passwordValidation.errors.number) errors.password += '\n- Contain at least one number';
+      }
     }
 
+    // Role validation
     if (!formData.role) {
       errors.role = 'Please select your role';
     } else if (!this.validateRole(formData.role)) {
