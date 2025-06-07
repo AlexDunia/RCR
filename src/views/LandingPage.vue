@@ -9,50 +9,92 @@
           <div class="main-nav__logo">
             <img src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1748316444/rclogo_l7oiod.png" alt="Real City Logo" class="main-nav__logo-img" />
           </div>
-          <div class="main-nav__center">
+          <div class="main-nav__center desktop-nav">
             <router-link to="/buy" class="main-nav__link">Buy</router-link>
             <router-link to="/rent" class="main-nav__link">Rent</router-link>
             <router-link to="/sell" class="main-nav__link">Sell</router-link>
             <router-link to="/allagents" class="main-nav__link">Find Agents</router-link>
             <router-link to="/signup" class="main-nav__link">Join Us</router-link>
           </div>
-          <div class="main-nav__right">
+          <div class="main-nav__right desktop-nav">
             <router-link to="/signup" class="main-nav__button">Sign up</router-link>
             <router-link to="/login" class="main-nav__button main-nav__button--primary">Login</router-link>
           </div>
+          <!-- Hamburger for mobile -->
+          <button class="main-nav__hamburger" @click="showMobileNav = true" aria-label="Open navigation" v-if="!showMobileNav">
+            <span></span><span></span><span></span>
+          </button>
         </nav>
-
+        <!-- Mobile Nav Modal -->
+        <transition name="fade">
+          <div v-if="showMobileNav" class="mobile-nav-modal" tabindex="-1" @keydown.esc="showMobileNav = false">
+            <div class="mobile-nav-modal__content">
+              <button class="mobile-nav-modal__close" @click="showMobileNav = false" aria-label="Close navigation">&times;</button>
+              <router-link to="/buy" class="mobile-nav-modal__link" @click="showMobileNav = false">Buy</router-link>
+              <router-link to="/rent" class="mobile-nav-modal__link" @click="showMobileNav = false">Rent</router-link>
+              <router-link to="/sell" class="mobile-nav-modal__link" @click="showMobileNav = false">Sell</router-link>
+              <router-link to="/allagents" class="mobile-nav-modal__link" @click="showMobileNav = false">Find Agents</router-link>
+              <router-link to="/signup" class="mobile-nav-modal__link" @click="showMobileNav = false">Join Us</router-link>
+              <router-link to="/signup" class="mobile-nav-modal__button" @click="showMobileNav = false">Sign up</router-link>
+              <router-link to="/login" class="mobile-nav-modal__button mobile-nav-modal__button--primary" @click="showMobileNav = false">Login</router-link>
+            </div>
+            <div class="mobile-nav-modal__backdrop" @click="showMobileNav = false"></div>
+          </div>
+        </transition>
         <div class="hero__content">
-          <h1 class="hero__title">Discover Homes You'll Love</h1>
+          <h1 class="hero__title">Discover Homes<br />You'll Love</h1>
         </div>
         <div class="hero__search-wrapper">
-          <div class="hero__search-tabs">
-            <button
-              v-for="tab in ['Sell', 'Rent', 'Buy']"
-              :key="tab"
-              :class="['hero__tab-btn', { 'hero__tab-btn--active': activeTab === tab }]"
-              @click="activeTab = tab"
-            >
-              {{ tab }}
-            </button>
-          </div>
-          <div class="hero__search-form">
-            <div class="search-input-group">
-              <div class="search-input-wrapper">
-                <span class="search-icon">
-                  <i class="fas fa-home"></i>
-                </span>
-                <input type="text" class="search-input" placeholder="Property type">
-                <span class="search-dropdown-icon">▼</span>
-              </div>
-              <div class="search-input-wrapper">
-                <span class="search-icon">
-                  <i class="fas fa-search"></i>
-                </span>
-                <input type="text" class="search-input" placeholder="Search by location or Property ID...">
-              </div>
-              <button class="search-btn">Search</button>
+          <!-- MOBILE: Pill buttons row with indicator arrow on active -->
+          <div v-if="isMobile" class="hero__pill-row-mobile">
+            <div class="pill-btn-group">
+              <button class="pill-btn" :class="{ 'pill-btn--active': activeTab === 'Sell' }" @click="activeTab = 'Sell'">
+                Sell <span v-if="activeTab === 'Sell'" class="pill-btn__arrow">▼</span>
+              </button>
+              <button class="pill-btn" :class="{ 'pill-btn--active': activeTab === 'Rent' }" @click="activeTab = 'Rent'">
+                Rent <span v-if="activeTab === 'Rent'" class="pill-btn__arrow">▼</span>
+              </button>
+              <button class="pill-btn" :class="{ 'pill-btn--active': activeTab === 'Buy' }" @click="activeTab = 'Buy'">
+                Buy <span v-if="activeTab === 'Buy'" class="pill-btn__arrow">▼</span>
+              </button>
             </div>
+          </div>
+          <!-- DESKTOP: Keep original tabs and search form together -->
+          <div v-else>
+            <div class="hero__search-tabs">
+              <button
+                v-for="tab in ['Sell', 'Rent', 'Buy']"
+                :key="tab"
+                :class="['hero__tab-btn', { 'hero__tab-btn--active': activeTab === tab }]"
+                @click="activeTab = tab"
+              >
+                {{ tab }}
+              </button>
+            </div>
+            <div class="hero__search-form">
+              <div class="search-input-group">
+                <div class="search-input-wrapper input-icon-wrapper">
+                  <span class="search-icon-inside">
+                    <i class="fas fa-home"></i>
+                  </span>
+                  <input type="text" class="search-input with-icon" placeholder="Search by property type, location, or ID…">
+                </div>
+                <button class="search-btn">Search</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- MOBILE: Standalone search bar section below hero -->
+    <section v-if="isMobile" class="mobile-search-section">
+      <div class="mobile-search-bar-container">
+        <div class="search-input-group mobile-search-bar">
+          <div class="search-input-wrapper input-icon-wrapper">
+            <span class="search-icon-inside">
+              <i class="fas fa-home"></i>
+            </span>
+            <input type="text" class="search-input with-icon mobile-search-input" placeholder="Search by location or Property name...">
           </div>
         </div>
       </div>
@@ -79,14 +121,14 @@
             <img :src="property.image" :alt="property.name" class="property-card__img--figma" loading="lazy">
             <div class="property-card__content--figma">
               <h3 class="property-card__title--figma">{{ property.name }}</h3>
-              <div class="property-card__price--figma">{{ property.price }}</div>
+              <div class="property-card__price--figma">${{ Number(property.price).toLocaleString() }}</div>
               <div class="property-card__address--figma">
                 <svg class="property-card__address-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
                 {{ property.address }}
-            </div>
+              </div>
             </div>
           </div>
-                </div>
+        </div>
         <router-link to="/allproperties" class="featured__view-more">
           View More
           <svg style="margin-left: 8px;" width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" stroke="#0052a5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -374,6 +416,7 @@ const isVisible = ref(false);
 const openIdx = ref(null);
 const activeTab = ref('Buy');
 const showFixedNav = ref(false);
+const showMobileNav = ref(false);
 
 const agentStore = useAgentStore();
 const allAgents = ref([]);
@@ -420,6 +463,13 @@ onMounted(async () => {
   } else {
     setTimeout(() => startCarousel(), 200);
   }
+
+  // Mobile detection
+  const checkMobile = () => {
+    isMobile.value = window.innerWidth <= 600;
+  };
+  checkMobile();
+  window.addEventListener('resize', checkMobile);
 });
 
 onBeforeUnmount(() => {
@@ -429,6 +479,7 @@ onBeforeUnmount(() => {
   openIdx.value = null;
   showFixedNav.value = false;
   stopCarousel();
+  window.removeEventListener('resize', () => {});
 });
 
 onActivated(async () => {
@@ -511,6 +562,31 @@ useRevealOnScroll('.reveal');
 
 const propertyStore = usePropertyStore();
 const featuredProperties = computed(() => propertyStore.properties.slice(0, 4));
+
+// Add a reactive isMobile property for mobile detection
+const isMobile = ref(false);
+const showDropdown = ref(false);
+
+onMounted(() => {
+  // ... existing code ...
+  // Mobile detection
+  const checkMobile = () => {
+    isMobile.value = window.innerWidth <= 600;
+  };
+  checkMobile();
+  window.addEventListener('resize', checkMobile);
+  // Close dropdown on outside click
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.pill-btn--dropdown')) {
+      showDropdown.value = false;
+    }
+  });
+});
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', () => {});
+  document.removeEventListener('click', () => {});
+});
+// ... existing code ...
 </script>
 
 <style scoped>
@@ -590,8 +666,8 @@ const featuredProperties = computed(() => propertyStore.properties.slice(0, 4));
 /* Hero section styles */
 .hero {
   position: relative;
-  height: 85vh;
-  min-height: 500px;
+  height: 65vh; /* Reduced from 85vh */
+  min-height: 400px; /* Reduced from 500px */
   display: flex;
   align-items: flex-start;
   background-image: url('https://res.cloudinary.com/dnuhjsckk/image/upload/v1743087291/Designer_8_1_fjvyi0.png');
@@ -622,8 +698,8 @@ const featuredProperties = computed(() => propertyStore.properties.slice(0, 4));
 
 .hero__content {
   text-align: left;
-  margin-top: 120px;
-  margin-bottom: 90px;
+  margin-top: 80px; /* Reduced from 120px */
+  margin-bottom: 60px; /* Reduced from 90px */
 }
 
 .hero__title {
@@ -699,33 +775,17 @@ const featuredProperties = computed(() => propertyStore.properties.slice(0, 4));
   align-items: center;
 }
 
-.search-input-wrapper {
-  display: flex;
-  align-items: center;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 14px 16px;
-  flex: 1;
-  background: #fff;
-  transition: all 0.2s ease;
+.input-icon-wrapper {
+  position: relative;
+  flex: 1 1 0%;
+  min-width: 320px;
+  max-width: 100%;
 }
 
-.search-input-wrapper:first-child {
-  max-width: 260px;
-  min-width: 260px;
-}
-
-.search-input {
+.with-icon {
+  padding-left: 40px;
   width: 100%;
-  border: none;
-  font-size: 15px;
-  color: #64748b;
-  background: transparent;
-  outline: none;
-}
-
-.search-input::placeholder {
-  color: #94a3b8;
+  min-width: 280px;
 }
 
 .search-btn {
@@ -741,38 +801,68 @@ const featuredProperties = computed(() => propertyStore.properties.slice(0, 4));
   height: 48px;
   min-width: 120px;
   white-space: nowrap;
+  flex-shrink: 0;
+  align-self: stretch;
+  margin-left: auto;
 }
 
-.search-btn:hover {
-  background: #0052a5;
+.search-input {
+  width: 100%;
+  border: none;
+  font-size: 15px;
+  color: #64748b;
+  background: transparent;
+  outline: none;
+}
+
+.search-input::placeholder {
+  color: #94a3b8;
 }
 
 /* Responsive adjustments */
 @media (max-width: 1200px) {
   .hero {
-    height: 80vh;
+    height: 60vh; /* Reduced from 80vh */
     background-size: cover;
-    margin-bottom: -80px;
+    margin-bottom: -60px; /* Reduced from -80px */
   }
-
   .property-types-section {
-    margin-top: 140px;
+    margin-top: 100px; /* Reduced from 140px */
   }
 }
 
 @media (max-width: 768px) {
   .hero {
-    height: 75vh;
-    margin-bottom: -60px;
+    height: 55vh; /* Reduced from 75vh */
+    margin-bottom: -40px; /* Reduced from -60px */
   }
-
   .hero__content {
-    margin-top: 160px;
-    margin-bottom: 4rem;
+    margin-top: 120px; /* Reduced from 160px */
+    margin-bottom: 3rem; /* Reduced from 4rem */
   }
-
   .property-types-section {
-    margin-top: 120px;
+    margin-top: 80px; /* Reduced from 120px */
+  }
+}
+
+@media (max-width: 600px) {
+  .hero {
+    height: auto;
+    min-height: 180px; /* Reduced from 220px */
+    padding-bottom: 0;
+    margin-bottom: 0;
+    padding-top: 18px;
+    padding-bottom: 28px;
+  }
+  .hero__content {
+    margin-top: 8px;
+    margin-bottom: 18px;
+    text-align: left;
+    padding-left: 16px;
+  }
+  .property-types-section {
+    padding: 16px 0;
+    margin-top: 20px; /* Reduced from 40px */
   }
 }
 
@@ -780,7 +870,7 @@ const featuredProperties = computed(() => propertyStore.properties.slice(0, 4));
 .property-types-section {
   background: #fff;
   padding: 24px 0;
-  margin-top: 160px;
+  margin-top: 80px; /* Reduced from 160px */
   position: relative;
   width: 100vw;
   left: 50%;
@@ -839,15 +929,12 @@ const featuredProperties = computed(() => propertyStore.properties.slice(0, 4));
     padding: 16px 0;
     margin-top: 40px;
   }
-
   .property-types-section .container {
     padding: 0 1rem;
   }
-
   .property-types-row {
     gap: 8px;
   }
-
   .property-type-item {
     padding: 6px 12px;
     font-size: 13px;
@@ -857,36 +944,66 @@ const featuredProperties = computed(() => propertyStore.properties.slice(0, 4));
 /* Featured Properties Section */
 .featured--figma {
   background: linear-gradient(135deg, #f7f8fa 60%, #e3f0ff 100%);
-  padding: 48px 0 64px 0;
-  width: 100vw;
-  position: relative;
-  left: 50%;
-  right: 50%;
-  margin-left: -50vw;
-  margin-right: -50vw;
+  padding: 48px 16px 64px;
+  width: 100%;
 }
 
-.featured .container {
+.featured .boxed-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 2rem;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .featured__title--figma {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #333;
-  margin-bottom: 36px;
-  margin-top: 0;
-  text-align: left;
+  color: #1a1a1a;
+  margin: 0 auto 48px auto;
+  text-align: center;
+  max-width: 800px;
   font-family: 'Poppins', sans-serif;
 }
 
 .property-grid--figma {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 24px;
   row-gap: 24px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media (max-width: 600px) {
+  .featured--figma {
+    background: #fff;
+    padding: 32px 8px;
+    margin: 0;
+    width: 100%;
+  }
+
+  .featured .boxed-container {
+    padding: 0;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .property-grid--figma {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+    width: 100%;
+  }
+
+  .property-card--figma {
+    width: calc(100% - 32px);
+    max-width: 450px;
+    margin: 0 auto;
+  }
 }
 
 .property-card--figma {
@@ -952,34 +1069,179 @@ const featuredProperties = computed(() => propertyStore.properties.slice(0, 4));
   .property-grid--figma {
     grid-template-columns: repeat(2, 1fr);
   }
-
   .featured__title--figma {
     font-size: 2rem;
     margin-bottom: 24px;
-}
+    text-align: center;
+  }
 }
 
 @media (max-width: 600px) {
-  .featured--figma {
-    padding: 32px 0;
-  }
-
-  .featured .container {
-    padding: 0 1rem;
-  }
-
   .property-grid--figma {
-    grid-template-columns: 1fr;
-    gap: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 0 8px;
+    margin: 0;
+  }
+
+  .featured--figma {
+    background: #fff;
+    padding: 0;
+    margin: 0;
+  }
+
+  .featured .boxed-container {
+    padding: 0;
+    max-width: 100%;
   }
 
   .featured__title--figma {
-    font-size: 1.75rem;
-    margin-bottom: 20px;
+    font-size: 20px;
+    font-weight: 600;
+    color: #000;
+    margin: 16px auto;
+    text-align: center;
+    padding: 0 12px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  .property-card--figma {
+    width: calc(100% - 16px);
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    overflow: hidden;
+    margin: 0 8px;
+    border: none;
   }
 
   .property-card__img--figma {
+    width: 100%;
     height: 180px;
+    object-fit: cover;
+    display: block;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .property-card__content--figma {
+    padding: 10px 12px;
+  }
+
+  .property-card__title--figma {
+    font-size: 15px;
+    font-weight: 500;
+    color: #000;
+    margin: 0 0 2px 0;
+    line-height: 1.3;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  .property-card__price--figma {
+    font-size: 15px;
+    font-weight: 500;
+    color: #0066FF;
+    margin: 0 0 6px 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  .property-card__address--figma {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: #666;
+    font-size: 13px;
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  .property-card__address-icon {
+    width: 12px;
+    height: 12px;
+    color: #666;
+    margin-top: -1px;
+  }
+
+  .featured__view-more {
+    display: none;
+  }
+}
+
+/* Property Grid Mobile Styles */
+@media (max-width: 600px) {
+  .property-grid--figma {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 0 16px;
+  }
+
+  .property-card--figma {
+    width: 100%;
+    max-width: 100%;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    overflow: hidden;
+    margin: 0;
+    border: 1px solid #f0f0f0;
+  }
+
+  .property-card__img--figma {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    border-radius: 12px 12px 0 0;
+  }
+
+  .property-card__content--figma {
+    padding: 16px;
+  }
+
+  .property-card__title--figma {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 8px 0;
+    line-height: 1.4;
+  }
+
+  .property-card__price--figma {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0052a5;
+    margin: 0 0 12px 0;
+  }
+
+  .property-card__address--figma {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #666;
+    font-size: 0.9rem;
+    margin-top: 8px;
+  }
+
+  .property-card__address-icon {
+    width: 16px;
+    height: 16px;
+    color: #666;
+    opacity: 0.8;
+  }
+
+  .featured--figma {
+    padding: 24px 0 32px 0;
+  }
+
+  .featured__title--figma {
+    font-size: 1.5rem;
+    padding: 0 16px;
+    margin-bottom: 24px;
+  }
+
+  .featured__view-more {
+    margin: 24px 16px 0 16px;
+    font-size: 1rem;
   }
 }
 
@@ -1964,21 +2226,25 @@ const featuredProperties = computed(() => propertyStore.properties.slice(0, 4));
   text-decoration: underline;
 }
 
-.help-section__gradient-box {
-  background: linear-gradient(135deg, #f7f8fa 60%, #e3f0ff 100%);
-  color: #0052a5;
-  padding: 48px 48px 48px 48px;
-  border-radius: 18px;
-  min-width: 420px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  height: 320px;
-  box-shadow: 0 2px 8px rgba(0,82,165,0.08);
+.help-section__gradient-box[data-v-f0577048] {
+    background: linear-gradient(135deg, #f7f8fa 60%, #e3f0ff 100%);
+    color: #0052a5;
+    border-radius: 18px;
+    min-width: 420px;
+    display: flex;
+    padding-top:100px;
+    padding-bottom:100px;
+    padding-right:50px;
+    padding-left:20px;
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 82, 165, 0.08);
 }
+
 .help-section__title {
   font-size: 1.7rem;
   font-weight: 900;
+    margin-top: -100px;
   margin-bottom: 32px;
   font-family: 'Poppins', 'Inter', Arial, sans-serif;
   color: #0052a5;
@@ -2007,6 +2273,402 @@ const featuredProperties = computed(() => propertyStore.properties.slice(0, 4));
   width: 28px;
   height: 28px;
   background: none;
+}
+
+.search-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 18px;
+  color: #64748b;
+}
+
+.search-dropdown-icon {
+  margin-left: 8px;
+  color: #bdbdbd;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon-wrapper {
+  position: relative;
+  flex: 1;
+}
+
+.search-icon-inside {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+  font-size: 18px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.with-icon {
+  padding-left: 40px;
+}
+
+/* Responsive Navigation */
+.desktop-nav {
+  display: flex;
+}
+.main-nav__hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 44px;
+  height: 44px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 1200;
+}
+.main-nav__hamburger span {
+  display: block;
+  width: 28px;
+  height: 3px;
+  background: #fff;
+  margin: 4px 0;
+  border-radius: 2px;
+  transition: all 0.3s;
+}
+@media (max-width: 900px) {
+  .desktop-nav {
+    display: none !important;
+  }
+  .main-nav__hamburger {
+    display: flex;
+  }
+}
+
+/* Mobile Nav Modal */
+.mobile-nav-modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+}
+.mobile-nav-modal__backdrop {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 1;
+}
+.mobile-nav-modal__content {
+  position: relative;
+  background: #fff;
+  width: 80vw;
+  max-width: 320px;
+  min-height: 100vh;
+  box-shadow: -2px 0 16px rgba(0,0,0,0.12);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  padding: 32px 24px 24px 24px;
+  animation: slideInRight 0.3s cubic-bezier(.4,2,.3,1);
+}
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+.mobile-nav-modal__close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #0052a5;
+  cursor: pointer;
+  z-index: 3;
+}
+.mobile-nav-modal__link {
+  color: #0052a5;
+  font-size: 1.18rem;
+  font-weight: 600;
+  margin: 18px 0;
+  text-decoration: none;
+  transition: color 0.2s;
+  display: block;
+}
+.mobile-nav-modal__link:hover {
+  color: #0066cc;
+}
+.mobile-nav-modal__button {
+  margin: 18px 0 0 0;
+  padding: 12px 0;
+  border-radius: 8px;
+  background: #e0f2fe;
+  color: #0052a5;
+  font-weight: 700;
+  font-size: 1.1rem;
+  border: none;
+  text-align: center;
+  cursor: pointer;
+  text-decoration: none;
+  display: block;
+}
+.mobile-nav-modal__button--primary {
+  background: #0052a5;
+  color: #fff;
+  margin-top: 10px;
+}
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
+
+/* Responsive Hero Section */
+@media (max-width: 900px) {
+  .hero {
+    height: auto;
+    min-height: 420px;
+    padding-bottom: 32px;
+  }
+  .hero__content {
+    margin-top: 80px;
+    margin-bottom: 32px;
+    text-align: center;
+  }
+  .hero__title {
+    font-size: 2.1rem;
+    text-align: center;
+    margin-bottom: 18px;
+  }
+  .hero__search-wrapper {
+    width: 95%;
+    min-width: 0;
+    margin: 0 auto;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  }
+  .hero__search-form {
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px 8px;
+  }
+  .search-input-group {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+  .input-icon-wrapper {
+    min-width: 0;
+    width: 100%;
+  }
+  .with-icon {
+    min-width: 0;
+    width: 100%;
+    font-size: 1rem;
+  }
+  .search-btn {
+    width: 100%;
+    min-width: 0;
+    height: 44px;
+    font-size: 1.1rem;
+    margin-left: 0;
+    align-self: stretch;
+  }
+  .hero__search-tabs {
+    position: static;
+    flex-direction: row;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 0;
+    top: 0;
+    left: 0;
+    padding: 0;
+    gap: 1px;
+  }
+  .hero__tab-btn {
+    padding: 12px 18px;
+    font-size: 1rem;
+    border-radius: 8px 8px 0 0;
+  }
+}
+@media (max-width: 600px) {
+  .hero {
+    height: auto;
+    min-height: 220px;
+    padding-bottom: 0;
+    margin-bottom: 0;
+    padding-top: 18px;
+    padding-bottom: 28px;
+  }
+  .hero__content {
+    margin-top: 8px;
+    margin-bottom: 18px;
+    text-align: left;
+    padding-left: 16px;
+  }
+  .hero__title {
+    font-size: 1.22rem;
+    margin-bottom: 12px;
+    line-height: 1.22;
+    text-align: left;
+    letter-spacing: -0.5px;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.18);
+    font-weight: 700;
+    padding-left: 0;
+  }
+  .hero__search-wrapper {
+    width: 100%;
+    border-radius: 0;
+    min-width: 0;
+    margin: 0;
+    box-shadow: none;
+    padding: 0;
+    background: none;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .hero__pill-row-mobile {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    padding-left: 8px;
+  }
+  .pill-btn-group {
+    display: flex;
+    flex-direction: row;
+    gap: 12px;
+    margin-bottom: 0;
+    margin-left: 0;
+  }
+  .pill-btn {
+    background: #fff;
+    color: #232229;
+    font-size: 0.98rem;
+    font-weight: 500;
+    border: none;
+    border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 8px 24px;
+    min-width: 74px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s;
+    position: relative;
+    outline: none;
+    margin-bottom: 0;
+  }
+  .pill-btn--active {
+    background: #e0f2fe;
+    color: #0052a5;
+    font-weight: 700;
+  }
+  .pill-btn__arrow {
+    margin-left: 8px;
+    font-size: 0.9em;
+    color: #64748b;
+    pointer-events: none;
+    display: inline-block;
+    vertical-align: middle;
+  }
+  .search-input-group--mobile {
+    width: 100%;
+    margin-top: 0;
+    background: #fff;
+    border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 2px 0 2px 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+  .input-icon-wrapper {
+    min-width: 0;
+    width: 100%;
+  }
+  .with-icon {
+    min-width: 0;
+    width: 100%;
+    font-size: 1rem;
+    padding-left: 36px;
+    height: 38px;
+    border-radius: 999px;
+    border: none;
+    background: transparent;
+  }
+  .search-icon-inside {
+    left: 12px;
+    font-size: 1rem;
+    color: #64748b;
+  }
+}
+
+/* Mobile Search Section */
+@media (max-width: 600px) {
+  .mobile-search-section {
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: transparent;
+    margin: 0;
+    padding: 0;
+    margin-top: 32px;
+    margin-bottom: 12px;
+  }
+  .mobile-search-bar-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: -18px;
+    margin-bottom: 0;
+  }
+  .mobile-search-bar {
+    width: 92vw;
+    max-width: 480px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    border: 1.5px solid #ececec;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    margin: 0 auto;
+    min-height: 48px;
+  }
+  .mobile-search-input {
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 1.01rem;
+    color: #232229;
+    width: 100%;
+    padding-left: 38px;
+    border-radius: 8px;
+    height: 48px;
+  }
+  .mobile-search-bar .search-icon-inside {
+    left: 16px;
+    color: #bdbdbd;
+    font-size: 1.1rem;
+    opacity: 0.85;
+  }
+  .mobile-search-input::placeholder {
+    color: #bdbdbd;
+    opacity: 1;
+    font-weight: 400;
+    font-size: 1.01rem;
+  }
 }
 </style>
 

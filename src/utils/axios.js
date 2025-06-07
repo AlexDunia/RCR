@@ -35,8 +35,8 @@ axiosInstance.interceptors.response.use(
           await axiosInstance.get('/sanctum/csrf-cookie');
           return axiosInstance(error.config);
         case 401: // Unauthorized
+          // Only remove token, let the auth store handle the redirect
           localStorage.removeItem('auth_token');
-          window.location.href = '/login';
           break;
         case 403: // Forbidden
           console.error('Access forbidden');

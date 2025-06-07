@@ -1,23 +1,44 @@
 import { useAuthStore } from '@/stores/authStore';
-import { useRoleStore } from '@/stores/roleStore';
 
 export function authGuard(to, from, next) {
   const authStore = useAuthStore();
-  const roleStore = useRoleStore();
   const isAuthenticated = authStore.isLoggedIn;
   const userRole = authStore.userRole;
 
   // Public routes that don't require authentication
   const publicRoutes = ['Landing', 'Login', 'Signup', 'NewBuyProperties', 'AllAgents'];
 
+  // If going to a public route, allow it
   if (publicRoutes.includes(to.name)) {
     next();
     return;
   }
 
-  // Check if user is authenticated
-  if (!isAuthenticated) {
-    next('/login');
+  // If not authenticated and trying to access protected route
+  if (!isAuthenticated && !publicRoutes.includes(to.name)) {
+    // Store the attempted URL for redirect after login
+    const loginPath = '/login';
+    const redirect = to.fullPath !== '/' ? `?redirect=${to.fullPath}` : '';
+    next(`${loginPath}${redirect}`);
+    return;
+  }
+
+  // If authenticated but trying to access auth pages (login/signup)
+  if (isAuthenticated && ['Login', 'Signup'].includes(to.name)) {
+    // Redirect to appropriate dashboard based on role
+    switch (userRole) {
+      case 'agent':
+        next('/agent-dashboard');
+        break;
+      case 'client':
+        next('/client-dashboard');
+        break;
+      case 'admin':
+        next('/admin-dashboard');
+        break;
+      default:
+        next('/');
+    }
     return;
   }
 
@@ -30,6 +51,9 @@ export function authGuard(to, from, next) {
         break;
       case 'client':
         next('/client-dashboard');
+        break;
+      case 'admin':
+        next('/admin-dashboard');
         break;
       default:
         next('/');

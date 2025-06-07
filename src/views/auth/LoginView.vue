@@ -205,16 +205,27 @@ async function onLogin() {
       localStorage.setItem('remember_token', response.remember_token);
     }
 
-    // Redirect based on role
-    switch (response.user.role) {
-      case 'agent':
-        router.push('/agent-dashboard');
-        break;
-      case 'client':
-        router.push('/client-dashboard');
-        break;
-      default:
-        router.push('/');
+    // Get the redirect URL from query params if it exists
+    const redirectPath = router.currentRoute.value.query.redirect;
+
+    // Redirect based on role or saved redirect path
+    if (redirectPath) {
+      await router.replace(redirectPath);
+    } else {
+      // Role-based redirect
+      switch (response.user.role) {
+        case 'admin':
+          await router.replace('/admin-dashboard');
+          break;
+        case 'agent':
+          await router.replace('/agent-dashboard');
+          break;
+        case 'client':
+          await router.replace('/client-dashboard');
+          break;
+        default:
+          await router.replace('/');
+      }
     }
 
   } catch (err) {
@@ -229,7 +240,7 @@ async function onLogin() {
     } else {
       error.value = 'An error occurred during login. Please try again.';
     }
-  } finally {
+
     isLoading.value = false;
   }
 }

@@ -1,46 +1,14 @@
 <script setup>
-import { computed, ref } from "vue";
+import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useAgentStore } from '@/stores/agentStore';
 import { useClientStore } from '@/stores/clientStore';
-import { useRoleStore } from '@/stores/roleStore';
+import UserMenu from '@/components/UserMenu.vue';
 
 const route = useRoute();
 const router = useRouter();
 const agentStore = useAgentStore();
 const clientStore = useClientStore();
-const roleStore = useRoleStore();
-
-// Role switching menu
-const showRoleMenu = ref(false);
-const toggleRoleMenu = () => {
-  showRoleMenu.value = !showRoleMenu.value;
-};
-
-// Get current role
-const currentRole = computed(() => roleStore.currentRole);
-
-// Change user role
-const changeRole = (role) => {
-  // First set the role in the store
-  roleStore.setRole(role);
-
-  // Close the menu
-  showRoleMenu.value = false;
-
-  // Redirect based on role
-  setTimeout(() => {
-    if (role === 'all') {
-      router.push('/'); // Redirect to landing page for 'all' role
-    } else if (role === 'client') {
-      router.push('/client-dashboard');
-    } else if (role === 'admin') {
-      router.push('/agents'); // Admin dashboard
-    } else {
-      router.push('/agent-dashboard');
-    }
-  }, 100); // Small delay to ensure role change is processed
-};
 
 // Function to go back to previous page
 const goBack = () => {
@@ -339,37 +307,8 @@ const isEducationCreatePage = computed(() => isRoutePath('/admin/education-train
       </div>
     </div>
 
-    <!-- Profile Section -->
-    <div class="profile-section" @click="toggleRoleMenu">
-      <img class="profile-image"
-        src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1739408381/Screenshot_2025-02-13_015617_mhjgby.png"
-        alt="Profile" />
-      <span class="profile-name">{{ currentRole === 'admin' ? 'Admin' : currentRole === 'agent' ? 'Agent' : currentRole === 'client' ? 'Client' : 'All' }}</span>
-      <svg class="dropdown-icon" viewBox="0 0 24 24">
-        <path d="M7 10l5 5 5-5z" />
-      </svg>
-
-      <!-- Role switcher dropdown -->
-      <div v-if="showRoleMenu" class="role-switcher-menu">
-        <div class="role-switcher-header">Switch Role</div>
-        <div class="role-option" :class="{ 'active': currentRole === 'all' }" @click="changeRole('all')">
-          <span class="role-icon all-icon">All</span>
-          <span class="role-name">All</span>
-        </div>
-        <div class="role-option" :class="{ 'active': currentRole === 'admin' }" @click="changeRole('admin')">
-          <span class="role-icon admin-icon">A</span>
-          <span class="role-name">Admin</span>
-        </div>
-        <div class="role-option" :class="{ 'active': currentRole === 'agent' }" @click="changeRole('agent')">
-          <span class="role-icon agent-icon">Ag</span>
-          <span class="role-name">Agent</span>
-        </div>
-        <div class="role-option" :class="{ 'active': currentRole === 'client' }" @click="changeRole('client')">
-          <span class="role-icon client-icon">C</span>
-          <span class="role-name">Client</span>
-        </div>
-      </div>
-    </div>
+    <!-- Replace the old profile section with UserMenu -->
+    <UserMenu />
   </header>
 </template>
 
