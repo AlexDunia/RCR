@@ -5,6 +5,12 @@ export function authGuard(to, from, next) {
   const isAuthenticated = authStore.isLoggedIn;
   const userRole = authStore.userRole;
 
+  // Allow access to routes marked as publicAccess in their meta
+  if (to.meta.publicAccess) {
+    next();
+    return;
+  }
+
   // Public routes that don't require authentication
   const publicRoutes = ['Landing', 'Login', 'Signup', 'NewBuyProperties', 'AllAgents'];
 

@@ -1,5 +1,27 @@
 <template>
   <div class="landing-page">
+    <teleport to="body">
+      <transition name="fade">
+        <div v-if="showMobileNav" class="modal-wrapper" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 999999999; display: flex; transform: translateZ(0); will-change: transform; isolation: isolate;">
+          <div class="mobile-nav-modal">
+            <div class="mobile-nav-modal__backdrop" @click="showMobileNav = false"></div>
+            <div class="mobile-nav-modal__content">
+              <button class="mobile-nav-modal__close" @click="showMobileNav = false" aria-label="Close navigation">×</button>
+              <router-link to="/buy" class="mobile-nav-modal__link" @click="showMobileNav = false">Buy</router-link>
+              <router-link to="/rent" class="mobile-nav-modal__link" @click="showMobileNav = false">Rent</router-link>
+              <router-link to="/sell" class="mobile-nav-modal__link" @click="showMobileNav = false">Sell</router-link>
+              <router-link to="/allagents" class="mobile-nav-modal__link" @click="showMobileNav = false">Find Agents</router-link>
+              <router-link to="/signup" class="mobile-nav-modal__link" @click="showMobileNav = false">Join Us</router-link>
+              <div class="mobile-nav-modal__buttons">
+                <router-link to="/signup" class="mobile-nav-modal__button" @click="showMobileNav = false">Sign up</router-link>
+                <router-link to="/login" class="mobile-nav-modal__button mobile-nav-modal__button--primary" @click="showMobileNav = false">Login</router-link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </transition>
+    </teleport>
+    
     <!-- Hero Section -->
     <section id="hero-section" class="hero">
       <div class="hero__overlay"></div>
@@ -25,22 +47,6 @@
             <span></span><span></span><span></span>
           </button>
         </nav>
-        <!-- Mobile Nav Modal -->
-        <transition name="fade">
-          <div v-if="showMobileNav" class="mobile-nav-modal" tabindex="-1" @keydown.esc="showMobileNav = false">
-            <div class="mobile-nav-modal__content">
-              <button class="mobile-nav-modal__close" @click="showMobileNav = false" aria-label="Close navigation">&times;</button>
-              <router-link to="/buy" class="mobile-nav-modal__link" @click="showMobileNav = false">Buy</router-link>
-              <router-link to="/rent" class="mobile-nav-modal__link" @click="showMobileNav = false">Rent</router-link>
-              <router-link to="/sell" class="mobile-nav-modal__link" @click="showMobileNav = false">Sell</router-link>
-              <router-link to="/allagents" class="mobile-nav-modal__link" @click="showMobileNav = false">Find Agents</router-link>
-              <router-link to="/signup" class="mobile-nav-modal__link" @click="showMobileNav = false">Join Us</router-link>
-              <router-link to="/signup" class="mobile-nav-modal__button" @click="showMobileNav = false">Sign up</router-link>
-              <router-link to="/login" class="mobile-nav-modal__button mobile-nav-modal__button--primary" @click="showMobileNav = false">Login</router-link>
-            </div>
-            <div class="mobile-nav-modal__backdrop" @click="showMobileNav = false"></div>
-          </div>
-        </transition>
         <div class="hero__content">
           <h1 class="hero__title">Discover Homes<br />You'll Love</h1>
         </div>
@@ -365,17 +371,21 @@
           <div class="fixed-nav__logo">
             <img src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1748316444/rclogo_l7oiod.png" alt="Real City Logo" class="fixed-nav__logo-img" />
           </div>
-          <div class="fixed-nav__center">
+          <div class="fixed-nav__center desktop-nav">
             <router-link to="/buy" class="fixed-nav__link">Buy</router-link>
             <router-link to="/rent" class="fixed-nav__link">Rent</router-link>
             <router-link to="/sell" class="fixed-nav__link">Sell</router-link>
             <router-link to="/agent" class="fixed-nav__link">Agent</router-link>
             <router-link to="/signup" class="fixed-nav__link">Join Us</router-link>
           </div>
-          <div class="fixed-nav__right">
-            <button class="fixed-nav__button">Sign in</button>
-            <button class="fixed-nav__button fixed-nav__button--primary">Login</button>
+          <div class="fixed-nav__right desktop-nav">
+            <router-link to="/signup" class="fixed-nav__button">Sign up</router-link>
+            <router-link to="/login" class="fixed-nav__button fixed-nav__button--primary">Login</router-link>
           </div>
+          <!-- Add hamburger for mobile -->
+          <button class="main-nav__hamburger" @click="showMobileNav = true" aria-label="Open navigation" v-if="!showMobileNav">
+            <span></span><span></span><span></span>
+          </button>
         </div>
       </div>
     </nav>
@@ -430,7 +440,8 @@ onMounted(async () => {
   // Reset all reactive states
   openIdx.value = null;
   activeTab.value = 'Buy';
-      showFixedNav.value = false;
+  showFixedNav.value = false;
+  showMobileNav.value = false;
 
   // Intersection Observer for sticky nav
   await nextTick();
@@ -450,6 +461,13 @@ onMounted(async () => {
 
   // Ensure component is visible after mount
   isVisible.value = true;
+
+  // Add event listener to close mobile nav on escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      showMobileNav.value = false;
+    }
+  });
 
   // Load agents from store
   if (typeof agentStore.fetchAgents === 'function') {
@@ -478,8 +496,10 @@ onBeforeUnmount(() => {
   isVisible.value = false;
   openIdx.value = null;
   showFixedNav.value = false;
+  showMobileNav.value = false;
   stopCarousel();
   window.removeEventListener('resize', () => {});
+  document.removeEventListener('keydown', () => {});
 });
 
 onActivated(async () => {
@@ -1837,7 +1857,7 @@ onBeforeUnmount(() => {
   right: 0;
   background: #fff;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  z-index: 1000;
+  z-index: 9999;
   transform: translateY(-100%);
   transition: transform 0.3s ease-in-out;
   opacity: 0;
@@ -1918,11 +1938,65 @@ onBeforeUnmount(() => {
   background: #0052a5;
 }
 
+@media (max-width: 900px) {
+  .fixed-nav__content {
+    padding: 12px 0;
+    justify-content: space-between;
+  }
+  
+  .fixed-nav__logo-img {
+    height: 40px;
+  }
+
+  .fixed-nav .desktop-nav {
+    display: none !important;
+  }
+
+  .fixed-nav .main-nav__hamburger {
+    display: flex !important;
+    margin-left: auto;
+  }
+
+  .fixed-nav .main-nav__hamburger span {
+    background: #333;
+  }
+}
+
 .boxed-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 24px;
-  width: 100%;
+  width: 80%;
+}
+
+/* Mobile Navigation Styles */
+.mobile-only {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .desktop-nav {
+    display: none !important;
+  }
+  
+  .mobile-only {
+    display: flex !important;
+  }
+
+  .fixed-nav__content {
+    padding: 12px 0;
+  }
+
+  .fixed-nav__logo-img {
+    height: 40px;
+  }
+
+  .main-nav__hamburger.mobile-only {
+    margin-left: auto;
+  }
+
+  .main-nav__hamburger.mobile-only span {
+    background: #333; /* Dark color for fixed nav hamburger */
+  }
 }
 
 /* Agent Carousel Styles */
@@ -2347,84 +2421,121 @@ onBeforeUnmount(() => {
 }
 
 /* Mobile Nav Modal */
+.modal-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999999999;
+  display: flex;
+}
+
 .mobile-nav-modal {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  z-index: 2000;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999999999;
   display: flex;
-  align-items: flex-start;
-  justify-content: flex-end;
 }
+
 .mobile-nav-modal__backdrop {
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.45);
-  z-index: 1;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999999999;
 }
+
 .mobile-nav-modal__content {
   position: relative;
   background: #fff;
-  width: 80vw;
+  width: 80%;
   max-width: 320px;
-  min-height: 100vh;
-  box-shadow: -2px 0 16px rgba(0,0,0,0.12);
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  padding: 32px 24px 24px 24px;
-  animation: slideInRight 0.3s cubic-bezier(.4,2,.3,1);
+  height: 100%;
+  margin-left: auto;
+  padding: 64px 24px 24px;
+  box-shadow: -2px 0 12px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  animation: slideIn 0.3s ease-out;
+  z-index: 999999999;
 }
-@keyframes slideInRight {
-  from { transform: translateX(100%); }
-  to { transform: translateX(0); }
-}
+
 .mobile-nav-modal__close {
   position: absolute;
-  top: 18px;
-  right: 18px;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border: none;
   background: none;
-  border: none;
-  font-size: 2rem;
-  color: #0052a5;
+  font-size: 32px;
+  color: #333;
   cursor: pointer;
-  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999999999;
 }
+
 .mobile-nav-modal__link {
-  color: #0052a5;
-  font-size: 1.18rem;
-  font-weight: 600;
-  margin: 18px 0;
-  text-decoration: none;
-  transition: color 0.2s;
   display: block;
+  padding: 16px 0;
+  color: #333;
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: 500;
+  border-bottom: 1px solid #eee;
 }
-.mobile-nav-modal__link:hover {
-  color: #0066cc;
+
+.mobile-nav-modal__buttons {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
+
 .mobile-nav-modal__button {
-  margin: 18px 0 0 0;
-  padding: 12px 0;
-  border-radius: 8px;
-  background: #e0f2fe;
-  color: #0052a5;
-  font-weight: 700;
-  font-size: 1.1rem;
-  border: none;
-  text-align: center;
-  cursor: pointer;
-  text-decoration: none;
   display: block;
+  padding: 12px 24px;
+  border-radius: 8px;
+  text-align: center;
+  text-decoration: none;
+  font-weight: 500;
+  border: 1px solid #e2e8f0;
+  color: #333;
 }
+
 .mobile-nav-modal__button--primary {
-  background: #0052a5;
+  background: #0066cc;
+  border: none;
   color: #fff;
-  margin-top: 10px;
 }
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.3s;
+
+/* Fade transition */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+  z-index: 999999999;
 }
-.fade-enter-from, .fade-leave-to {
+
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
+}
+
+/* Slide animation */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 /* Responsive Hero Section */
@@ -2669,6 +2780,16 @@ onBeforeUnmount(() => {
     font-weight: 400;
     font-size: 1.01rem;
   }
+}
+
+.modal-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999999999;
+  display: flex;
 }
 </style>
 

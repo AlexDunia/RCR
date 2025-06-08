@@ -193,43 +193,46 @@ watch(
 </script>
 
 <template>
-  <div class="app-container" :style="{ background: background }">
-    <!-- Show PublicHeader for 'all' role or landing page, but not on login/signup, and not if hideHeader is true -->
-    <PublicHeader
-      v-if="!route.meta.hideHeader && (roleStore.currentRole === 'all' || route.path === '/landing') && !route.path.includes('login') && !route.path.includes('signup')"
-      :transparent="route.path === '/landing'"
-      :is-fixed="true"
-      class="z-50"
-    />
+  <div id="app">
+    <div id="modal-container"></div>
+    <div class="app-container" :style="{ background: background }">
+      <!-- Show PublicHeader for 'all' role or landing page, but not on login/signup, and not if hideHeader is true -->
+      <PublicHeader
+        v-if="!route.meta.hideHeader && (roleStore.currentRole === 'all' || route.path === '/landing') && !route.path.includes('login') && !route.path.includes('signup')"
+        :transparent="route.path === '/landing'"
+        :is-fixed="true"
+        class="z-50"
+      />
 
-    <!-- Dynamic sidebar based on role (only when not on landing page) -->
-    <component v-if="!isLandingPage" :is="activeSidebar" :key="'sidebar-' + roleStore.currentRole" />
+      <!-- Dynamic sidebar based on role (only when not on landing page) -->
+      <component v-if="!isLandingPage" :is="activeSidebar" :key="'sidebar-' + roleStore.currentRole" />
 
-    <!-- Main content container with sidebar-adjusted class -->
-    <div class="main-content" :class="{ 'with-sidebar': hasSidebar && !isLandingPage, 'landing-page': isLandingPage }">
-      <!-- Show global header only if not hidden and not on landing page and not for 'all' role -->
-      <Header v-if="!route.meta.hideHeader && !isLandingPage && roleStore.currentRole !== 'all'"/>
+      <!-- Main content container with sidebar-adjusted class -->
+      <div class="main-content" :class="{ 'with-sidebar': hasSidebar && !isLandingPage, 'landing-page': isLandingPage }">
+        <!-- Show global header only if not hidden and not on landing page and not for 'all' role -->
+        <Header v-if="!route.meta.hideHeader && !isLandingPage && roleStore.currentRole !== 'all'"/>
 
-      <div class="scroll-container" :class="{ 'navigating': isNavigating }">
-        <router-view v-slot="{ Component }">
-          <transition
-            :name="route.path === '/landing' ? 'none' : 'fade'"
-            mode="out-in"
-            @before-leave="handleBeforeLeave"
-            @after-enter="handleAfterEnter"
-          >
-            <component
-              :is="Component"
-              :key="route.fullPath + (route.path === '/landing' ? Date.now() : '')"
-            />
-          </transition>
-        </router-view>
+        <div class="scroll-container" :class="{ 'navigating': isNavigating }">
+          <router-view v-slot="{ Component }">
+            <transition
+              :name="route.path === '/landing' ? 'none' : 'fade'"
+              mode="out-in"
+              @before-leave="handleBeforeLeave"
+              @after-enter="handleAfterEnter"
+            >
+              <component
+                :is="Component"
+                :key="route.fullPath + (route.path === '/landing' ? Date.now() : '')"
+              />
+            </transition>
+          </router-view>
 
-        <TaskNotification
-          :show="showNotification"
-          :message="currentNotification?.message || ''"
-          @dismiss="dismissNotification"
-        />
+          <TaskNotification
+            :show="showNotification"
+            :message="currentNotification?.message || ''"
+            @dismiss="dismissNotification"
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -632,5 +635,15 @@ html, body {
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 24px;
   margin-bottom: 24px;
+}
+
+#modal-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 999999999;
 }
 </style>

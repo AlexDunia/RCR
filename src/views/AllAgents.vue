@@ -22,7 +22,7 @@
                 type="text"
                 v-model="searchQuery"
                 class="search-input"
-                placeholder="Search agents by name, location, or specialty..."
+                placeholder="Search agents by name or location"
                 @input="handleSearch"
               >
             </div>
@@ -52,7 +52,6 @@
               </div>
 
               <h3 class="agent-card__name">{{ agent.name }}</h3>
-              <a class="agent-card__email" :href="'mailto:' + agent.email">{{ agent.email }}</a>
               <a class="agent-card__phone" :href="'tel:' + agent.phone">M: {{ agent.phone }}</a>
 
               <div class="agent-card__specialty">{{ agent.title }}</div>
@@ -62,9 +61,10 @@
                 {{ agent.location }}
               </div>
 
-              <button class="contact-btn" @click="openContactModal(agent)">
-                Contact Agent
-              </button>
+              <a class="contact-link" :href="'mailto:' + agent.email">
+                <i class="fas fa-envelope"></i>
+                Email {{ agent.name }}
+              </a>
             </div>
           </div>
         </div>
@@ -205,21 +205,7 @@ function handleSearch() {
   // The computed property will automatically update
 }
 
-function openContactModal(agent) {
-  selectedAgent.value = agent;
-  showContactModal.value = true;
-}
 
-function closeContactModal() {
-  showContactModal.value = false;
-  selectedAgent.value = null;
-}
-
-function submitContactForm() {
-  // Handle form submission here
-  console.log('Form submitted:', contactForm.value);
-  closeContactModal();
-}
 </script>
 
 <style scoped>
@@ -535,7 +521,8 @@ function submitContactForm() {
   letter-spacing: -0.3px;
 }
 
-.agent-card__email,
+
+
 .agent-card__phone {
   color: #64748b;
   font-size: 0.8rem;
@@ -548,7 +535,6 @@ function submitContactForm() {
   gap: 6px;
 }
 
-.agent-card__email::before,
 .agent-card__phone::before {
   content: '';
   display: block;
@@ -559,20 +545,13 @@ function submitContactForm() {
   transition: all 0.2s ease;
 }
 
-.agent-card__email:hover,
 .agent-card__phone:hover {
   color: #0066cc;
 }
 
-.agent-card__email:hover::before,
 .agent-card__phone:hover::before {
   background-color: #0066cc;
   transform: scale(1.1);
-}
-
-.agent-card__email:hover,
-.agent-card__phone:hover {
-  color: #0066cc;
 }
 
 .agent-card__specialty {
@@ -599,7 +578,31 @@ function submitContactForm() {
   font-size: 0.9rem;
 }
 
-.contact-btn {
+.contact-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #0066cc;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 12px 16px;
+  margin: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  background: #f0f9ff;
+}
+
+.contact-link:hover {
+  background: #e0f2fe;
+  transform: translateY(-1px);
+}
+
+.contact-link i {
+  font-size: 0.9rem;
+}
+
+.contact-link {
   background: #0066cc;
   color: #fff;
   border: none;
@@ -617,9 +620,10 @@ function submitContactForm() {
   margin: 12px 16px 0;
   position: relative;
   overflow: hidden;
+  text-decoration: none;
 }
 
-.contact-btn::before {
+.contact-link::before {
   content: '';
   position: absolute;
   top: 0;
@@ -631,18 +635,22 @@ function submitContactForm() {
   transition: opacity 0.3s ease;
 }
 
-.contact-btn:hover {
+.contact-link:hover {
   background: #005bb8;
   transform: translateY(-1px);
 }
 
-.contact-btn:hover::before {
+.contact-link:hover::before {
   opacity: 1;
 }
 
-.contact-btn:hover {
+.contact-link:hover {
   background: #0052a5;
   transform: translateY(-2px);
+}
+
+.contact-link i {
+  font-size: 0.9rem;
 }
 
 @media (max-width: 1400px) {
