@@ -8,6 +8,7 @@
       </div>
       <!-- Desktop Navigation -->
       <div class="public-nav__center desktop-only">
+        <router-link v-if="userRole === 'all'" to="/" class="public-nav__link">Home</router-link>
         <router-link to="/RCR/buy" class="public-nav__link">Buy</router-link>
         <router-link to="/RCR/rent" class="public-nav__link">Rent</router-link>
         <router-link to="/RCR/sell" class="public-nav__link">Sell</router-link>
@@ -33,6 +34,7 @@
       <div class="mobile-nav-modal__backdrop" @click="showMobileNav = false"></div>
       <div class="mobile-nav-modal__content">
         <button class="mobile-nav-modal__close" @click="showMobileNav = false" aria-label="Close menu">×</button>
+        <router-link v-if="userRole === 'all'" to="/" class="mobile-nav-modal__link" @click="showMobileNav = false">Home</router-link>
         <router-link to="/RCR/buy" class="mobile-nav-modal__link" @click="showMobileNav = false">Buy</router-link>
         <router-link to="/RCR/rent" class="mobile-nav-modal__link" @click="showMobileNav = false">Rent</router-link>
         <router-link to="/RCR/sell" class="mobile-nav-modal__link" @click="showMobileNav = false">Sell</router-link>
@@ -48,7 +50,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { useAuthStore } from '@/stores/authStore';
 
 defineProps({
   transparent: {
@@ -60,6 +63,9 @@ defineProps({
     default: true
   }
 });
+
+const authStore = useAuthStore();
+const userRole = computed(() => authStore.userRole || 'all');
 
 const isScrolled = ref(false);
 const showMobileNav = ref(false);

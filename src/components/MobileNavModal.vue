@@ -6,6 +6,7 @@
           <div class="mobile-nav-modal__backdrop" @click="$emit('update:modelValue', false)"></div>
           <div class="mobile-nav-modal__content">
             <button class="mobile-nav-modal__close" @click="$emit('update:modelValue', false)" aria-label="Close navigation">×</button>
+            <router-link v-if="userRole === 'all'" to="/" class="mobile-nav-modal__link" @click="$emit('update:modelValue', false)">Home</router-link>
             <router-link to="/buy" class="mobile-nav-modal__link" @click="$emit('update:modelValue', false)">Buy</router-link>
             <router-link to="/rent" class="mobile-nav-modal__link" @click="$emit('update:modelValue', false)">Rent</router-link>
             <router-link to="/sell" class="mobile-nav-modal__link" @click="$emit('update:modelValue', false)">Sell</router-link>
@@ -27,6 +28,10 @@ defineProps({
   modelValue: {
     type: Boolean,
     required: true
+  },
+  userRole: {
+    type: String,
+    default: 'all'
   }
 });
 </script>

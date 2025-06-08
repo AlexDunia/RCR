@@ -7,6 +7,7 @@
             <div class="mobile-nav-modal__backdrop" @click="showMobileNav = false"></div>
             <div class="mobile-nav-modal__content">
               <button class="mobile-nav-modal__close" @click="showMobileNav = false" aria-label="Close navigation">×</button>
+              <router-link v-if="userRole === 'all'" to="/" class="mobile-nav-modal__link" @click="showMobileNav = false">Home</router-link>
               <router-link to="/buy" class="mobile-nav-modal__link" @click="showMobileNav = false">Buy</router-link>
               <router-link to="/rent" class="mobile-nav-modal__link" @click="showMobileNav = false">Rent</router-link>
               <router-link to="/sell" class="mobile-nav-modal__link" @click="showMobileNav = false">Sell</router-link>
@@ -32,6 +33,7 @@
             <img src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1748316444/rclogo_l7oiod.png" alt="Real City Logo" class="main-nav__logo-img" />
           </div>
           <div class="main-nav__center desktop-nav">
+            <router-link v-if="userRole === 'all'" to="/" class="main-nav__link">Home</router-link>
             <router-link to="/buy" class="main-nav__link">Buy</router-link>
             <router-link to="/rent" class="main-nav__link">Rent</router-link>
             <router-link to="/sell" class="main-nav__link">Sell</router-link>
@@ -145,10 +147,10 @@
     <!-- How We Can Help Section (Pixel Perfect, Figma Accurate, Cleaned Up) -->
     <section class="help-section">
       <div class="boxed-container">
-        <div style="display: flex; align-items: flex-start; justify-content: center; gap: 48px; background: transparent; box-shadow: none; padding: 64px 0;">
-          <div style="display: flex; flex-direction: row; gap: 0;">
-            <img src="https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&w=600&q=80" alt="Interior 1" style="width: 220px; height: 320px; object-fit: cover; border-radius: 0; margin: 0;" />
-            <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80" alt="Interior 2" style="width: 220px; height: 320px; object-fit: cover; border-radius: 0; margin: 0; margin-left: 0;" />
+        <div class="help-section__container">
+          <div class="help-section__images">
+            <img src="https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&w=600&q=80" alt="Interior 1" class="help-section__image" />
+            <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80" alt="Interior 2" class="help-section__image" />
           </div>
           <div class="help-section__gradient-box">
             <h2 class="help-section__title">Here's how we can help you</h2>
@@ -204,18 +206,14 @@
         <h2 class="agent-carousel__title">Meet Our Top Agents</h2>
         <div class="agent-carousel__subtitle">Handpicked professionals ready to help you find your dream home</div>
         <div class="agent-carousel__wrapper">
-          <transition-group name="agent-fade" tag="div" class="agent-carousel__track">
-            <div
-              v-for="agent in visibleAgents"
-              :key="agent.id"
-              class="agent-card"
-            >
+          <div class="agent-carousel__track">
+            <div v-for="agent in visibleAgents" :key="agent.id" class="agent-card">
               <div class="agent-card__img-box">
                 <img :src="agent.avatar || agent.profilePicture || '/default-avatar.png'" :alt="agent.name || 'Agent'" class="agent-card__img" />
               </div>
               <div class="agent-card__name">{{ agent.name || 'Agent Name' }}</div>
             </div>
-          </transition-group>
+          </div>
         </div>
         <router-link to="/allagents" class="agent-carousel__view-more">View More</router-link>
       </div>
@@ -372,6 +370,7 @@
             <img src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1748316444/rclogo_l7oiod.png" alt="Real City Logo" class="fixed-nav__logo-img" />
           </div>
           <div class="fixed-nav__center desktop-nav">
+            <router-link v-if="userRole === 'all'" to="/" class="fixed-nav__link">Home</router-link>
             <router-link to="/buy" class="fixed-nav__link">Buy</router-link>
             <router-link to="/rent" class="fixed-nav__link">Rent</router-link>
             <router-link to="/sell" class="fixed-nav__link">Sell</router-link>
@@ -398,10 +397,14 @@ import { useAgentStore } from '@/stores/agentStore';
 import { usePropertyStore } from '@/stores/propertyStore';
 import { useBlogStore } from '@/stores/blogStore';
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/authStore';
 
 defineOptions({
   name: 'LandingPage'
 });
+
+const authStore = useAuthStore();
+const userRole = computed(() => authStore.userRole || 'all');
 
 const faqList = [
   {
@@ -2011,6 +2014,7 @@ onBeforeUnmount(() => {
   margin-right: -50vw;
   box-shadow: 0 8px 32px rgba(0,82,165,0.07);
 }
+
 .agent-carousel__title {
   font-size: 2.4rem;
   font-weight: 800;
@@ -2020,6 +2024,7 @@ onBeforeUnmount(() => {
   font-family: 'Poppins', sans-serif;
   letter-spacing: -0.5px;
 }
+
 .agent-carousel__subtitle {
   font-size: 1.18rem;
   color: #fff;
@@ -2029,6 +2034,7 @@ onBeforeUnmount(() => {
   font-weight: 500;
   letter-spacing: 0.01em;
 }
+
 .agent-carousel__wrapper {
   overflow: hidden;
   width: 100%;
@@ -2037,13 +2043,14 @@ onBeforeUnmount(() => {
   box-shadow: 0 4px 24px rgba(0,82,165,0.08);
   padding: 32px 0 24px 0;
 }
+
 .agent-carousel__track {
-  display: flex;
-  gap: 40px;
-  justify-content: center;
-  align-items: stretch;
-  min-height: 220px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+  padding: 0 24px;
 }
+
 .agent-card {
   background: #fff;
   border-radius: 18px;
@@ -2052,20 +2059,19 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 200px;
-  max-width: 240px;
   width: 100%;
-  margin: 0 4px;
   transition: transform 0.25s cubic-bezier(.4,2,.3,1), box-shadow 0.25s;
   border: 1.5px solid #e0f2fe;
   position: relative;
 }
+
 .agent-card:hover {
-  transform: translateY(-8px) scale(1.035);
+  transform: translateY(-8px);
   box-shadow: 0 8px 32px rgba(0,82,165,0.13);
   border-color: #4f8edc;
   z-index: 2;
 }
+
 .agent-card__img-box {
   width: 100px;
   height: 100px;
@@ -2079,6 +2085,7 @@ onBeforeUnmount(() => {
   justify-content: center;
   box-shadow: 0 2px 8px rgba(0,82,165,0.07);
 }
+
 .agent-card__img {
   width: 100%;
   height: 100%;
@@ -2086,6 +2093,7 @@ onBeforeUnmount(() => {
   border-radius: 50%;
   transition: transform 0.3s cubic-bezier(.4,2,.3,1);
 }
+
 .agent-card__name {
   margin-top: 10px;
   font-size: 1.18rem;
@@ -2095,49 +2103,67 @@ onBeforeUnmount(() => {
   font-family: 'Poppins', sans-serif;
   letter-spacing: 0.01em;
 }
-.agent-carousel__view-more {
-  display: block;
-  margin: 32px auto 0 auto;
-  background: linear-gradient(90deg, #0066cc 0%, #4f8edc 100%);
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  padding: 14px 44px;
-  font-size: 1.18rem;
-  font-weight: 700;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0,82,165,0.08);
-  transition: background 0.2s, box-shadow 0.2s;
-  text-align: center;
-  width: fit-content;
-  min-width: 180px;
-  max-width: 320px;
-  text-decoration: none;
-}
-.agent-carousel__view-more:hover {
-  background: linear-gradient(90deg, #0052a5 0%, #0066cc 100%);
-  box-shadow: 0 4px 16px rgba(0,82,165,0.13);
-  text-decoration: none;
-}
-@media (max-width: 600px) {
-  .agent-carousel__view-more {
-    padding: 12px 24px;
+
+@media (max-width: 768px) {
+  .agent-carousel-section {
+    padding: 40px 0;
+  }
+
+  .agent-carousel__title {
+    font-size: 1.8rem;
+    margin-bottom: 8px;
+  }
+
+  .agent-carousel__subtitle {
     font-size: 1rem;
-    min-width: 120px;
-    max-width: 90vw;
+    margin-bottom: 24px;
+  }
+
+  .agent-carousel__wrapper {
+    padding: 24px 0;
+  }
+
+  .agent-carousel__track {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 0 16px;
+  }
+
+  .agent-card {
+    max-width: 100%;
+    padding: 20px 16px;
   }
 }
-/* Fade/slide animation for carousel */
-.agent-fade-enter-active, .agent-fade-leave-active {
-  transition: all 0.7s cubic-bezier(.4,2,.3,1);
-}
-.agent-fade-enter-from {
-  opacity: 0;
-  transform: translateY(30px) scale(0.98);
-}
-.agent-fade-leave-to {
-  opacity: 0;
-  transform: translateY(-30px) scale(0.98);
+
+@media (max-width: 480px) {
+  .agent-carousel-section {
+    padding: 32px 0;
+  }
+
+  .agent-carousel__title {
+    font-size: 1.5rem;
+  }
+
+  .agent-carousel__subtitle {
+    font-size: 0.9rem;
+  }
+
+  .agent-carousel__wrapper {
+    padding: 16px 0;
+  }
+
+  .agent-card {
+    padding: 16px;
+  }
+
+  .agent-card__img-box {
+    width: 80px;
+    height: 80px;
+  }
+
+  .agent-card__name {
+    font-size: 1rem;
+  }
 }
 
 /* Blog Section (Below FAQ) */
@@ -2791,5 +2817,182 @@ onBeforeUnmount(() => {
   z-index: 999999999;
   display: flex;
 }
-</style>
 
+.help-section__container {
+  padding: 80px;
+  background: #fff;
+  box-shadow: 0 4px 40px rgba(0, 0, 0, 0.08);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.help-section__images {
+  display: flex;
+  gap: 24px;
+}
+
+.help-section__image {
+  width: 280px;
+  height: 400px;
+  object-fit: cover;
+  border-radius: 20px;
+  margin: 0;
+}
+
+.help-section__gradient-box {
+  background: linear-gradient(135deg, #f7f8fa 0%, #e3f0ff 100%);
+  color: #0052a5;
+  border-radius: 24px;
+  padding: 64px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.help-section__title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 40px;
+  font-family: 'Poppins', 'Inter', Arial, sans-serif;
+  color: #0052a5;
+}
+
+@media (max-width: 1024px) {
+  .help-section__container {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    padding: 40px 24px;
+  }
+
+  .help-section__images {
+    justify-content: center;
+  }
+
+  .help-section__image {
+    width: 180px;
+    height: 260px;
+  }
+
+  .help-section__gradient-box {
+    padding: 40px 30px;
+  }
+}
+
+@media (max-width: 768px) {
+  .help-section__container {
+    padding: 32px 16px;
+  }
+
+  .help-section__images {
+    gap: 8px;
+  }
+
+  .help-section__image {
+    width: 150px;
+    height: 220px;
+  }
+
+  .help-section__gradient-box {
+    padding: 32px 24px;
+  }
+
+  .help-section__title {
+    font-size: 1.4rem;
+    margin-bottom: 24px;
+  }
+
+  .help-section__item {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .help-section__container {
+    padding: 24px 16px;
+  }
+
+  .help-section__images {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .help-section__image {
+    width: 100%;
+    max-width: 280px;
+    height: 200px;
+  }
+
+  .help-section__gradient-box {
+    padding: 24px 20px;
+  }
+
+  .help-section__title {
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+  }
+
+  .help-section__item {
+    font-size: 0.9rem;
+    gap: 12px;
+  }
+}
+
+.agent-carousel__track {
+  display: flex;
+  gap: 32px;
+  padding: 0 24px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+@media (max-width: 768px) {
+  .agent-carousel__track {
+    flex-direction: column;
+    gap: 24px;
+    align-items: center;
+  }
+
+  .agent-carousel__title {
+    font-size: 1.8rem;
+    margin-bottom: 8px;
+  }
+
+  .agent-carousel__subtitle {
+    font-size: 1rem;
+    margin-bottom: 24px;
+  }
+
+  .agent-card {
+    width: 100%;
+    max-width: 280px;
+    margin: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .agent-carousel-section {
+    padding: 40px 0 32px 0;
+  }
+
+  .agent-carousel__title {
+    font-size: 1.5rem;
+  }
+
+  .agent-carousel__subtitle {
+    font-size: 0.9rem;
+  }
+
+  .agent-card {
+    max-width: 100%;
+    margin: 0 16px;
+  }
+}
+</style>

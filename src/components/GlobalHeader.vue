@@ -8,6 +8,7 @@
       </div>
       <!-- Desktop Navigation -->
       <div class="main-nav__center desktop-only">
+        <router-link v-if="userRole === 'all'" to="/" class="main-nav__link">Home</router-link>
         <router-link to="/buy" class="main-nav__link">Buy</router-link>
         <router-link to="/rent" class="main-nav__link">Rent</router-link>
         <router-link to="/sell" class="main-nav__link">Sell</router-link>
@@ -34,6 +35,7 @@
       <div class="mobile-nav-modal__backdrop" @click="showMobileNav = false"></div>
       <div class="mobile-nav-modal__content">
         <button class="mobile-nav-modal__close" @click="showMobileNav = false" aria-label="Close menu">×</button>
+        <router-link v-if="userRole === 'all'" to="/" class="mobile-nav-modal__link" @click="showMobileNav = false">Home</router-link>
         <router-link to="/buy" class="mobile-nav-modal__link" @click="showMobileNav = false">Buy</router-link>
         <router-link to="/rent" class="mobile-nav-modal__link" @click="showMobileNav = false">Rent</router-link>
         <router-link to="/sell" class="mobile-nav-modal__link" @click="showMobileNav = false">Sell</router-link>
@@ -52,8 +54,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import RoleSelector from '@/components/RoleSelector.vue';
+import { useAuthStore } from '@/stores/authStore';
+
+const authStore = useAuthStore();
+const userRole = computed(() => authStore.userRole || 'all');
 
 const isScrolled = ref(false);
 const showMobileNav = ref(false);
@@ -65,6 +71,7 @@ const handleScroll = () => {
 onMounted(() => {
   window.addEventListener('scroll', handleScroll);
 });
+
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll);
 });
