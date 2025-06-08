@@ -3,9 +3,10 @@
     <GlobalHeader />
     <!-- Hero Section -->
     <div class="agents-hero world-class-hero">
-      <div class="hero-bg-decor"></div>
+      <div class="hero-text-find-agent">
       <h2 class="agents-hero__title">Find Agent</h2>
       <p class="agents-hero__caption">Easily search, filter, and connect with the best real estate agents for your needs.</p>
+    </div>
     </div>
     <!-- Main Content -->
     <section class="agents-content">
@@ -32,58 +33,7 @@
           </div>
         </div>
 
-        <div class="content-wrapper">
-          <!-- Filters Sidebar -->
-          <div class="agents-filters">
-            <div class="filter-group">
-              <h3 class="filter-title">Specialties</h3>
-              <div class="filter-options">
-                <label v-for="specialty in specialties" :key="specialty" class="filter-option">
-                  <input
-                    type="checkbox"
-                    v-model="selectedSpecialties"
-                    :value="specialty"
-                    @change="handleSearch"
-                  >
-                  <span class="checkmark"></span>
-                  <span class="filter-label">{{ specialty }}</span>
-                </label>
-              </div>
-            </div>
-
-            <div class="filter-group">
-              <h3 class="filter-title">Experience</h3>
-              <div class="filter-options">
-                <label v-for="exp in experienceLevels" :key="exp" class="filter-option">
-                  <input
-                    type="checkbox"
-                    v-model="selectedExperience"
-                    :value="exp"
-                    @change="handleSearch"
-                  >
-                  <span class="checkmark"></span>
-                  <span class="filter-label">{{ exp }}</span>
-                </label>
-              </div>
-            </div>
-
-            <div class="filter-group">
-              <h3 class="filter-title">Languages</h3>
-              <div class="filter-options">
-                <label v-for="lang in languages" :key="lang" class="filter-option">
-                  <input
-                    type="checkbox"
-                    v-model="selectedLanguages"
-                    :value="lang"
-                    @change="handleSearch"
-                  >
-                  <span class="checkmark"></span>
-                  <span class="filter-label">{{ lang }}</span>
-                </label>
-              </div>
-            </div>
-          </div>
-
+        <div class="content-wrapper content-wrapper--no-sidebar">
           <!-- Agents Grid -->
           <div class="agents-grid">
             <div v-if="filteredAgents.length === 0" class="no-results">
@@ -97,64 +47,24 @@
               :key="agent.id"
               class="agent-card"
             >
-              <div class="agent-card__header">
-                <div class="agent-card__img-box">
-                  <img :src="agent.avatar || agent.profilePicture" :alt="agent.name" class="agent-card__img">
-                </div>
-                <div class="agent-card__badges">
-                  <span v-if="agent.isVerified" class="agent-badge agent-badge--verified">
-                    <i class="fas fa-check-circle"></i> Verified
-                  </span>
-                  <span v-if="agent.isTopAgent" class="agent-badge agent-badge--top">
-                    <i class="fas fa-star"></i> Top Agent
-                  </span>
-                </div>
+              <div class="agent-card__img-container">
+                <img :src="agent.avatar || agent.profilePicture" :alt="agent.name" class="agent-card__img">
               </div>
 
-              <div class="agent-card__content">
-                <h3 class="agent-card__name">{{ agent.name }}</h3>
-                <p class="agent-card__title">{{ agent.title }}</p>
+              <h3 class="agent-card__name">{{ agent.name }}</h3>
+              <a class="agent-card__email" :href="'mailto:' + agent.email">{{ agent.email }}</a>
+              <a class="agent-card__phone" :href="'tel:' + agent.phone">M: {{ agent.phone }}</a>
 
-                <div class="agent-card__stats">
-                  <div class="stat">
-                    <span class="stat__value">{{ agent.propertiesSold }}</span>
-                    <span class="stat__label">Properties Sold</span>
-                  </div>
-                  <div class="stat">
-                    <span class="stat__value">{{ agent.yearsExperience }}</span>
-                    <span class="stat__label">Years Experience</span>
-                  </div>
-                  <div class="stat">
-                    <span class="stat__value">{{ agent.rating }}</span>
-                    <span class="stat__label">Rating</span>
-                  </div>
-                </div>
+              <div class="agent-card__specialty">{{ agent.title }}</div>
 
-                <div class="agent-card__specialties">
-                  <span
-                    v-for="specialty in agent.specialties.slice(0, 3)"
-                    :key="specialty"
-                    class="specialty-tag"
-                  >
-                    {{ specialty }}
-                  </span>
-                  <span v-if="agent.specialties.length > 3" class="specialty-tag specialty-tag--more">
-                    +{{ agent.specialties.length - 3 }}
-                  </span>
-                </div>
-
-                <div class="agent-card__location">
-                  <i class="fas fa-map-marker-alt"></i>
-                  {{ agent.location }}
-                </div>
+              <div class="agent-card__location">
+                <i class="fas fa-map-marker-alt"></i>
+                {{ agent.location }}
               </div>
 
-              <div class="agent-card__footer">
-                <button class="agent-card__contact-btn" @click.stop="contactAgent">
-                  <i class="fas fa-envelope"></i>
-                  Contact Agent
-                </button>
-              </div>
+              <button class="contact-btn" @click="openContactModal(agent)">
+                Contact Agent
+              </button>
             </div>
           </div>
         </div>
@@ -174,8 +84,12 @@
               <img :src="selectedAgent?.avatar || selectedAgent?.profilePicture" :alt="selectedAgent?.name">
             </div>
             <div class="modal-agent-details">
-        <h2>Contact {{ selectedAgent?.name }}</h2>
+              <h2>Contact {{ selectedAgent?.name }}</h2>
               <p class="modal-agent-title">{{ selectedAgent?.title }}</p>
+              <p class="modal-agent-email">
+                <i class="fas fa-envelope"></i>
+                {{ selectedAgent?.email }}
+              </p>
             </div>
           </div>
         </div>
@@ -241,17 +155,12 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useAgentStore } from '@/stores/agentStore';
-import { useRouter } from 'vue-router';
 import GlobalHeader from '@/components/GlobalHeader.vue';
 
-const router = useRouter();
 const agentStore = useAgentStore();
 
 // Search and filter state
 const searchQuery = ref('');
-const selectedSpecialties = ref([]);
-const selectedExperience = ref([]);
-const selectedLanguages = ref([]);
 const showContactModal = ref(false);
 const selectedAgent = ref(null);
 
@@ -262,31 +171,6 @@ const contactForm = ref({
   phone: '',
   message: ''
 });
-
-// Filter options
-const specialties = [
-  'Luxury Homes',
-  'Commercial Properties',
-  'Residential Properties',
-  'Investment Properties',
-  'First-Time Buyers',
-  'Urban Apartments'
-];
-
-const experienceLevels = [
-  '0-2 years',
-  '3-5 years',
-  '5-10 years',
-  '10+ years'
-];
-
-const languages = [
-  'English',
-  'Spanish',
-  'French',
-  'Mandarin',
-  'Arabic'
-];
 
 // Add these computed properties and methods after the languages array
 const agents = ref([]);
@@ -314,27 +198,6 @@ const filteredAgents = computed(() => {
     );
   }
 
-  // Filter by specialties
-  if (selectedSpecialties.value.length > 0) {
-    filtered = filtered.filter(agent =>
-      agent.specialties.some(s => selectedSpecialties.value.includes(s))
-    );
-  }
-
-  // Filter by experience
-  if (selectedExperience.value.length > 0) {
-    filtered = filtered.filter(agent => {
-      const years = agent.yearsExperience;
-      return selectedExperience.value.some(exp => {
-        if (exp === '0-2 years') return years <= 2;
-        if (exp === '3-5 years') return years >= 3 && years <= 5;
-        if (exp === '5-10 years') return years >= 5 && years <= 10;
-        if (exp === '10+ years') return years > 10;
-        return false;
-      });
-    });
-  }
-
   return filtered;
 });
 
@@ -342,8 +205,20 @@ function handleSearch() {
   // The computed property will automatically update
 }
 
-function contactAgent() {
-  router.push('/login');
+function openContactModal(agent) {
+  selectedAgent.value = agent;
+  showContactModal.value = true;
+}
+
+function closeContactModal() {
+  showContactModal.value = false;
+  selectedAgent.value = null;
+}
+
+function submitContactForm() {
+  // Handle form submission here
+  console.log('Form submitted:', contactForm.value);
+  closeContactModal();
 }
 </script>
 
@@ -356,10 +231,7 @@ function contactAgent() {
 
 /* Hero Section */
 .agents-hero {
-  margin: 24px auto 32px auto;
-  max-width: 1200px;
   padding: 24px 32px 36px 32px;
-  border-radius: 20px;
   background: linear-gradient(120deg, #f0fdfa 0%, #f8fafc 100%);
   border: 1px solid #d1fae5;
   box-shadow: 0 2px 12px rgba(0, 124, 240, 0.04);
@@ -473,7 +345,6 @@ function contactAgent() {
 /* Main Content */
 .content-wrapper {
   display: grid;
-  grid-template-columns: 300px 1fr;
   gap: 40px;
   align-items: start;
 }
@@ -594,49 +465,51 @@ function contactAgent() {
 .agents-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 28px;
+  gap: 24px;
+  padding: 16px 0;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .agent-card {
   background: #fff;
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-  transition: all 0.3s ease;
-  cursor: pointer;
-  position: relative;
-  height: 100%;
+  text-align: left;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  max-width: 250px;
+  margin: 0 auto;
+  overflow: hidden;
+  position: relative;
+  padding-bottom: 12px;
 }
 
 .agent-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06);
+  border-color: rgba(0, 102, 204, 0.1);
 }
 
-.agent-card__header {
-  padding: 20px;
-  text-align: center;
-  position: relative;
-  background: linear-gradient(to bottom, rgba(240, 249, 255, 0.5), transparent);
+.agent-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
-.agent-card__img-box {
-  width: 90px;
-  height: 90px;
-  margin: 0 auto;
-  border-radius: 50%;
+.agent-card__img-container {
+  width: 100%;
+  height: 180px;
   overflow: hidden;
-  border: 3px solid #e0f2fe;
-  box-shadow: 0 4px 12px rgba(0, 102, 204, 0.1);
-  transition: all 0.3s ease;
+  position: relative;
+  margin: 0 0 16px 0;
+  background: #f8fafc;
 }
 
-.agent-card:hover .agent-card__img-box {
-  transform: scale(1.05);
-  border-color: #bae6fd;
+.agent-card:hover .agent-card__img-container {
+  border-color: #0066cc;
 }
 
 .agent-card__img {
@@ -644,118 +517,71 @@ function contactAgent() {
   height: 100%;
   object-fit: cover;
   transition: transform 0.3s ease;
+  transform-origin: center;
 }
 
 .agent-card:hover .agent-card__img {
-  transform: scale(1.1);
-}
-
-.agent-card__badges {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  display: flex;
-  gap: 6px;
-}
-
-.agent-badge {
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  transition: all 0.3s ease;
-}
-
-.agent-badge--verified {
-  background: #e0f2fe;
-  color: #0066cc;
-}
-
-.agent-badge--top {
-  background: #fef3c7;
-  color: #d97706;
-}
-
-.agent-card__content {
-  padding: 0 20px 20px;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+  transform: scale(1.05);
 }
 
 .agent-card__name {
-  font-size: 1.15rem;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 600;
   color: #1e293b;
-  margin: 0 0 2px;
+  margin: 0 0 8px 0;
   font-family: 'Poppins', sans-serif;
+  line-height: 1.3;
+  padding: 0 16px;
+  letter-spacing: -0.3px;
 }
 
-.agent-card__title {
+.agent-card__email,
+.agent-card__phone {
   color: #64748b;
-  margin: 0 0 16px;
-  font-size: 0.9rem;
-}
-
-.agent-card__stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-bottom: 16px;
-  padding: 12px;
-  background: #f8fafc;
-  border-radius: 12px;
-  border: 1px solid rgba(0, 0, 0, 0.03);
-}
-
-.stat {
-  text-align: center;
-}
-
-.stat__value {
-  display: block;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #0066cc;
-  margin-bottom: 2px;
-}
-
-.stat__label {
-  font-size: 0.75rem;
-  color: #64748b;
-}
-
-.agent-card__specialties {
+  font-size: 0.8rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  line-height: 1.4;
+  padding: 2px 16px;
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
   gap: 6px;
-  margin-bottom: 16px;
 }
 
-.specialty-tag {
-  padding: 4px 10px;
-  background: #f1f5f9;
-  color: #64748b;
-  border-radius: 999px;
-  font-size: 0.75rem;
+.agent-card__email::before,
+.agent-card__phone::before {
+  content: '';
+  display: block;
+  width: 14px;
+  height: 14px;
+  background-color: #e2e8f0;
+  border-radius: 4px;
   transition: all 0.2s ease;
 }
 
-.specialty-tag:hover {
-  background: #e2e8f0;
-  color: #1e293b;
-}
-
-.specialty-tag--more {
-  background: #e0f2fe;
+.agent-card__email:hover,
+.agent-card__phone:hover {
   color: #0066cc;
 }
 
-.specialty-tag--more:hover {
-  background: #bae6fd;
+.agent-card__email:hover::before,
+.agent-card__phone:hover::before {
+  background-color: #0066cc;
+  transform: scale(1.1);
+}
+
+.agent-card__email:hover,
+.agent-card__phone:hover {
+  color: #0066cc;
+}
+
+.agent-card__specialty {
+  color: #1e293b;
+  font-size: 0.8rem;
+  margin: 12px 0 6px;
+  line-height: 1.4;
+  font-weight: 500;
+  padding: 0 16px;
 }
 
 .agent-card__location {
@@ -763,101 +589,105 @@ function contactAgent() {
   align-items: center;
   gap: 6px;
   color: #64748b;
-  font-size: 0.85rem;
-  /* margin-bottom: 20px; */
-}
-
-.agent-card__footer {
-  padding: 16px 20px;
-  background: #f8fafc;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  border-top: 1px solid rgba(0, 0, 0, 0.03);
-}
-
-.agent-card__contact-btn {
+  font-size: 0.8rem;
+  padding: 6px 16px;
   width: 100%;
-  background: linear-gradient(135deg, #007cf0 0%, #0052d4 100%);
+}
+
+.agent-card__location i {
+  color: #0066cc;
+  font-size: 0.9rem;
+}
+
+.contact-btn {
+  background: #0066cc;
   color: #fff;
   border: none;
-  padding: 12px 36px;
-  border-radius: 12px;
-  font-weight: 700;
-  font-size: 1rem;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.8rem;
   cursor: pointer;
-  transition:
-    background 0.3s cubic-bezier(.4,2,.6,1),
-    transform 0.18s cubic-bezier(.4,2,.6,1),
-    box-shadow 0.18s cubic-bezier(.4,2,.6,1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  width: calc(100% - 32px);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  box-shadow: 0 8px 24px rgba(0, 124, 240, 0.18), 0 1.5px 6px rgba(0,0,0,0.04);
-  outline: none;
-  border: 2px solid transparent;
+  gap: 6px;
+  margin: 12px 16px 0;
+  position: relative;
+  overflow: hidden;
 }
 
-.agent-card__contact-btn:hover,
-.agent-card__contact-btn:focus {
-  background: linear-gradient(135deg, #0052d4 0%, #007cf0 100%);
-  transform: translateY(-3px) scale(1.04);
-  box-shadow: 0 12px 32px rgba(0, 124, 240, 0.22), 0 2px 8px rgba(0,0,0,0.06);
-  border-color: #bae6fd;
+.contact-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-.agent-card__contact-btn:active {
-  transform: scale(0.98);
-  box-shadow: 0 4px 12px rgba(0, 124, 240, 0.12);
+.contact-btn:hover {
+  background: #005bb8;
+  transform: translateY(-1px);
 }
 
-.agent-card__view-btn {
-  background: #fff;
-  color: #0066cc;
-  border: 1px solid #e0f2fe;
+.contact-btn:hover::before {
+  opacity: 1;
 }
 
-.agent-card__contact-btn:hover,
-.agent-card__view-btn:hover {
-  transform: translateY(-2px) scale(1.04);
-  box-shadow: 0 8px 24px rgba(0,102,204,0.18);
+.contact-btn:hover {
+  background: #0052a5;
+  transform: translateY(-2px);
 }
 
 @media (max-width: 1400px) {
   .agents-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
+    max-width: 1200px;
+    gap: 20px;
   }
 }
 
 @media (max-width: 1200px) {
   .agents-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 960px;
   }
 }
 
-@media (max-width: 1024px) {
-  .content-wrapper {
-    grid-template-columns: 1fr;
+@media (max-width: 992px) {
+  .agents-grid {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 720px;
   }
-
-  .agents-filters {
-    position: static;
-    margin-bottom: 32px;
+  .main-container {
+    width: 95%;
   }
 }
 
 @media (max-width: 768px) {
   .agents-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(1, 1fr);
+    max-width: 400px;
+  }
+  
+  .agent-card {
+    max-width: 100%;
   }
 
-  .search-input-group {
-    grid-template-columns: 1fr;
+  .agent-card__img-container {
+    height: 240px;
   }
-
-  .agents-search-bar {
-    padding: 24px;
+  
+  .main-container {
+    width: 100%;
+    padding-left: 16px;
+    padding-right: 16px;
   }
 }
 
@@ -977,7 +807,15 @@ function contactAgent() {
 .modal-agent-title {
   font-size: 1.1rem;
   opacity: 0.9;
-  margin: 0;
+  margin: 0 0 8px;
+}
+
+.modal-agent-email {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  opacity: 0.9;
 }
 
 .contact-form {
@@ -1043,25 +881,31 @@ function contactAgent() {
   background: linear-gradient(135deg, #0066cc 0%, #0052a5 100%);
   color: #fff;
   border: none;
-  padding: 16px;
+  padding: 16px 32px;
   border-radius: 12px;
   font-weight: 600;
   font-size: 1rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  box-shadow: 0 4px 12px rgba(0, 102, 204, 0.15);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  width: 100%;
 }
 
 .submit-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 102, 204, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 102, 204, 0.25);
+  background: linear-gradient(135deg, #0052a5 0%, #003d7a 100%);
 }
 
-.submit-btn i {
-  font-size: 0.9rem;
+.submit-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 8px rgba(0, 102, 204, 0.2);
 }
 
 @media (max-width: 640px) {
@@ -1097,7 +941,7 @@ function contactAgent() {
 }
 
 .main-container {
-  max-width: 1200px;
+  width: 89%;
   margin: 0 auto;
   padding-left: 32px;
   padding-right: 32px;
@@ -1107,7 +951,7 @@ function contactAgent() {
   position: relative;
   overflow: hidden;
   background: linear-gradient(120deg, #0f2027 0%, #2c5364 100%); /* dark blue gradient */
-  border-radius: 24px;
+
   padding: 64px 40px 56px 40px;
   margin-bottom: 32px;
   box-shadow: 0 8px 40px 0 rgba(0, 102, 204, 0.07);
@@ -1118,8 +962,10 @@ function contactAgent() {
   align-items: flex-start;
 }
 
-.hero-bg-decor {
-  display: none;
+.hero-text-find-agent{
+  width:89%;
+  margin:auto;
+
 }
 
 .agents-hero__title {
