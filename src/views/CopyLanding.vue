@@ -250,6 +250,29 @@
       </div>
     </section>
 
+    <!-- Blog Section (Below FAQ) -->
+    <section class="blog-section--worldclass reveal">
+      <div class="boxed-container blog-section__container">
+        <h2 class="blog-section__title blog-section__title--worldclass">Latest from our Blog</h2>
+        <div class="blog-section__tiles blog-section__tiles--worldclass">
+          <div v-for="blog in blogs" :key="blog.id" class="blog-tile blog-tile--worldclass reveal" @click="goToBlog(blog)" style="cursor:pointer;">
+            <div class="blog-tile__accent-bar"></div>
+            <div class="blog-tile__title-worldclass">{{ blog.title }}</div>
+            <div class="blog-tile__desc-worldclass">{{ blog.desc }}</div>
+            <div class="blog-tile__meta-worldclass">
+              <span class="blog-tile__meta-icon-worldclass">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#e0f2fe"/><path d="M12 12c1.656 0 3-1.344 3-3s-1.344-3-3-3-3 1.344-3 3 1.344 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V20h14v-2.5c0-2.33-4.67-3.5-7-3.5z" fill="#0052a5"/></svg>
+              </span>
+              <span class="blog-tile__meta-author-worldclass">Real City Team</span>
+              <span class="blog-tile__meta-dot-worldclass">|</span>
+              <span class="blog-tile__meta-date-worldclass">June 2024</span>
+            </div>
+            <button class="blog-tile__readmore-worldclass" @click.stop="goToBlog(blog)">Read More &gt;</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- FAQ Section -->
     <section class="faq-section--saas">
       <div class="boxed-container faq__container--saas">
@@ -366,10 +389,12 @@
 import { ref, onMounted, onBeforeUnmount, nextTick, computed, onActivated } from 'vue';
 import { useAgentStore } from '@/stores/agentStore';
 import { usePropertyStore } from '@/stores/propertyStore';
+import { useBlogStore } from '@/stores/blogStore';
+import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/authStore';
 
 defineOptions({
-  name: 'LandingPage'
+  name: 'CopyLanding'
 });
 
 const authStore = useAuthStore();
@@ -485,6 +510,16 @@ onActivated(async () => {
     await propertyStore.fetchProperties();
   }
 });
+
+const blogStore = useBlogStore();
+const router = useRouter();
+onMounted(() => {
+  blogStore.fetchBlogs();
+});
+const blogs = computed(() => blogStore.blogs.slice(0, 3));
+function goToBlog(blog) {
+  router.push(`/blog/${blog.id}`);
+}
 
 function shuffleAgents(agents) {
   // Fisher-Yates shuffle
@@ -639,29 +674,6 @@ const formatPrice = (price) => {
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: #fff;
-}
-
-.agent-carousel__view-more {
-    display: block;
-    color: rgb(255, 255, 255);
-    font-size: 1.18rem;
-    font-weight: 700;
-    cursor: pointer;
-    box-shadow: rgba(0, 82, 165, 0.08) 0px 2px 8px;
-    text-align: center;
-    width: fit-content;
-    min-width: 180px;
-    max-width: 320px;
-    margin: 32px auto 0px;
-    background: linear-gradient(90deg, rgb(0, 102, 204), rgb(79, 142, 220));
-    border-width: initial;
-    border-style: none;
-    border-color: initial;
-    border-image: initial;
-    border-radius: 10px;
-    padding: 14px 44px;
-    transition: background 0.2s, box-shadow 0.2s;
-    text-decoration: none;
 }
 
 .main-nav__button--primary {
@@ -3171,6 +3183,4 @@ const formatPrice = (price) => {
     gap: 12px;
   }
 }
-
-
 </style>

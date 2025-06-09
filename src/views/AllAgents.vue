@@ -52,7 +52,12 @@
               </div>
 
               <h3 class="agent-card__name">{{ agent.name }}</h3>
-              <a class="agent-card__phone" :href="'tel:' + agent.phone">M: {{ agent.phone }}</a>
+              <a class="agent-card__phone" :href="'tel:' + agent.phone">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z" />
+                </svg>
+                {{ agent.phone }}
+              </a>
 
               <div class="agent-card__specialty">{{ agent.title }}</div>
 
@@ -178,7 +183,8 @@ const agents = ref([]);
 onMounted(async () => {
   // Fetch agents when component mounts
   await agentStore.fetchAgents();
-  agents.value = agentStore.getAllAgents();
+  const allAgents = agentStore.getAllAgents();
+  agents.value = allAgents;
 });
 
 // Computed property for filtered agents
@@ -521,8 +527,6 @@ function handleSearch() {
   letter-spacing: -0.3px;
 }
 
-
-
 .agent-card__phone {
   color: #64748b;
   font-size: 0.8rem;
@@ -535,13 +539,8 @@ function handleSearch() {
   gap: 6px;
 }
 
-.agent-card__phone::before {
-  content: '';
-  display: block;
-  width: 14px;
-  height: 14px;
-  background-color: #e2e8f0;
-  border-radius: 4px;
+.agent-card__phone svg {
+  color: #64748b;
   transition: all 0.2s ease;
 }
 
@@ -549,8 +548,8 @@ function handleSearch() {
   color: #0066cc;
 }
 
-.agent-card__phone:hover::before {
-  background-color: #0066cc;
+.agent-card__phone:hover svg {
+  color: #0066cc;
   transform: scale(1.1);
 }
 
@@ -586,8 +585,6 @@ function handleSearch() {
   color: #0066cc;
   text-decoration: none;
   font-weight: 500;
-  padding: 12px 16px;
-  margin: 8px 16px;
   border-radius: 8px;
   transition: all 0.2s ease;
   background: #f0f9ff;
@@ -612,7 +609,6 @@ function handleSearch() {
   font-size: 0.8rem;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  width: calc(100% - 32px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -683,7 +679,7 @@ function handleSearch() {
     grid-template-columns: repeat(1, 1fr);
     max-width: 400px;
   }
-  
+
   .agent-card {
     max-width: 100%;
   }
@@ -691,7 +687,7 @@ function handleSearch() {
   .agent-card__img-container {
     height: 240px;
   }
-  
+
   .main-container {
     width: 100%;
     padding-left: 16px;

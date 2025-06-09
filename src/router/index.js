@@ -1101,9 +1101,13 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
-  scrollBehavior() {
-    // Always scroll to top on navigation
-    return { top: 0, behavior: 'smooth' };
+  scrollBehavior(to, from, savedPosition) {
+    // If the user is using browser back/forward buttons, restore their position
+    if (savedPosition) {
+      return savedPosition;
+    }
+    // For all other navigation, scroll to top immediately
+    return { top: 0, left: 0, behavior: 'instant' };
   }
 });
 

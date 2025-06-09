@@ -52,6 +52,7 @@ export const useAgentStore = defineStore('agent', () => {
       id: 1,
       name: 'James T. Whifield',
       email: 'james.whifield@example.com',
+      phone: '+1 (555) 123-4567',
       location: 'Columbia, USA',
       profilePicture: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790261/300_e7yggy.jpg',
       avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790261/300_e7yggy.jpg',
@@ -66,6 +67,7 @@ export const useAgentStore = defineStore('agent', () => {
       id: 2,
       name: 'Amanda Rodriguez',
       email: 'amanda.rodriguez@example.com',
+      phone: '+1 (555) 234-5678',
       location: 'Miami, USA',
       profilePicture: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790261/300_1_gdilxy.jpg',
       avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790261/300_1_gdilxy.jpg',
@@ -80,6 +82,7 @@ export const useAgentStore = defineStore('agent', () => {
       id: 3,
       name: 'Michael Chen',
       email: 'michael.chen@example.com',
+      phone: '+1 (555) 345-6789',
       location: 'Seattle, USA',
       profilePicture: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790260/300_3_inul8p.jpg',
       avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790260/300_3_inul8p.jpg',
@@ -94,6 +97,7 @@ export const useAgentStore = defineStore('agent', () => {
       id: 4,
       name: 'Sarah Johnson',
       email: 'sarah.johnson@example.com',
+      phone: '+1 (555) 456-7890',
       location: 'Boston, USA',
       profilePicture: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790260/300_2_rfyiva.jpg',
       avatar: 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790260/300_2_rfyiva.jpg',
@@ -210,7 +214,8 @@ export const useAgentStore = defineStore('agent', () => {
       rating: agent.averageRating,
       title: `${agent.specialties[0]} Specialist`,
       isVerified: true,
-      isTopAgent: agent.averageRating >= 4.8
+      isTopAgent: agent.averageRating >= 4.8,
+      phone: agent.phone // Ensure phone is included
     }));
   }
 
