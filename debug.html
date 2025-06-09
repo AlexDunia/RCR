@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debug Navigation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1 {
+      color: #0f172a;
+    }
+    .debug-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .debug-button {
+      display: inline-block;
+      background-color: #3b82f6;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background-color 0.2s ease;
+    }
+    .debug-button:hover {
+      background-color: #2563eb;
+    }
+  </style>
+</head>
+<body>
+  <h1>Debug Navigation</h1>
+  <p>Use the buttons below to test navigation to different pages:</p>
+  
+  <div class="debug-buttons">
+    <a href="/#/" class="debug-button">Dashboard</a>
+    <a href="/#/education-training" class="debug-button">Education & Training</a>
+    <a href="/#/education-training/test" class="debug-button">Education Test Page</a>
+    <a href="/#/education-training/fixed" class="debug-button">Fixed Education View</a>
+    <a href="/#/education-training/module/1" class="debug-button">Module Details (ID: 1)</a>
+  </div>
+</body>
+</html> 

@@ -1,0 +1,1 @@
+import{b as o,e as t,i as s}from"./vendor.Bh3_gxHF.js";import{_ as r}from"./index.Cv61STol.js";const a={class:"profile-test"},l={__name:"ProfileTest",setup(i){return(n,e)=>(s(),o("div",a,e[0]||(e[0]=[t("h1",null,"Profile Test Page",-1),t("p",null,"If you can see this, the profile routing works!",-1)])))}},f=r(l,[["__scopeId","data-v-90f8180c"]]);export{f as default};
