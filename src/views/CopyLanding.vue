@@ -8,9 +8,6 @@
             <div class="mobile-nav-modal__content">
               <button class="mobile-nav-modal__close" @click="showMobileNav = false" aria-label="Close navigation">×</button>
               <router-link v-if="userRole === 'all'" to="/" class="mobile-nav-modal__link" @click="showMobileNav = false">Home</router-link>
-              <router-link to="/buy" class="mobile-nav-modal__link" @click="showMobileNav = false">Buy</router-link>
-              <router-link to="/rent" class="mobile-nav-modal__link" @click="showMobileNav = false">Rent</router-link>
-              <router-link to="/sell" class="mobile-nav-modal__link" @click="showMobileNav = false">Sell</router-link>
               <router-link to="/allagents" class="mobile-nav-modal__link" @click="showMobileNav = false">Find Agents</router-link>
               <router-link to="/signup" class="mobile-nav-modal__link" @click="showMobileNav = false">Join Us</router-link>
               <div class="mobile-nav-modal__buttons">
@@ -34,9 +31,6 @@
           </div>
           <div class="main-nav__center desktop-nav">
             <router-link v-if="userRole === 'all'" to="/" class="main-nav__link">Home</router-link>
-            <router-link to="/buy" class="main-nav__link">Buy</router-link>
-            <router-link to="/rent" class="main-nav__link">Rent</router-link>
-            <router-link to="/sell" class="main-nav__link">Sell</router-link>
             <router-link to="/allagents" class="main-nav__link">Find Agents</router-link>
             <router-link to="/signup" class="main-nav__link">Join Us</router-link>
           </div>
@@ -365,10 +359,7 @@
           </div>
           <div class="fixed-nav__center desktop-nav">
             <router-link v-if="userRole === 'all'" to="/" class="fixed-nav__link">Home</router-link>
-            <router-link to="/buy" class="fixed-nav__link">Buy</router-link>
-            <router-link to="/rent" class="fixed-nav__link">Rent</router-link>
-            <router-link to="/sell" class="fixed-nav__link">Sell</router-link>
-            <router-link to="/agent" class="fixed-nav__link">Agent</router-link>
+            <router-link to="/allagents" class="fixed-nav__link">Find Agents</router-link>
             <router-link to="/signup" class="fixed-nav__link">Join Us</router-link>
           </div>
           <div class="fixed-nav__right desktop-nav">

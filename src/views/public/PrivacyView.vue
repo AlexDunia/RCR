@@ -161,11 +161,13 @@
         </section>
       </div>
     </div>
+    <PublicFooter />
   </div>
 </template>
 
 <script setup>
 import GlobalHeader from '@/components/GlobalHeader.vue';
+import PublicFooter from '@/components/PublicFooter.vue';
 import { onMounted } from 'vue';
 
 onMounted(() => {

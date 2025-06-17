@@ -104,6 +104,8 @@
         </div>
       </section>
     </div>
+
+    <PublicFooter />
   </div>
 </template>
 
@@ -112,6 +114,7 @@ import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { usePropertyStore } from '@/stores/propertyStore';
 import GlobalHeader from '@/components/GlobalHeader.vue';
+import PublicFooter from '@/components/PublicFooter.vue';
 
 const router = useRouter();
 const propertyStore = usePropertyStore();

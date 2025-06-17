@@ -35,14 +35,11 @@
       <div class="mobile-nav-modal__content">
         <button class="mobile-nav-modal__close" @click="showMobileNav = false" aria-label="Close menu">×</button>
         <router-link v-if="userRole === 'all'" to="/" class="mobile-nav-modal__link" @click="showMobileNav = false">Home</router-link>
-        <router-link to="/RCR/buy" class="mobile-nav-modal__link" @click="showMobileNav = false">Buy</router-link>
-        <router-link to="/RCR/rent" class="mobile-nav-modal__link" @click="showMobileNav = false">Rent</router-link>
-        <router-link to="/RCR/sell" class="mobile-nav-modal__link" @click="showMobileNav = false">Sell</router-link>
-        <router-link to="/RCR/allagents" class="mobile-nav-modal__link" @click="showMobileNav = false">Find Agents</router-link>
-        <router-link to="/RCR/signup" class="mobile-nav-modal__link" @click="showMobileNav = false">Join Us</router-link>
+        <router-link to="/allagents" class="mobile-nav-modal__link" @click="showMobileNav = false">Find Agents</router-link>
+        <router-link to="/signup" class="mobile-nav-modal__link" @click="showMobileNav = false">Join Us</router-link>
         <div class="mobile-nav-modal__buttons">
-          <router-link to="/RCR/signup" class="mobile-nav-modal__button" @click="showMobileNav = false">Sign up</router-link>
-          <router-link to="/RCR/login" class="mobile-nav-modal__button mobile-nav-modal__button--primary" @click="showMobileNav = false">Login</router-link>
+          <router-link to="/signup" class="mobile-nav-modal__button" @click="showMobileNav = false">Sign up</router-link>
+          <router-link to="/login" class="mobile-nav-modal__button mobile-nav-modal__button--primary" @click="showMobileNav = false">Login</router-link>
         </div>
       </div>
     </div>
@@ -331,19 +328,19 @@ onUnmounted(() => {
   .desktop-only {
     display: none !important;
   }
-  
+
   .mobile-only {
     display: flex !important;
   }
-  
+
   .hamburger-menu {
     display: flex !important;
   }
-  
+
   .public-nav__container {
     padding: 0 16px;
   }
-  
+
   .public-nav__logo-img {
     height: 40px;
   }

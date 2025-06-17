@@ -83,11 +83,13 @@
         </section>
       </div>
     </div>
+    <PublicFooter />
   </div>
 </template>
 
 <script setup>
 import GlobalHeader from '@/components/GlobalHeader.vue';
+import PublicFooter from '@/components/PublicFooter.vue';
 </script>
 
 <style scoped>
@@ -313,4 +315,4 @@ import GlobalHeader from '@/components/GlobalHeader.vue';
     padding: 3rem 1rem;
   }
 }
-</style> 
+</style>

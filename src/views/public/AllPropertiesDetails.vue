@@ -4,9 +4,7 @@
     <nav class="main-nav">
       <div class="main-nav__logo">Real City</div>
       <div class="main-nav__center">
-        <router-link to="/buy" class="main-nav__link">Buy</router-link>
-        <router-link to="/rent" class="main-nav__link">Rent</router-link>
-        <router-link to="/sell" class="main-nav__link">Sell</router-link>
+        <router-link v-if="userRole === 'all'" to="/" class="main-nav__link">Home</router-link>
         <router-link to="/allagents" class="main-nav__link">Find Agents</router-link>
         <router-link to="/signup" class="main-nav__link">Join Us</router-link>
       </div>
@@ -17,6 +15,7 @@
     </nav>
 
     <div v-if="property" class="property-details-container">
+      <GlobalHeader />
       <div class="property-gallery">
         <img v-for="(img, i) in property.images" :key="i" :src="img" :alt="property.name" class="gallery-img" loading="lazy" />
       </div>
@@ -36,6 +35,7 @@
         <div class="property-description">{{ property.description }}</div>
         <button class="view-client-btn" @click="showModal = true">View Client</button>
       </div>
+      <PublicFooter />
     </div>
     <div v-else class="not-found">
       <h2>Property Not Found</h2>
@@ -58,10 +58,16 @@
 import { ref, computed, onMounted, onActivated } from 'vue';
 import { useRoute } from 'vue-router';
 import { usePropertyStore } from '@/stores/propertyStore';
+import GlobalHeader from '@/components/GlobalHeader.vue';
+import PublicFooter from '@/components/PublicFooter.vue';
+import { useAuthStore } from '@/stores/authStore';
 
 const route = useRoute();
 const propertyStore = usePropertyStore();
+const authStore = useAuthStore();
 const showModal = ref(false);
+
+const userRole = computed(() => authStore.userRole || 'all');
 
 function slugify(text) {
   return text

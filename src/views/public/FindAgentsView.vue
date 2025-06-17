@@ -1,42 +1,48 @@
 <template>
-  <section id="hero-section" class="agents-hero">
-    <div class="agents-hero__content">
-      <h1 class="agents-hero__title">Find Your Trusted Agent</h1>
-      <p class="agents-hero__subtitle">The right agent makes all the difference. Let us help you connect with someone who truly cares about your journey.</p>
-    </div>
-  </section>
-  <section class="agents-benefits">
-    <div class="agents-benefits__container">
-      <h2>Why Choose a Real City Agent?</h2>
-      <div class="agents-benefits__grid">
-        <div class="agents-benefit">
-          <span class="agents-benefit__icon">🤝</span>
-          <h3>Personalized Guidance</h3>
-          <p>Our agents listen, understand, and tailor their approach to your unique needs and dreams.</p>
-        </div>
-        <div class="agents-benefit">
-          <span class="agents-benefit__icon">🏆</span>
-          <h3>Proven Expertise</h3>
-          <p>With deep local knowledge and a passion for results, our agents turn possibilities into reality.</p>
-        </div>
-        <div class="agents-benefit">
-          <span class="agents-benefit__icon">💬</span>
-          <h3>Support at Every Step</h3>
-          <p>From first showing to final signature, you'll have a trusted partner by your side.</p>
+  <div class="find-agents-container">
+    <GlobalHeader />
+    <section id="hero-section" class="agents-hero">
+      <div class="agents-hero__content">
+        <h1 class="agents-hero__title">Find Your Trusted Agent</h1>
+        <p class="agents-hero__subtitle">The right agent makes all the difference. Let us help you connect with someone who truly cares about your journey.</p>
+      </div>
+    </section>
+    <section class="agents-benefits">
+      <div class="agents-benefits__container">
+        <h2>Why Choose a Real City Agent?</h2>
+        <div class="agents-benefits__grid">
+          <div class="agents-benefit">
+            <span class="agents-benefit__icon">🤝</span>
+            <h3>Personalized Guidance</h3>
+            <p>Our agents listen, understand, and tailor their approach to your unique needs and dreams.</p>
+          </div>
+          <div class="agents-benefit">
+            <span class="agents-benefit__icon">🏆</span>
+            <h3>Proven Expertise</h3>
+            <p>With deep local knowledge and a passion for results, our agents turn possibilities into reality.</p>
+          </div>
+          <div class="agents-benefit">
+            <span class="agents-benefit__icon">💬</span>
+            <h3>Support at Every Step</h3>
+            <p>From first showing to final signature, you'll have a trusted partner by your side.</p>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
-  <section class="agents-cta">
-    <div class="agents-cta__content">
-      <h2>Ready to connect?</h2>
-      <p>Let's match you with an agent who will champion your goals and guide you home.</p>
-      <router-link to="/signup" class="agents-cta__button">Get Started</router-link>
-    </div>
-  </section>
+    </section>
+    <section class="agents-cta">
+      <div class="agents-cta__content">
+        <h2>Ready to connect?</h2>
+        <p>Let's match you with an agent who will champion your goals and guide you home.</p>
+        <router-link to="/signup" class="agents-cta__button">Get Started</router-link>
+      </div>
+    </section>
+    <PublicFooter />
+  </div>
 </template>
 
 <script setup>
+import GlobalHeader from '@/components/GlobalHeader.vue';
+import PublicFooter from '@/components/PublicFooter.vue';
 // No imports needed anymore
 </script>
 

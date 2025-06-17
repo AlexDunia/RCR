@@ -747,23 +747,31 @@ const routes = [
       }
     ]
   },
+  // Public property routes - accessible to all
   {
-    path: '/property/:id',
-    name: 'PropertyDetail',
-    component: () => import('@/views/listings/PropertyDetail.vue'),
+    path: '/allproperties',
+    name: 'AllProperties',
+    component: () => import('@/views/AllProperties.vue'),
     meta: {
-      title: 'Property Details',
-      hideSidebar: false,
-      allowedRoles: ['admin', 'agent'] // Allow both admin and agent
+      hideHeader: true,
+      hideSidebar: true,
+      layout: 'public',
+      title: 'All Properties',
+      publicAccess: true,
+      allowedRoles: ['all', 'admin', 'agent', 'client']
     }
   },
   {
-    path: '/properties',
-    name: 'Properties',
-    component: () => import('@/views/listings/PropertiesView.vue'),
+    path: '/property/:id',
+    name: 'PropertyDetail',
+    component: () => import('@/views/PropertyDetail.vue'),
     meta: {
-      title: 'All Properties',
-      allowedRoles: ['admin', 'agent'] // Allow both admin and agent
+      hideHeader: true,
+      hideSidebar: true,
+      layout: 'public',
+      title: 'Property Details',
+      publicAccess: true,
+      allowedRoles: ['all', 'admin', 'agent', 'client']
     }
   },
   // Clients route (Admin-only)
@@ -987,16 +995,6 @@ const routes = [
     component: () => import('@/views/public/FindAgentsView.vue'),
     meta: { title: 'Find Agents', allowedRoles: ['all', 'admin', 'agent', 'client'] }
   },
-  {
-    path: '/allproperties',
-    name: 'AllProperties',
-    component: () => import('@/views/public/AllProperties.vue'),
-    meta: {
-      title: 'All Properties',
-      publicAccess: true
-    }
-  },
-  // All Properties public details page
   {
     path: '/allproperties/:slug',
     name: 'AllPropertiesDetails',

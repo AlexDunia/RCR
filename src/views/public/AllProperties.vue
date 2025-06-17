@@ -1,21 +1,6 @@
 <template>
   <div class="all-properties-page">
-    <!-- Header Navigation (from LandingPage.vue) -->
-    <nav class="main-nav">
-      <div class="main-nav__logo">Real City</div>
-      <div class="main-nav__center">
-        <router-link to="/buy" class="main-nav__link">Buy</router-link>
-        <router-link to="/rent" class="main-nav__link">Rent</router-link>
-        <router-link to="/sell" class="main-nav__link">Sell</router-link>
-        <router-link to="/allagents" class="main-nav__link">Find Agents</router-link>
-        <router-link to="/signup" class="main-nav__link">Join Us</router-link>
-      </div>
-      <div class="main-nav__right">
-        <router-link to="/signup" class="main-nav__button">Sign up</router-link>
-        <router-link to="/login" class="main-nav__button main-nav__button--primary">Login</router-link>
-      </div>
-    </nav>
-
+    <GlobalHeader />
     <!-- World-class search/filter bar -->
     <div class="all-properties-bar">
       <div class="property-types-row">
@@ -63,6 +48,7 @@
         <p>Try adjusting your search or filters.</p>
       </div>
     </div>
+    <PublicFooter />
   </div>
 </template>
 
@@ -70,6 +56,8 @@
 import { ref, computed, onMounted, onActivated } from 'vue';
 import { useRouter } from 'vue-router';
 import { usePropertyStore } from '@/stores/propertyStore';
+import GlobalHeader from '@/components/GlobalHeader.vue';
+import PublicFooter from '@/components/PublicFooter.vue';
 
 const router = useRouter();
 const propertyStore = usePropertyStore();

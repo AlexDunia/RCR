@@ -1,53 +1,49 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { usePropertyStore } from "@/stores/propertyStore";
 import { useNavigationStore } from "@/stores/navigation";
 
 const route = useRoute();
+const router = useRouter();
 const propertyStore = usePropertyStore();
 const navigationStore = useNavigationStore();
 
+// Loading and error states
+const isLoading = computed(() => propertyStore.loading);
+const error = computed(() => propertyStore.error);
+
 // Get property details based on the route parameter
-const property = computed(() => {
-  return propertyStore.properties.find(p => p.id === Number(route.params.id));
-});
+const property = computed(() => propertyStore.currentProperty);
 
-// Set active page on mount
-
-onMounted(() => {
+// Set active page and fetch property on mount
+onMounted(async () => {
   navigationStore.setActivePage("Manage Listings");
-  loadLovedImages();
+  try {
+    await propertyStore.fetchPropertyById(Number(route.params.id));
+  } catch (err) {
+    console.error('Failed to fetch property:', err);
+  }
 });
 
-const lovedImages = ref([]);
 const showModal = ref(false);
 const shareImage = ref(null);
 const mainImage = ref(null); // Track the main image for updates
 
 // Initialize main image with the property's main image
 onMounted(() => {
-  mainImage.value = property.value.image;
+  if (property.value) {
+    mainImage.value = property.value.image;
+  }
 });
 
-const toggleLove = (property) => {
-  const index = lovedImages.value.findIndex(p => p.id === property.id);
-  if (index !== -1) {
-    lovedImages.value.splice(index, 1);
-  } else {
-    lovedImages.value.push(property);
-  }
-  saveLovedImages();
-};
-
-const saveLovedImages = () => {
-  localStorage.setItem('lovedImages', JSON.stringify(lovedImages.value));
-};
-
-const loadLovedImages = () => {
-  const savedImages = localStorage.getItem('lovedImages');
-  if (savedImages) {
-    lovedImages.value = JSON.parse(savedImages);
+// Toggle favorite
+const toggleFavorite = async () => {
+  if (!property.value) return;
+  try {
+    await propertyStore.toggleFavorite(property.value.id);
+  } catch (err) {
+    console.error('Failed to toggle favorite:', err);
   }
 };
 
@@ -98,27 +94,37 @@ const updateMainImage = (newImage) => {
 </script>
 
 <template>
+  <!-- Loading State -->
+  <div v-if="isLoading" class="loading">
+    Loading property details...
+  </div>
+
+  <!-- Error State -->
+  <div v-else-if="error" class="error">
+    {{ error }}
+  </div>
+
   <!-- Property Details -->
-  <div v-if="property" class="property-detail">
+  <div v-else-if="property" class="property-detail">
     <div class="property-main">
       <div class="property-image-container">
-        <!-- Main Image (unchanged, but now bound to mainImage ref) -->
+        <!-- Main Image -->
         <img
-          :src="mainImage"
-          alt="Property Image"
+          :src="mainImage || property.image"
+          :alt="property.name"
           class="property-image"
         />
         <div class="icon-container">
           <button
             class="icon-btn love-btn"
-            :class="{ loved: lovedImages.some(p => p.id === property.id) }"
-            @click="toggleLove(property)"
+            :class="{ loved: property.isFavorite }"
+            @click="toggleFavorite"
           >
             <svg class="love-icon" viewBox="0 0 24 24">
               <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
             </svg>
           </button>
-          <button class="icon-btn share-btn" @click="openShareModal(mainImage)">
+          <button class="icon-btn share-btn" @click="openShareModal(mainImage || property.image)">
             <svg class="share-icon" viewBox="0 0 24 24">
               <path d="M18 16.08c-1.76 0-3.29.77-4.32 1.97L8.91 15.7c.07-.32.09-.66.09-1 0-.34-.03-.68-.09-1l4.77-2.35c1.03 1.2 2.56 1.97 4.32 1.97 3.04 0 5.5-2.46 5.5-5.5S21.04 2 18 2s-5.5 2.46-5.5 5.5c0 .34.03.68.09 1L7.82 10.85C6.79 9.65 5.26 8.88 3.5 8.88 0.46 8.88-2 11.34-2 14.38s2.46 5.5 5.5 5.5c1.76 0 3.29-.77 4.32-1.97l4.77 2.35c-.07.32-.09.66-.09 1 0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5-2.46-5.5-5.5-5.5z"/>
             </svg>
@@ -130,11 +136,19 @@ const updateMainImage = (newImage) => {
         <div class="property-address-type">
           <p class="property-address">{{ property.address }}</p>
           <p class="property-type">Type: {{ property.type }}</p>
+          <p class="property-status">Status: {{ property.status }}</p>
+          <p class="property-price">Price: ${{ property.price.toLocaleString() }}</p>
         </div>
         <div class="property-specs">
-          <div class="property-spec-item">Bedroom <br> {{ property.bedrooms }}</div>
-          <div class="property-spec-item">Bathroom <br> {{ property.bathrooms }}</div>
-          <div class="property-spec-item">Square Feet<br> {{ property.size }} ft²</div>
+          <div v-if="property.bedrooms" class="property-spec-item">
+            Bedroom <br> {{ property.bedrooms }}
+          </div>
+          <div v-if="property.bathrooms" class="property-spec-item">
+            Bathroom <br> {{ property.bathrooms }}
+          </div>
+          <div v-if="property.size" class="property-spec-item">
+            Square Feet<br> {{ property.size }} ft²
+          </div>
         </div>
         <br/>
         <h3 class="property-title">Description</h3>
@@ -145,15 +159,16 @@ const updateMainImage = (newImage) => {
     </div>
 
     <!-- Thumbnail Loop (Carousel-like) -->
-    <div class="thumbnail-loop">
+    <div v-if="property.images && property.images.length > 0" class="thumbnail-loop">
       <div v-for="(img, index) in property.images" :key="index" class="thumbnail-loop-item">
-        <img :src="img" alt="Thumbnail" class="thumbnail-loop-image" @click="updateMainImage(img)" />
+        <img :src="img" :alt="`${property.name} - Image ${index + 1}`" class="thumbnail-loop-image" @click="updateMainImage(img)" />
       </div>
     </div>
   </div>
 
   <div v-else class="not-found">
     <p>Property not found.</p>
+    <button class="back-btn" @click="router.push('/listings')">Back to Listings</button>
   </div>
 
   <!-- Share Modal -->
@@ -212,36 +227,43 @@ const updateMainImage = (newImage) => {
 
 .property-image {
   width: 550px;
+  height: 400px;
+  object-fit: cover;
   border-radius: 10px;
 }
 
 /* Thumbnail Loop (Carousel-like) */
 .thumbnail-loop {
   display: flex;
-  flex-wrap: wrap; /* Allow wrapping to the next line */
+  flex-wrap: wrap;
   gap: 10px;
-  padding: 10px 0;
-  background: #F5F5F5; /* Light gray background */
-  padding: 15px; /* Add padding for spacing */
-  border-radius: 10px; /* Rounded corners to match the image */
+  padding: 15px;
+  background: #F5F5F5;
+  border-radius: 10px;
 }
 
 .thumbnail-loop-item {
-  flex: 1 1 calc(16.66% - 20px); /* Six items per row with spacing */
-  max-width: calc(16.66% - 20px); /* Ensure max width for six items per row */
-  border-radius: 10px; /* Rounded corners to match the image */
-  overflow: hidden; /* Ensure image fits within rounded corners */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  flex: 1 1 calc(16.66% - 20px);
+  max-width: calc(16.66% - 20px);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.thumbnail-loop-item:hover {
+  transform: scale(1.05);
 }
 
 .thumbnail-loop-image {
   width: 100%;
-  height: auto;
-  border-radius: 10px; /* Rounded corners to match the image */
-  cursor: pointer; /* Indicate clickable */
+  height: 100px;
+  object-fit: cover;
+  border-radius: 10px;
+  cursor: pointer;
 }
 
-/* Icon styles (unchanged as requested) */
+/* Icon Container */
 .icon-container {
   position: absolute;
   bottom: 10px;
@@ -251,153 +273,128 @@ const updateMainImage = (newImage) => {
 }
 
 .icon-btn {
-  background: #D9D9D9; /* Restored original background */
-  padding: 5px;
-  border-radius: 5px;
-  cursor: pointer;
+  background: white;
   border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s;
 }
 
-.love-icon {
-  width: 24px;
-  height: 24px;
-  fill: rgba(0, 0, 0, 0.4); /* Restored original icon color with 40% opacity */
+.icon-btn:hover {
+  transform: scale(1.1);
 }
 
+.love-icon,
 .share-icon {
   width: 24px;
   height: 24px;
-  fill: rgba(0, 0, 0, 0.4); /* Restored original icon color with 40% opacity */
+  fill: #666;
 }
 
-.loved .love-icon {
+.love-btn.loved .love-icon {
   fill: red;
 }
 
+/* Property Info */
 .property-info {
-  display: flex;
-  margin: 15px 0px 15px 0px;
-  flex-direction: column;
-  gap: 10px;
+  flex: 1;
+  max-width: 500px;
 }
 
 .property-title {
-  font-size: 16.4px;
+  font-size: 24px;
   font-weight: 600;
-  padding: 0px;
-  margin: 0px;
+  color: #333;
+  margin-bottom: 15px;
 }
 
 .property-address-type {
-  display: flex;
-  padding: 0px;
-  margin: 0px;
-  flex-direction: column;
-  gap: 2px;
+  margin-bottom: 20px;
 }
 
-.property-address {
-  color: rgb(34, 34, 34);
-  padding: 0px;
-  margin: 0px;
-  font-weight: 600;
-  font-size: 12.2px;
-  opacity: 0.7; /* 70% opacity */
-}
-
-.property-type {
-  color: rgba(60, 68, 77, 0.6); /* 3C444D with 70% opacity */
-  padding: 0px;
-  margin: 0px;
-  font-weight: 600;
-  font-size: 12.7px;
+.property-address,
+.property-type,
+.property-status,
+.property-price {
+  margin: 5px 0;
+  color: #666;
 }
 
 .property-specs {
   display: flex;
   gap: 20px;
+  margin-bottom: 20px;
 }
 
 .property-spec-item {
+  flex: 1;
+  text-align: center;
+  padding: 15px;
+  background: #f5f5f5;
+  border-radius: 8px;
   font-size: 14px;
-  font-weight: 500;
-  color: rgb(49, 56, 61); /* 3C444D with 80% opacity */
+  color: #666;
 }
 
 .property-description {
-  color: rgb(34, 34, 34);
-  padding: 0px;
-  margin: 0px;
-  font-weight: 600;
-  font-size: 12.8px;
-  opacity: 0.7; /* 70% opacity */
+  color: #666;
+  line-height: 1.6;
 }
 
-/* Thumbnails (unchanged, but renamed for clarity) */
-.thumbnail-container {
-  display: flex;
-  gap: 10px;
-}
-
-.thumbnail-wrapper {
-  position: relative;
-}
-
-.thumbnail {
-  width: 100px;
-  border-radius: 5px;
-}
-
-.thumbnail-wrapper .icon-container {
-  bottom: 5px;
-  left: 5px;
-}
-
-.thumbnail-wrapper .icon-btn {
-  padding: 5px;
-}
-
-.thumbnail-wrapper .love-btn {
-  left: 0;
-}
-
-.thumbnail-wrapper .share-btn {
-  left: 35px;
-}
-
-/* Property Not Found */
+/* Loading and Error States */
+.loading,
+.error,
 .not-found {
   text-align: center;
-  font-size: 18px;
-  color: #777;
+  padding: 40px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin: 20px;
 }
 
-/* Modal (Keeping the design as in your current code) */
+.error {
+  color: #d32f2f;
+}
+
+.back-btn {
+  margin-top: 20px;
+  padding: 8px 16px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* Share Modal */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.8); /* Darker background to make popup stand out */
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
-  justify-content: center;
   align-items: center;
-  z-index: 1000; /* Ensure it stays on top */
+  justify-content: center;
+  z-index: 1000;
 }
 
 .modal-content {
-  background: #1A1A1A; /* Dark background for the popup */
+  background: white;
   padding: 20px;
-  border-radius: 15px; /* Rounded corners like in the image */
+  border-radius: 10px;
   position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
-  width: 300px; /* Fixed width to match the image */
-  max-width: 90%; /* Responsive max-width */
-  animation: slideIn 0.3s ease-out;
+  width: 90%;
+  max-width: 500px;
 }
 
 .close-btn {
@@ -408,61 +405,43 @@ const updateMainImage = (newImage) => {
   border: none;
   font-size: 20px;
   cursor: pointer;
-  color: #FFFFFF; /* White color for visibility on dark background */
-}
-
-.share-image {
-  width: 200px;
-  border-radius: 10px;
-  margin-bottom: 20px;
-  display: none; /* Hide the image since the design doesn’t show it in the popup */
+  color: #666;
 }
 
 .share-options {
-  display: flex;
-  flex-direction: column; /* Stack vertically like in the image */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 10px;
-  width: 100%; /* Full width for buttons */
+  margin-top: 20px;
 }
 
 .share-btn {
-  background: #D9D9D9;
-  padding: 5px;
-  border-radius: 5px;
-  cursor: pointer;
-  border: none;
+  display: flex;
   align-items: center;
-  transition: background 0.3s ease; /* Smooth hover effect */
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: transform 0.2s;
 }
 
 .share-btn:hover {
-  color: white;
-  background: #8a8787; /* Slightly lighter on hover for feedback */
+  transform: translateY(-2px);
 }
 
-/* Specific styles for each share option */
-.share-btn.linkedin { background: #0077B5; }
-.share-btn.linkedin:hover { background: #00619A; }
-.share-btn.gmail { background: #D14836; }
-.share-btn.gmail:hover { background: #B3362B; }
-.share-btn.whatsapp { background: #25D366; }
-.share-btn.whatsapp:hover { background: #1EB851; }
-.share-btn.facebook { background: #1877F2; }
-.share-btn.facebook:hover { background: #1564D7; }
-.share-btn.telegram { background: #0088CC; }
-.share-btn.telegram:hover { background: #0077B5; }
-.share-btn.copy-link { background: #4A4A4A; }
-.share-btn.copy-link:hover { background: #5A5A5A; }
+.linkedin { background: #0077B5; color: white; }
+.gmail { background: #EA4335; color: white; }
+.whatsapp { background: #25D366; color: white; }
+.facebook { background: #1877F2; color: white; }
+.telegram { background: #0088CC; color: white; }
+.copy-link { background: #f5f5f5; color: #333; }
 
-/* Ensure the popup stands out with a higher z-index and smooth animation */
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.share-btn svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
 }
 </style>

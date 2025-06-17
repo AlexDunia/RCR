@@ -58,9 +58,6 @@
                 </svg>
                 {{ agent.phone }}
               </a>
-
-              <div class="agent-card__specialty">{{ agent.title }}</div>
-
               <div class="agent-card__location">
                 <i class="fas fa-map-marker-alt"></i>
                 {{ agent.location }}
@@ -75,6 +72,8 @@
         </div>
       </div>
     </section>
+
+    <PublicFooter class="agents-footer" />
 
     <!-- Contact Agent Modal -->
     <div v-if="showContactModal" class="modal-overlay" @click="closeContactModal">
@@ -161,6 +160,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useAgentStore } from '@/stores/agentStore';
 import GlobalHeader from '@/components/GlobalHeader.vue';
+import PublicFooter from '@/components/PublicFooter.vue';
 
 const agentStore = useAgentStore();
 
@@ -991,5 +991,10 @@ function handleSearch() {
   z-index: 1;
   max-width: 600px;
   line-height: 1.6;
+}
+
+.agents-footer {
+  margin-top: 30px;
+  font-size: calc(1em + 4px);
 }
 </style>

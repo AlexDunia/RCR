@@ -1,153 +1,23 @@
 // src/store/propertyStore.js
 import { defineStore } from 'pinia'
+import { propertyService } from '../services/propertyService'
 
 export const usePropertyStore = defineStore('propertyStore', {
   state: () => ({
-    properties: [
-      {
-        id: 1,
-        name: 'Cedar Grove Estates',
-        location: 'Austin, Texas',
-        address: '123 Cedar Grove, Austin, TX 78701',
-        price: 25000,
-        bedrooms: 3,
-        bathrooms: 6,
-        size: 1700,
-        type: 'Residential',
-        isFavorite: true,
-        status: 'For Sale',
-        image: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800&auto=format&fit=crop&q=60',
-        description: 'A beautiful residential estate located in Austin, Texas.',
-        images: [
-          'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800&auto=format&fit=crop&q=60',
-          'https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=800&auto=format&fit=crop&q=60',
-          'https://images.unsplash.com/photo-1575517111839-3a3843ee7f5d?w=800&auto=format&fit=crop&q=60',
-          'https://images.unsplash.com/photo-1592928302636-c83cf1e1c887?w=800&auto=format&fit=crop&q=60',
-          'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800&auto=format&fit=crop&q=60',
-          'https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=800&auto=format&fit=crop&q=60'
-        ]
-      },
-      {
-        id: 2,
-        name: 'Willow Creek Villa',
-        location: 'Boulder, Colorado',
-        address: '456 Willow Creek, Boulder, CO 80301',
-        price: 35000,
-        bedrooms: 4,
-        bathrooms: 5,
-        size: 2000,
-        type: 'Commercial',
-        isFavorite: false,
-        status: 'For Rent',
-        image: 'https://images.unsplash.com/photo-1592595896551-12b371d546d5?w=800&auto=format&fit=crop&q=60',
-        description: 'A spacious commercial villa in Boulder, Colorado.',
-        images: [
-          'https://images.unsplash.com/photo-1592595896551-12b371d546d5?w=800&auto=format&fit=crop&q=60',
-          'https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=800&auto=format&fit=crop&q=60',
-          'https://images.unsplash.com/photo-1575517111839-3a3843ee7f5d?w=800&auto=format&fit=crop&q=60',
-          'https://images.unsplash.com/photo-1592928302636-c83cf1e1c887?w=800&auto=format&fit=crop&q=60'
-        ]
-      },
-      {
-        id: 3,
-        name: 'Maple Leaf Cottage',
-        location: 'Portland, Oregon',
-        address: '789 Maple Leaf, Portland, OR 97201',
-        price: 45000,
-        bedrooms: 5,
-        bathrooms: 4,
-        size: 2500,
-        type: 'Residential',
-        isFavorite: true,
-        status: 'New',
-        image: 'https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=800&auto=format&fit=crop&q=60',
-        description: 'A cozy residential cottage in Portland, Oregon.',
-        images: [
-          'https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=800&auto=format&fit=crop&q=60',
-          'https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=800&auto=format&fit=crop&q=60',
-          'https://images.unsplash.com/photo-1575517111839-3a3843ee7f5d?w=800&auto=format&fit=crop&q=60',
-          'https://images.unsplash.com/photo-1592928302636-c83cf1e1c887?w=800&auto=format&fit=crop&q=60'
-        ]
-      },
-      {
-        id: 4,
-        name: 'Pine Hill Mansion',
-        location: 'Seattle, Washington',
-        address: '101 Pine Hill, Seattle, WA 98101',
-        price: 55000,
-        bedrooms: 6,
-        bathrooms: 7,
-        size: 3000,
-        type: 'Luxury',
-        image: 'https://images.unsplash.com/photo-1592595896616-c37162298647?w=800&auto=format&fit=crop&q=60',
-        description: 'A luxurious mansion located in Seattle, Washington.',
-        images: [
-          'https://images.unsplash.com/photo-1592595896616-c37162298647?w=800&auto=format&fit=crop&q=60',
-          'https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=800&auto=format&fit=crop&q=60',
-          'https://images.unsplash.com/photo-1575517111839-3a3843ee7f5d?w=800&auto=format&fit=crop&q=60',
-          'https://images.unsplash.com/photo-1592928302636-c83cf1e1c887?w=800&auto=format&fit=crop&q=60'
-        ]
-      },
-      {
-        id: 5,
-        name: 'Oakwood Apartments',
-        location: 'San Francisco, California',
-        address: '202 Oakwood, San Francisco, CA 94101',
-        price: 65000,
-        bedrooms: 2,
-        bathrooms: 2,
-        size: 1200,
-        type: 'Apartment',
-        image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&auto=format&fit=crop&q=60',
-        description: 'Modern apartments in the heart of San Francisco, California.',
-        images: [
-          'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&auto=format&fit=crop&q=60',
-          'https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=800&auto=format&fit=crop&q=60',
-          'https://images.unsplash.com/photo-1575517111839-3a3843ee7f5d?w=800&auto=format&fit=crop&q=60',
-          'https://images.unsplash.com/photo-1592928302636-c83cf1e1c887?w=800&auto=format&fit=crop&q=60'
-        ]
-      },
-      {
-        id: 6,
-        name: 'Birchwood Residence',
-        location: 'Denver, Colorado',
-        address: '303 Birchwood, Denver, CO 80201',
-        price: 75000,
-        bedrooms: 3,
-        bathrooms: 3,
-        size: 1500,
-        type: 'Residential',
-        image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&auto=format&fit=crop&q=60',
-        description: 'A charming residence in Denver, Colorado.',
-        images: [
-          'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&auto=format&fit=crop&q=60',
-          'https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=800&auto=format&fit=crop&q=60',
-          'https://images.unsplash.com/photo-1575517111839-3a3843ee7f5d?w=800&auto=format&fit=crop&q=60',
-          'https://images.unsplash.com/photo-1592928302636-c83cf1e1c887?w=800&auto=format&fit=crop&q=60'
-        ]
-      },
-      {
-        id: 7,
-        name: 'Spruce Villa',
-        location: 'Salt Lake City, Utah',
-        address: '404 Spruce Villa, Salt Lake City, UT 84101',
-        price: 85000,
-        bedrooms: 4,
-        bathrooms: 4,
-        size: 1800,
-        type: 'Villa',
-        image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&auto=format&fit=crop&q=60',
-        description: 'A beautiful villa in Salt Lake City, Utah.',
-        images: [
-          'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&auto=format&fit=crop&q=60',
-          'https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?w=800&auto=format&fit=crop&q=60',
-          'https://images.unsplash.com/photo-1575517111839-3a3843ee7f5d?w=800&auto=format&fit=crop&q=60',
-          'https://images.unsplash.com/photo-1592928302636-c83cf1e1c887?w=800&auto=format&fit=crop&q=60'
-        ]
-      },
-      // More properties can be added dynamically
-    ],
-    currentIndex: 0, // For carousel navigation
+    properties: [],
+    currentIndex: 0,
+    loading: false,
+    error: null,
+    currentProperty: null,
+    imageIndices: {}, // Store current image index for each property
+    filters: {
+      type: null,
+      minPrice: null,
+      maxPrice: null,
+      bedrooms: null,
+      bathrooms: null,
+      status: null
+    }
   }),
 
   getters: {
@@ -156,24 +26,191 @@ export const usePropertyStore = defineStore('propertyStore', {
 
     favoriteProperties: (state) =>
       state.properties.filter(property => property.isFavorite),
+
+    filteredProperties: (state) => {
+      return state.properties.filter(property => {
+        if (state.filters.type && property.type !== state.filters.type) return false
+        if (state.filters.minPrice && property.price < state.filters.minPrice) return false
+        if (state.filters.maxPrice && property.price > state.filters.maxPrice) return false
+        if (state.filters.bedrooms && property.bedrooms !== state.filters.bedrooms) return false
+        if (state.filters.bathrooms && property.bathrooms !== state.filters.bathrooms) return false
+        if (state.filters.status && property.status !== state.filters.status) return false
+        return true
+      })
+    }
   },
 
   actions: {
+    async fetchProperties() {
+      try {
+        console.log('Fetching properties...')
+        this.loading = true
+        this.error = null
+        const response = await propertyService.getProperties(this.filters)
+        console.log('API Response:', response)
+        if (response && response.data) {
+          this.properties = response.data.map(property => ({
+            ...property,
+            currentImageIndex: 0 // Initialize image index for each property
+          }))
+          console.log('Properties set:', this.properties)
+        } else {
+          console.log('No data in response')
+          this.properties = []
+        }
+      } catch (error) {
+        console.error('Error fetching properties:', error)
+        this.error = error.message || 'Failed to fetch properties'
+        this.properties = []
+        throw error
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async fetchPropertyById(id) {
+      try {
+        this.loading = true;
+        this.error = null;
+        const response = await propertyService.getPropertyById(id);
+        console.log('Property API Response:', response);
+        if (response && response.data) {
+          const property = {
+            ...response.data,
+            currentImageIndex: 0,
+            images: response.data.media?.images || response.data.images || []
+          };
+          console.log('Processed Property:', property);
+          // Update the property in the store
+          const index = this.properties.findIndex(p => p.id === id);
+          if (index !== -1) {
+            this.properties[index] = property;
+          } else {
+            this.properties.push(property);
+          }
+          this.currentProperty = property;
+          return property;
+        }
+        return null;
+      } catch (error) {
+        console.error('Error fetching property:', error);
+        this.error = error.message || 'Failed to fetch property';
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async createProperty(propertyData) {
+      try {
+        this.loading = true
+        this.error = null
+        const data = await propertyService.createProperty(propertyData)
+        this.properties.push(data)
+        return data
+      } catch (error) {
+        this.error = error.message || 'Failed to create property'
+        throw error
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async updateProperty(id, propertyData) {
+      try {
+        this.loading = true
+        this.error = null
+        const data = await propertyService.updateProperty(id, propertyData)
+        const index = this.properties.findIndex(p => p.id === id)
+        if (index !== -1) {
+          this.properties[index] = data
+        }
+        return data
+      } catch (error) {
+        this.error = error.message || 'Failed to update property'
+        throw error
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async deleteProperty(id) {
+      try {
+        this.loading = true
+        this.error = null
+        await propertyService.deleteProperty(id)
+        this.properties = this.properties.filter(p => p.id !== id)
+      } catch (error) {
+        this.error = error.message || 'Failed to delete property'
+        throw error
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async toggleFavorite(propertyId) {
+      try {
+        const data = await propertyService.toggleFavorite(propertyId)
+        const property = this.properties.find(p => p.id === propertyId)
+        if (property) {
+          property.isFavorite = data.isFavorite
+        }
+      } catch (error) {
+        this.error = error.message || 'Failed to toggle favorite'
+        throw error
+      }
+    },
+
     nextSlide() {
       if (this.currentIndex + 4 < this.properties.length) {
         this.currentIndex += 4
       }
     },
+
     prevSlide() {
       if (this.currentIndex > 0) {
         this.currentIndex -= 4
       }
     },
-    toggleFavorite(propertyId) {
-      const property = this.properties.find(p => p.id === propertyId);
+
+    setFilters(filters) {
+      this.filters = { ...this.filters, ...filters }
+      this.fetchProperties() // Refetch with new filters
+    },
+
+    clearFilters() {
+      this.filters = {
+        type: null,
+        minPrice: null,
+        maxPrice: null,
+        bedrooms: null,
+        bathrooms: null,
+        status: null
+      }
+      this.fetchProperties() // Refetch without filters
+    },
+
+    setPropertyImageIndex(propertyId, index) {
+      const property = this.properties.find(p => p.id === propertyId)
       if (property) {
-        property.isFavorite = !property.isFavorite;
+        property.currentImageIndex = index
       }
     },
-  },
+
+    nextPropertyImage(propertyId) {
+      const property = this.properties.find(p => p.id === propertyId)
+      if (property && property.images && property.images.length > 0) {
+        property.currentImageIndex = (property.currentImageIndex + 1) % property.images.length
+      }
+    },
+
+    previousPropertyImage(propertyId) {
+      const property = this.properties.find(p => p.id === propertyId)
+      if (property && property.images && property.images.length > 0) {
+        property.currentImageIndex = property.currentImageIndex === 0
+          ? property.images.length - 1
+          : property.currentImageIndex - 1
+      }
+    }
+  }
 })

@@ -1,13 +1,19 @@
 <template>
-  <div class="new-buy-properties">
-    <div class="welcome-container">
-      <h1>Welcome to Buy Properties</h1>
-      <p>Find your dream home with us</p>
+  <div class="new-buy-properties-container">
+    <GlobalHeader />
+    <div class="new-buy-properties">
+      <div class="welcome-container">
+        <h1>Welcome to Buy Properties</h1>
+        <p>Find your dream home with us</p>
+      </div>
     </div>
+    <PublicFooter />
   </div>
 </template>
 
 <script setup>
+import GlobalHeader from '@/components/GlobalHeader.vue';
+import PublicFooter from '@/components/PublicFooter.vue';
 // Component logic can be added here
 </script>
 

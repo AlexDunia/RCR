@@ -9,10 +9,7 @@
       <!-- Desktop Navigation -->
       <div class="main-nav__center desktop-only">
         <router-link v-if="userRole === 'all'" to="/" class="main-nav__link">Home</router-link>
-        <router-link to="/buy" class="main-nav__link">Buy</router-link>
-        <router-link to="/rent" class="main-nav__link">Rent</router-link>
-        <router-link to="/sell" class="main-nav__link">Sell</router-link>
-        <router-link to="/allagents" class="main-nav__link">Agent</router-link>
+        <router-link to="/allagents" class="main-nav__link">Find Agents</router-link>
         <router-link to="/signup" class="main-nav__link">Join Us</router-link>
       </div>
       <div class="main-nav__right desktop-only">
@@ -36,10 +33,7 @@
       <div class="mobile-nav-modal__content">
         <button class="mobile-nav-modal__close" @click="showMobileNav = false" aria-label="Close menu">×</button>
         <router-link v-if="userRole === 'all'" to="/" class="mobile-nav-modal__link" @click="showMobileNav = false">Home</router-link>
-        <router-link to="/buy" class="mobile-nav-modal__link" @click="showMobileNav = false">Buy</router-link>
-        <router-link to="/rent" class="mobile-nav-modal__link" @click="showMobileNav = false">Rent</router-link>
-        <router-link to="/sell" class="mobile-nav-modal__link" @click="showMobileNav = false">Sell</router-link>
-        <router-link to="/allagents" class="mobile-nav-modal__link" @click="showMobileNav = false">Agent</router-link>
+        <router-link to="/allagents" class="mobile-nav-modal__link" @click="showMobileNav = false">Find Agents</router-link>
         <router-link to="/signup" class="mobile-nav-modal__link" @click="showMobileNav = false">Join Us</router-link>
         <div class="mobile-nav-modal__buttons">
           <router-link to="/signin" class="mobile-nav-modal__button" @click="showMobileNav = false">Sign in</router-link>
@@ -326,19 +320,19 @@ onUnmounted(() => {
   .desktop-only {
     display: none !important;
   }
-  
+
   .mobile-only {
     display: flex !important;
   }
-  
+
   .hamburger-menu {
     display: flex !important;
   }
-  
+
   .main-nav__container {
     padding: 0 16px;
   }
-  
+
   .main-nav__logo-img {
     height: 40px;
   }

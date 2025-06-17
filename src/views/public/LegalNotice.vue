@@ -34,7 +34,7 @@
           </div>
           <div class="hero-text-col">
             <h1 class="hero-title">Legal Notice</h1>
-            <p class="hero-subtitle">Transparency, trust, and compliance. Here's everything you need to know about your rights and our obligations as a real estate platform.</p>
+            <p class="hero-subtitle">Important information about your rights and our obligations as your trusted real estate partner.</p>
           </div>
         </div>
       </div>
@@ -46,59 +46,69 @@
       <section class="legal-section animate-section">
         <div class="section-header">
           <div class="section-accent"></div>
-          <h2 class="section-title">Introduction</h2>
+          <h2 class="section-title">Legal Information</h2>
         </div>
         <div class="story-content">
           <div class="content-card">
-            <p class="highlight-text">This Legal Notice explains your rights and our responsibilities as you use Real City Realty.</p>
-            <p>We are committed to full transparency and legal compliance. By using our services, you agree to the terms and practices described here. Please read carefully and contact us with any questions.</p>
+            <p class="highlight-text">This Legal Notice outlines the terms and conditions governing your use of Real City Realty's services.</p>
+            <p>By accessing and using our platform, you acknowledge and agree to comply with these terms. Please read this notice carefully as it contains important information about your rights and obligations.</p>
           </div>
         </div>
       </section>
 
-      <!-- Key Legal Points Section -->
+      <!-- Legal Notices Grid -->
       <section class="legal-section animate-section">
         <div class="section-header">
           <div class="section-accent"></div>
-          <h2 class="section-title">Key Legal Points</h2>
+          <h2 class="section-title">Key Legal Notices</h2>
         </div>
         <div class="legal-grid">
           <div class="legal-card">
             <div class="legal-card-icon legal-card-icon--blue">
-              <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="16" fill="#e0f2fe"/><path d="M16 24V10" stroke="#0066cc" stroke-width="2.2" stroke-linecap="round"/><path d="M10 18C10 21.3137 13.134 24 16 24C18.866 24 22 21.3137 22 18" stroke="#0066cc" stroke-width="2.2" stroke-linecap="round"/><path d="M7 14H25" stroke="#0066cc" stroke-width="2.2" stroke-linecap="round"/></svg>
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                <circle cx="16" cy="16" r="16" fill="#e0f2fe"/>
+                <path d="M16 24V10" stroke="#0066cc" stroke-width="2.2" stroke-linecap="round"/>
+                <path d="M10 18C10 21.3137 13.134 24 16 24C18.866 24 22 21.3137 22 18" stroke="#0066cc" stroke-width="2.2" stroke-linecap="round"/>
+                <path d="M7 14H25" stroke="#0066cc" stroke-width="2.2" stroke-linecap="round"/>
+              </svg>
             </div>
-            <h3>Legal Status</h3>
-            <ul class="feature-list">
-              <li>Registered real estate brokerage</li>
-              <li>Compliant with all relevant laws</li>
-              <li>Transparent business practices</li>
-            </ul>
+            <h3>Licensing & Registration</h3>
+            <p>Real City Realty is a licensed real estate brokerage operating under all applicable laws and regulations. Our agents are certified professionals committed to ethical practices.</p>
           </div>
           <div class="legal-card">
             <div class="legal-card-icon legal-card-icon--yellow">
-              <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="16" fill="#fef3c7"/><path d="M10 22L16 10L22 22" stroke="#d97706" stroke-width="2.2" stroke-linecap="round"/></svg>
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                <circle cx="16" cy="16" r="16" fill="#fef3c7"/>
+                <path d="M10 22L16 10L22 22" stroke="#d97706" stroke-width="2.2" stroke-linecap="round"/>
+              </svg>
             </div>
-            <h3>Disclaimer</h3>
-            <p>All property information is provided "as is" without warranty. We make no guarantees about listing accuracy. Please verify all information independently.</p>
+            <h3>Fair Housing</h3>
+            <p>We strictly adhere to Fair Housing laws and do not discriminate based on race, color, religion, sex, handicap, familial status, or national origin.</p>
           </div>
           <div class="legal-card">
             <div class="legal-card-icon legal-card-icon--green">
-              <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="16" fill="#d1fae5"/><path d="M10 22L16 10L22 22" stroke="#059669" stroke-width="2.2" stroke-linecap="round"/></svg>
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                <circle cx="16" cy="16" r="16" fill="#d1fae5"/>
+                <path d="M10 22L16 10L22 22" stroke="#059669" stroke-width="2.2" stroke-linecap="round"/>
+              </svg>
             </div>
-            <h3>Intellectual Property</h3>
-            <p>All content and trademarks are owned by Real City Realty. Unauthorized use is strictly prohibited.</p>
+            <h3>Data Protection</h3>
+            <p>Your personal information is protected under applicable data protection laws. We implement strict security measures to safeguard your data.</p>
           </div>
           <div class="legal-card">
             <div class="legal-card-icon legal-card-icon--red">
-              <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="16" fill="#fee2e2"/><path d="M10 22L16 10L22 22" stroke="#ef4444" stroke-width="2.2" stroke-linecap="round"/></svg>
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                <circle cx="16" cy="16" r="16" fill="#fee2e2"/>
+                <path d="M10 22L16 10L22 22" stroke="#ef4444" stroke-width="2.2" stroke-linecap="round"/>
+              </svg>
             </div>
-            <h3>Limitation of Liability</h3>
-            <p>We are not liable for damages from use or inability to access our platform, including direct, indirect, or consequential damages.</p>
+            <h3>Legal Compliance</h3>
+            <p>We maintain strict compliance with all applicable real estate laws, regulations, and professional standards in our operations.</p>
           </div>
         </div>
       </section>
 
-      <!-- Detailed Legal Section -->
+      <!-- Detailed Legal Information -->
       <section class="legal-section animate-section">
         <div class="section-header">
           <div class="section-accent"></div>
@@ -106,20 +116,20 @@
         </div>
         <div class="detailed-legal">
           <div class="legal-block">
-            <h3>1. Company Information</h3>
-            <p>Real City Realty is a registered real estate brokerage. Our business address, contact information, and registration details are available upon request. We operate under the laws and regulations of the jurisdictions in which we provide services.</p>
+            <h3>1. Professional Standards</h3>
+            <p>Our real estate professionals adhere to the highest standards of practice, maintaining all required licenses and certifications. We regularly update our knowledge to serve you better.</p>
           </div>
           <div class="legal-block">
-            <h3>2. Service Disclaimer</h3>
-            <p>While we strive to provide accurate and up-to-date information, we make no representations or warranties about the completeness, accuracy, reliability, suitability, or availability of our services. Users should independently verify all information.</p>
+            <h3>2. Transaction Security</h3>
+            <p>All real estate transactions are conducted through secure, verified channels. We implement robust security measures to protect your financial and personal information throughout the process.</p>
           </div>
           <div class="legal-block">
-            <h3>3. Third-Party Links</h3>
-            <p>Our platform may contain links to third-party websites. We are not responsible for the content, privacy policies, or practices of any third-party websites. Users access these links at their own risk.</p>
+            <h3>3. Property Information</h3>
+            <p>While we strive to provide accurate property information, all details should be independently verified. We recommend professional inspections and due diligence before making any real estate decisions.</p>
           </div>
           <div class="legal-block">
-            <h3>4. Governing Law</h3>
-            <p>These legal notices are governed by and construed in accordance with the laws of the jurisdiction in which Real City Realty operates. Any disputes shall be subject to the exclusive jurisdiction of the courts in that jurisdiction.</p>
+            <h3>4. Consumer Protection</h3>
+            <p>We uphold all consumer protection laws and regulations, ensuring transparent communication and fair practices in all our dealings with clients.</p>
           </div>
         </div>
       </section>
@@ -127,19 +137,17 @@
       <!-- Contact Section -->
       <section class="legal-section cta-section animate-section">
         <div class="cta-content">
-          <h2>Need Legal Assistance?</h2>
-          <p>If you have any questions about our legal notices or need clarification on any points, please contact our legal team.</p>
-          <button class="cta-button">Contact Legal Team</button>
+          <h2>Questions About Legal Matters?</h2>
+          <p>Our legal team is here to help clarify any questions about our notices, terms, or legal obligations.</p>
+          <button class="cta-button">Contact Legal Department</button>
         </div>
       </section>
     </div>
-    <PublicFooter />
   </div>
 </template>
 
 <script setup>
 import GlobalHeader from '@/components/GlobalHeader.vue';
-import PublicFooter from '@/components/PublicFooter.vue';
 import { onMounted } from 'vue';
 
 onMounted(() => {
@@ -347,6 +355,7 @@ onMounted(() => {
   justify-content: center;
   margin-bottom: 0.5rem;
 }
+
 .legal-card-icon--blue { background: #e0f2fe; }
 .legal-card-icon--yellow { background: #fef3c7; }
 .legal-card-icon--green { background: #d1fae5; }
@@ -359,30 +368,9 @@ onMounted(() => {
   margin-bottom: 1rem;
 }
 
-.legal-card p, .legal-card li {
+.legal-card p {
   color: #4b5563;
   line-height: 1.6;
-}
-
-.feature-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.feature-list li {
-  position: relative;
-  padding-left: 1.5rem;
-  margin-bottom: 0.75rem;
-  color: #4b5563;
-}
-
-.feature-list li::before {
-  content: "•";
-  position: absolute;
-  left: 0;
-  color: #0066cc;
-  font-weight: bold;
 }
 
 .detailed-legal {

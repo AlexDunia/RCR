@@ -8,9 +8,6 @@
             <div class="mobile-nav-modal__content">
               <button class="mobile-nav-modal__close" @click="showMobileNav = false" aria-label="Close navigation">×</button>
               <router-link v-if="userRole === 'all'" to="/" class="mobile-nav-modal__link" @click="showMobileNav = false">Home</router-link>
-              <router-link to="/buy" class="mobile-nav-modal__link" @click="showMobileNav = false">Buy</router-link>
-              <router-link to="/rent" class="mobile-nav-modal__link" @click="showMobileNav = false">Rent</router-link>
-              <router-link to="/sell" class="mobile-nav-modal__link" @click="showMobileNav = false">Sell</router-link>
               <router-link to="/allagents" class="mobile-nav-modal__link" @click="showMobileNav = false">Find Agents</router-link>
               <router-link to="/signup" class="mobile-nav-modal__link" @click="showMobileNav = false">Join Us</router-link>
               <div class="mobile-nav-modal__buttons">
@@ -34,9 +31,6 @@
           </div>
           <div class="main-nav__center desktop-nav">
             <router-link v-if="userRole === 'all'" to="/" class="main-nav__link">Home</router-link>
-            <router-link to="/buy" class="main-nav__link">Buy</router-link>
-            <router-link to="/rent" class="main-nav__link">Rent</router-link>
-            <router-link to="/sell" class="main-nav__link">Sell</router-link>
             <router-link to="/allagents" class="main-nav__link">Find Agents</router-link>
             <router-link to="/signup" class="main-nav__link">Join Us</router-link>
           </div>
@@ -124,18 +118,44 @@
     <section class="featured featured--figma reveal">
       <div class="boxed-container">
         <h2 class="featured__title--figma">Find the best place for you.</h2>
-        <div class="property-grid--figma">
-          <div class="property-card--figma" v-for="property in featuredProperties" :key="property.id">
-            <img :src="property.image" :alt="property.name" class="property-card__img--figma" loading="lazy">
+        <div v-if="propertyStore.loading" class="loading-state">
+          Loading properties...
+        </div>
+        <div v-else-if="propertyStore.error" class="error-state">
+          {{ propertyStore.error }}
+        </div>
+        <div v-else-if="featuredProperties.length === 0" class="empty-state">
+          No properties available at the moment.
+        </div>
+        <div v-else class="property-grid--figma">
+          <router-link
+            v-for="property in featuredProperties"
+            :key="property.id"
+            :to="`/property/${property.id}`"
+            class="property-card--figma">
+            <div class="property-card__image-carousel">
+              <img v-if="!property.images?.length"
+                   src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1743087291/Designer_8_1_fjvyi0.png"
+                   :alt="property.name"
+                   class="property-card__img--figma"
+                   loading="lazy">
+              <template v-else>
+                <img :src="property.images[0]"
+                     :alt="property.name"
+                     class="property-card__img--figma"
+                     loading="lazy"
+                     @error="handleImageError">
+              </template>
+            </div>
             <div class="property-card__content--figma">
-              <h3 class="property-card__title--figma">{{ property.name }}</h3>
+              <h3 class="property-card__title--figma">{{ property.name || 'Beautiful Property' }}</h3>
               <div class="property-card__price--figma">${{ formatPrice(property.price) }}</div>
               <div class="property-card__address--figma">
                 <svg class="property-card__address-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                {{ property.address }}
+                {{ property.address }}{{ property.city ? `, ${property.city}` : '' }}{{ property.state ? `, ${property.state}` : '' }}
               </div>
             </div>
-          </div>
+          </router-link>
         </div>
         <router-link to="/allproperties" class="featured__view-more">
           View More
@@ -275,63 +295,7 @@
     </section>
 
     <!-- Footer -->
-    <footer class="footer--figma">
-      <div class="boxed-container">
-        <div class="footer__container--figma">
-          <div class="footer__col footer__col--brand">
-            <div class="footer__logo--figma">Real City</div>
-            <div class="footer__tagline--figma">realty inc brokerage</div>
-            <div class="footer__desc--figma">We have built our reputation as true local area experts.</div>
-          </div>
-          <div class="footer__col footer__col--service">
-            <div class="footer__heading--figma">Service</div>
-            <ul class="footer__list--figma">
-              <li><router-link to="/about">About us</router-link></li>
-              <li><router-link to="/careers">Careers</router-link></li>
-              <li><router-link to="/terms">Terms & Conditions</router-link></li>
-              <li><router-link to="/privacy">Privacy & Policy</router-link></li>
-              <li><router-link to="/blog">Blog</router-link></li>
-              <li><router-link to="/signup" class="footer__link">Sign up</router-link></li>
-              <li><router-link to="/login" class="footer__link">Login</router-link></li>
-            </ul>
-          </div>
-          <div class="footer__col footer__col--community">
-            <div class="footer__heading--figma">Community</div>
-            <ul class="footer__list--figma">
-              <li><router-link to="/allagents">Find agents</router-link></li>
-              <li><router-link to="/lifestyle">Lifestyle</router-link></li>
-              <li><router-link to="/legal-notice">Legal notice</router-link></li>
-            </ul>
-          </div>
-          <div class="footer__col footer__col--social">
-            <div class="footer__heading--figma">Follow us on</div>
-            <div class="footer__socials--figma">
-              <a href="#" class="footer__social-icon--figma" aria-label="Instagram">
-                <span class="footer__icon-bg--figma">
-                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M16.5 7.5H16.51M11 15.5C13.4853 15.5 15.5 13.4853 15.5 11C15.5 8.51472 13.4853 6.5 11 6.5C8.51472 6.5 6.5 8.51472 6.5 11C6.5 13.4853 8.51472 15.5 11 15.5ZM11 22C16.5228 22 21 17.5228 21 12C21 6.47715 16.5228 2 11 2C5.47715 2 1 6.47715 1 12C1 17.5228 5.47715 22 11 22Z" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </span>
-              </a>
-              <a href="#" class="footer__social-icon--figma" aria-label="YouTube">
-                <span class="footer__icon-bg--figma">
-                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M21.5 6.5C21.5 6.5 21.3 4.5 20.5 3.7C19.5 2.7 18.5 2.7 18 2.5C15.5 2 11 2 11 2C11 2 6.5 2 4 2.5C3.5 2.7 2.5 2.7 1.5 3.7C0.7 4.5 0.5 6.5 0.5 6.5C0.5 6.5 0.3 8.7 0.3 10.9V13.1C0.3 15.3 0.5 17.5 0.5 17.5C0.5 17.5 0.7 19.5 1.5 20.3C2.5 21.3 3.5 21.3 4 21.5C5.5 21.9 11 22 11 22C11 22 15.5 21.9 18 21.5C18.5 21.3 19.5 21.3 20.5 20.3C21.3 19.5 21.5 17.5 21.5 17.5C21.5 17.5 21.7 15.3 21.7 13.1V10.9C21.7 8.7 21.5 6.5 21.5 6.5ZM8.8 15.1V8.9L14.5 12L8.8 15.1Z" fill="#fff"/>
-                  </svg>
-                </span>
-              </a>
-              <a href="#" class="footer__social-icon--figma" aria-label="Facebook">
-                <span class="footer__icon-bg--figma">
-                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M21.5 11C21.5 5.5 16.8 1 11 1C5.2 1 0.5 5.5 0.5 11C0.5 15.9 4.1 20 8.8 21V14.5H6.5V11H8.8V8.3C8.8 5.3 10.5 3.8 13.2 3.8C14.4 3.8 15.7 4 15.7 4V6.5H14.3C12.9 6.5 12.5 7.2 12.5 8V11H15.5L15 14.5H12.5V21C17.2 20 21.5 15.9 21.5 11Z" fill="#fff"/>
-                  </svg>
-                </span>
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </footer>
+    <PublicFooter />
 
     <!-- Fixed Navigation -->
     <nav class="fixed-nav" :class="{ 'fixed-nav--visible': showFixedNav }" v-show="showFixedNav">
@@ -342,10 +306,7 @@
           </div>
           <div class="fixed-nav__center desktop-nav">
             <router-link v-if="userRole === 'all'" to="/" class="fixed-nav__link">Home</router-link>
-            <router-link to="/buy" class="fixed-nav__link">Buy</router-link>
-            <router-link to="/rent" class="fixed-nav__link">Rent</router-link>
-            <router-link to="/sell" class="fixed-nav__link">Sell</router-link>
-            <router-link to="/agent" class="fixed-nav__link">Agent</router-link>
+            <router-link to="/allagents" class="fixed-nav__link">Find Agents</router-link>
             <router-link to="/signup" class="fixed-nav__link">Join Us</router-link>
           </div>
           <div class="fixed-nav__right desktop-nav">
@@ -367,6 +328,7 @@ import { ref, onMounted, onBeforeUnmount, nextTick, computed, onActivated } from
 import { useAgentStore } from '@/stores/agentStore';
 import { usePropertyStore } from '@/stores/propertyStore';
 import { useAuthStore } from '@/stores/authStore';
+import PublicFooter from '@/components/PublicFooter.vue';
 
 defineOptions({
   name: 'LandingPage'
@@ -414,6 +376,13 @@ onMounted(async () => {
   activeTab.value = 'Buy';
   showFixedNav.value = false;
   showMobileNav.value = false;
+
+  // Fetch properties
+  try {
+    await propertyStore.fetchProperties();
+  } catch (error) {
+    console.error('Error fetching properties:', error);
+  }
 
   // Intersection Observer for sticky nav
   await nextTick();
@@ -543,7 +512,14 @@ onBeforeUnmount(() => {
 useRevealOnScroll('.reveal');
 
 const propertyStore = usePropertyStore();
-const featuredProperties = computed(() => propertyStore.properties.slice(0, 4));
+const featuredProperties = computed(() => {
+  const properties = propertyStore.properties || [];
+  return properties.map(property => ({
+    ...property,
+    currentImageIndex: 0,
+    images: property.images || []
+  }));
+});
 
 // Add a reactive isMobile property for mobile detection
 const isMobile = ref(false);
@@ -578,6 +554,12 @@ const formatPrice = (price) => {
   if (isNaN(numericPrice)) return '0';
   return numericPrice.toLocaleString();
 };
+
+// Add this function to handle image loading errors
+function handleImageError(event, property) {
+  event.target.src = 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1743087291/Designer_8_1_fjvyi0.png';
+}
+
 </script>
 
 <style scoped>
@@ -797,9 +779,12 @@ const formatPrice = (price) => {
 }
 
 .with-icon {
-  padding-left: 40px;
+  padding-left: 48px;
   width: 100%;
   min-width: 280px;
+  height: 48px;
+  display: flex;
+  align-items: center;
 }
 
 .search-btn {
@@ -2472,10 +2457,19 @@ const formatPrice = (price) => {
   font-size: 18px;
   pointer-events: none;
   z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
 }
 
 .with-icon {
-  padding-left: 40px;
+  padding-left: 48px;
+  width: 100%;
+  min-width: 280px;
+  height: 48px;
+  display: flex;
+  align-items: center;
 }
 
 /* Responsive Navigation */
@@ -3172,5 +3166,173 @@ const formatPrice = (price) => {
   }
 }
 
+/* Footer Disclaimer and Copyright */
+.footer__disclaimer-wrapper {
+  margin-top: 48px;
+  padding-top: 32px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
 
+.footer__disclaimer {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.footer__disclaimer-text {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.footer__copyright {
+  text-align: center;
+}
+
+.footer__copyright-text {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+@media (max-width: 768px) {
+  .footer__disclaimer-wrapper {
+    margin-top: 32px;
+    padding: 24px 16px 0;
+  }
+
+  .footer__disclaimer-text {
+    font-size: 0.8rem;
+    margin-bottom: 16px;
+  }
+
+  .footer__copyright-text {
+    font-size: 0.8rem;
+  }
+}
+
+.loading-state,
+.error-state,
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  font-size: 1.1rem;
+  color: #666;
+}
+
+.error-state {
+  color: #dc2626;
+}
+
+.property-card__image-carousel {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  border-radius: 12px 12px 0 0;
+}
+
+.property-card__images {
+  display: flex;
+  transition: transform 0.3s ease;
+  height: 100%;
+}
+
+.property-card__img--figma {
+  width: 100%;
+  min-width: 100%;
+  height: 100%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.property-card__image-dots {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 2;
+}
+
+.image-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.image-dot--active {
+  background: #fff;
+}
+
+.image-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.8);
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 24px;
+  color: #333;
+  z-index: 2;
+  transition: all 0.2s;
+  opacity: 0;
+}
+
+.property-card__image-carousel:hover .image-nav {
+  opacity: 1;
+}
+
+.image-nav:hover {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.image-nav--prev {
+  left: 12px;
+}
+
+.image-nav--next {
+  right: 12px;
+}
+
+@media (max-width: 768px) {
+  .image-nav {
+    opacity: 1;
+    width: 28px;
+    height: 28px;
+    font-size: 20px;
+  }
+}
+
+/* Add these new styles */
+.property-card__details {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.detail-item i {
+  color: #0052a5;
+  font-size: 1rem;
+}
 </style>
