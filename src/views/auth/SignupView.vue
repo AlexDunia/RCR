@@ -113,12 +113,11 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import axiosInstance from '@/utils/axios';
 import { generateDeviceName } from '@/utils/deviceFingerprint';
 import { useAuthStore } from '@/stores/authStore';
 import { useRoleStore } from '@/stores/roleStore';
 import validationService from '@/services/validationService';
-import { sanitizeInput } from '@/utils/validators';
+import authService from '@/services/authService';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -162,15 +161,6 @@ function validateForm() {
   };
 }
 
-async function initializeCsrf() {
-  try {
-    await axiosInstance.get('/sanctum/csrf-cookie');
-  } catch (err) {
-    console.error('Failed to initialize CSRF protection:', err);
-    throw err;
-  }
-}
-
 async function onSignup() {
   try {
     error.value = null;
@@ -185,32 +175,23 @@ async function onSignup() {
 
     isLoading.value = true;
 
-    // Initialize CSRF protection before making the request
-    await initializeCsrf();
+    // Initialize auth
+    await authService.initializeAuth();
 
-    // Sanitize input
-    const sanitizedForm = {
-      name: sanitizeInput(form.name.trim()),
-      email: sanitizeInput(form.email.trim().toLowerCase()),
-      password: form.password, // Don't sanitize password
-      role: form.role,
-      device_name: form.device_name
-    };
-
-    const response = await axiosInstance.post('/api/auth/register', sanitizedForm);
+    const response = await authService.register({
+      name: form.name,
+      email: form.email,
+      password: form.password,
+      role: form.role
+    });
 
     // Store the token
-    const token = response.data.token;
-    authStore.setToken(token);
-
-    // Set user in auth store
-    await authStore.setUser(response.data.user);
-
-    // Set role in role store
-    roleStore.setRole(response.data.user.role);
+    authStore.setToken(response.token);
+    authStore.setUser(response.user);
+    roleStore.setRole(response.user.role);
 
     // Redirect based on role
-    switch (response.data.user.role) {
+    switch (response.user.role) {
       case 'agent':
         router.push('/agent-dashboard');
         break;
@@ -224,26 +205,10 @@ async function onSignup() {
   } catch (err) {
     console.error('Registration error:', err);
 
-    if (err.response) {
-      switch (err.response.status) {
-        case 422: // Validation errors from backend
-          validationErrors.value = err.response.data.errors;
-          break;
-        case 429: // Rate limiting
-          error.value = 'Too many attempts. Please try again later.';
-          break;
-        case 500: // Server error
-          error.value = 'An unexpected error occurred. Please try again.';
-          break;
-        default:
-          if (err.response.data.message) {
-            error.value = err.response.data.message;
-          } else {
-            error.value = 'Failed to create account. Please try again.';
-          }
-      }
+    if (err.status === 422) {
+      validationErrors.value = err.errors;
     } else {
-      error.value = 'Network error. Please check your connection.';
+      error.value = err.message;
     }
   } finally {
     isLoading.value = false;
@@ -253,12 +218,10 @@ async function onSignup() {
 async function onGoogleSignup() {
   try {
     isLoading.value = true;
-    const response = await axiosInstance.get('/api/auth/google/url');
-    window.location.href = response.data.url;
+    await authService.googleLogin();
   } catch (err) {
     console.error('Google signup error:', err);
-    error.value = 'Failed to initialize Google signup. Please try again.';
-  } finally {
+    error.value = err.message;
     isLoading.value = false;
   }
 }

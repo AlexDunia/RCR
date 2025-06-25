@@ -20,60 +20,44 @@ export const propertyService = {
   },
 
   async createProperty(propertyData) {
-    try {
-      const authStore = useAuthStore()
-      const response = await axiosInstance.post('/properties', propertyData, {
-        headers: {
-          Authorization: `Bearer ${authStore.token}`,
-          'Content-Type': 'multipart/form-data'
-        }
-      })
-      return response.data
-    } catch (error) {
-      throw error
-    }
+    const authStore = useAuthStore()
+    const response = await axiosInstance.post('/properties', propertyData, {
+      headers: {
+        Authorization: `Bearer ${authStore.token}`,
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+    return response.data
   },
 
   async updateProperty(id, propertyData) {
-    try {
-      const authStore = useAuthStore()
-      const response = await axiosInstance.put(`/properties/${id}`, propertyData, {
-        headers: {
-          Authorization: `Bearer ${authStore.token}`,
-          'Content-Type': 'multipart/form-data'
-        }
-      })
-      return response.data
-    } catch (error) {
-      throw error
-    }
+    const authStore = useAuthStore()
+    const response = await axiosInstance.put(`/properties/${id}`, propertyData, {
+      headers: {
+        Authorization: `Bearer ${authStore.token}`,
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+    return response.data
   },
 
   async deleteProperty(id) {
-    try {
-      const authStore = useAuthStore()
-      const response = await axiosInstance.delete(`/properties/${id}`, {
-        headers: {
-          Authorization: `Bearer ${authStore.token}`
-        }
-      })
-      return response.data
-    } catch (error) {
-      throw error
-    }
+    const authStore = useAuthStore()
+    const response = await axiosInstance.delete(`/properties/${id}`, {
+      headers: {
+        Authorization: `Bearer ${authStore.token}`
+      }
+    })
+    return response.data
   },
 
   async toggleFavorite(id) {
-    try {
-      const authStore = useAuthStore()
-      const response = await axiosInstance.post(`/properties/${id}/favorite`, {}, {
-        headers: {
-          Authorization: `Bearer ${authStore.token}`
-        }
-      })
-      return response.data
-    } catch (error) {
-      throw error
-    }
+    const authStore = useAuthStore()
+    const response = await axiosInstance.post(`/properties/${id}/favorite`, {}, {
+      headers: {
+        Authorization: `Bearer ${authStore.token}`
+      }
+    })
+    return response.data
   }
 }

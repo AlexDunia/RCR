@@ -185,25 +185,18 @@ async function onLogin() {
 
     isLoading.value = true;
 
-    // Initialize CSRF protection
+    // Initialize auth
     await authService.initializeAuth();
 
     const response = await authService.login({
-      email: form.email.trim().toLowerCase(),
-      password: form.password,
-      device_name: form.device_name,
-      remember: form.remember
+      email: form.email,
+      password: form.password
     });
 
     // Store authentication data
     authStore.setToken(response.token);
     authStore.setUser(response.user);
     roleStore.setRole(response.user.role);
-
-    // Store remember me token if enabled
-    if (form.remember && response.remember_token) {
-      localStorage.setItem('remember_token', response.remember_token);
-    }
 
     // Get the redirect URL from query params if it exists
     const redirectPath = router.currentRoute.value.query.redirect;
@@ -231,14 +224,10 @@ async function onLogin() {
   } catch (err) {
     console.error('Login error:', err);
 
-    if (err.response?.status === 429) {
-      error.value = 'Too many login attempts. Please try again later.';
-    } else if (err.response?.status === 401) {
-      error.value = 'Invalid email or password';
-    } else if (err.response?.data?.message) {
-      error.value = err.response.data.message;
+    if (err.status === 422) {
+      validationErrors.value = err.errors;
     } else {
-      error.value = 'An error occurred during login. Please try again.';
+      error.value = err.message;
     }
 
     isLoading.value = false;
@@ -248,12 +237,10 @@ async function onLogin() {
 async function onGoogleLogin() {
   try {
     isLoading.value = true;
-    const response = await authService.socialLogin('google');
-    window.location.href = response.redirect_url;
+    await authService.googleLogin();
   } catch (err) {
     console.error('Google login error:', err);
-    error.value = 'Failed to initialize Google login. Please try again.';
-  } finally {
+    error.value = err.message;
     isLoading.value = false;
   }
 }

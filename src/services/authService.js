@@ -1,32 +1,23 @@
 import axios from '@/utils/axios';
 import { sanitizeInput } from '@/utils/validators';
 
-const API_URL = '/api';
+const API_URL = '/api/auth';
 const TOKEN_KEY = 'auth_token';
-const REFRESH_TOKEN_KEY = 'refresh_token';
 const USER_DATA_KEY = 'user_data';
 
 // Configure axios defaults
 axios.defaults.withCredentials = true;
 
-// Request interceptor for security
+// Request interceptor for API calls
 axios.interceptors.request.use(async (config) => {
-  // Get CSRF token from meta tag (Laravel sets this)
-  const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-  if (token) {
-    config.headers['X-CSRF-TOKEN'] = token;
-  }
-
   // Add auth token if available
-  const authToken = localStorage.getItem(TOKEN_KEY);
+  const authToken = sessionStorage.getItem(TOKEN_KEY);
   if (authToken) {
     config.headers['Authorization'] = `Bearer ${authToken}`;
   }
 
-  // Add security headers
-  config.headers['X-Requested-With'] = 'XMLHttpRequest';
   config.headers['Accept'] = 'application/json';
-
+  config.headers['Content-Type'] = 'application/json';
   return config;
 });
 
@@ -34,40 +25,10 @@ axios.interceptors.request.use(async (config) => {
 axios.interceptors.response.use(
   (response) => response,
   async (error) => {
-    // Handle rate limiting
-    if (error.response?.status === 429) {
-      const retryAfter = error.response.headers['retry-after'];
-      const minutesUntilAvailable = error.response.data.minutes_until_available;
-      throw {
-        message: `Too many attempts. Please try again in ${minutesUntilAvailable} minutes.`,
-        status: 429,
-        retryAfter: parseInt(retryAfter)
-      };
-    }
-
-    // Handle token expiration
     if (error.response?.status === 401) {
-      try {
-        // Try to refresh the token
-        const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
-        if (refreshToken) {
-          const response = await axios.post(`${API_URL}/auth/refresh`, {
-            refresh_token: refreshToken
-          });
-
-          // Update tokens
-          const { token, refresh_token } = response.data;
-          localStorage.setItem(TOKEN_KEY, token);
-          localStorage.setItem(REFRESH_TOKEN_KEY, refresh_token);
-
-          // Retry the original request
-          error.config.headers['Authorization'] = `Bearer ${token}`;
-          return axios(error.config);
-        }
-      } catch (refreshError) {
-        // If refresh fails, logout
-        authService.logout();
-      }
+      // Clear auth data and redirect to login
+      authService.clearAuthData();
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   }
@@ -75,11 +36,11 @@ axios.interceptors.response.use(
 
 const authService = {
   /**
-   * Initialize authentication and get CSRF cookie
+   * Initialize authentication
    */
   async initializeAuth() {
     try {
-      await axios.get('/sanctum/csrf-cookie');
+      await axios.get(`${API_URL}/init`);
     } catch (error) {
       console.error('Failed to initialize auth:', error);
       throw error;
@@ -91,33 +52,47 @@ const authService = {
    * @param {Object} credentials - User credentials
    * @returns {Promise} - Response with user data and token
    */
-  async login({ email, password, device_name, remember = false }) {
+  async login({ email, password }) {
     try {
-      // Initialize auth first
-      await this.initializeAuth();
-
-      // Sanitize input
       const sanitizedData = {
         email: sanitizeInput(email.toLowerCase()),
-        password: password, // Don't sanitize password
-        device_name,
-        remember
+        password,
+        device_name: 'web'
       };
 
-      const response = await axios.post(`${API_URL}/auth/login`, sanitizedData);
+      const response = await axios.post(`${API_URL}/login`, sanitizedData);
 
-      // Store tokens and user data if remember is true
-      if (remember && response.data.token) {
-        localStorage.setItem(TOKEN_KEY, response.data.token);
-        if (response.data.refresh_token) {
-          localStorage.setItem(REFRESH_TOKEN_KEY, response.data.refresh_token);
-        }
-        localStorage.setItem(USER_DATA_KEY, JSON.stringify(response.data.user));
+      if (response.data.token) {
+        sessionStorage.setItem(TOKEN_KEY, response.data.token);
+        sessionStorage.setItem(USER_DATA_KEY, JSON.stringify(response.data.user));
       }
 
-      // Set token in axios headers
+      return response.data;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  },
+
+  /**
+   * Register new user
+   * @param {Object} userData - User registration data
+   * @returns {Promise} - Response with user data and token
+   */
+  async register({ name, email, password, role }) {
+    try {
+      const sanitizedData = {
+        name: sanitizeInput(name),
+        email: sanitizeInput(email.toLowerCase()),
+        password,
+        role,
+        device_name: 'web'
+      };
+
+      const response = await axios.post(`${API_URL}/register`, sanitizedData);
+
       if (response.data.token) {
-        axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+        sessionStorage.setItem(TOKEN_KEY, response.data.token);
+        sessionStorage.setItem(USER_DATA_KEY, JSON.stringify(response.data.user));
       }
 
       return response.data;
@@ -131,19 +106,13 @@ const authService = {
    */
   async logout() {
     try {
-      await axios.post(`${API_URL}/auth/logout`);
-
-      // Clear auth header
-      delete axios.defaults.headers.common['Authorization'];
-
-      // Clear all stored data
-      localStorage.removeItem(TOKEN_KEY);
-      localStorage.removeItem(REFRESH_TOKEN_KEY);
-      localStorage.removeItem(USER_DATA_KEY);
+      const token = sessionStorage.getItem(TOKEN_KEY);
+      if (token) {
+        await axios.post(`${API_URL}/logout`);
+      }
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
-      // Always clear local storage even if logout request fails
       this.clearAuthData();
     }
   },
@@ -152,24 +121,22 @@ const authService = {
    * Clear all authentication data
    */
   clearAuthData() {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(REFRESH_TOKEN_KEY);
-    localStorage.removeItem(USER_DATA_KEY);
-    delete axios.defaults.headers.common['Authorization'];
+    sessionStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(USER_DATA_KEY);
   },
 
   /**
    * Check if user is authenticated
    */
   isAuthenticated() {
-    return !!localStorage.getItem(TOKEN_KEY);
+    return !!sessionStorage.getItem(TOKEN_KEY);
   },
 
   /**
    * Get stored user data
    */
   getStoredUserData() {
-    const userData = localStorage.getItem(USER_DATA_KEY);
+    const userData = sessionStorage.getItem(USER_DATA_KEY);
     return userData ? JSON.parse(userData) : null;
   },
 
@@ -178,14 +145,7 @@ const authService = {
    */
   async getCurrentUser() {
     try {
-      // First try to get from local storage
-      const storedUser = this.getStoredUserData();
-      if (storedUser) {
-        return storedUser;
-      }
-
-      // If not in storage, fetch from API
-      const response = await axios.get(`${API_URL}/auth/user`);
+      const response = await axios.get(`${API_URL}/user`);
       return response.data;
     } catch (error) {
       throw this.handleError(error);
@@ -197,44 +157,23 @@ const authService = {
    */
   async verifyToken() {
     try {
-      const response = await axios.get(`${API_URL}/auth/verify`);
+      const response = await axios.get(`${API_URL}/verify`);
       return response.data.valid;
-    } catch (error) {
+    } catch {
       return false;
     }
   },
 
   /**
-   * Initialize social login
-   * @param {string} provider - Social provider (google, facebook, etc)
+   * Initialize Google OAuth login
    */
-  async socialLogin(provider) {
+  async googleLogin() {
     try {
-      const response = await axios.get(`${API_URL}/auth/${provider}/url`);
-      return response.data;
+      const response = await axios.get('/auth/google/url');
+      window.location.href = response.data.url;
     } catch (error) {
       throw this.handleError(error);
     }
-  },
-
-  /**
-   * Generate device fingerprint for authentication
-   */
-  async generateFingerprint() {
-    const fpData = [
-      navigator.userAgent,
-      navigator.language,
-      screen.width,
-      screen.height,
-      new Date().getTimezoneOffset(),
-      navigator.hardwareConcurrency,
-      navigator.platform
-    ].join('|');
-
-    const msgBuffer = new TextEncoder().encode(fpData);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   },
 
   /**
@@ -242,28 +181,33 @@ const authService = {
    */
   handleError(error) {
     if (error.response) {
-      // Handle unauthorized or token expiration
-      if (error.response.status === 401) {
-        this.logout();
-        return {
-          status: 401,
-          message: 'Session expired. Please login again.'
-        };
+      switch (error.response.status) {
+        case 422:
+          return {
+            status: 422,
+            errors: error.response.data.errors
+          };
+        case 401:
+          this.clearAuthData();
+          return {
+            status: 401,
+            message: 'Invalid credentials'
+          };
+        case 500:
+          return {
+            status: 500,
+            message: 'An unexpected error occurred. Please try again.'
+          };
+        default:
+          return {
+            status: error.response.status,
+            message: error.response.data.message || 'An error occurred'
+          };
       }
-
-      // Return the error from the server
-      return {
-        status: error.response.status,
-        message: error.response.data.message || 'An error occurred',
-        errors: error.response.data.errors || {}
-      };
     }
-
-    // Network or other errors
     return {
-      status: 500,
-      message: error.message || 'Network error occurred',
-      errors: {}
+      status: 0,
+      message: 'Network error. Please check your connection.'
     };
   }
 };
