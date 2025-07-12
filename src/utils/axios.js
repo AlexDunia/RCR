@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+const TOKEN_KEY = 'auth_token';
+
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
   headers: {
@@ -13,7 +15,7 @@ const axiosInstance = axios.create({
 // Request interceptor for API calls
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('auth_token');
+    const token = sessionStorage.getItem(TOKEN_KEY);
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -36,7 +38,7 @@ axiosInstance.interceptors.response.use(
           return axiosInstance(error.config);
         case 401: // Unauthorized
           // Only remove token, let the auth store handle the redirect
-          localStorage.removeItem('auth_token');
+          sessionStorage.removeItem(TOKEN_KEY);
           break;
         case 403: // Forbidden
           console.error('Access forbidden');

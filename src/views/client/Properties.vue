@@ -1,26 +1,5 @@
 <template>
   <div class="client-properties" @click="closeDropdowns">
-    <div class="hero-section">
-      <div class="hero-content">
-        <h1>Find Your Dream Home</h1>
-        <p>Browse through our curated selection of properties</p>
-        <div class="filter-buttons">
-          <button
-            :class="{ active: isFilterActive('all') }"
-            @click="setFilter('all')"
-          >All Properties</button>
-          <button
-            :class="{ active: isFilterActive('buy') }"
-            @click="setFilter('buy')"
-          >For Sale</button>
-          <button
-            :class="{ active: isFilterActive('rent') }"
-            @click="setFilter('rent')"
-          >For Rent</button>
-        </div>
-      </div>
-    </div>
-
     <div class="search-filters">
       <div class="search-container">
         <i class="search-icon">⌕</i>
@@ -673,11 +652,6 @@ const togglePriceDropdown = () => {
   showLocationDropdown.value = false;
 };
 
-// Add a computed property to track active button state
-const isFilterActive = (filter) => {
-  return activeFilter.value === filter;
-};
-
 // Lifecycle hooks
 onMounted(async () => {
   try {
@@ -701,65 +675,6 @@ onMounted(async () => {
 .client-properties {
   min-height: 100vh;
   background: #f8fafc;
-}
-
-.hero-section {
-  position: relative;
-  height: 300px;
-  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-    url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3');
-  background-size: cover;
-  background-position: center;
-  display: flex;
-  align-items: center;
-  padding: 0 40px;
-  margin-bottom: 30px;
-  border-radius: 12px;
-  margin: 20px 20px 30px 20px;
-}
-
-.hero-content {
-  color: white;
-  max-width: 800px;
-}
-
-.hero-content h1 {
-  font-size: 1.7em;
-  margin-bottom: 1rem;
-  font-weight: 600;
-}
-
-.hero-content p {
-  font-size: 1.2rem;
-  margin-bottom: 2rem;
-  opacity: 0.9;
-}
-
-.filter-buttons {
-  display: flex;
-  gap: 1rem;
-}
-
-.filter-buttons button {
-  padding: 0.75rem 1.5rem;
-  border: 2px solid white;
-  background: transparent;
-  color: white;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.filter-buttons button:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.filter-buttons button.active {
-  background: white;
-  color: #0066cc;
-  border-color: white;
 }
 
 .search-filters {

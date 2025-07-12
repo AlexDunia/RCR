@@ -2,8 +2,8 @@ import { useAuthStore } from '@/stores/authStore';
 
 export function authGuard(to, from, next) {
   const authStore = useAuthStore();
-  const isAuthenticated = authStore.isLoggedIn;
-  const userRole = authStore.userRole;
+  const isAuthenticated = authStore.isAuthenticated();
+  const userRole = authStore.user?.role;
 
   // Allow access to routes marked as publicAccess in their meta
   if (to.meta.publicAccess) {
@@ -34,13 +34,13 @@ export function authGuard(to, from, next) {
     // Redirect to appropriate dashboard based on role
     switch (userRole) {
       case 'agent':
-        next('/agent-dashboard');
+        next('/agent/dashboard');
         break;
       case 'client':
-        next('/client-dashboard');
+        next('/client/dashboard');
         break;
       case 'admin':
-        next('/admin-dashboard');
+        next('/admin/dashboard');
         break;
       default:
         next('/');
@@ -53,13 +53,13 @@ export function authGuard(to, from, next) {
     // Redirect to appropriate dashboard based on role
     switch (userRole) {
       case 'agent':
-        next('/agent-dashboard');
+        next('/agent/dashboard');
         break;
       case 'client':
-        next('/client-dashboard');
+        next('/client/dashboard');
         break;
       case 'admin':
-        next('/admin-dashboard');
+        next('/admin/dashboard');
         break;
       default:
         next('/');

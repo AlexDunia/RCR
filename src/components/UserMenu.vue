@@ -56,13 +56,17 @@
 
         <div class="menu-divider"></div>
 
-        <button @click="handleLogout" class="menu-item menu-item--danger">
+        <button
+          @click="handleLogout"
+          class="menu-item menu-item--danger"
+          :disabled="isLoading"
+        >
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
             <polyline points="16 17 21 12 16 7"></polyline>
             <line x1="21" y1="12" x2="9" y2="12"></line>
           </svg>
-          Logout
+          {{ isLoading ? 'Logging out...' : 'Logout' }}
         </button>
       </div>
     </div>
@@ -73,11 +77,14 @@
 import { ref, computed, onUnmounted } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useRoleStore } from '@/stores/roleStore';
+import { useRouter } from 'vue-router';
 
 const authStore = useAuthStore();
 const roleStore = useRoleStore();
+const router = useRouter();
 
 const isOpen = ref(false);
+const isLoading = ref(false);
 
 // User information
 const userName = computed(() => authStore.user?.name || 'User');
@@ -115,9 +122,25 @@ onUnmounted(() => {
 // Handle logout
 const handleLogout = async () => {
   try {
+    // Show loading state
+    isLoading.value = true;
+
+    // Call logout from auth service
     await authStore.logout();
+
+    // Clear any additional stored data (like role)
+    roleStore.setRole('client'); // Reset to default role
+
+    // Redirect to login page
+    router.push('/login');
+
   } catch (error) {
     console.error('Logout failed:', error);
+    // You could add a notification system here to show errors to the user
+  } finally {
+    isLoading.value = false;
+    // Close the dropdown menu
+    isOpen.value = false;
   }
 };
 </script>

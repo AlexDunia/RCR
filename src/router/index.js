@@ -140,132 +140,168 @@ const routes = [
     }
   },
 
-  // Client Dashboard route (Client-only)
+  // Client routes
+  {
+    path: '/client',
+    component: () => import('@/layouts/ClientLayout.vue'),
+    meta: { allowedRoles: ['client'] },
+    children: [
+      {
+        path: 'dashboard',
+        name: 'ClientDashboard',
+        component: () => import('@/views/dashboard/ClientDashboardView.vue'),
+        meta: {
+          title: 'Client Dashboard',
+          description: 'View your properties, documents, and communications'
+        }
+      },
+      {
+        path: 'properties',
+        name: 'ClientProperties',
+        component: () => import('@/views/client/Properties.vue'),
+        meta: {
+          title: 'My Properties',
+          description: 'View and manage your properties'
+        }
+      },
+      {
+        path: 'find-agents',
+        name: 'ClientFindAgents',
+        component: () => import('@/views/client/ClientAgentsView.vue'),
+        meta: {
+          title: 'Find Agents',
+          description: 'Browse and connect with real estate agents'
+        }
+      },
+      {
+        path: 'favourites',
+        name: 'ClientFavourites',
+        component: () => import('@/views/client/FavouritesView.vue'),
+        meta: {
+          title: 'Favourites',
+          description: 'View your saved properties and agents'
+        }
+      },
+      {
+        path: 'documents',
+        name: 'ClientDocuments',
+        component: () => import('@/views/client/DocumentsView.vue'),
+        meta: {
+          title: 'Documents',
+          description: 'View and manage your documents'
+        }
+      },
+      {
+        path: 'profile',
+        name: 'ClientProfile',
+        component: () => import('@/views/client/ClientProfileView.vue'),
+        meta: {
+          title: 'My Profile'
+        }
+      },
+      {
+        path: 'profile/edit',
+        name: 'ClientProfileEdit',
+        component: () => import('@/views/client/ClientProfileEditView.vue'),
+        meta: {
+          title: 'Edit Profile'
+        }
+      },
+      {
+        path: '/client-profile/edit',
+        redirect: '/client/profile/edit'
+      },
+      {
+        path: 'settings',
+        name: 'ClientSettings',
+        component: () => import('@/views/client/ClientSettingsView.vue'),
+        meta: {
+          title: 'Settings'
+        }
+      },
+      {
+        path: 'property/:id',
+        name: 'ClientPropertyDetail',
+        component: () => import('@/views/client/PropertyDetailView.vue'),
+        meta: {
+          title: 'Property Details',
+          description: 'View detailed information about a property'
+        }
+      },
+      {
+        path: 'appointments',
+        name: 'ClientAppointments',
+        component: () => import('@/views/client/AppointmentsView.vue'),
+        meta: {
+          title: 'Appointments',
+          description: 'Schedule and manage property viewings'
+        }
+      },
+      {
+        path: 'messages',
+        name: 'ClientMessages',
+        component: () => import('@/views/client/MessagesView.vue'),
+        meta: {
+          title: 'Messages',
+          description: 'Communicate with your agent'
+        }
+      },
+      {
+        path: 'agent/:id',
+        name: 'FavoriteAgentProfile',
+        component: () => import('@/views/client/FavoriteAgentProfileView.vue'),
+        meta: {
+          title: 'Agent Profile',
+          description: 'View detailed agent profile'
+        }
+      }
+    ]
+  },
+
+  // Redirect old client routes to new ones
   {
     path: '/client-dashboard',
-    name: 'ClientDashboard',
-    component: () => import('@/views/dashboard/ClientDashboardView.vue'),
-    beforeEnter: (to, from, next) => {
-      const roleStore = useRoleStore();
-      if (roleStore.currentRole === 'client') {
-        next();
-      } else {
-        next('/'); // Redirect to root which will handle based on role
-      }
-    },
-    meta: {
-      title: 'Client Dashboard',
-      description: 'View your properties, documents, and communications',
-      allowedRoles: ['client']
-    }
+    redirect: '/client/dashboard'
   },
-  // Client Properties route (Client-only)
   {
     path: '/client-properties',
-    name: 'ClientProperties',
-    component: () => import('@/views/client/Properties.vue'),
-    meta: {
-      title: 'My Properties',
-      description: 'View and manage your properties',
-      allowedRoles: ['client']
-    }
+    redirect: '/client/properties'
   },
-  // Client Find Agents route (Client-only)
   {
     path: '/client-find-agents',
-    name: 'ClientFindAgents',
-    component: () => import('@/views/client/ClientAgentsView.vue'),
-    meta: {
-      title: 'Find Agents',
-      description: 'Browse and connect with real estate agents',
-      allowedRoles: ['client']
-    }
+    redirect: '/client/find-agents'
   },
-  // Client Agent Profile route (Client-only)
-  {
-    path: '/client-find-agents/:id',
-    name: 'ClientAgentProfile',
-    component: () => import('@/views/client/AgentProfileView.vue'),
-    meta: {
-      title: 'Agent Profile',
-      description: 'View detailed information about an agent',
-      allowedRoles: ['client']
-    }
-  },
-  // Client Favourites route (Client-only)
   {
     path: '/client-favourites',
-    name: 'ClientFavourites',
-    component: () => import('@/views/client/FavouritesView.vue'),
-    meta: {
-      title: 'Favourites',
-      description: 'View your saved properties and agents',
-      allowedRoles: ['client']
-    }
+    redirect: '/client/favourites'
   },
-  // Favourite Agent Profile route (Client-only)
-  {
-    path: '/client-agent/:id',
-    name: 'FavoriteAgentProfile',
-    component: () => import('@/views/client/FavoriteAgentProfileView.vue'),
-    meta: {
-      title: 'Agent Profile',
-      description: 'View detailed agent profile',
-      allowedRoles: ['client'],
-      requiresAuth: true
-    },
-    beforeEnter: (to, from, next) => {
-      const roleStore = useRoleStore();
-      if (roleStore.currentRole === 'client') {
-        next();
-      } else {
-        next('/client-favourites');
-      }
-    }
-  },
-  // Client Property Detail route (Client-only)
-  {
-    path: '/client-property/:id',
-    name: 'ClientPropertyDetail',
-    component: () => import('@/views/client/PropertyDetailView.vue'),
-    meta: {
-      title: 'Property Details',
-      description: 'View detailed information about a property',
-      allowedRoles: ['client']
-    }
-  },
-  // Client Documents route (Client-only)
   {
     path: '/client-documents',
-    name: 'ClientDocuments',
-    component: () => import('@/views/client/DocumentsView.vue'),
-    meta: {
-      title: 'Documents',
-      description: 'View and manage your documents',
-      allowedRoles: ['client']
-    }
+    redirect: '/client/documents'
   },
-  // Client Appointments route (Client-only)
+  {
+    path: '/client-profile',
+    redirect: '/client/profile'
+  },
+  {
+    path: '/client-settings',
+    redirect: '/client/settings'
+  },
+  {
+    path: '/client-property/:id',
+    redirect: to => `/client/property/${to.params.id}`
+  },
   {
     path: '/client-appointments',
-    name: 'ClientAppointments',
-    component: () => import('@/views/client/AppointmentsView.vue'),
-    meta: {
-      title: 'Appointments',
-      description: 'Schedule and manage property viewings',
-      allowedRoles: ['client']
-    }
+    redirect: '/client/appointments'
   },
-  // Client Messages route (Client-only)
   {
     path: '/client-messages',
-    name: 'ClientMessages',
-    component: () => import('@/views/client/MessagesView.vue'),
-    meta: {
-      title: 'Messages',
-      description: 'Communicate with your agent',
-      allowedRoles: ['client']
-    }
+    redirect: '/client/messages'
+  },
+  {
+    path: '/client-agent/:id',
+    redirect: to => `/client/agent/${to.params.id}`
   },
 
   // Manage Listings routes (Agent-only)
@@ -1058,35 +1094,6 @@ const routes = [
       noCache: true
     }
   },
-  // Client Profile routes (Client-only)
-  {
-    path: '/client-profile',
-    name: 'ClientProfile',
-    component: () => import('@/views/client/ClientProfileView.vue'),
-    meta: {
-      title: 'My Profile',
-      allowedRoles: ['client']
-    }
-  },
-  {
-    path: '/client-profile/edit',
-    name: 'ClientProfileEdit',
-    component: () => import('@/views/client/ClientProfileEditView.vue'),
-    meta: {
-      title: 'Edit Profile',
-      allowedRoles: ['client']
-    }
-  },
-  // Add Client Settings route
-  {
-    path: '/client-settings',
-    name: 'ClientSettings',
-    component: () => import('@/views/client/ClientSettingsView.vue'),
-    meta: {
-      title: 'Settings',
-      allowedRoles: ['client']
-    }
-  },
   // 404 route - must be the last route
   {
     path: '/:pathMatch(.*)*',
@@ -1097,14 +1104,12 @@ const routes = [
 
 // Create router instance
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory('/'),
   routes,
   scrollBehavior(to, from, savedPosition) {
-    // If the user is using browser back/forward buttons, restore their position
     if (savedPosition) {
       return savedPosition;
     }
-    // For all other navigation, scroll to top immediately
     return { top: 0, left: 0, behavior: 'instant' };
   }
 });

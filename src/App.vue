@@ -8,9 +8,9 @@ import { watch, computed, onMounted, ref, nextTick } from 'vue';
 
 import Sidebar from './layouts/components/SidebarView.vue';
 import AdminSidebar from './layouts/components/AdminSidebar.vue'; // Import Admin Sidebar
-import ClientSidebar from './layouts/components/ClientSidebar.vue'; // Import Client Sidebar
 import Header from './layouts/components/HeaderView.vue';
 import TaskNotification from './components/TaskNotification.vue';
+import PublicHeader from './components/PublicHeader.vue';
 
 import '@fontsource/poppins';
 import '@fontsource/poppins/700.css';
@@ -44,7 +44,7 @@ const isClient = computed(() => {
 const hasSidebar = computed(() => {
   // Don't show sidebar on landing page
   if (isLandingPage.value) return false;
-  return isAdmin.value || isClient.value || (!isAdmin.value && !isClient.value); // Agent has sidebar too
+  return isAdmin.value || (!isAdmin.value && !isClient.value); // Agent has sidebar too, client has its own layout
 });
 
 // Computed properties for layout settings
@@ -53,7 +53,7 @@ const background = computed(() => layoutStore.background);
 // Get the current active sidebar component based on role
 const activeSidebar = computed(() => {
   if (isAdmin.value) return AdminSidebar;
-  if (isClient.value) return ClientSidebar;
+  if (isClient.value) return null; // Client has its own layout with sidebar
   return Sidebar; // Default to agent sidebar
 });
 
@@ -204,8 +204,8 @@ watch(
         class="z-50"
       />
 
-      <!-- Dynamic sidebar based on role (only when not on landing page) -->
-      <component v-if="!isLandingPage" :is="activeSidebar" :key="'sidebar-' + roleStore.currentRole" />
+      <!-- Dynamic sidebar based on role (only when not on landing page and not client) -->
+      <component v-if="!isLandingPage && !isClient" :is="activeSidebar" :key="'sidebar-' + roleStore.currentRole" />
 
       <!-- Main content container with sidebar-adjusted class -->
       <div class="main-content" :class="{ 'with-sidebar': hasSidebar && !isLandingPage, 'landing-page': isLandingPage }">

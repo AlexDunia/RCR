@@ -8,7 +8,7 @@ import { dirname, resolve } from 'path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
-  base: '/RCR/', // Use absolute base path for correct routing
+  base: '/', // Remove the /RCR/ prefix
   plugins: [
     vue(),
     vueJsx(),
@@ -39,6 +39,13 @@ export default defineConfig({
     },
   },
   server: {
-    historyApiFallback: true
+    historyApiFallback: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        secure: false,
+      }
+    }
   }
 });

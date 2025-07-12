@@ -261,10 +261,11 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useListingStore } from '@/stores/listingStore';
 import { useClientStore } from '@/stores/clientStore';
+import { useLayoutStore } from '@/stores/layout';
 import { debounce } from 'lodash-es';
 
 defineOptions({
@@ -275,6 +276,7 @@ const router = useRouter();
 const route = useRoute();
 const listingStore = useListingStore();
 const clientStore = useClientStore();
+const layoutStore = useLayoutStore();
 
 // Get client ID from store or route
 const clientId = computed(() => clientStore.getCurrentClientId());
@@ -801,6 +803,11 @@ watch([activeFilter, activeFilters], () => {
 // Initialize on mount
 onMounted(() => {
   initializeFiltersFromURL();
+  layoutStore.setHeaderVisibility(false);
+});
+
+onUnmounted(() => {
+  layoutStore.setHeaderVisibility(true);
 });
 
 // Create computed property for display properties with loading state

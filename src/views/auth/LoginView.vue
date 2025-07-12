@@ -208,13 +208,13 @@ async function onLogin() {
       // Role-based redirect
       switch (response.user.role) {
         case 'admin':
-          await router.replace('/admin-dashboard');
+          await router.replace('/admin/dashboard');
           break;
         case 'agent':
-          await router.replace('/agent-dashboard');
+          await router.replace('/agent/dashboard');
           break;
         case 'client':
-          await router.replace('/client-dashboard');
+          await router.replace('/client/dashboard');
           break;
         default:
           await router.replace('/');

@@ -10,7 +10,7 @@
       </div>
 
       <nav class="sidebar-nav">
-        <router-link to="/client-dashboard" class="nav-item" active-class="active">
+        <router-link to="/client/dashboard" class="nav-item" active-class="active">
           <div class="nav-icon">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="3" width="7" height="7"></rect>
@@ -32,7 +32,7 @@
           <span>Properties</span>
         </router-link>
 
-        <router-link to="/client/agents" class="nav-item" active-class="active">
+        <router-link to="/client/find-agents" class="nav-item" active-class="active">
           <div class="nav-icon">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -42,7 +42,7 @@
           <span>Find agents</span>
         </router-link>
 
-        <router-link to="/client/favorites" class="nav-item" active-class="active">
+        <router-link to="/client/favourites" class="nav-item" active-class="active">
           <div class="nav-icon">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
@@ -77,7 +77,7 @@
 
       <div class="account-section">
         <div class="section-label">Account Management</div>
-        <router-link to="/client-settings" class="nav-item" active-class="active">
+        <router-link to="/client/settings" class="nav-item" active-class="active">
           <div class="nav-icon">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="3"></circle>
@@ -144,7 +144,7 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useRoleStore } from '@/stores/roleStore';
 import { useLayoutStore } from '@/stores/layout';
@@ -200,11 +200,23 @@ watch(
 const userAvatar = computed(() => {
   return 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1746790261/300_e7yggy.jpg';
 });
+
+// Reset layout store when component is mounted
+onMounted(() => {
+  layoutStore.resetLayout();
+});
+
+// Clean up layout store when component is unmounted
+onUnmounted(() => {
+  layoutStore.resetLayout();
+});
 </script>
 
 <style scoped>
 /* Add these global styles at the top of your style section */
 :root {
+  --sidebar-width: 300px;
+  --header-height: 80px;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -232,7 +244,7 @@ const userAvatar = computed(() => {
 
 /* Sidebar Styles */
 .sidebar {
-  width: 300px;
+  width: var(--sidebar-width);
   background: linear-gradient(180deg, #0a4d8c 0%, #063a6d 100%);
   color: white;
   display: flex;
@@ -241,8 +253,9 @@ const userAvatar = computed(() => {
   left: 0;
   top: 0;
   height: 100vh;
-  z-index: 10;
+  z-index: 20;
   box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
 }
 
 .logo-container {
@@ -378,37 +391,45 @@ const userAvatar = computed(() => {
   opacity: 0.7;
 }
 
-/* Client Content Wrapper - matches main-content from App.vue */
+/* Client Content Wrapper */
 .client-content-wrapper {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
+  margin-left: var(--sidebar-width);
+  min-height: 100vh;
+  background: #f8fafc;
   position: relative;
-  transition: all 0.3s ease;
-  width: calc(100% - 300px);
-  margin-left: 300px;
+  overflow-x: hidden;
+  width: calc(100% - var(--sidebar-width));
+  padding-top: var(--header-height); /* Add padding for fixed header */
 }
 
-/* Client Content Area - for the actual content */
-.client-content-area {
-  flex: 1;
-  padding: 30px;
-  overflow-y: auto;
-  background-color: #f8fafc;
-}
-
+/* Header Styles */
 .header {
-  height: 100px;
+  height: var(--header-height);
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 24px 32px;
-  background-color: white;
-  border-bottom: 1px solid #eaecef;
-  position: sticky;
+  padding: 0 32px;
+  position: fixed;
   top: 0;
-  z-index: 5;
+  left: calc(var(--sidebar-width) + 32px);
+  right: 32px;
+  z-index: 10;
+  border-radius: 12px;
+  margin-top: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  margin-top: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+/* Client Content Area */
+.client-content-area {
+  padding: 32px;
+  padding-top: calc(var(--header-height) + 32px);
+  min-height: calc(100vh - var(--header-height));
+  background: #f8fafc;
 }
 
 .header-left {
@@ -503,85 +524,36 @@ const userAvatar = computed(() => {
 }
 
 /* Responsive Design */
-@media (max-width: 991px) {
-  .sidebar {
-    width: 80px;
-    overflow: hidden;
-  }
-
-  .logo-container {
-    justify-content: center;
-    padding: 15px 0;
-  }
-
-  .logo .company-name,
-  .logo .tagline,
-  .nav-item span,
-  .section-label,
-  .user-info,
-  .user-profile .dropdown-icon {
-    display: none;
-  }
-
-  .nav-icon {
-    margin-right: 0;
-  }
-
-  .client-content-wrapper {
-    width: calc(100% - 80px);
-    margin-left: 80px;
-  }
-
-  .user-profile {
-    justify-content: center;
-    padding: 15px 0;
-  }
-
-  .avatar {
-    margin-right: 0;
-  }
-}
-
-@media (max-width: 767px) {
-  .sidebar {
-    width: 0;
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
-  }
-
-  .client-content-wrapper {
-    width: 100%;
-    margin-left: 0;
-  }
-
-  .header {
-    padding: 0 15px;
-  }
-
-  .search-container {
-    max-width: 200px;
-  }
-
-  .main-content {
-    padding: 20px 15px;
+@media (max-width: 1024px) {
+  :root {
+    --sidebar-width: 250px;
   }
 }
 
 @media (max-width: 768px) {
+  :root {
+    --sidebar-width: 0px;
+  }
+
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    width: 250px;
+  }
+
+  .client-content-wrapper {
+    margin-left: 0;
+    width: 100%;
+  }
+
   .header {
-    padding: 0 16px;
+    width: 100%;
+    margin-right: 0;
+    right: 0;
   }
 
-  .page-subtitle {
-    display: none;
-  }
-
-  .header-actions {
-    gap: 16px;
-  }
-
-  .username {
-    display: none;
+  .sidebar.active {
+    transform: translateX(0);
   }
 }
 

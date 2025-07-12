@@ -25,78 +25,67 @@ export function applyClientNavFix(router, store) {
   console.log('Applying client navigation fix');
 
   // Clear any zombie timers or stale navigation state
-  clearStaleNavigationState();
+  clearNavigationState();
 
-  // Track navigation attempts
-  const navGuard = router.beforeEach((to, from, next) => {
+  // Handle route changes
+  const routeHandler = async (to, from, next) => {
+    // Ensure we're in client role
+    if (store.currentRole !== 'client') {
+      store.setRole('client');
+    }
+
+    // Handle old route patterns
+    if (to.path.startsWith('/client-')) {
+      const newPath = to.path.replace('/client-', '/client/');
+      next({ path: newPath, replace: true });
+      return;
+    }
+
+    // Ensure client routes are under /client/
+    if (!to.path.startsWith('/client/') && !to.meta.publicAccess) {
+      const newPath = `/client${to.path}`;
+      next({ path: newPath, replace: true });
+      return;
+    }
+
+    // Track navigation attempts
     navigationAttempts++;
-
-    // Force component remount on navigation if we're seeing problems
-    if (navigationAttempts > 3 && mountedComponents.size > 10) {
-      console.warn('Detected potential component leak, forcing clean navigation');
-
-      // Add timestamp to force component remount
-      const timestamp = Date.now();
-      const query = {...to.query, _ts: timestamp};
-
-      // Navigate with clean query to force remount
-      next({
-        path: to.path,
-        query,
-        params: to.params,
-        replace: true
-      });
-
-      // Reset tracking
-      mountedComponents.clear();
-      navigationAttempts = 0;
-    } else {
-      next();
+    if (navigationAttempts > 10) {
+      console.warn('Too many navigation attempts detected');
+      clearNavigationState();
+      next(false);
+      return;
     }
-  });
 
-  // Track navigation completion
-  const afterHook = router.afterEach(() => {
-    // Reset navigation attempts counter on successful navigation
-    setTimeout(() => {
-      navigationAttempts = 0;
-    }, 1000);
-  });
+    // Proceed with navigation
+    next();
+  };
 
-  // Error recovery
-  const errorHook = router.onError(() => {
-    // Force component cleanup on error
-    mountedComponents.clear();
+  // Add route handler
+  router.beforeEach(routeHandler);
 
-    // Reset navigation tracking
-    navigationAttempts = 0;
-  });
-
-  // Remove all client-specific route guards
+  // Return cleanup function
   return () => {
-    router.beforeHooks.splice(router.beforeHooks.indexOf(navGuard), 1);
-    router.afterHooks.splice(router.afterHooks.indexOf(afterHook), 1);
-    if (errorHook && router.errorHooks) {
-      router.errorHooks.splice(router.errorHooks.indexOf(errorHook), 1);
-    }
+    router.beforeEach((to, from, next) => next());
+    clearNavigationState();
   };
 }
 
 /**
- * Track component lifecycle to detect memory leaks and navigation issues
- * @param {string} componentName - Name of the component to track
+ * Clear navigation state
+ */
+function clearNavigationState() {
+  mountedComponents.clear();
+  navigationAttempts = 0;
+}
+
+/**
+ * Track component lifecycle
+ * @param {string} componentName - Name of the component
  */
 export function trackComponent(componentName) {
-  if (!componentName) return { onMounted: () => {}, onUnmounted: () => {} };
-
-  return {
-    onMounted() {
-      mountedComponents.add(componentName);
-    },
-    onUnmounted() {
-      mountedComponents.delete(componentName);
-    }
-  };
+  mountedComponents.add(componentName);
+  return () => mountedComponents.delete(componentName);
 }
 
 /**
@@ -122,6 +111,10 @@ function clearStaleNavigationState() {
 
   // Set a flag to track that we've cleaned up
   localStorage.setItem('navFixApplied', Date.now().toString());
+
+  mountedComponents.clear();
+  navigationAttempts = 0;
+  localStorage.removeItem('clientNavBroken');
 }
 
 /**

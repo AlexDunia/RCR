@@ -1,42 +1,6 @@
 <template>
   <div class="client-profile">
-    <!-- Profile Header -->
-    <div class="profile-header">
-      <div class="profile-header-content">
-        <!-- Profile Image -->
-        <div class="profile-image-wrapper">
-          <img
-            :src="profileData?.avatar || '/default-avatar.jpg'"
-            alt="Profile"
-            class="profile-image"
-          />
-          <div class="status-badge"></div>
-        </div>
-
-        <!-- Basic Info -->
-        <div class="profile-info">
-          <div class="info-header">
-            <div class="name-section">
-              <h1>{{ profileData?.fullName }}</h1>
-              <p class="role">{{ profileData?.role || 'Client' }}</p>
-              <p class="location">
-                <i class="location-icon"></i>
-                {{ profileData?.location }}
-              </p>
-            </div>
-            <button
-              @click="editProfile"
-              class="edit-button"
-            >
-              <i class="edit-icon"></i>
-              Edit Profile
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Main Content Grid -->
+    <!-- Profile content -->
     <div class="profile-content">
       <div class="content-grid">
         <!-- Left Column -->
@@ -136,14 +100,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useClientStore } from '@/stores/clientStore';
-import { useRoleStore } from '@/stores/roleStore';
+import { useLayoutStore } from '@/stores/layout';
 
 const router = useRouter();
 const clientStore = useClientStore();
-const roleStore = useRoleStore();
+const layoutStore = useLayoutStore();
 
 const profileData = ref(null);
 
@@ -163,37 +127,28 @@ const propertyFields = [
   { label: 'Desired Features', key: 'preferences' }
 ];
 
+// Hide layout header when this component mounts
+onMounted(() => {
+  layoutStore.setHeaderVisibility(false);
+});
+
+// Restore layout header when component unmounts
+onUnmounted(() => {
+  layoutStore.setHeaderVisibility(true);
+});
+
 onMounted(async () => {
-  // Ensure we're in client role
-  if (roleStore.currentRole !== 'client') {
-    roleStore.setRole('client');
-  }
-
-  // Get the first client's data (for demo purposes)
-  const clients = clientStore.getAllClients();
-  if (clients.length > 0) {
-    const clientData = clients[0]; // Using Emily R. Thompson's data
-
-    // Map the client data to our profile format
-    profileData.value = {
-      firstName: clientData.name.split(' ')[0],
-      lastName: clientData.name.split(' ').slice(1).join(' '),
-      email: clientData.email,
-      phoneNumber: clientData.phoneNumber || 'Not set',
-      dateOfBirth: 'Not set', // This field isn't in the mock data
-      role: 'Client',
-      propertyType: clientData.preferences[0] || 'Not set',
-      budget: clientData.budget,
-      location: clientData.location,
-      preferences: clientData.preferences.join(', '),
-      fullName: clientData.name,
-      avatar: clientData.avatar
-    };
+  // Load profile data
+  try {
+    const data = await clientStore.getClientProfile();
+    profileData.value = data;
+  } catch (error) {
+    console.error('Failed to load profile:', error);
   }
 });
 
 const editProfile = () => {
-  router.push('/client-profile/edit');
+  router.push('/client/profile/edit');
 };
 </script>
 

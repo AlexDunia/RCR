@@ -165,13 +165,15 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { usePropertyStore } from '@/stores/propertyStore';
+import { useLayoutStore } from '@/stores/layout';
 
 const router = useRouter();
 const route = useRoute();
 const propertyStore = usePropertyStore();
+const layoutStore = useLayoutStore();
 const propertyId = ref(parseInt(route.params.id || route.query.id));
 const isLoading = ref(true);
 const isFavorite = ref(false);
@@ -245,6 +247,16 @@ const contactAgent = () => {
 const goBack = () => {
   router.push('/client-properties');
 };
+
+// Hide layout header when this component mounts
+onMounted(() => {
+  layoutStore.setHeaderVisibility(false);
+});
+
+// Restore layout header when component unmounts
+onUnmounted(() => {
+  layoutStore.setHeaderVisibility(true);
+});
 
 onMounted(async () => {
   console.log('Viewing property with ID:', propertyId.value);

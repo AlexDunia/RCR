@@ -114,7 +114,7 @@ const isEducationCreatePage = computed(() => isRoutePath('/admin/education-train
         />
         <div class="agent-header-details">
           <h1>{{ currentAgent.name }}</h1>
-          <p>{{ currentAgent.title || 'Real Estate Agent' }}</p>
+          <p>agent meee</p>
         </div>
       </div>
     </div>
@@ -133,8 +133,8 @@ const isEducationCreatePage = computed(() => isRoutePath('/admin/education-train
           class="client-header-avatar"
         />
         <div class="client-header-details">
-          <h1>{{ currentClient.name }}</h1>
-          <p>Client</p>
+          <h1>xannn</h1>
+          <p>Client  meee </p>
         </div>
       </div>
     </div>
@@ -324,7 +324,7 @@ const isEducationCreatePage = computed(() => isRoutePath('/admin/education-train
   border: none;
   z-index: 100;
   box-shadow: 0px 2px 5px rgba(99, 98, 98, 0.1);
-  width: 100%;
+  width: 80%;
   transition: box-shadow 0.3s ease;
 }
 

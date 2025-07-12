@@ -1,5 +1,6 @@
 import axios from '@/utils/axios';
 import { sanitizeInput } from '@/utils/validators';
+import router from '@/router';
 
 const API_URL = '/api/auth';
 const TOKEN_KEY = 'auth_token';
@@ -28,7 +29,7 @@ axios.interceptors.response.use(
     if (error.response?.status === 401) {
       // Clear auth data and redirect to login
       authService.clearAuthData();
-      window.location.href = '/login';
+      router.push('/login');
     }
     return Promise.reject(error);
   }
@@ -54,10 +55,13 @@ const authService = {
    */
   async login({ email, password }) {
     try {
+      const userAgent = navigator.userAgent; // Get browser info
+      const deviceName = `Vue - ${userAgent}`;
+
       const sanitizedData = {
         email: sanitizeInput(email.toLowerCase()),
         password,
-        device_name: 'web'
+        device_name: deviceName, // Use user-agent string
       };
 
       const response = await axios.post(`${API_URL}/login`, sanitizedData);
@@ -65,6 +69,7 @@ const authService = {
       if (response.data.token) {
         sessionStorage.setItem(TOKEN_KEY, response.data.token);
         sessionStorage.setItem(USER_DATA_KEY, JSON.stringify(response.data.user));
+        sessionStorage.setItem("device_name", deviceName); // store device name for logout
       }
 
       return response.data;
@@ -106,12 +111,17 @@ const authService = {
    */
   async logout() {
     try {
+      const deviceName = sessionStorage.getItem("device_name");
       const token = sessionStorage.getItem(TOKEN_KEY);
+
       if (token) {
-        await axios.post(`${API_URL}/logout`);
+        await axios.post(`${API_URL}/logout`, {
+          device_name: deviceName
+        });
       }
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('Logout failed:', error);
+      throw error;
     } finally {
       this.clearAuthData();
     }

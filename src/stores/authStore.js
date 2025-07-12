@@ -59,6 +59,17 @@ export const useAuthStore = defineStore('auth', () => {
     return user.value;
   }
 
+  // Logout user
+  async function logout() {
+    try {
+      await authService.logout();
+      clearAuth();
+    } catch (error) {
+      console.error('Logout failed:', error);
+      throw error;
+    }
+  }
+
   return {
     token,
     user,
@@ -67,6 +78,7 @@ export const useAuthStore = defineStore('auth', () => {
     setUser,
     clearAuth,
     isAuthenticated,
-    getUser
+    getUser,
+    logout
   };
 });

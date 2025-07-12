@@ -1,85 +1,71 @@
 <template>
   <div class="find-agents-container">
-    <!-- Header section -->
-    <div class="header">
-      <div class="header-content">
-        <h1>Find agents</h1>
-        <p>Find and filter agents</p>
+    <!-- Search and filter section -->
+    <div class="search-filters">
+      <div class="search-container">
+        <input type="text" v-model="searchQuery" placeholder="Search agents..." />
+        <span class="search-shortcut">⌘ K</span>
       </div>
-      <div class="header-actions">
-        <div class="notification-badge">
-          <span class="badge">50</span>
-          <img src="@/assets/icons/mail.svg" alt="Messages" />
+
+      <div class="filter-section">
+        <div class="filter-tabs">
+          <button class="filter-tab" :class="{ active: filterTab === 'network' }" @click="filterTab = 'network'">Your network</button>
+          <button class="filter-tab" :class="{ active: filterTab === 'others' }" @click="filterTab = 'others'">Others</button>
         </div>
-        <div class="notification-badge">
-          <span class="badge">99+</span>
-          <img src="@/assets/icons/bell.svg" alt="Notifications" />
+
+        <div class="filter-dropdown">
+          <select v-model="locationFilter">
+            <option value="">All Locations</option>
+            <option value="Columbia, USA">Columbia, USA</option>
+            <option value="Seattle, USA">Seattle, USA</option>
+            <option value="Miami, USA">Miami, USA</option>
+          </select>
         </div>
-        <div class="user-profile">
-          <img src="@/assets/profile.jpg" alt="User profile" />
-          <span>Alex Duniq</span>
-          <img src="@/assets/icons/chevron-down.svg" alt="Expand" class="chevron" />
+
+        <div class="filter-dropdown">
+          <select v-model="specialtyFilter">
+            <option value="">All Specialties</option>
+            <option value="Luxury Real Estate">Luxury Real Estate</option>
+            <option value="Commercial Properties">Commercial Properties</option>
+            <option value="Residential Homes">Residential Homes</option>
+          </select>
         </div>
       </div>
     </div>
 
-    <!-- Favourite agents section -->
-    <div class="favourite-section">
-      <div class="section-header">
-        <div>
-          <h2>Favourite agents</h2>
-          <p>Agents you like</p>
-        </div>
-        <div class="toggle-buttons">
-          <button class="toggle-btn">Properties</button>
-          <button class="toggle-btn active">Agents</button>
-        </div>
-      </div>
-
-      <div class="filters">
-        <div class="filter-tabs">
-          <button class="filter-tab">Your network</button>
-          <button class="filter-tab active">Others</button>
-        </div>
-        <div class="search-container">
-          <input type="text" placeholder="Search..." />
-          <span class="search-shortcut">⌘ K</span>
-        </div>
-      </div>
-
-      <div class="agents-list">
-        <div class="agent-card">
-          <div class="agent-info">
-            <img src="@/assets/agents/james.jpg" alt="James T. Whifield" class="agent-avatar" />
-            <div class="agent-details">
-              <h3>James T. Whifield <span>(5+ Yr of experience)</span></h3>
-              <div class="agent-meta">
-                <div class="meta-item">
-                  <img src="@/assets/icons/location.svg" alt="Location" />
-                  <span>Columbia, USA</span>
-                </div>
-                <div class="meta-item">
-                  <img src="@/assets/icons/building.svg" alt="Specialty" />
-                  <span>Luxury Real Estate</span>
-                </div>
+    <!-- Agent grid -->
+    <div class="agent-grid">
+      <div class="agent-card">
+        <div class="agent-info">
+          <img src="@/assets/agents/james.jpg" alt="James T. Whifield" class="agent-avatar" />
+          <div class="agent-details">
+            <h3>James T. Whifield <span>(5+ Yr of experience)</span></h3>
+            <div class="agent-meta">
+              <div class="meta-item">
+                <img src="@/assets/icons/location.svg" alt="Location" />
+                <span>Columbia, USA</span>
+              </div>
+              <div class="meta-item">
+                <img src="@/assets/icons/building.svg" alt="Specialty" />
+                <span>Luxury Real Estate</span>
               </div>
             </div>
           </div>
-          <div class="agent-actions">
-            <button class="btn-view">
-              <img src="@/assets/icons/eye.svg" alt="View" />
-              View profile
-            </button>
-            <button class="btn-connect">
-              <img src="@/assets/icons/user-plus.svg" alt="Connect" />
-              Request to connect
-            </button>
-            <button class="btn-favorite active">
-              <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-              </svg>
-            </button>
-          </div>
+        </div>
+        <div class="agent-actions">
+          <button class="btn-view">
+            <img src="@/assets/icons/eye.svg" alt="View" />
+            View profile
+          </button>
+          <button class="btn-connect">
+            <img src="@/assets/icons/user-plus.svg" alt="Connect" />
+            Request to connect
+          </button>
+          <button class="btn-favorite active">
+            <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+          </button>
         </div>
       </div>
     </div>
@@ -469,5 +455,22 @@
 </style>
 
 <script setup>
-// Component logic will go here
+import { ref, onMounted, onUnmounted } from 'vue';
+import { useLayoutStore } from '@/stores/layout';
+
+const layoutStore = useLayoutStore();
+const searchQuery = ref('');
+const filterTab = ref('network');
+const locationFilter = ref('');
+const specialtyFilter = ref('');
+
+// Hide layout header when this component mounts
+onMounted(() => {
+  layoutStore.setHeaderVisibility(false);
+});
+
+// Restore layout header when component unmounts
+onUnmounted(() => {
+  layoutStore.setHeaderVisibility(true);
+});
 </script>
