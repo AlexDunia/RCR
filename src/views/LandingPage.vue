@@ -380,6 +380,8 @@ onMounted(async () => {
   // Fetch properties
   try {
     await propertyStore.fetchProperties();
+    await propertyStore.getTrebData();
+
   } catch (error) {
     console.error('Error fetching properties:', error);
   }

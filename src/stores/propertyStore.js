@@ -1,6 +1,7 @@
 // src/store/propertyStore.js
 import { defineStore } from 'pinia'
 import { propertyService } from '../services/propertyService'
+import axiosInstance from '../api/axios'
 
 export const usePropertyStore = defineStore('propertyStore', {
   state: () => ({
@@ -210,6 +211,21 @@ export const usePropertyStore = defineStore('propertyStore', {
         property.currentImageIndex = property.currentImageIndex === 0
           ? property.images.length - 1
           : property.currentImageIndex - 1
+      }
+    },
+
+    async getTrebData() {
+      try {
+        this.loading = true
+        this.error = null
+        const response = await axiosInstance.get('/trebdata')
+        return response.data
+      } catch (error) {
+        console.error('Error fetching TREB data:', error)
+        this.error = error.message || 'Failed to fetch TREB data'
+        throw error
+      } finally {
+        this.loading = false
       }
     }
   }
