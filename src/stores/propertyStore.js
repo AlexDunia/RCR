@@ -1,4 +1,3 @@
-// src/store/propertyStore.js
 import { defineStore } from 'pinia'
 import { propertyService } from '../services/propertyService'
 import axiosInstance from '../api/axios'
@@ -18,7 +17,11 @@ export const usePropertyStore = defineStore('propertyStore', {
       bedrooms: null,
       bathrooms: null,
       status: null
-    }
+    },
+    trebData: null,
+    trebLoading: false,
+    trebError: null,
+    mediaCache: new Map() // Cache for TREB media data
   }),
 
   getters: {
@@ -216,17 +219,104 @@ export const usePropertyStore = defineStore('propertyStore', {
 
     async getTrebData() {
       try {
-        this.loading = true
-        this.error = null
-        const response = await axiosInstance.get('/trebdata')
-        return response.data
+        this.trebLoading = true;
+        this.trebError = null;
+        const response = await axiosInstance.get('/trebdata');
+        this.trebData = response.data;
+
+        // Fetch media for each property
+        if (this.trebData?.data?.value) {
+          await Promise.all(
+            this.trebData.data.value.map(async (property) => {
+              try {
+                const mediaResponse = await axiosInstance.get(`/trebmedia/${property.ListingKey}`);
+                if (mediaResponse.data.success && mediaResponse.data.data.value.length > 0) {
+                  // Pick the first image (filtered by LargestNoWatermark in controller)
+                  property.image = mediaResponse.data.data.value[0].MediaURL;
+                } else {
+                  property.image = null; // Fallback if no media
+                }
+              } catch (error) {
+                console.error(`Failed to fetch media for ${property.ListingKey}:`, error);
+                property.image = null; // Fallback on error
+              }
+            })
+          );
+        }
       } catch (error) {
-        console.error('Error fetching TREB data:', error)
-        this.error = error.message || 'Failed to fetch TREB data'
-        throw error
+        this.trebError = error.message || 'Failed to fetch TREB data';
       } finally {
-        this.loading = false
+        this.trebLoading = false;
       }
+    },
+
+    async getTrebPropertyMedia(listingKey) {
+      try {
+        // Check cache first
+        if (this.mediaCache.has(listingKey)) {
+          return this.mediaCache.get(listingKey)
+        }
+
+        // Use the documented endpoint structure without /api prefix
+        const response = await axiosInstance.get('/media/property', {
+          params: {
+            mlsNumber: listingKey
+          },
+          headers: {
+            'Cache-Control': 'public, max-age=31536000'
+          }
+        })
+
+        const mediaData = (response.data?.value || []).map(media => ({
+          ...media,
+          // Use the documented proxy URL structure without /api prefix
+          ProxyURL: `/media/proxy?url=${encodeURIComponent(media.MediaURL)}`
+        }))
+
+        // Cache the media data
+        this.mediaCache.set(listingKey, mediaData)
+        return mediaData
+      } catch (error) {
+        console.error(`Error fetching media for property ${listingKey}:`, error)
+        return []
+      }
+    },
+
+    // Add methods for TREB property image navigation
+    setTrebPropertyImageIndex(listingKey, index) {
+      const property = this.trebData?.data?.value?.find(p => p.ListingKey === listingKey)
+      if (property) {
+        if (!this.imageIndices[listingKey]) {
+          this.imageIndices[listingKey] = 0
+        }
+        this.imageIndices[listingKey] = index
+      }
+    },
+
+    nextTrebPropertyImage(listingKey) {
+      const property = this.trebData?.data?.value?.find(p => p.ListingKey === listingKey)
+      if (property?.mediaData?.length) {
+        if (!this.imageIndices[listingKey]) {
+          this.imageIndices[listingKey] = 0
+        }
+        this.imageIndices[listingKey] = (this.imageIndices[listingKey] + 1) % property.mediaData.length
+      }
+    },
+
+    previousTrebPropertyImage(listingKey) {
+      const property = this.trebData?.data?.value?.find(p => p.ListingKey === listingKey)
+      if (property?.mediaData?.length) {
+        if (!this.imageIndices[listingKey]) {
+          this.imageIndices[listingKey] = 0
+        }
+        this.imageIndices[listingKey] = this.imageIndices[listingKey] === 0
+          ? property.mediaData.length - 1
+          : this.imageIndices[listingKey] - 1
+      }
+    },
+
+    getCurrentImageIndex(listingKey) {
+      return this.imageIndices[listingKey] || 0
     }
   }
 })
