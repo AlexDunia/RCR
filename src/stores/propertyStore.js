@@ -8,6 +8,7 @@ export const usePropertyStore = defineStore('propertyStore', {
     currentIndex: 0,
     loading: false,
     error: null,
+    media:{},
     currentProperty: null,
     imageIndices: {}, // Store current image index for each property
     filters: {
@@ -25,6 +26,9 @@ export const usePropertyStore = defineStore('propertyStore', {
   }),
 
   getters: {
+    getTrebMediaByListingKey: (state) => (listingKey) => {
+      return state.media[listingKey] || [];
+    },
     visibleProperties: (state) =>
       state.properties.slice(state.currentIndex, state.currentIndex + 4),
 
@@ -249,6 +253,20 @@ export const usePropertyStore = defineStore('propertyStore', {
         this.trebLoading = false;
       }
     },
+
+    async getTrebMedia(listingKey) {
+      this.loading = true;
+      try {
+        const response = await axiosInstance.get(`/trebmedia/${listingKey}`);
+        this.media[listingKey] = response.data.data.value; // Store images by ListingKey
+        this.loading = false;
+      } catch (error) {
+        console.error('Error fetching TREB media:', error);
+        this.error = error.message;
+        this.loading = false;
+      }
+    },
+
 
     async getTrebPropertyMedia(listingKey) {
       try {
