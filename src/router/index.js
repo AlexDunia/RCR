@@ -7,6 +7,7 @@ import permissionGuard from './guards/permissionGuard';
 import { authGuard } from './guards/authGuard';
 import { setupRouterDebug } from '@/utils/router-debug';
 import { publicGuard } from './guards/publicGuard';
+import PropertyGallery from '@/views/property/PropertyGallery.vue'
 
 // Lazy-loaded route components
 const routes = [
@@ -809,6 +810,35 @@ const routes = [
       publicAccess: true,
       allowedRoles: ['all', 'admin', 'agent', 'client']
     }
+  },
+  {
+    path: '/property/:listingKey',
+    name: 'TrebPropertyDetail',
+    component: () => import('@/views/TrebPropertyDetail.vue'),
+    meta: {
+      hideHeader: true,
+      hideSidebar: true,
+      layout: 'public',
+      title: 'Property Details',
+      publicAccess: true,
+      allowedRoles: ['all', 'admin', 'agent', 'client']
+    }
+  },
+  {
+    path: '/property/:listingKey/gallery',
+    name: 'PropertyGallery',
+    component: PropertyGallery,
+    meta: {
+      public: true,
+      publicAccess: true,
+      hideHeader: true,
+      hideSidebar: true,
+      layout: 'public',
+      title: 'Property Gallery',
+      allowedRoles: ['all', 'admin', 'agent', 'client'],
+      requiresAuth: false
+    },
+    beforeEnter: publicGuard
   },
   // Clients route (Admin-only)
   {

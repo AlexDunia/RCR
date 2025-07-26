@@ -146,7 +146,12 @@
           </div>
         </div>
         <div class="treb-property-card__content">
-          <h3 class="treb-property-card__title">{{ property.UnparsedAddress }}</h3>
+          <router-link
+            :to="`/property/${property.ListingKey}`"
+            class="treb-property-card__title-link"
+          >
+            <h3 class="treb-property-card__title">{{ property.UnparsedAddress }}</h3>
+          </router-link>
           <div class="treb-property-card__price">
             ${{ formatPrice(property.ListPrice) }}
           </div>
