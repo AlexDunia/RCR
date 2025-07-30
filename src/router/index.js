@@ -784,6 +784,21 @@ const routes = [
       }
     ]
   },
+  // Search results route - accessible to all
+  {
+    path: '/search',
+    name: 'SearchResults',
+    component: () => import('@/views/SearchResults.vue'),
+    meta: {
+      hideHeader: true,
+      hideSidebar: true,
+      layout: 'public',
+      title: 'Search Results',
+      publicAccess: true,
+      allowedRoles: ['all', 'admin', 'agent', 'client']
+    }
+  },
+
   // Public property routes - accessible to all
   {
     path: '/allproperties',

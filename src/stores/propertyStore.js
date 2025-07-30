@@ -8,7 +8,10 @@ export const usePropertyStore = defineStore('propertyStore', {
     currentIndex: 0,
     loading: false,
     error: null,
-    media:{},
+    singleProperty: null,
+    searchResults: [],
+    searchMeta: { total: 0, page: 1, perPage: 10 }, // Added for pagination
+    media: {},
     currentProperty: null,
     imageIndices: {}, // Store current image index for each property
     filters: {
@@ -45,7 +48,9 @@ export const usePropertyStore = defineStore('propertyStore', {
         if (state.filters.status && property.status !== state.filters.status) return false
         return true
       })
-    }
+    },
+    getSearchResults: (state) => state.searchResults, // Added for search results
+    getSearchMeta: (state) => state.searchMeta // Added for pagination metadata
   },
 
   actions: {
@@ -104,6 +109,47 @@ export const usePropertyStore = defineStore('propertyStore', {
         console.error('Error fetching property:', error);
         this.error = error.message || 'Failed to fetch property';
         throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async searchProperties({ query = '', city = '', minPrice = '', maxPrice = '', bedrooms = '', page = 1, perPage = 10 }) {
+      // Avoid fetching if all parameters are empty
+      if (!query && !city && !minPrice && !maxPrice && !bedrooms) {
+        this.searchResults = [];
+        this.searchMeta = { total: 0, page, perPage };
+        this.loading = false;
+        return;
+      }
+
+      this.loading = true;
+      try {
+        const filters = [];
+        if (city) filters.push(`City eq '${city}'`);
+        if (minPrice) filters.push(`ListPrice ge ${minPrice}`);
+        if (maxPrice) filters.push(`ListPrice le ${maxPrice}`);
+        if (bedrooms) filters.push(`BedroomsTotal ge ${bedrooms}`);
+        const filter = filters.join(' and ');
+
+        const response = await axiosInstance.get('/trebsearch', {
+          params: { 
+            search: query, 
+            filter: filter || undefined, 
+            page, 
+            per_page: perPage 
+          }
+        });
+        this.searchResults = response.data.data || [];
+        this.searchMeta = {
+          total: response.data.pagination?.total || 0,
+          page: response.data.pagination?.current_page || page,
+          perPage: response.data.pagination?.per_page || perPage
+        };
+        this.error = null;
+      } catch (error) {
+        console.error('Error searching TREB properties:', error);
+        this.error = error.response?.data?.message || error.message || 'Failed to search properties';
       } finally {
         this.loading = false;
       }
@@ -266,7 +312,6 @@ export const usePropertyStore = defineStore('propertyStore', {
         this.loading = false;
       }
     },
-
 
     async getTrebPropertyMedia(listingKey) {
       try {

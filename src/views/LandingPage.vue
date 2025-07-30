@@ -79,9 +79,18 @@
                   <span class="search-icon-inside">
                     <i class="fas fa-home"></i>
                   </span>
-                  <input type="text" class="search-input with-icon" placeholder="Search by property type, location, or ID…">
+                  <form @submit.prevent="handleSearch" class="search-form">
+                    <div class="search-input-wrapper input-icon-wrapper">
+                      <input
+                        v-model="searchQuery"
+                        type="text"
+                        class="search-input with-icon"
+                        placeholder="Search by property type, location, or ID…"
+                      >
+                    </div>
+                    <button class="search-btn">Search</button>
+                  </form>
                 </div>
-                <button class="search-btn">Search</button>
               </div>
             </div>
           </div>
@@ -96,93 +105,69 @@
             <span class="search-icon-inside">
               <i class="fas fa-home"></i>
             </span>
-            <input type="text" class="search-input with-icon mobile-search-input" placeholder="Search by location or Property name...">
+            <input
+              v-model="searchQuery"
+              type="text"
+              class="search-input with-icon mobile-search-input"
+              placeholder="Search by location or Property name..."
+              @keyup.enter="handleSearch"
+            >
           </div>
         </div>
       </div>
     </section>
 
     <!-- TREB Properties Section -->
-   <!-- TREB Properties Section -->
-<section class="treb-properties">
-  <div class="boxed-container">
-    <h2 class="treb-properties__title">Featured TREB Listings</h2>
-    <div v-if="propertyStore.trebLoading" class="loading-state">
-      <div class="loading-spinner"></div>
-      <div class="loading-text">Loading TREB properties...</div>
-    </div>
-    <div v-else-if="propertyStore.trebError" class="error-state">
-      <div class="error-icon">⚠️</div>
-      <div class="error-message">{{ propertyStore.trebError }}</div>
-      <button class="retry-button" @click="retryTrebFetch">Retry</button>
-    </div>
-    <div v-else-if="!propertyStore.trebData?.data?.value?.length" class="empty-state">
-      <div class="empty-icon">📭</div>
-      <div class="empty-message">No TREB properties available at the moment.</div>
-    </div>
-    <div v-else class="treb-properties__grid">
-      <router-link
-        v-for="property in propertyStore.trebData?.data?.value"
-        :key="property.ListingKey"
-        :to="`/property/${property.ListingKey}`"
-        class="treb-property-card"
-      >
-        <div class="treb-property-card__image">
-          <img
-            v-if="property.image"
-            :src="property.image"
-            :alt="property.UnparsedAddress || 'Property Image'"
-            class="treb-property-card__img"
-            loading="lazy"
-            @error="handleImageError"
-          />
-          <div v-else class="treb-property-card__no-image">
-            <img
-              src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1743087291/Designer_8_1_fjvyi0.png"
-              alt="No Image Available"
-              class="treb-property-card__img"
-              loading="lazy"
-            />
-          </div>
+    <section class="treb-properties">
+      <div class="boxed-container">
+        <h2 class="treb-properties__title">Featured TREB Listings</h2>
+        <div v-if="propertyStore.trebLoading" class="loading-state">
+          <div class="loading-spinner"></div>
+          <div class="loading-text">Loading properties...</div>
         </div>
-        <div class="treb-property-card__content">
+        <div v-else-if="propertyStore.trebError" class="error-state">
+          <div class="error-message">{{ propertyStore.trebError }}</div>
+          <button class="retry-button" @click="retryTrebFetch">Retry</button>
+        </div>
+        <div v-else-if="!propertyStore.trebData?.data?.value?.length" class="empty-state">
+          <div class="empty-message">No properties available at the moment.</div>
+        </div>
+        <div v-else class="treb-properties__grid">
           <router-link
+            v-for="property in propertyStore.trebData?.data?.value"
+            :key="property.ListingKey"
             :to="`/property/${property.ListingKey}`"
-            class="treb-property-card__title-link"
+            class="treb-property-card"
           >
-            <h3 class="treb-property-card__title">{{ property.UnparsedAddress }}</h3>
+            <div class="treb-property-card__image">
+              <img
+                v-if="property.image"
+                :src="property.image"
+                :alt="property.UnparsedAddress || 'Property Image'"
+                class="treb-property-card__img"
+                loading="lazy"
+                @error="handleImageError"
+              />
+              <div v-else class="treb-property-card__no-image">
+                <img
+                  src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1743087291/Designer_8_1_fjvyi0.png"
+                  alt="No Image Available"
+                  class="treb-property-card__img"
+                  loading="lazy"
+                />
+              </div>
+            </div>
+            <div class="treb-property-card__content">
+              <h3 class="treb-property-card__title">{{ property.UnparsedAddress }}</h3>
+              <div class="treb-property-card__price">${{ formatPrice(property.ListPrice) }}</div>
+              <div class="treb-property-card__location">
+                <i class="fas fa-map-marker-alt"></i> {{ property.City }}, {{ property.StateOrProvince }}
+              </div>
+            </div>
           </router-link>
-          <div class="treb-property-card__price">
-            ${{ formatPrice(property.ListPrice) }}
-          </div>
-          <div class="treb-property-card__details">
-            <div class="treb-property-card__specs">
-              <span v-if="property.BedroomsTotal" class="spec-item">
-                <i class="fas fa-bed"></i> {{ property.BedroomsTotal }} Beds
-              </span>
-              <span v-if="property.BathroomsTotalInteger" class="spec-item">
-                <i class="fas fa-bath"></i> {{ property.BathroomsTotalInteger }} Baths
-              </span>
-              <span v-if="property.PropertySubType" class="spec-item">
-                <i class="fas fa-home"></i> {{ property.PropertySubType }}
-              </span>
-            </div>
-            <div class="treb-property-card__location">
-              <i class="fas fa-map-marker-alt"></i> {{ property.City }}, {{ property.StateOrProvince }}
-            </div>
-            <div class="treb-property-card__features">
-              <span v-if="property.PropertyType" class="tag">{{ property.PropertyType }}</span>
-              <span v-if="property.TransactionType" class="tag">{{ property.TransactionType }}</span>
-              <span v-if="property.ArchitecturalStyle && property.ArchitecturalStyle.length > 0" class="tag">
-                {{ property.ArchitecturalStyle[0] }}
-              </span>
-            </div>
-          </div>
         </div>
-      </router-link>
-    </div>
-  </div>
-</section>
+      </div>
+    </section>
 
     <!-- Property type filter pills -->
     <section class="property-types-section">
@@ -407,6 +392,7 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, nextTick, computed, onActivated } from 'vue';
+import { useRouter } from 'vue-router';
 import { useAgentStore } from '@/stores/agentStore';
 import { usePropertyStore } from '@/stores/propertyStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -416,8 +402,10 @@ defineOptions({
   name: 'LandingPage'
 });
 
+const router = useRouter();
 const authStore = useAuthStore();
 const userRole = computed(() => authStore.userRole || 'all');
+const searchQuery = ref('');
 
 const faqList = [
   {
@@ -642,6 +630,15 @@ onBeforeUnmount(() => {
 // Add this function to handle image loading errors
 function handleImageError(event) {
   event.target.src = 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1743087291/Designer_8_1_fjvyi0.png';
+}
+
+function handleSearch() {
+  router.push({
+    path: '/search',
+    query: {
+      q: searchQuery.value
+    }
+  });
 }
 
 // Add retry function for TREB data
@@ -3409,55 +3406,62 @@ async function retryTrebFetch() {
   }
 }
 
-/* TREB Properties Section */
+/* TREB Properties Section - Updated Styles */
 .treb-properties {
   padding: 80px 0;
-  background: linear-gradient(135deg, #f7f8fa 60%, #e3f0ff 100%);
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
 }
 
 .treb-properties__title {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #1a1a1a;
-  margin: 0 0 48px 0;
+  color: #0f172a;
+  margin-bottom: 3rem;
   text-align: center;
   font-family: 'Poppins', sans-serif;
-}
-
-.treb-properties {
-  padding: 4rem 0;
-  background: #f8f9fa;
-}
-
-.treb-properties__title {
-  text-align: center;
-  font-size: 2.5rem;
-  margin-bottom: 2rem;
-  color: #2c3e50;
+  letter-spacing: -0.02em;
 }
 
 .treb-properties__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
   margin: 0 auto;
 }
 
 .treb-property-card {
-  background: white;
-  border-radius: 12px;
+  position: relative;
+  background: #fff;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  transition: transform 0.2s ease;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
 }
 
 .treb-property-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-8px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.treb-property-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  pointer-events: none;
+  transition: border-color 0.3s ease;
+}
+
+.treb-property-card:hover::after {
+  border-color: rgba(0, 0, 0, 0.2);
 }
 
 .treb-property-card__image {
   position: relative;
-  padding-top: 66.67%; /* 3:2 aspect ratio */
+  width: 100%;
+  padding-top: 66.67%; /* 3:2 Aspect Ratio */
   overflow: hidden;
 }
 
@@ -3468,6 +3472,11 @@ async function retryTrebFetch() {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.treb-property-card:hover .treb-property-card__img {
+  transform: scale(1.05);
 }
 
 .treb-property-card__content {
@@ -3475,442 +3484,112 @@ async function retryTrebFetch() {
 }
 
 .treb-property-card__title {
-  font-size: 1.1rem;
+  font-size: 1.125rem;
   font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: #2c3e50;
-}
-
-.treb-property-card__price {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #3498db;
-  margin-bottom: 1rem;
-}
-
-.treb-property-card__specs {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
-}
-
-.spec-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #666;
-  font-size: 0.9rem;
-}
-
-.treb-property-card__location {
-  color: #666;
-  font-size: 0.9rem;
-  margin-bottom: 0.75rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.treb-property-card__features {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.tag {
-  background: #e1f0ff;
-  color: #3498db;
-  padding: 0.25rem 0.75rem;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 500;
-}
-
-.treb-property-card {
-  background: #fff;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  cursor: pointer;
-}
-
-.treb-property-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-}
-
-.treb-property-card__image {
-  position: relative;
-  width: 100%;
-  height: 220px;
-  overflow: hidden;
-}
-
-.treb-property-card__img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.treb-property-card__content {
-  padding: 20px;
-}
-
-.treb-property-card__title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin: 0 0 12px 0;
-  font-family: 'Poppins', sans-serif;
+  color: #1e293b;
+  margin: 0 0 0.75rem;
   line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
 }
 
 .treb-property-card__price {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #0052a5;
-  margin: 0 0 16px 0;
-}
-
-.treb-property-card__details {
-  display: flex;
-  gap: 20px;
-  margin-bottom: 16px;
-}
-
-.treb-property-card__detail {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: #666;
-  font-size: 0.9rem;
-}
-
-.treb-property-card__detail i {
-  color: #0052a5;
-  font-size: 1rem;
+  color: #0066cc;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.02em;
 }
 
 .treb-property-card__location {
   display: flex;
   align-items: center;
-  gap: 8px;
-  color: #666;
-  font-size: 0.9rem;
-  margin-bottom: 16px;
+  gap: 0.5rem;
+  color: #64748b;
+  font-size: 0.875rem;
 }
 
 .treb-property-card__location i {
-  color: #0052a5;
+  color: #94a3b8;
 }
 
-.treb-property-card__features {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.treb-property-card__tag {
-  background: #e0f2fe;
-  color: #0052a5;
-  padding: 4px 12px;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: 500;
-}
-
-@media (max-width: 768px) {
-  .treb-properties {
-    padding: 40px 0;
-  }
-
-  .treb-properties__title {
-    font-size: 2rem;
-    margin-bottom: 32px;
-  }
-
-  .treb-properties__grid {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 16px;
-    padding: 0 16px;
-  }
-
-  .treb-property-card__image {
-    height: 180px;
-  }
-
-  .treb-property-card__content {
-    padding: 16px;
-  }
-
-  .treb-property-card__title {
-    font-size: 1.1rem;
-  }
-
-  .treb-property-card__price {
-    font-size: 1.25rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .treb-properties {
-    padding: 32px 0;
-  }
-
-  .treb-properties__title {
-    font-size: 1.5rem;
-    margin-bottom: 24px;
-  }
-
-  .treb-property-card {
-    margin: 0 8px;
-  }
-
-  .treb-property-card__details {
-    gap: 12px;
-  }
-}
-
-/* Add these new styles */
-.property-card__details {
-  display: flex;
-  gap: 16px;
-  margin-top: 12px;
-  color: #666;
-  font-size: 0.9rem;
-}
-
-.detail-item {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.detail-item i {
-  color: #0052a5;
-  font-size: 1rem;
-}
-
-.treb-property-card__no-image {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: #f5f5f5;
-  color: #666;
-  font-size: 0.9rem;
-  gap: 12px;
-}
-
-.loading-spinner {
-  width: 24px;
-  height: 24px;
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #0066cc;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Enhanced TREB Properties Styles */
-.treb-properties {
-  padding: 80px 0;
-  background: linear-gradient(135deg, #f7f8fa 60%, #e3f0ff 100%);
-}
-
+/* Loading, Error, and Empty States */
 .loading-state,
 .error-state,
 .empty-state {
   text-align: center;
-  padding: 60px 20px;
+  padding: 4rem 2rem;
   background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  margin: 20px 0;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #0066cc;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 3px solid #e2e8f0;
+  border-top-color: #0066cc;
   border-radius: 50%;
-  margin: 0 auto 20px;
+  margin: 0 auto 1rem;
   animation: spin 1s linear infinite;
 }
 
 .loading-text,
 .error-message,
 .empty-message {
-  font-size: 1.1rem;
-  color: #666;
-  margin-top: 12px;
-}
-
-.error-icon,
-.empty-icon {
-  font-size: 2.5rem;
-  margin-bottom: 16px;
+  font-size: 1rem;
+  color: #64748b;
 }
 
 .retry-button {
-  margin-top: 20px;
-  padding: 8px 24px;
+  margin-top: 1rem;
+  padding: 0.75rem 2rem;
   background: #0066cc;
   color: #fff;
   border: none;
-  border-radius: 6px;
-  font-size: 1rem;
+  border-radius: 8px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background-color 0.2s ease;
 }
 
 .retry-button:hover {
   background: #0052a5;
 }
 
-/* Image Carousel */
-.image-carousel {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
-
-.image-nav {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.9);
-  border: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  font-size: 24px;
-  color: #333;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-  opacity: 0;
-  z-index: 2;
-}
-
-.treb-property-card:hover .image-nav {
-  opacity: 1;
-}
-
-.image-nav:hover {
-  background: #fff;
-  transform: translateY(-50%) scale(1.1);
-}
-
-.image-nav--prev {
-  left: 12px;
-}
-
-.image-nav--next {
-  right: 12px;
-}
-
-.image-dots {
-  position: absolute;
-  bottom: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 8px;
-  z-index: 2;
-}
-
-.image-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.5);
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.image-dot--active {
-  background: #fff;
-  transform: scale(1.2);
-}
-
-.treb-property-card__no-image {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: #f5f5f5;
-  color: #666;
-  padding: 20px;
-}
-
-.treb-property-card__no-image--error {
-  background: #fff5f5;
-}
-
-.treb-property-card__no-image .loading-spinner {
-  width: 30px;
-  height: 30px;
-  border-width: 3px;
-  margin-bottom: 12px;
-}
-
-.treb-property-card__no-image .loading-text,
-.treb-property-card__no-image .error-text {
-  font-size: 0.9rem;
-  text-align: center;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Responsive adjustments */
 @media (max-width: 768px) {
-  .image-nav {
-    opacity: 1;
-    width: 36px;
-    height: 36px;
-    font-size: 20px;
+  .treb-properties {
+    padding: 3rem 1rem;
   }
 
-  .treb-property-card__no-image {
-    padding: 16px;
+  .treb-properties__title {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .treb-properties__grid {
+    gap: 1.5rem;
   }
 }
 
-@media (max-width: 480px) {
-  .loading-state,
-  .error-state,
-  .empty-state {
-    padding: 40px 16px;
+@media (max-width: 640px) {
+  .treb-properties__title {
+    font-size: 1.75rem;
   }
 
-  .loading-spinner {
-    width: 32px;
-    height: 32px;
+  .treb-property-card {
+    border-radius: 12px;
   }
 
-  .loading-text,
-  .error-message,
-  .empty-message {
-    font-size: 1rem;
+  .treb-property-card__content {
+    padding: 1.25rem;
+  }
+
+  .treb-property-card__price {
+    font-size: 1.25rem;
   }
 }
 </style>

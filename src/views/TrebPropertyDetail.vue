@@ -2,6 +2,55 @@
   <div class="property-detail-page">
     <GlobalHeader />
 
+    <!-- Share Modal -->
+    <transition name="fade">
+      <div v-if="showShareModal" class="modal-overlay" @click="showShareModal = false">
+        <div class="share-modal" @click.stop>
+          <div class="share-modal-header">
+            <h3>Share this place</h3>
+            <button class="close-button" @click="showShareModal = false">×</button>
+          </div>
+
+          <div class="share-modal-preview">
+            <img
+              :src="property?.image || 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1743087291/Designer_8_1_fjvyi0.png'"
+              :alt="property?.UnparsedAddress"
+              class="preview-image"
+            >
+            <div class="preview-info">
+              <p class="preview-title">{{ property?.UnparsedAddress }}</p>
+              <p class="preview-details">
+                {{ property?.PropertyType }} • ${{ formatPrice(property?.ListPrice) }}
+              </p>
+            </div>
+          </div>
+
+          <div class="share-options">
+            <button class="share-option" @click="copyLink">
+              <i class="fas fa-link"></i>
+              <span>Copy Link</span>
+            </button>
+            <button class="share-option" @click="shareViaEmail">
+              <i class="fas fa-envelope"></i>
+              <span>Email</span>
+            </button>
+            <button class="share-option" @click="shareViaWhatsApp">
+              <i class="fab fa-whatsapp"></i>
+              <span>WhatsApp</span>
+            </button>
+            <button class="share-option" @click="shareViaFacebook">
+              <i class="fab fa-facebook"></i>
+              <span>Facebook</span>
+            </button>
+            <button class="share-option" @click="shareViaTwitter">
+              <i class="fab fa-twitter"></i>
+              <span>Twitter</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
+
     <div class="content-wrapper">
       <div v-if="loading" class="loading-state">
         <div class="loading-spinner"></div>
@@ -20,6 +69,17 @@
                 :alt="property.UnparsedAddress"
                 @error="handleImageError"
               >
+              <!-- Action Buttons -->
+              <div class="action-buttons">
+                <button class="action-button share-btn" @click="showShareModal = true">
+                  <i class="fas fa-share-alt"></i>
+                  Share
+                </button>
+                <button class="action-button save-btn" @click="handleSave">
+                  <i class="fas fa-bookmark"></i>
+                  Save
+                </button>
+              </div>
               <!-- Status Badges -->
               <div class="floating-badges">
                 <div class="status-badge" :class="property.StandardStatus.toLowerCase()">
@@ -247,14 +307,18 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { usePropertyStore } from '@/stores/propertyStore';
+import { useAuthStore } from '@/stores/authStore';
 import GlobalHeader from '@/components/GlobalHeader.vue';
 
 const route = useRoute();
+const router = useRouter();
 const propertyStore = usePropertyStore();
+const authStore = useAuthStore();
 const loading = ref(false);
 const error = ref(null);
+const showShareModal = ref(false);
 
 const property = computed(() => {
   const listingKey = route.params.listingKey;
@@ -285,6 +349,128 @@ const formatPrice = (price) => {
 
 const handleImageError = (event) => {
   event.target.src = 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1743087291/Designer_8_1_fjvyi0.png';
+};
+
+// Share functionality
+const copyLink = async () => {
+  try {
+    await navigator.clipboard.writeText(window.location.href);
+    alert('Link copied to clipboard!');
+    showShareModal.value = false;
+  } catch (err) {
+    console.error('Failed to copy link:', err);
+  }
+};
+
+const shareViaEmail = () => {
+  if (!property.value) return;
+
+  const subject = `Check out this property: ${property.value.UnparsedAddress}`;
+  const price = property.value.ListPrice ? `$${formatPrice(property.value.ListPrice)}` : 'Price not available';
+  const body = `Check out this property I found on Real City!\n\n` +
+    `${property.value.UnparsedAddress}\n` +
+    `Price: ${price}\n\n` +
+    `View more details here: ${window.location.href}`;
+
+  // For Gmail
+  const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+  // For Outlook
+  const outlookUrl = `https://outlook.office.com/mail/deeplink/compose?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+  // Create a small popup menu for email client selection
+  const emailMenu = document.createElement('div');
+  emailMenu.className = 'email-client-menu';
+  emailMenu.innerHTML = `
+    <div class="email-client-options">
+      <button class="email-client-option" data-client="gmail">
+        <i class="fab fa-google"></i>
+        Gmail
+      </button>
+      <button class="email-client-option" data-client="outlook">
+        <i class="fab fa-microsoft"></i>
+        Outlook
+      </button>
+      <button class="email-client-option" data-client="default">
+        <i class="fas fa-envelope"></i>
+        Default Email
+      </button>
+    </div>
+  `;
+
+  // Style the menu
+  emailMenu.style.position = 'absolute';
+  emailMenu.style.zIndex = '1001';
+  emailMenu.style.background = 'white';
+  emailMenu.style.borderRadius = '12px';
+  emailMenu.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+  emailMenu.style.padding = '8px';
+
+  // Get the email button position
+  const emailBtn = event.currentTarget;
+  const rect = emailBtn.getBoundingClientRect();
+  emailMenu.style.top = `${rect.bottom + window.scrollY + 5}px`;
+  emailMenu.style.left = `${rect.left + window.scrollX}px`;
+
+  // Add click handlers
+  emailMenu.addEventListener('click', (e) => {
+    const client = e.target.closest('.email-client-option')?.dataset.client;
+    if (client) {
+      switch (client) {
+        case 'gmail':
+          window.open(gmailUrl, '_blank');
+          break;
+        case 'outlook':
+          window.open(outlookUrl, '_blank');
+          break;
+        case 'default':
+          window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+          break;
+      }
+      document.body.removeChild(emailMenu);
+      showShareModal.value = false;
+    }
+  });
+
+  // Close menu when clicking outside
+  const closeMenu = (e) => {
+    if (!emailMenu.contains(e.target) && e.target !== emailBtn) {
+      document.body.removeChild(emailMenu);
+      document.removeEventListener('click', closeMenu);
+    }
+  };
+
+  document.addEventListener('click', closeMenu);
+  document.body.appendChild(emailMenu);
+};
+
+const shareViaWhatsApp = () => {
+  const text = `Check out this property on Real City: ${window.location.href}`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  showShareModal.value = false;
+};
+
+const shareViaFacebook = () => {
+  window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank');
+  showShareModal.value = false;
+};
+
+const shareViaTwitter = () => {
+  const text = `Check out this property on Real City: ${property.value?.UnparsedAddress}`;
+  window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`, '_blank');
+  showShareModal.value = false;
+};
+
+const handleSave = () => {
+  if (!authStore.isAuthenticated) {
+    // Store the current URL to redirect back after login
+    localStorage.setItem('redirectAfterLogin', window.location.pathname);
+    router.push('/login');
+    return;
+  }
+  // Handle save functionality for authenticated users
+  // You'll need to implement this based on your requirements
+  console.log('Saving property...');
 };
 
 onMounted(() => {
@@ -679,5 +865,257 @@ onMounted(() => {
   .main-image {
     height: 250px;
   }
+}
+
+.action-buttons {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  gap: 12px;
+  z-index: 10;
+}
+
+.action-button {
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  background: rgba(255, 255, 255, 0.95);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.action-button i {
+  font-size: 1rem;
+}
+
+.share-btn {
+  color: #0066cc;
+}
+
+.save-btn {
+  color: #1a1a1a;
+}
+
+.action-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.share-modal {
+  background: white;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 500px;
+  padding: 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  animation: modal-pop 0.3s ease-out;
+}
+
+.share-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.share-modal-header h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #64748b;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.close-button:hover {
+  background: #f1f5f9;
+  color: #1a1a1a;
+}
+
+.share-modal-preview {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 24px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.preview-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.preview-info {
+  flex: 1;
+}
+
+.preview-title {
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 4px 0;
+}
+
+.preview-details {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.share-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.share-option {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  color: #1a1a1a;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.share-option:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  transform: translateY(-2px);
+}
+
+.share-option i {
+  font-size: 1.2rem;
+}
+
+/* Animation */
+@keyframes modal-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Fade transition */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .share-modal {
+    width: 95%;
+    padding: 20px;
+  }
+
+  .share-options {
+    grid-template-columns: 1fr;
+  }
+
+  .action-buttons {
+    top: 16px;
+    right: 16px;
+    gap: 8px;
+  }
+
+  .action-button {
+    padding: 10px 16px;
+    font-size: 0.8rem;
+  }
+}
+
+.email-client-menu {
+  min-width: 200px;
+}
+
+.email-client-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.email-client-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: none;
+  background: #f8fafc;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #1a1a1a;
+  width: 100%;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.email-client-option:hover {
+  background: #e2e8f0;
+}
+
+.email-client-option i {
+  font-size: 1.1rem;
+}
+
+.email-client-option[data-client="gmail"] i {
+  color: #EA4335;
+}
+
+.email-client-option[data-client="outlook"] i {
+  color: #0078D4;
+}
+
+.email-client-option[data-client="default"] i {
+  color: #64748b;
 }
 </style>

@@ -8,6 +8,7 @@ import { patchHistoryAPI, enhanceRouter } from './utils/navigation-fixer'
 import { useRoleStore } from './stores/roleStore'
 import ToastPlugin from 'vue-toast-notification';
 import 'vue-toast-notification/dist/theme-default.css';
+import { features, isFeatureEnabled } from './utils/features';
 
 // Apply navigation fixes
 patchHistoryAPI()
@@ -22,6 +23,10 @@ app.directive('can', permissionDirective)
 
 // Register toast plugin
 app.use(ToastPlugin)
+
+// Make feature flags available globally
+app.config.globalProperties.$features = features;
+app.config.globalProperties.$isFeatureEnabled = isFeatureEnabled;
 
 // Add global error handler for component rendering issues
 app.config.errorHandler = (err, vm, info) => {

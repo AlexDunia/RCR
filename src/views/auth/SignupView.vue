@@ -58,7 +58,7 @@
           </div>
 
           <!-- Role Selection -->
-          <div class="form-group">
+          <!-- <div class="form-group">
             <div class="role-selector">
               <label>
                 <input
@@ -80,7 +80,7 @@
               </label>
             </div>
             <span v-if="validationErrors.role" class="error-message">{{ validationErrors.role[0] }}</span>
-          </div>
+          </div> -->
 
           <button type="submit" :disabled="isLoading">
             {{ isLoading ? 'Creating Account...' : 'Sign up' }}
