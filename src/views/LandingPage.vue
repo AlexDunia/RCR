@@ -136,7 +136,7 @@
           <router-link
             v-for="property in propertyStore.trebData?.data?.value"
             :key="property.ListingKey"
-            :to="`/property/treb/${property.ListingKey}`"
+            :to="`/property/${property.ListingKey}`"
             class="treb-property-card"
           >
             <div class="treb-property-card__image">

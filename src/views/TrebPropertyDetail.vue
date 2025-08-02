@@ -52,8 +52,180 @@
     </transition>
 
     <div class="content-wrapper">
-      <div v-if="loading" class="loading-state">
-        <div class="loading-spinner"></div>
+      <div v-if="loading" class="skeleton-loader">
+        <!-- Main Content Skeleton -->
+        <div class="main-content">
+          <!-- Property Gallery Skeleton -->
+          <section class="gallery-section">
+            <div class="main-image-skeleton">
+              <!-- Image placeholder -->
+              <div class="image-placeholder animate-pulse"></div>
+              
+              <!-- Action Buttons Skeleton -->
+              <div class="action-buttons-skeleton">
+                <div class="action-button-skeleton animate-pulse"></div>
+                <div class="action-button-skeleton animate-pulse"></div>
+              </div>
+              
+              <!-- Status Badges Skeleton -->
+              <div class="floating-badges-skeleton">
+                <div class="status-badge-skeleton animate-pulse"></div>
+                <div class="transaction-type-badge-skeleton animate-pulse"></div>
+              </div>
+              
+              <!-- Gallery Button Skeleton -->
+              <div class="gallery-button-skeleton animate-pulse"></div>
+            </div>
+          </section>
+
+          <!-- Essential Info Skeleton -->
+          <section class="essential-info-skeleton">
+            <div class="price-section-skeleton">
+              <div class="price-skeleton animate-pulse"></div>
+              <div class="mls-info-skeleton">
+                <div class="mls-line-skeleton animate-pulse"></div>
+                <div class="mls-line-skeleton animate-pulse"></div>
+              </div>
+            </div>
+
+            <div class="address-section-skeleton">
+              <div class="address-title-skeleton animate-pulse"></div>
+              <div class="address-subtitle-skeleton animate-pulse"></div>
+            </div>
+
+            <!-- Key Details Grid Skeleton -->
+            <div class="key-details-skeleton">
+              <div class="detail-grid-skeleton">
+                <div class="detail-item-skeleton animate-pulse">
+                  <div class="detail-icon-skeleton"></div>
+                  <div class="detail-value-skeleton"></div>
+                  <div class="detail-label-skeleton"></div>
+                </div>
+                <div class="detail-item-skeleton animate-pulse">
+                  <div class="detail-icon-skeleton"></div>
+                  <div class="detail-value-skeleton"></div>
+                  <div class="detail-label-skeleton"></div>
+                </div>
+                <div class="detail-item-skeleton animate-pulse">
+                  <div class="detail-icon-skeleton"></div>
+                  <div class="detail-value-skeleton"></div>
+                  <div class="detail-label-skeleton"></div>
+                </div>
+                <div class="detail-item-skeleton animate-pulse">
+                  <div class="detail-icon-skeleton"></div>
+                  <div class="detail-value-skeleton"></div>
+                  <div class="detail-label-skeleton"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Property Details Grid Skeleton -->
+          <div class="details-grid-skeleton">
+            <!-- Left Column Skeleton -->
+            <div class="left-column-skeleton">
+              <!-- Property Description Skeleton -->
+              <section class="detail-section-skeleton">
+                <div class="section-title-skeleton animate-pulse"></div>
+                <div class="text-content-skeleton">
+                  <div class="text-line-skeleton animate-pulse"></div>
+                  <div class="text-line-skeleton animate-pulse"></div>
+                  <div class="text-line-skeleton animate-pulse"></div>
+                  <div class="text-line-skeleton animate-pulse"></div>
+                  <div class="text-line-skeleton animate-pulse"></div>
+                </div>
+              </section>
+
+              <!-- Property Features Skeleton -->
+              <section class="detail-section-skeleton">
+                <div class="section-title-skeleton animate-pulse"></div>
+                <div class="features-grid-skeleton">
+                  <div class="feature-group-skeleton">
+                    <div class="feature-title-skeleton animate-pulse"></div>
+                    <div class="feature-list-skeleton">
+                      <div class="feature-item-skeleton animate-pulse"></div>
+                      <div class="feature-item-skeleton animate-pulse"></div>
+                      <div class="feature-item-skeleton animate-pulse"></div>
+                      <div class="feature-item-skeleton animate-pulse"></div>
+                    </div>
+                  </div>
+                  <div class="feature-group-skeleton">
+                    <div class="feature-title-skeleton animate-pulse"></div>
+                    <div class="feature-list-skeleton">
+                      <div class="feature-item-skeleton animate-pulse"></div>
+                      <div class="feature-item-skeleton animate-pulse"></div>
+                      <div class="feature-item-skeleton animate-pulse"></div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            <!-- Right Column Skeleton -->
+            <div class="right-column-skeleton">
+              <!-- Building Details Skeleton -->
+              <section class="detail-section-skeleton">
+                <div class="section-title-skeleton animate-pulse"></div>
+                <div class="details-list-skeleton">
+                  <div class="detail-row-skeleton animate-pulse">
+                    <div class="detail-label-skeleton"></div>
+                    <div class="detail-value-skeleton"></div>
+                  </div>
+                  <div class="detail-row-skeleton animate-pulse">
+                    <div class="detail-label-skeleton"></div>
+                    <div class="detail-value-skeleton"></div>
+                  </div>
+                  <div class="detail-row-skeleton animate-pulse">
+                    <div class="detail-label-skeleton"></div>
+                    <div class="detail-value-skeleton"></div>
+                  </div>
+                  <div class="detail-row-skeleton animate-pulse">
+                    <div class="detail-label-skeleton"></div>
+                    <div class="detail-value-skeleton"></div>
+                  </div>
+                  <div class="detail-row-skeleton animate-pulse">
+                    <div class="detail-label-skeleton"></div>
+                    <div class="detail-value-skeleton"></div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Lot Details Skeleton -->
+              <section class="detail-section-skeleton">
+                <div class="section-title-skeleton animate-pulse"></div>
+                <div class="details-list-skeleton">
+                  <div class="detail-row-skeleton animate-pulse">
+                    <div class="detail-label-skeleton"></div>
+                    <div class="detail-value-skeleton"></div>
+                  </div>
+                  <div class="detail-row-skeleton animate-pulse">
+                    <div class="detail-label-skeleton"></div>
+                    <div class="detail-value-skeleton"></div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Financial Details Skeleton -->
+              <section class="detail-section-skeleton">
+                <div class="section-title-skeleton animate-pulse"></div>
+                <div class="details-list-skeleton">
+                  <div class="detail-row-skeleton animate-pulse">
+                    <div class="detail-label-skeleton"></div>
+                    <div class="detail-value-skeleton"></div>
+                  </div>
+                  <div class="detail-row-skeleton animate-pulse">
+                    <div class="detail-label-skeleton"></div>
+                    <div class="detail-value-skeleton"></div>
+                  </div>
+                  <div class="detail-row-skeleton animate-pulse">
+                    <div class="detail-label-skeleton"></div>
+                    <div class="detail-value-skeleton"></div>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
       </div>
       <div v-else-if="error" class="error-state">{{ error }}</div>
       <div v-else-if="!property" class="not-found-state">Property not found</div>
@@ -65,7 +237,7 @@
           <section class="gallery-section">
             <div class="main-image">
               <img
-                :src="property.image || 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1743087291/Designer_8_1_fjvyi0.png'"
+                :src="propertyImage || property.image"
                 :alt="property.UnparsedAddress"
                 @error="handleImageError"
               >
@@ -306,7 +478,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { usePropertyStore } from '@/stores/propertyStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -319,10 +491,13 @@ const authStore = useAuthStore();
 const loading = ref(false);
 const error = ref(null);
 const showShareModal = ref(false);
+const propertyImage = ref(null); // Add reactive property for image URL
 
 const property = computed(() => {
   const listingKey = route.params.listingKey;
-  return propertyStore.trebData?.data?.value?.find(p => p.ListingKey === listingKey) || null;
+  // First check in search results, then in trebData
+  return propertyStore.searchResults?.find(p => p.ListingKey === listingKey) || 
+         propertyStore.trebData?.data?.value?.find(p => p.ListingKey === listingKey) || null;
 });
 
 const isResidential = computed(() => {
@@ -348,7 +523,8 @@ const formatPrice = (price) => {
 };
 
 const handleImageError = (event) => {
-  event.target.src = 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1743087291/Designer_8_1_fjvyi0.png';
+  // Don't set a fallback image - just hide the image if it fails to load
+  event.target.style.display = 'none';
 };
 
 // Share functionality
@@ -473,18 +649,119 @@ const handleSave = () => {
   console.log('Saving property...');
 };
 
-onMounted(() => {
-  if (!propertyStore.trebData) {
-    loading.value = true;
-    propertyStore.getTrebData()
-      .catch((err) => {
-        error.value = err.message || 'Failed to load property details';
-      })
-      .finally(() => {
-        loading.value = false;
-      });
+onMounted(async () => {
+  // Always start with loading state
+  loading.value = true;
+  error.value = null;
+  
+  try {
+    // Always fetch TREB data on page load/refresh to ensure we have the data
+    if (!propertyStore.trebData) {
+      await propertyStore.getTrebData();
+    }
+    
+    // Wait a bit for the computed property to update after data is loaded
+    await nextTick();
+    
+    // Add a small delay to ensure data is fully processed
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Check if property exists after fetching data
+    if (!property.value) {
+      // Property not found even after fetching data
+      error.value = 'Property not found';
+      loading.value = false;
+      return;
+    }
+    
+    // Always fetch media for the property to get the actual image
+    if (property.value) {
+      try {
+        await propertyStore.getTrebMedia(route.params.listingKey);
+        // Get the first image from media array
+        const media = propertyStore.getTrebMediaByListingKey(route.params.listingKey);
+        if (media && media.length > 0) {
+          propertyImage.value = media[0].MediaURL;
+        }
+      } catch (err) {
+        console.error('Failed to fetch property media:', err);
+      }
+    }
+  } catch (err) {
+    error.value = err.message || 'Failed to load property details';
+  } finally {
+    // Add a minimum loading time for better UX
+    setTimeout(() => {
+      loading.value = false;
+    }, 1000); // Show loader for at least 1 second
   }
 });
+
+// Watch for route changes to handle navigation from other pages
+watch(() => route.params.listingKey, async (newListingKey, oldListingKey) => {
+  if (newListingKey !== oldListingKey) {
+    // Reset state for new property
+    loading.value = true;
+    error.value = null;
+    propertyImage.value = null;
+    
+    try {
+      // If property is not found in either searchResults or trebData, try to fetch TREB data
+      if (!property.value && !propertyStore.trebData) {
+        await propertyStore.getTrebData();
+      }
+      
+      // Always fetch media for the property to get the actual image
+      if (property.value) {
+        try {
+          await propertyStore.getTrebMedia(route.params.listingKey);
+          // Get the first image from media array
+          const media = propertyStore.getTrebMediaByListingKey(route.params.listingKey);
+          if (media && media.length > 0) {
+            propertyImage.value = media[0].MediaURL;
+          }
+        } catch (err) {
+          console.error('Failed to fetch property media:', err);
+        }
+      }
+      
+      // If still no property found, show error
+      if (!property.value) {
+        error.value = 'Property not found';
+      }
+    } catch (err) {
+      error.value = err.message || 'Failed to load property details';
+    } finally {
+      // Add a minimum loading time for better UX
+      setTimeout(() => {
+        loading.value = false;
+      }, 1000); // Show loader for at least 1 second
+    }
+  }
+});
+
+// Watch for property changes to manage loading state
+watch(property, (newProperty) => {
+  if (newProperty && loading.value) {
+    // Property found, keep loading for minimum time then stop
+    setTimeout(() => {
+      loading.value = false;
+    }, 1000);
+  }
+}, { immediate: true });
+
+// Watch for TREB data changes to handle property finding after data loads
+watch(() => propertyStore.trebData, (newTrebData) => {
+  if (newTrebData && loading.value && !property.value) {
+    // TREB data loaded, check if property exists now
+    setTimeout(() => {
+      if (!property.value) {
+        error.value = 'Property not found';
+      }
+      loading.value = false;
+    }, 500);
+  }
+}, { immediate: true, deep: true });
 </script>
 
 <style scoped>
@@ -1117,5 +1394,358 @@ onMounted(() => {
 
 .email-client-option[data-client="default"] i {
   color: #64748b;
+}
+
+/* Skeleton Loader Styles */
+.skeleton-loader {
+  padding-top: 80px;
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+.main-content {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+/* Gallery Section Skeleton */
+.gallery-section {
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+.main-image-skeleton {
+  width: 100%;
+  height: calc(100vh - 140px);
+  max-height: 600px;
+  border-radius: 1rem;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.image-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+.action-buttons-skeleton {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  gap: 12px;
+  z-index: 10;
+}
+
+.action-button-skeleton {
+  width: 80px;
+  height: 40px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 12px;
+  animation: shimmer 2s infinite;
+}
+
+.floating-badges-skeleton {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  display: flex;
+  gap: 1rem;
+  z-index: 2;
+}
+
+.status-badge-skeleton,
+.transaction-type-badge-skeleton {
+  width: 80px;
+  height: 32px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 1rem;
+  animation: shimmer 2s infinite;
+}
+
+.gallery-button-skeleton {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 180px;
+  height: 40px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 1rem;
+  animation: shimmer 2s infinite;
+}
+
+/* Essential Info Skeleton */
+.essential-info-skeleton {
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.price-section-skeleton {
+  margin-bottom: 1rem;
+}
+
+.price-skeleton {
+  width: 200px;
+  height: 40px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  animation: shimmer 2s infinite;
+}
+
+.mls-info-skeleton {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.mls-line-skeleton {
+  width: 120px;
+  height: 16px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: shimmer 2s infinite;
+}
+
+.address-section-skeleton {
+  margin-bottom: 2rem;
+}
+
+.address-title-skeleton {
+  width: 300px;
+  height: 24px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  animation: shimmer 2s infinite;
+}
+
+.address-subtitle-skeleton {
+  width: 200px;
+  height: 16px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: shimmer 2s infinite;
+}
+
+/* Key Details Grid Skeleton */
+.key-details-skeleton {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.detail-grid-skeleton {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 2rem;
+}
+
+.detail-item-skeleton {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.detail-icon-skeleton {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 50%;
+  animation: shimmer 2s infinite;
+}
+
+.detail-value-skeleton {
+  width: 60px;
+  height: 20px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: shimmer 2s infinite;
+}
+
+.detail-label-skeleton {
+  width: 40px;
+  height: 14px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: shimmer 2s infinite;
+}
+
+/* Details Grid Skeleton */
+.details-grid-skeleton {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+}
+
+.detail-section-skeleton {
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.section-title-skeleton {
+  width: 200px;
+  height: 24px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+  animation: shimmer 2s infinite;
+}
+
+.text-content-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.text-line-skeleton {
+  height: 16px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: shimmer 2s infinite;
+}
+
+.text-line-skeleton:nth-child(1) { width: 100%; }
+.text-line-skeleton:nth-child(2) { width: 90%; }
+.text-line-skeleton:nth-child(3) { width: 85%; }
+.text-line-skeleton:nth-child(4) { width: 70%; }
+.text-line-skeleton:nth-child(5) { width: 60%; }
+
+.features-grid-skeleton {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+.feature-group-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.feature-title-skeleton {
+  width: 120px;
+  height: 18px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: shimmer 2s infinite;
+}
+
+.feature-list-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.feature-item-skeleton {
+  height: 14px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: shimmer 2s infinite;
+}
+
+.feature-item-skeleton:nth-child(1) { width: 100%; }
+.feature-item-skeleton:nth-child(2) { width: 90%; }
+.feature-item-skeleton:nth-child(3) { width: 85%; }
+.feature-item-skeleton:nth-child(4) { width: 80%; }
+
+.details-list-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.detail-row-skeleton {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.detail-label-skeleton {
+  width: 80px;
+  height: 14px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: shimmer 2s infinite;
+}
+
+.detail-value-skeleton {
+  width: 120px;
+  height: 14px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: shimmer 2s infinite;
+}
+
+/* Shimmer Animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Responsive Design for Skeleton */
+@media (max-width: 1024px) {
+  .details-grid-skeleton {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .detail-grid-skeleton {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .main-image-skeleton {
+    height: 400px;
+  }
+}
+
+@media (max-width: 640px) {
+  .detail-grid-skeleton {
+    grid-template-columns: 1fr;
+  }
+  
+  .main-image-skeleton {
+    height: 250px;
+  }
+  
+  .main-content {
+    padding: 1rem;
+  }
 }
 </style>
