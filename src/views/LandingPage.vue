@@ -136,7 +136,7 @@
           <router-link
             v-for="property in propertyStore.trebData?.data?.value"
             :key="property.ListingKey"
-            :to="`/property/${property.ListingKey}`"
+            :to="`/property/treb/${property.ListingKey}`"
             class="treb-property-card"
           >
             <div class="treb-property-card__image">
@@ -156,12 +156,55 @@
                   loading="lazy"
                 />
               </div>
+              <div class="treb-property-card__badges">
+                <span
+                  v-if="property.StandardStatus === 'Active'"
+                  class="property-badge property-badge--active"
+                >
+                  Active
+                </span>
+                <span
+                  v-else-if="property.StandardStatus === 'Sold'"
+                  class="property-badge property-badge--sold"
+                >
+                  Sold
+                </span>
+                <span
+                  v-else-if="property.StandardStatus === 'Pending'"
+                  class="property-badge property-badge--pending"
+                >
+                  Pending
+                </span>
+                <span
+                  class="property-badge property-badge--type"
+                >
+                  {{ property.PropertyType || 'Residential' }}
+                </span>
+              </div>
+              <div class="treb-property-card__favorite">
+                <i class="far fa-heart"></i>
+              </div>
             </div>
             <div class="treb-property-card__content">
-              <h3 class="treb-property-card__title">{{ property.UnparsedAddress }}</h3>
               <div class="treb-property-card__price">${{ formatPrice(property.ListPrice) }}</div>
+              <h3 class="treb-property-card__title">{{ property.UnparsedAddress }}</h3>
+              <div class="treb-property-card__details">
+                <span class="treb-property-card__detail">
+                  <i class="fas fa-bed"></i>
+                  {{ property.BedroomsTotal || 'N/A' }} Beds
+                </span>
+                <span class="treb-property-card__detail">
+                  <i class="fas fa-bath"></i>
+                  {{ property.BathroomsFull || 'N/A' }} Baths
+                </span>
+                <span class="treb-property-card__detail">
+                  <i class="fas fa-ruler-combined"></i>
+                  {{ formatArea(property.LivingArea) || 'N/A' }} sqft
+                </span>
+              </div>
               <div class="treb-property-card__location">
-                <i class="fas fa-map-marker-alt"></i> {{ property.City }}, {{ property.StateOrProvince }}
+                <i class="fas fa-map-marker-alt"></i>
+                {{ property.City }}, {{ property.StateOrProvince }}
               </div>
             </div>
           </router-link>
@@ -213,12 +256,54 @@
                      loading="lazy"
                      @error="handleImageError">
               </template>
+              <div class="property-card__badges">
+                <span
+                  v-if="property.status === 'active'"
+                  class="property-badge property-badge--active"
+                >
+                  Active
+                </span>
+                <span
+                  v-else-if="property.status === 'sold'"
+                  class="property-badge property-badge--sold"
+                >
+                  Sold
+                </span>
+                <span
+                  v-else-if="property.status === 'pending'"
+                  class="property-badge property-badge--pending"
+                >
+                  Pending
+                </span>
+                <span
+                  class="property-badge property-badge--type"
+                >
+                  {{ property.type || 'Residential' }}
+                </span>
+              </div>
+              <div class="property-card__favorite">
+                <i class="far fa-heart"></i>
+              </div>
             </div>
             <div class="property-card__content--figma">
-              <h3 class="property-card__title--figma">{{ property.name || 'Beautiful Property' }}</h3>
               <div class="property-card__price--figma">${{ formatPrice(property.price) }}</div>
+              <h3 class="property-card__title--figma">{{ property.name || 'Beautiful Property' }}</h3>
+              <div class="property-card__details">
+                <span class="property-card__detail">
+                  <i class="fas fa-bed"></i>
+                  {{ property.bedrooms || 'N/A' }} Beds
+                </span>
+                <span class="property-card__detail">
+                  <i class="fas fa-bath"></i>
+                  {{ property.bathrooms || 'N/A' }} Baths
+                </span>
+                <span class="property-card__detail">
+                  <i class="fas fa-ruler-combined"></i>
+                  {{ formatArea(property.area) || 'N/A' }} sqft
+                </span>
+              </div>
               <div class="property-card__address--figma">
-                <svg class="property-card__address-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <i class="fas fa-map-marker-alt"></i>
                 {{ property.address }}{{ property.city ? `, ${property.city}` : '' }}{{ property.state ? `, ${property.state}` : '' }}
               </div>
             </div>
@@ -588,6 +673,16 @@ const propertyStore = usePropertyStore();
 // Format price with commas
 const formatPrice = (price) => {
   return new Intl.NumberFormat('en-US').format(price);
+};
+
+// Format area with commas and handle null values
+const formatArea = (area) => {
+  if (!area) return null;
+  return new Intl.NumberFormat('en-US', {
+    style: 'decimal',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(area);
 };
 const featuredProperties = computed(() => {
   const properties = propertyStore.properties || [];
@@ -1058,94 +1153,220 @@ async function retryTrebFetch() {
 
 .property-grid--figma {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 24px;
-  row-gap: 24px;
-  width: 100%;
-  max-width: 1200px;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 32px;
   margin: 0 auto;
 }
 
-@media (max-width: 600px) {
-  .featured--figma {
-    background: #fff;
-    padding: 32px 8px;
-    margin: 0;
-    width: 100%;
-  }
-
-  .featured .boxed-container {
-    padding: 0;
-    max-width: 100%;
-    width: 100%;
-  }
-
-  .property-grid--figma {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    align-items: center;
-    width: 100%;
-  }
-
-  .property-card--figma {
-    width: calc(100% - 32px);
-    max-width: 450px;
-    margin: 0 auto;
-  }
-}
-
 .property-card--figma {
-  background: #fff;
-  border-radius: 12px;
+  position: relative;
+  background: white;
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+  border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 .property-card--figma:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transform: translateY(-8px) scale(1.01);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+}
+
+.property-card__image-carousel {
+  position: relative;
+    width: 100%;
+  padding-top: 66.67%;
+  overflow: hidden;
 }
 
 .property-card__img--figma {
-  width: 100%;
-  height: 200px;
+  position: absolute;
+  top: 0;
+  left: 0;
+    width: 100%;
+  height: 100%;
   object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.property-card--figma:hover .property-card__img--figma {
+  transform: scale(1.08);
 }
 
 .property-card__content--figma {
-  padding: 16px;
-}
-
-.property-card__title--figma {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin: 0 0 8px 0;
-  font-family: 'Poppins', sans-serif;
+  padding: 24px;
+  position: relative;
 }
 
 .property-card__price--figma {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #0052a5;
-  margin: 0 0 12px 0;
+  color: #0066cc;
+  margin-bottom: 8px;
+}
+
+.property-card__title--figma {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 16px;
+  line-height: 1.4;
+}
+
+.property-card__details {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 16px;
+}
+
+.property-card__detail {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #64748b;
+  font-size: 0.875rem;
 }
 
 .property-card__address--figma {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #666;
-  font-size: 0.9rem;
+  color: #64748b;
+  font-size: 0.875rem;
+  margin-top: 12px;
 }
 
 .property-card__address-icon {
   width: 16px;
   height: 16px;
-  color: #0052a5;
+  color: #64748b;
+}
+
+.property-card__favorite {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+}
+
+.property-card__favorite:hover {
+  transform: scale(1.1);
+  background: white;
+}
+
+@media (max-width: 1200px) {
+  .property-grid--figma {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .property-grid--figma {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .featured__title--figma {
+    font-size: 2rem;
+    margin-bottom: 24px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 600px) {
+  .property-grid--figma {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 0 8px;
+    margin: 0;
+  }
+
+  .featured--figma {
+    background: #fff;
+    padding: 0;
+    margin: 0;
+  }
+
+  .featured .boxed-container {
+    padding: 0;
+    max-width: 100%;
+  }
+
+  .featured__title--figma {
+    font-size: 20px;
+    font-weight: 600;
+    color: #000;
+    margin: 16px auto;
+    text-align: center;
+    padding: 0 12px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.property-card--figma {
+    width: calc(100% - 16px);
+  background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  overflow: hidden;
+    margin: 0 8px;
+    border: none;
+}
+
+.property-card__img--figma {
+  width: 100%;
+    height: 180px;
+  object-fit: cover;
+    display: block;
+    border-radius: 8px 8px 0 0;
+}
+
+.property-card__content--figma {
+    padding: 10px 12px;
+}
+
+.property-card__title--figma {
+    font-size: 15px;
+    font-weight: 500;
+    color: #000;
+    margin: 0 0 2px 0;
+    line-height: 1.3;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.property-card__price--figma {
+    font-size: 15px;
+    font-weight: 500;
+    color: #0066FF;
+    margin: 0 0 6px 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.property-card__address--figma {
+  display: flex;
+  align-items: center;
+    gap: 4px;
+  color: #666;
+    font-size: 13px;
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.property-card__address-icon {
+    width: 12px;
+    height: 12px;
+    color: #666;
+    margin-top: -1px;
+  }
 }
 
 @media (max-width: 1200px) {
@@ -3424,44 +3645,31 @@ async function retryTrebFetch() {
 
 .treb-properties__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 32px;
   margin: 0 auto;
 }
 
 .treb-property-card {
   position: relative;
-  background: #fff;
-  border-radius: 16px;
+  background: white;
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   text-decoration: none;
+  border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
 .treb-property-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-.treb-property-card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 16px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  pointer-events: none;
-  transition: border-color 0.3s ease;
-}
-
-.treb-property-card:hover::after {
-  border-color: rgba(0, 0, 0, 0.2);
+  transform: translateY(-8px) scale(1.01);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
 }
 
 .treb-property-card__image {
   position: relative;
   width: 100%;
-  padding-top: 66.67%; /* 3:2 Aspect Ratio */
+  padding-top: 66.67%;
   overflow: hidden;
 }
 
@@ -3476,44 +3684,105 @@ async function retryTrebFetch() {
 }
 
 .treb-property-card:hover .treb-property-card__img {
-  transform: scale(1.05);
+  transform: scale(1.08);
+}
+
+.treb-property-card__badges {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.property-badge {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+  backdrop-filter: blur(4px);
+}
+
+.property-badge--active {
+  background: rgba(34, 197, 94, 0.9);
+}
+
+.property-badge--sold {
+  background: rgba(239, 68, 68, 0.9);
+}
+
+.property-badge--pending {
+  background: rgba(245, 158, 11, 0.9);
+}
+
+.property-badge--type {
+  background: rgba(0, 102, 204, 0.9);
 }
 
 .treb-property-card__content {
-  padding: 1.5rem;
-}
-
-.treb-property-card__title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #1e293b;
-  margin: 0 0 0.75rem;
-  line-height: 1.4;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
+  padding: 24px;
+  position: relative;
 }
 
 .treb-property-card__price {
   font-size: 1.5rem;
   font-weight: 700;
   color: #0066cc;
-  margin-bottom: 0.75rem;
-  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+
+.treb-property-card__title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 16px;
+  line-height: 1.4;
+}
+
+.treb-property-card__details {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 16px;
+}
+
+.treb-property-card__detail {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #64748b;
+  font-size: 0.875rem;
 }
 
 .treb-property-card__location {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 6px;
   color: #64748b;
   font-size: 0.875rem;
+  margin-top: 12px;
 }
 
-.treb-property-card__location i {
-  color: #94a3b8;
+.treb-property-card__favorite {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+}
+
+.treb-property-card__favorite:hover {
+  transform: scale(1.1);
+  background: white;
 }
 
 /* Loading, Error, and Empty States */

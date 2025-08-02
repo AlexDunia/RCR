@@ -133,11 +133,11 @@ export const usePropertyStore = defineStore('propertyStore', {
         const filter = filters.join(' and ');
 
         const response = await axiosInstance.get('/trebsearch', {
-          params: { 
-            search: query, 
-            filter: filter || undefined, 
-            page, 
-            per_page: perPage 
+          params: {
+            search: query,
+            filter: filter || undefined,
+            page,
+            per_page: perPage
           }
         });
         this.searchResults = response.data.data || [];
