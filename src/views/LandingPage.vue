@@ -133,10 +133,9 @@
           <div class="empty-message">No properties available at the moment.</div>
         </div>
         <div v-else class="treb-properties__grid">
-          <router-link
+          <div
             v-for="property in propertyStore.trebData?.data?.value"
             :key="property.ListingKey"
-            :to="`/property/${property.ListingKey}`"
             class="treb-property-card"
           >
             <div class="treb-property-card__image">
@@ -187,7 +186,12 @@
             </div>
             <div class="treb-property-card__content">
               <div class="treb-property-card__price">${{ formatPrice(property.ListPrice) }}</div>
-              <h3 class="treb-property-card__title">{{ property.UnparsedAddress }}</h3>
+              <router-link
+                :to="`/property/${property.ListingKey}`"
+                class="treb-property-card__title"
+              >
+                {{ property.UnparsedAddress }}
+              </router-link>
               <div class="treb-property-card__details">
                 <span class="treb-property-card__detail">
                   <i class="fas fa-bed"></i>
@@ -207,7 +211,7 @@
                 {{ property.City }}, {{ property.StateOrProvince }}
               </div>
             </div>
-          </router-link>
+          </div>
         </div>
       </div>
     </section>
@@ -3739,6 +3743,13 @@ async function retryTrebFetch() {
   color: #1e293b;
   margin: 0 0 16px;
   line-height: 1.4;
+  text-decoration: none;
+  display: block;
+  transition: color 0.2s ease;
+}
+
+.treb-property-card__title:hover {
+  color: #0066cc;
 }
 
 .treb-property-card__details {

@@ -1,24 +1,45 @@
-import axiosInstance from '../api/axios'
-import { useAuthStore } from '../stores/authStore'
+import axiosInstance from '../api/axios';
+import { useAuthStore } from '../stores/authStore';
 
 export const propertyService = {
   async getProperties(filters = {}) {
     try {
       const response = await axiosInstance.get('/properties', {
-        params: filters
-      })
-      return response.data
+        params: filters,
+      });
+      return response.data;
     } catch (error) {
-      console.error('Error fetching properties:', error)
-      throw error
+      console.error('Error fetching properties:', error);
+      throw error;
     }
   },
 
   async getPropertyById(id) {
-    const response = await axiosInstance.get(`/properties/${id}`)
-    return response.data
+    const response = await axiosInstance.get(`/properties/${id}`);
+    return response.data;
   },
 
+  async toggleFavorite(propertyType, propertyId, propertyData = null) {
+    const authStore = useAuthStore();
+    const payload = {
+      property_type: propertyType,
+      property_id: propertyId,
+    };
+    if (propertyType === 'treb' && propertyData) {
+      payload.property_data = propertyData;
+    }
+    try {
+      const response = await axiosInstance.post('/favorites/toggle', payload, {
+        headers: {
+          Authorization: `Bearer ${authStore.token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Error toggling favorite for ${propertyId}:`, error);
+      throw error;
+    }
+  },
   async createProperty(propertyData) {
     const authStore = useAuthStore()
     const response = await axiosInstance.post('/properties', propertyData, {
