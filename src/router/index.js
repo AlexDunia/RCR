@@ -7,7 +7,8 @@ import permissionGuard from './guards/permissionGuard';
 import { authGuard } from './guards/authGuard';
 import { setupRouterDebug } from '@/utils/router-debug';
 import { publicGuard } from './guards/publicGuard';
-import PropertyGallery from '@/views/property/PropertyGallery.vue'
+import PropertyGallery from '@/views/property/PropertyGallery.vue';
+import { isFeatureEnabled, isFeatureFlagsInitialized } from '@/utils/features';
 
 // Lazy-loaded route components
 const routes = [
@@ -100,7 +101,8 @@ const routes = [
     },
     meta: {
       title: 'Find Agents',
-      allowedRoles: ['admin']
+      allowedRoles: ['admin'],
+      fullAppOnly: true // Only available when full app features are enabled
     }
   },
   // Admin dashboard
@@ -119,7 +121,8 @@ const routes = [
     meta: {
       title: 'Dashboard',
       description: 'View your performance metrics and important updates',
-      allowedRoles: ['admin']
+      allowedRoles: ['admin'],
+      fullAppOnly: true // Only available when full app features are enabled
     }
   },
   {
@@ -137,7 +140,8 @@ const routes = [
     meta: {
       title: 'Agent Dashboard',
       description: 'View your listings, clients, and performance metrics',
-      allowedRoles: ['agent']
+      allowedRoles: ['agent'],
+      fullAppOnly: true // Only available when full app features are enabled
     }
   },
 
@@ -145,7 +149,10 @@ const routes = [
   {
     path: '/client',
     component: () => import('@/layouts/ClientLayout.vue'),
-    meta: { allowedRoles: ['client'] },
+    meta: {
+      allowedRoles: ['client'],
+      fullAppOnly: true // Only available when full app features are enabled
+    },
     children: [
       {
         path: 'dashboard',
@@ -311,7 +318,8 @@ const routes = [
     component: () => import('@/views/agents/ManageListings.vue'),
     meta: {
       title: 'Manage Listings',
-      allowedRoles: ['agent']
+      allowedRoles: ['agent'],
+      fullAppOnly: true // Only available when full app features are enabled
     }
   },
   {
@@ -319,7 +327,8 @@ const routes = [
     component: () => import('@/views/agents/AddListing.vue'),
     meta: {
       title: 'Add Listing',
-      allowedRoles: ['agent']
+      allowedRoles: ['agent'],
+      fullAppOnly: true // Only available when full app features are enabled
     }
   },
   {
@@ -327,7 +336,8 @@ const routes = [
     component: () => import('@/views/listings/ViewListings.vue'),
     meta: {
       title: 'View Listings',
-      allowedRoles: ['agent'] // Restricted to agents as per your request
+      allowedRoles: ['agent'], // Restricted to agents as per your request
+      fullAppOnly: true // Only available when full app features are enabled
     }
   },
   {
@@ -335,7 +345,8 @@ const routes = [
     component: () => import('@/views/listings/PendingApprovals.vue'),
     meta: {
       title: 'Pending Approvals',
-      allowedRoles: ['agent'] // Restricted to agents as per your request
+      allowedRoles: ['agent'], // Restricted to agents as per your request
+      fullAppOnly: true // Only available when full app features are enabled
     }
   },
   {
@@ -343,7 +354,8 @@ const routes = [
     component: () => import('@/views/listings/Drafts.vue'),
     meta: {
       title: 'Drafts',
-      allowedRoles: ['agent']
+      allowedRoles: ['agent'],
+      fullAppOnly: true // Only available when full app features are enabled
     }
   },
 
@@ -351,7 +363,10 @@ const routes = [
   {
     path: '/tasks',
     component: TasksLayout,
-    meta: { allowedRoles: ['agent'] }, // Restrict parent route to agents
+    meta: {
+      allowedRoles: ['agent'], // Restrict parent route to agents
+      fullAppOnly: true // Only available when full app features are enabled
+    },
     children: [
       {
         path: '',
@@ -407,7 +422,10 @@ const routes = [
   {
     path: '/admin/tasks',
     component: TasksLayout,
-    meta: { allowedRoles: ['admin'] }, // Restrict to admin only
+    meta: {
+      allowedRoles: ['admin'], // Restrict to admin only
+      fullAppOnly: true // Only available when full app features are enabled
+    },
     children: [
       {
         path: '',
@@ -434,13 +452,17 @@ const routes = [
       title: 'Client Task Detail',
       hideSidebar: true,
       hideHeader: true,
-      allowedRoles: ['admin']
+      allowedRoles: ['admin'],
+      fullAppOnly: true // Only available when full app features are enabled
     }
   },
   {
     path: '/admin/client-task/:id/edit',
     name: 'EditClientTask',
-    component: () => import('@/views/admin/EditClientTask.vue')
+    component: () => import('@/views/admin/EditClientTask.vue'),
+    meta: {
+      fullAppOnly: true // Only available when full app features are enabled
+    }
   },
 
   // Agent Profile route (Agent-only)
@@ -448,14 +470,20 @@ const routes = [
     path: '/agent-profile',
     name: 'AgentProfile',
     component: () => import('@/views/agents/AgentProfile.vue'),
-    meta: { allowedRoles: ['agent'] }
+    meta: {
+      allowedRoles: ['agent'],
+      fullAppOnly: true // Only available when full app features are enabled
+    }
   },
 
   // Document management routes (Agent-only)
   {
     path: '/receipts-docs',
     component: DocumentLayout,
-    meta: { allowedRoles: ['agent'] }, // Restrict parent route to agents
+    meta: {
+      allowedRoles: ['agent'], // Restrict parent route to agents
+      fullAppOnly: true // Only available when full app features are enabled
+    },
     children: [
       {
         path: 'buyer-rep',
@@ -489,7 +517,8 @@ const routes = [
     component: () => import('@/views/documents/DocumentDetail.vue'),
     meta: {
       title: 'Document Details',
-      allowedRoles: ['agent']
+      allowedRoles: ['agent'],
+      fullAppOnly: true // Only available when full app features are enabled
     }
   },
   {
@@ -498,7 +527,8 @@ const routes = [
     component: () => import('@/views/documents/DocumentEdit.vue'),
     meta: {
       title: 'Edit Document',
-      allowedRoles: ['agent']
+      allowedRoles: ['agent'],
+      fullAppOnly: true // Only available when full app features are enabled
     }
   },
   {
@@ -507,7 +537,8 @@ const routes = [
     component: () => import('@/views/documents/DocumentEdit.vue'),
     meta: {
       title: 'Create Document',
-      allowedRoles: ['agent']
+      allowedRoles: ['agent'],
+      fullAppOnly: true // Only available when full app features are enabled
     }
   },
   {
@@ -516,7 +547,8 @@ const routes = [
     component: () => import('@/views/documents/ViewDocs.vue'),
     meta: {
       title: 'All Documents',
-      allowedRoles: ['agent']
+      allowedRoles: ['agent'],
+      fullAppOnly: true // Only available when full app features are enabled
     }
   },
 
@@ -526,7 +558,8 @@ const routes = [
     component: () => import('@/views/marketing/MarketingTools.vue'),
     meta: {
       allowedRoles: ['agent', 'admin'],
-      requiredPermissions: ['view-marketing-plans']
+      requiredPermissions: ['view-marketing-plans'],
+      fullAppOnly: true // Only available when full app features are enabled
     },
     children: [
       {
@@ -644,20 +677,29 @@ const routes = [
     path: '/chat/admin',
     name: 'AdminChat',
     component: () => import('@/views/chat/AdminChatView.vue'),
-    meta: { allowedRoles: ['admin'] } // Restrict to admin
+    meta: {
+      allowedRoles: ['admin'],
+      fullAppOnly: true // Only available when full app features are enabled
+    }
   },
   {
     path: '/chat/client',
     name: 'ClientChat',
     component: () => import('@/views/chat/ClientChatView.vue'),
-    meta: { allowedRoles: ['agent'] } // Restrict to agent
+    meta: {
+      allowedRoles: ['agent'],
+      fullAppOnly: true // Only available when full app features are enabled
+    }
   },
 
   // Education & Training routes (Agent-only)
   {
     path: '/education-training',
     component: EducationLayout,
-    meta: { allowedRoles: ['agent'] }, // Restrict parent route to agents
+    meta: {
+      allowedRoles: ['agent'], // Restrict parent route to agents
+      fullAppOnly: true // Only available when full app features are enabled
+    },
     children: [
       {
         path: '',
@@ -700,7 +742,10 @@ const routes = [
   {
     path: '/admin/education-training',
     component: EducationLayout,
-    meta: { allowedRoles: ['admin'] }, // Restrict to admin
+    meta: {
+      allowedRoles: ['admin'], // Restrict to admin
+      fullAppOnly: true // Only available when full app features are enabled
+    },
     children: [
       {
         path: '',
@@ -746,7 +791,10 @@ const routes = [
     path: '/profile-test',
     name: 'profile-test',
     component: () => import('@/views/profile/ProfileTest.vue'),
-    meta: { allowedRoles: ['agent'] }
+    meta: {
+      allowedRoles: ['agent'],
+      fullAppOnly: true // Only available when full app features are enabled
+    }
   },
   {
     path: '/profile',
@@ -754,7 +802,8 @@ const routes = [
     meta: {
       hideHeader: true,
       background: '#f9fafb',
-      allowedRoles: ['agent']
+      allowedRoles: ['agent'],
+      fullAppOnly: true // Only available when full app features are enabled
     },
     children: [
       {
@@ -862,7 +911,8 @@ const routes = [
     component: () => import('@/views/admin/ClientsView.vue'),
     meta: {
       title: 'Clients',
-      allowedRoles: ['admin']
+      allowedRoles: ['admin'],
+      fullAppOnly: true // Only available when full app features are enabled
     }
   },
   // Client Profile route (Admin-only)
@@ -872,7 +922,8 @@ const routes = [
     component: () => import('@/views/admin/ClientProfileView.vue'),
     meta: {
       title: 'Client Profile',
-      allowedRoles: ['admin']
+      allowedRoles: ['admin'],
+      fullAppOnly: true // Only available when full app features are enabled
     }
   },
   // Admin Property Detail route (Admin-only)
@@ -882,7 +933,8 @@ const routes = [
     component: () => import('@/views/admin/PropertyDetailView.vue'),
     meta: {
       title: 'Property Details',
-      allowedRoles: ['admin']
+      allowedRoles: ['admin'],
+      fullAppOnly: true // Only available when full app features are enabled
     }
   },
   // Admin Profile route (Admin-only)
@@ -892,7 +944,8 @@ const routes = [
     component: () => import('@/views/admin/AdminProfileView.vue'),
     meta: {
       title: 'Admin Profile',
-      allowedRoles: ['admin']
+      allowedRoles: ['admin'],
+      fullAppOnly: true // Only available when full app features are enabled
     }
   },
   // Admin Agent Profile route (Admin-only)
@@ -902,7 +955,8 @@ const routes = [
     component: () => import('@/views/admin/AgentProfileView.vue'),
     meta: {
       title: 'Agent Profile',
-      allowedRoles: ['admin']
+      allowedRoles: ['admin'],
+      fullAppOnly: true // Only available when full app features are enabled
     }
   },
   // Admin Document Edit route (Admin-only)
@@ -912,7 +966,8 @@ const routes = [
     component: () => import('@/views/admin/AdminDocumentEdit.vue'),
     meta: {
       title: 'Edit Document',
-      allowedRoles: ['admin']
+      allowedRoles: ['admin'],
+      fullAppOnly: true // Only available when full app features are enabled
     }
   },
   // Admin Document Create route (Admin-only)
@@ -922,7 +977,8 @@ const routes = [
     component: () => import('@/views/admin/AdminDocumentEdit.vue'),
     meta: {
       title: 'Create Document',
-      allowedRoles: ['admin']
+      allowedRoles: ['admin'],
+      fullAppOnly: true // Only available when full app features are enabled
     }
   },
   // Tour routes
@@ -930,7 +986,10 @@ const routes = [
     path: '/tours',
     name: 'Tours',
     component: () => import('@/features/tour/TourList.vue'),
-    meta: { requiresAuth: true },
+    meta: {
+      requiresAuth: true,
+      fullAppOnly: true // Only available when full app features are enabled
+    },
     children: [
       {
         path: '',
@@ -962,13 +1021,19 @@ const routes = [
     path: '/tours/create',
     name: 'CreateTour',
     component: () => import('@/features/tour/TourCreate.vue'),
-    meta: { requiresAuth: true }
+    meta: {
+      requiresAuth: true,
+      fullAppOnly: true // Only available when full app features are enabled
+    }
   },
   {
     path: '/tours/:id/edit',
     name: 'EditTour',
     component: () => import('@/features/tour/TourCreate.vue'),
-    meta: { requiresAuth: true }
+    meta: {
+      requiresAuth: true,
+      fullAppOnly: true // Only available when full app features are enabled
+    }
   },
   // Auth routes
   {
@@ -1012,7 +1077,7 @@ const routes = [
       title: 'About Us',
       description: 'Learn more about our company',
       publicAccess: true,
-      hideHeader: true,
+      hideHeader: false,
       hideSidebar: true,
       layout: 'public',
       noCache: true
@@ -1026,7 +1091,7 @@ const routes = [
       title: 'Careers',
       description: 'Join our team',
       publicAccess: true,
-      hideHeader: true,
+      hideHeader: false,
       hideSidebar: true,
       layout: 'public',
       noCache: true
@@ -1139,6 +1204,30 @@ const routes = [
       noCache: true
     }
   },
+  // Feature disabled route
+  {
+    path: '/feature-disabled',
+    name: 'FeatureDisabled',
+    component: () => import('@/views/FeatureDisabled.vue'),
+    meta: {
+      title: 'Feature Unavailable',
+      hideHeader: true,
+      hideSidebar: true,
+      layout: 'public'
+    }
+  },
+  // Feature test route (for debugging)
+  {
+    path: '/feature-test',
+    name: 'FeatureTest',
+    component: () => import('@/views/FeatureTest.vue'),
+    meta: {
+      title: 'Feature Flag Test',
+      hideHeader: true,
+      hideSidebar: true,
+      layout: 'public'
+    }
+  },
   // 404 route - must be the last route
   {
     path: '/:pathMatch(.*)*',
@@ -1159,8 +1248,71 @@ const router = createRouter({
   }
 });
 
-// Apply global navigation guard
+// Feature flag guard function
+const featureFlagGuard = (to, from, next) => {
+  // If feature flags haven't been initialized yet, allow navigation
+  if (!isFeatureFlagsInitialized()) {
+    return next();
+  }
+
+  // Check if the route requires a specific feature flag
+  if (to.meta.requiresFeature) {
+    const requiredFeature = to.meta.requiresFeature;
+    if (!isFeatureEnabled(requiredFeature)) {
+      console.warn(`Feature ${requiredFeature} is disabled, redirecting to feature disabled page`);
+      return next('/feature-disabled');
+    }
+  }
+
+  // Check if the route is for full app features when they're disabled
+  if (to.meta.fullAppOnly && !isFeatureEnabled('fullAppFeature')) {
+    // Allow access if user is authenticated and trying to access their role-appropriate route
+    const roleStore = useRoleStore();
+    const currentRole = roleStore.currentRole;
+
+    if (currentRole && currentRole !== 'all' && to.meta.allowedRoles && to.meta.allowedRoles.includes(currentRole)) {
+      console.log(`Allowing ${currentRole} user to access ${to.path} despite full app features being disabled`);
+      return next();
+    }
+
+    console.warn('Full app features are disabled, redirecting to feature disabled page');
+    return next('/feature-disabled');
+  }
+
+  // Check if the route is for MVP features when they're disabled
+  if (to.meta.mvpOnly && !isFeatureEnabled('mvpFeature')) {
+    console.warn('MVP features are disabled, redirecting to feature disabled page');
+    return next('/feature-disabled');
+  }
+
+  // If user is trying to access any role-specific route when full app is disabled
+  // BUT allow authenticated users to access their role-appropriate routes
+  if (!isFeatureEnabled('fullAppFeature') &&
+      (to.meta.allowedRoles &&
+       to.meta.allowedRoles.some(role => ['admin', 'agent', 'client'].includes(role)) &&
+       !to.meta.publicAccess)) {
+
+    // Check if user is authenticated and trying to access their appropriate route
+    const roleStore = useRoleStore();
+    const currentRole = roleStore.currentRole;
+
+    // If user has a specific role and is trying to access a route for that role, allow it
+    if (currentRole && currentRole !== 'all' && to.meta.allowedRoles.includes(currentRole)) {
+      console.log(`Allowing ${currentRole} user to access ${to.path} despite full app features being disabled`);
+      return next();
+    }
+
+    // Otherwise, redirect to feature disabled page
+    console.warn('Full app features are disabled, redirecting to feature disabled page');
+    return next('/feature-disabled');
+  }
+
+  next();
+};
+
+// Apply global navigation guards
 router.beforeEach(authGuard);
+router.beforeEach(featureFlagGuard);
 
 // Add global navigation guard for landing page
 router.beforeEach((to, from, next) => {

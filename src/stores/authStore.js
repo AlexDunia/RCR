@@ -40,6 +40,11 @@ export const useAuthStore = defineStore('auth', () => {
   // Set the user data
   function setUser(userData) {
     user.value = userData;
+
+    // Set user role if available in user data
+    if (userData && userData.role) {
+      localStorage.setItem('userRole', userData.role);
+    }
   }
 
   // Clear authentication data
@@ -47,6 +52,9 @@ export const useAuthStore = defineStore('auth', () => {
     token.value = null;
     user.value = null;
     authService.clearAuthData();
+
+    // Clear user role and set to 'all' for public access
+    localStorage.setItem('userRole', 'all');
   }
 
   // Check if user is authenticated

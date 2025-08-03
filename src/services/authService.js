@@ -70,6 +70,11 @@ const authService = {
         sessionStorage.setItem(TOKEN_KEY, response.data.token);
         sessionStorage.setItem(USER_DATA_KEY, JSON.stringify(response.data.user));
         sessionStorage.setItem("device_name", deviceName); // store device name for logout
+
+        // Set user role based on response data
+        if (response.data.user && response.data.user.role) {
+          localStorage.setItem('userRole', response.data.user.role);
+        }
       }
 
       return response.data;
@@ -98,6 +103,11 @@ const authService = {
       if (response.data.token) {
         sessionStorage.setItem(TOKEN_KEY, response.data.token);
         sessionStorage.setItem(USER_DATA_KEY, JSON.stringify(response.data.user));
+
+        // Set user role based on response data
+        if (response.data.user && response.data.user.role) {
+          localStorage.setItem('userRole', response.data.user.role);
+        }
       }
 
       return response.data;

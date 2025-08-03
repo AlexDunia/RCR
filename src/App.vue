@@ -5,6 +5,7 @@ import { useLayoutStore } from '@/stores/layout';
 import { useRoleStore } from './stores/roleStore.js'; // Added explicit .js extension
 import { useTaskTimer } from './composables/useTaskTimer';
 import { watch, computed, onMounted, ref, nextTick } from 'vue';
+import { isFeatureEnabled, isFeatureFlagsInitialized } from '@/utils/features';
 
 import Sidebar from './layouts/components/SidebarView.vue';
 import AdminSidebar from './layouts/components/AdminSidebar.vue'; // Import Admin Sidebar
@@ -38,6 +39,18 @@ const isAdmin = computed(() => {
 // Check if user is a client
 const isClient = computed(() => {
   return roleStore.currentRole === 'client';
+});
+
+// Check if full app features are enabled
+const isFullAppEnabled = computed(() => {
+  return isFeatureEnabled('fullAppFeature');
+});
+
+
+
+// Check if feature flags have been initialized
+const areFeatureFlagsReady = computed(() => {
+  return isFeatureFlagsInitialized();
 });
 
 // Determine if any sidebar is visible
@@ -205,27 +218,36 @@ watch(
       />
 
       <!-- Dynamic sidebar based on role (only when not on landing page and not client) -->
-      <component v-if="!isLandingPage && !isClient" :is="activeSidebar" :key="'sidebar-' + roleStore.currentRole" />
+      <component v-if="!isLandingPage && !isClient && isFullAppEnabled" :is="activeSidebar" :key="'sidebar-' + roleStore.currentRole" />
 
       <!-- Main content container with sidebar-adjusted class -->
       <div class="main-content" :class="{ 'with-sidebar': hasSidebar && !isLandingPage, 'landing-page': isLandingPage }">
         <!-- Show global header only if not hidden and not on landing page and not for 'all' role -->
-        <Header v-if="!route.meta.hideHeader && !isLandingPage && roleStore.currentRole !== 'all'"/>
+        <Header v-if="!route.meta.hideHeader && !isLandingPage && roleStore.currentRole !== 'all' && isFullAppEnabled"/>
 
-        <div class="scroll-container" :class="{ 'navigating': isNavigating }">
-          <router-view v-slot="{ Component }">
-            <transition
-              :name="route.path === '/landing' ? 'none' : 'fade'"
-              mode="out-in"
-              @before-leave="handleBeforeLeave"
-              @after-enter="handleAfterEnter"
-            >
-              <component
-                :is="Component"
-                :key="route.fullPath + (route.path === '/landing' ? Date.now() : '')"
-              />
-            </transition>
-          </router-view>
+                  <div class="scroll-container" :class="{ 'navigating': isNavigating }">
+            <!-- Show feature disabled message when appropriate -->
+            <div v-if="!isLandingPage && !isFullAppEnabled && areFeatureFlagsReady" class="feature-disabled-message">
+              <div class="feature-disabled-content">
+                <h2>Feature Temporarily Unavailable</h2>
+                <p>The full application features are currently being updated. Please check back later or contact support for assistance.</p>
+                <button @click="$router.push('/landing')" class="btn-primary">Return to Home</button>
+              </div>
+            </div>
+
+            <router-view v-slot="{ Component }" v-else>
+              <transition
+                :name="route.path === '/landing' ? 'none' : 'fade'"
+                mode="out-in"
+                @before-leave="handleBeforeLeave"
+                @after-enter="handleAfterEnter"
+              >
+                <component
+                  :is="Component"
+                  :key="route.fullPath + (route.path === '/landing' ? Date.now() : '')"
+                />
+              </transition>
+            </router-view>
 
           <TaskNotification
             :show="showNotification"
@@ -645,5 +667,53 @@ html, body {
   bottom: 0;
   pointer-events: none;
   z-index: 999999999;
+}
+
+/* Feature disabled message styles */
+.feature-disabled-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.feature-disabled-content {
+  max-width: 500px;
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.feature-disabled-content h2 {
+  color: #1f2937;
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+}
+
+.feature-disabled-content p {
+  color: #6b7280;
+  font-size: 16px;
+  line-height: 1.5;
+  margin: 0 0 24px 0;
+}
+
+.btn-primary {
+  background: #0a4d8c;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+  background: #083d70;
 }
 </style>

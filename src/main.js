@@ -8,7 +8,7 @@ import { patchHistoryAPI, enhanceRouter } from './utils/navigation-fixer'
 import { useRoleStore } from './stores/roleStore'
 import ToastPlugin from 'vue-toast-notification';
 import 'vue-toast-notification/dist/theme-default.css';
-import { features, isFeatureEnabled } from './utils/features';
+import { features, isFeatureEnabled, initializeFeatureFlags } from './utils/features';
 
 // Apply navigation fixes
 patchHistoryAPI()
@@ -51,8 +51,11 @@ app.use(pinia)
 app.use(router)
 app.mount('#app')
 
-// Initialize with client role and redirect to client dashboard
-const initializeApp = () => {
+// Initialize feature flags and app
+const initializeApp = async () => {
+  // Initialize feature flags first
+  await initializeFeatureFlags()
+
   const roleStore = useRoleStore()
   const currentRole = localStorage.getItem('userRole')
 
@@ -64,12 +67,18 @@ const initializeApp = () => {
   // Only redirect to dashboard if not in 'all' role and at root
   if (router.currentRoute.value.path === '/' && roleStore.currentRole !== 'all') {
     const role = roleStore.currentRole
-    if (role === 'admin') {
-      router.push('/agents')
-    } else if (role === 'agent') {
-      router.push('/agent-dashboard')
-    } else if (role === 'client') {
-      router.push('/client-dashboard')
+    // Check if full app features are enabled, if not, redirect to landing
+    if (!isFeatureEnabled('fullAppFeature')) {
+      console.log('Full app features disabled, redirecting to landing page');
+      router.push('/landing')
+    } else {
+      if (role === 'admin') {
+        router.push('/agents')
+      } else if (role === 'agent') {
+        router.push('/agent-dashboard')
+      } else if (role === 'client') {
+        router.push('/client-dashboard')
+      }
     }
   }
 }

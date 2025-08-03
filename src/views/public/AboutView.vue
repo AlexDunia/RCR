@@ -1,6 +1,5 @@
 <template>
   <div class="about-container">
-    <GlobalHeader />
     <div class="main-container about-aligned-container">
       <!-- Hero Section -->
       <div class="hero-section">
@@ -145,7 +144,6 @@
 </template>
 
 <script setup>
-import GlobalHeader from '@/components/GlobalHeader.vue';
 import PublicFooter from '@/components/PublicFooter.vue';
 import { onMounted } from 'vue';
 

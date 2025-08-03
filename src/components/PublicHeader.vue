@@ -16,8 +16,39 @@
         <router-link to="/RCR/signup" class="public-nav__link">Join Us</router-link>
       </div>
       <div class="public-nav__right desktop-only">
-        <router-link to="/RCR/signup" class="public-nav__button">Sign up</router-link>
-        <router-link to="/RCR/login" class="public-nav__button public-nav__button--primary">Login</router-link>
+        <!-- Show user dropdown if logged in, otherwise show auth buttons -->
+        <div v-if="isLoggedIn" class="user-dropdown" @mouseenter="showDropdown = true" @mouseleave="showDropdown = false">
+          <button class="user-dropdown__trigger" @click="toggleDropdown">
+            <span class="user-dropdown__name">{{ userDisplayName }}</span>
+            <svg class="user-dropdown__arrow" :class="{ 'user-dropdown__arrow--open': showDropdown }" width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div v-if="showDropdown" class="user-dropdown__menu">
+            <div class="user-dropdown__header">
+              <div class="user-dropdown__avatar">
+                {{ userInitials }}
+              </div>
+              <div class="user-dropdown__info">
+                <div class="user-dropdown__full-name">{{ userDisplayName }}</div>
+                <div class="user-dropdown__email">{{ userEmail }}</div>
+              </div>
+            </div>
+            <div class="user-dropdown__divider"></div>
+            <button @click="handleLogout" class="user-dropdown__item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16,17 21,12 16,7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+              </svg>
+              Logout
+            </button>
+          </div>
+        </div>
+        <template v-else>
+          <router-link to="/RCR/signup" class="public-nav__button">Sign up</router-link>
+          <router-link to="/RCR/login" class="public-nav__button public-nav__button--primary">Login</router-link>
+        </template>
       </div>
       <!-- Hamburger Menu for Mobile -->
       <button class="hamburger-menu mobile-only" @click="showMobileNav = true" aria-label="Menu">
@@ -34,10 +65,34 @@
       <div class="mobile-nav-modal__backdrop" @click="showMobileNav = false"></div>
       <div class="mobile-nav-modal__content">
         <button class="mobile-nav-modal__close" @click="showMobileNav = false" aria-label="Close menu">×</button>
+
+        <!-- Mobile user section if logged in -->
+        <div v-if="isLoggedIn" class="mobile-user-section">
+          <div class="mobile-user__info">
+            <div class="mobile-user__avatar">{{ userInitials }}</div>
+            <div class="mobile-user__details">
+              <div class="mobile-user__name">{{ userDisplayName }}</div>
+              <div class="mobile-user__email">{{ userEmail }}</div>
+            </div>
+          </div>
+          <div class="mobile-user__divider"></div>
+          <button @click="handleLogout" class="mobile-user__logout">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16,17 21,12 16,7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+            Logout
+          </button>
+        </div>
+
+        <!-- Mobile navigation links -->
         <router-link v-if="userRole === 'all'" to="/" class="mobile-nav-modal__link" @click="showMobileNav = false">Home</router-link>
         <router-link to="/allagents" class="mobile-nav-modal__link" @click="showMobileNav = false">Find Agents</router-link>
         <router-link to="/signup" class="mobile-nav-modal__link" @click="showMobileNav = false">Join Us</router-link>
-        <div class="mobile-nav-modal__buttons">
+
+        <!-- Mobile auth buttons if not logged in -->
+        <div v-if="!isLoggedIn" class="mobile-nav-modal__buttons">
           <router-link to="/signup" class="mobile-nav-modal__button" @click="showMobileNav = false">Sign up</router-link>
           <router-link to="/login" class="mobile-nav-modal__button mobile-nav-modal__button--primary" @click="showMobileNav = false">Login</router-link>
         </div>
@@ -49,6 +104,8 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
+import { useRoleStore } from '@/stores/roleStore';
+import { useRouter } from 'vue-router';
 
 defineProps({
   transparent: {
@@ -62,13 +119,60 @@ defineProps({
 });
 
 const authStore = useAuthStore();
+const roleStore = useRoleStore();
+const router = useRouter();
 const userRole = computed(() => authStore.userRole || 'all');
 
 const isScrolled = ref(false);
 const showMobileNav = ref(false);
+const showDropdown = ref(false);
+
+// User authentication state
+const isLoggedIn = computed(() => {
+  return authStore.isAuthenticated();
+});
+
+const userDisplayName = computed(() => {
+  if (!authStore.isAuthenticated() || !authStore.user) return 'User';
+  if (authStore.user?.name) return authStore.user.name;
+  if (authStore.user?.first_name && authStore.user?.last_name) {
+    return `${authStore.user.first_name} ${authStore.user.last_name}`;
+  }
+  if (authStore.user?.email) return authStore.user.email.split('@')[0];
+  return 'User';
+});
+
+const userEmail = computed(() => {
+  if (!authStore.isAuthenticated() || !authStore.user) return '';
+  return authStore.user?.email || '';
+});
+
+const userInitials = computed(() => {
+  const name = userDisplayName.value;
+  if (name === 'User') return 'U';
+  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+});
 
 const handleScroll = () => {
   isScrolled.value = window.scrollY > 10;
+};
+
+const toggleDropdown = () => {
+  showDropdown.value = !showDropdown.value;
+};
+
+const handleLogout = async () => {
+  try {
+    await authStore.logout();
+    // Reset role to 'all' for public access
+    roleStore.setRole('all');
+    showDropdown.value = false;
+    showMobileNav.value = false;
+    // Redirect to landing page after logout
+    router.push('/landing');
+  } catch (error) {
+    console.error('Logout error:', error);
+  }
 };
 
 onMounted(() => {
@@ -154,6 +258,7 @@ onUnmounted(() => {
 .public-nav__right {
   display: flex;
   gap: 16px;
+  align-items: center;
 }
 
 .public-nav__button {
@@ -181,6 +286,136 @@ onUnmounted(() => {
 
 .public-nav__button--primary:hover {
   background: #0052a5;
+}
+
+/* User Dropdown Styles */
+.user-dropdown {
+  position: relative;
+}
+
+.user-dropdown__trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.user-dropdown__trigger:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.user-dropdown__name {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-dropdown__arrow {
+  transition: transform 0.2s;
+}
+
+.user-dropdown__arrow--open {
+  transform: rotate(180deg);
+}
+
+.user-dropdown__menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  min-width: 240px;
+  z-index: 1000;
+  animation: dropdownFadeIn 0.2s ease-out;
+}
+
+.user-dropdown__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.user-dropdown__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #0066cc;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.user-dropdown__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.user-dropdown__full-name {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.user-dropdown__email {
+  color: #6b7280;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-dropdown__divider {
+  height: 1px;
+  background: #f1f5f9;
+  margin: 8px 0;
+}
+
+.user-dropdown__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  color: #374151;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.user-dropdown__item:hover {
+  background: #f9fafb;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Desktop/Mobile visibility classes */
@@ -300,6 +535,70 @@ onUnmounted(() => {
   background: #0066cc;
   border: none;
   color: #fff;
+}
+
+/* Mobile User Section */
+.mobile-user-section {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.mobile-user__info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.mobile-user__avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #0066cc;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.mobile-user__details {
+  flex: 1;
+}
+
+.mobile-user__name {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 16px;
+  margin-bottom: 2px;
+}
+
+.mobile-user__email {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.mobile-user__divider {
+  height: 1px;
+  background: #eee;
+  margin: 16px 0;
+}
+
+.mobile-user__logout {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 16px 0;
+  background: none;
+  border: none;
+  color: #dc2626;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
 }
 
 /* Fade transition */
