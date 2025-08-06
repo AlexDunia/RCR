@@ -180,8 +180,9 @@
                   {{ property.PropertyType || 'Residential' }}
                 </span>
               </div>
-              <div class="treb-property-card__favorite">
-                <i class="far fa-heart"></i>
+              <div class="treb-property-card__favorite" @click.stop="toggleTrebFavorite(property.ListingKey, property)">
+                <i v-if="favouritesStore.loading" class="fas fa-spinner fa-spin"></i>
+                <i v-else :class="isTrebFavorite(property.ListingKey) ? 'fas fa-heart' : 'far fa-heart'"></i>
               </div>
             </div>
             <div class="treb-property-card__content">
@@ -285,8 +286,9 @@
                   {{ property.type || 'Residential' }}
                 </span>
               </div>
-              <div class="property-card__favorite">
-                <i class="far fa-heart"></i>
+              <div class="property-card__favorite" @click.stop="toggleLocalFavorite(property.id)">
+                <i v-if="favouritesStore.loading" class="fas fa-spinner fa-spin"></i>
+                <i v-else :class="isLocalFavorite(property.id) ? 'fas fa-heart' : 'far fa-heart'"></i>
               </div>
             </div>
             <div class="property-card__content--figma">
@@ -486,6 +488,7 @@ import { useAgentStore } from '@/stores/agentStore';
 import { usePropertyStore } from '@/stores/propertyStore';
 import { useAuthStore } from '@/stores/authStore';
 import PublicFooter from '@/components/PublicFooter.vue';
+import { useFavouritesStore } from '@/stores/favouritesStore';
 
 defineOptions({
   name: 'LandingPage'
@@ -590,6 +593,9 @@ onMounted(async () => {
   };
   checkMobile();
   window.addEventListener('resize', checkMobile);
+
+  // Initialize favorites
+  favouritesStore.initFavourites();
 });
 
 onBeforeUnmount(() => {
@@ -749,6 +755,147 @@ async function retryTrebFetch() {
   }
 }
 
+// Import favorites store
+const favouritesStore = useFavouritesStore();
+
+// Initialize favorites on component mount
+onMounted(() => {
+  favouritesStore.initFavourites();
+});
+
+// Favorite functionality methods
+async function toggleLocalFavorite(propertyId) {
+  if (!authStore.isAuthenticated) {
+    // Redirect to login if not authenticated
+    router.push('/login');
+    return;
+  }
+
+  try {
+    // Find the full property data from the store
+    const property = propertyStore.properties.find(p => p.id === propertyId);
+    if (property) {
+      await favouritesStore.toggleFavouriteProperty(property);
+    }
+  } catch (error) {
+    console.error('Error toggling favorite:', error);
+    // You could show a toast notification here
+  }
+}
+
+async function toggleTrebFavorite(listingKey, propertyData) {
+  if (!authStore.isAuthenticated) {
+    // Redirect to login if not authenticated
+    router.push('/login');
+    return;
+  }
+
+  try {
+    // Use the full TREB property data
+    await favouritesStore.toggleFavouriteTrebProperty(propertyData);
+  } catch (error) {
+    console.error('Error toggling TREB favorite:', error);
+    // You could show a toast notification here
+  }
+}
+
+function isLocalFavorite(propertyId) {
+  return favouritesStore.isPropertyFavourite(propertyId);
+}
+
+function isTrebFavorite(listingKey) {
+  return favouritesStore.isTrebPropertyFavourite(listingKey);
+}
+
+// Debug function to view stored favorites (you can call this in browser console)
+function viewStoredFavorites() {
+  console.log('=== STORED FAVORITES ===');
+  console.log('Local Properties:', favouritesStore.getAllFavouriteProperties());
+  console.log('TREB Properties:', favouritesStore.getAllFavouriteTrebProperties());
+  console.log('All Favorites:', favouritesStore.getAllFavourites());
+
+  // Show localStorage data
+  console.log('localStorage favourite-properties:', localStorage.getItem('favourite-properties'));
+  console.log('localStorage favourite-treb-properties:', localStorage.getItem('favourite-treb-properties'));
+}
+
+// Make it available globally for testing
+window.viewStoredFavorites = viewStoredFavorites;
+
+// Test function to add a sample favorite
+async function testAddFavorite() {
+  if (!authStore.isAuthenticated) {
+    console.log('Please login first');
+    return;
+  }
+
+  // Test with a sample local property
+  const sampleProperty = {
+    id: 'test-property-1',
+    name: 'Beautiful Test Property',
+    price: 500000,
+    bedrooms: 3,
+    bathrooms: 2,
+    area: 1500,
+    address: '123 Test Street',
+    city: 'Test City',
+    state: 'TS',
+    images: ['https://example.com/test-image.jpg'],
+    status: 'active',
+    type: 'Single Family'
+  };
+
+  try {
+    await favouritesStore.toggleFavouriteProperty(sampleProperty);
+    console.log('Added test property to favorites!');
+    viewStoredFavorites();
+  } catch (error) {
+    console.error('Error adding test favorite:', error);
+  }
+}
+
+// Test function to add a sample TREB favorite
+async function testAddTrebFavorite() {
+  if (!authStore.isAuthenticated) {
+    console.log('Please login first');
+    return;
+  }
+
+  // Test with a sample TREB property
+  const sampleTrebProperty = {
+    ListingKey: 'test-treb-1',
+    UnparsedAddress: '456 TREB Test Street',
+    ListPrice: 750000,
+    BedroomsTotal: 4,
+    BathroomsFull: 3,
+    LivingArea: 2000,
+    City: 'TREB City',
+    StateOrProvince: 'TS',
+    PropertyType: 'Residential',
+    image: 'https://example.com/treb-test-image.jpg'
+  };
+
+  try {
+    await favouritesStore.toggleFavouriteTrebProperty(sampleTrebProperty);
+    console.log('Added test TREB property to favorites!');
+    viewStoredFavorites();
+  } catch (error) {
+    console.error('Error adding test TREB favorite:', error);
+  }
+}
+
+// Make test functions available globally
+window.testAddFavorite = testAddFavorite;
+window.testAddTrebFavorite = testAddTrebFavorite;
+
+// Clear all favorites (for testing)
+function clearAllFavorites() {
+  favouritesStore.clearAllFavourites();
+  console.log('All favorites cleared!');
+  viewStoredFavorites();
+}
+
+window.clearAllFavorites = clearAllFavorites;
 </script>
 
 <style scoped>
@@ -1262,11 +1409,33 @@ async function retryTrebFetch() {
   cursor: pointer;
   transition: all 0.3s ease;
   backdrop-filter: blur(4px);
+  z-index: 10;
 }
 
 .property-card__favorite:hover {
   transform: scale(1.1);
   background: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.property-card__favorite i {
+  color: #666;
+  transition: all 0.3s ease;
+}
+
+.property-card__favorite:hover i {
+  color: #e74c3c;
+}
+
+.property-card__favorite i.fas {
+  color: #e74c3c;
+  animation: heartBeat 0.3s ease-in-out;
+}
+
+@keyframes heartBeat {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
 }
 
 @media (max-width: 1200px) {
@@ -3789,11 +3958,33 @@ async function retryTrebFetch() {
   cursor: pointer;
   transition: all 0.3s ease;
   backdrop-filter: blur(4px);
+  z-index: 10;
 }
 
 .treb-property-card__favorite:hover {
   transform: scale(1.1);
   background: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.treb-property-card__favorite i {
+  color: #666;
+  transition: all 0.3s ease;
+}
+
+.treb-property-card__favorite:hover i {
+  color: #e74c3c;
+}
+
+.treb-property-card__favorite i.fas {
+  color: #e74c3c;
+  animation: heartBeat 0.3s ease-in-out;
+}
+
+@keyframes heartBeat {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
 }
 
 /* Loading, Error, and Empty States */

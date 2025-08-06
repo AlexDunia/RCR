@@ -184,7 +184,7 @@ const routes = [
       {
         path: 'favourites',
         name: 'ClientFavourites',
-        component: () => import('@/views/client/FavouritesView.vue'),
+        component: () => import('@/views/client/FavoritesView.vue'),
         meta: {
           title: 'Favourites',
           description: 'View your saved properties and agents'

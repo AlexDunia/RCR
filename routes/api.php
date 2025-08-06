@@ -47,6 +47,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/favorites', [ClientController::class, 'addToFavorites']);
         Route::get('/favorites', [ClientController::class, 'getFavorites']);
         
+        // New comprehensive favorite routes
+        Route::post('/favorites/add', [ClientController::class, 'addToFavoritesWithDetails']);
+        Route::post('/favorites/remove', [ClientController::class, 'removeFromFavorites']);
+        Route::post('/favorites/check', [ClientController::class, 'checkFavoriteStatus']);
+        Route::get('/favorites/all', [ClientController::class, 'getAllFavorites']);
+        
         // Add more client-specific routes here
     });
 }); 
