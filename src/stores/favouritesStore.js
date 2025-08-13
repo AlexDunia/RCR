@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+// import { useAuthStore } from './authStore';
 import { useAuthStore } from './authStore';
 
 export const useFavouritesStore = defineStore('favourites', {
@@ -11,118 +12,85 @@ export const useFavouritesStore = defineStore('favourites', {
   }),
 
   getters: {
-    isAgentFavourite: (state) => (agentId) => {
-      return state.favouriteAgents.includes(agentId);
-    },
-    isPropertyFavourite: (state) => (propertyId) => {
-      return state.favouriteProperties.some(property => property.id === propertyId);
-    },
-    isTrebPropertyFavourite: (state) => (listingKey) => {
-      return state.favouriteTrebProperties.some(property => property.ListingKey === listingKey);
-    },
-    getAllFavouriteAgents: (state) => {
-      return state.favouriteAgents;
-    },
-    getAllFavouriteProperties: (state) => {
-      return state.favouriteProperties;
-    },
-    getAllFavouriteTrebProperties: (state) => {
-      return state.favouriteTrebProperties;
-    },
-    getAllFavourites: (state) => {
-      return {
-        local: state.favouriteProperties,
-        treb: state.favouriteTrebProperties
-      };
-    }
+    isAgentFavourite: (state) => (agentId) => state.favouriteAgents.includes(agentId),
+    isPropertyFavourite: (state) => (propertyId) => state.favouriteProperties.some(p => p.id === propertyId),
+    isTrebPropertyFavourite: (state) => (listingKey) => state.favouriteTrebProperties.some(p => p.ListingKey === listingKey),
+    getAllFavouriteAgents: (state) => state.favouriteAgents,
+    getAllFavouriteProperties: (state) => state.favouriteProperties,
+    getAllFavouriteTrebProperties: (state) => state.favouriteTrebProperties,
+    getAllFavourites: (state) => ({ local: state.favouriteProperties, treb: state.favouriteTrebProperties })
   },
 
   actions: {
     initFavourites() {
-      const storedAgents = localStorage.getItem('favourite-agents');
-      const storedProperties = localStorage.getItem('favourite-properties');
-      const storedTrebProperties = localStorage.getItem('favourite-treb-properties');
-      if (storedAgents) {
-        this.favouriteAgents = JSON.parse(storedAgents);
-      }
-      if (storedProperties) {
-        this.favouriteProperties = JSON.parse(storedProperties);
-      }
-      if (storedTrebProperties) {
-        this.favouriteTrebProperties = JSON.parse(storedTrebProperties);
+      try {
+        const storedAgents = localStorage.getItem('favourite-agents');
+        const storedProperties = localStorage.getItem('favourite-properties');
+        const storedTrebProperties = localStorage.getItem('favourite-treb-properties');
+        if (storedAgents) this.favouriteAgents = JSON.parse(storedAgents);
+        if (storedProperties) this.favouriteProperties = JSON.parse(storedProperties);
+        if (storedTrebProperties) this.favouriteTrebProperties = JSON.parse(storedTrebProperties);
+      } catch (error) {
+        console.error('Error loading favorites:', error);
       }
     },
 
     toggleFavouriteAgent(agentId) {
       const index = this.favouriteAgents.indexOf(agentId);
-      if (index > -1) {
-        this.favouriteAgents.splice(index, 1);
-      } else {
-        this.favouriteAgents.push(agentId);
-      }
+      if (index > -1) this.favouriteAgents.splice(index, 1);
+      else this.favouriteAgents.push(agentId);
       this.saveFavouriteAgents();
     },
 
-    async toggleFavouriteProperty(propertyData) {
+    toggleFavouriteProperty(propertyData) {
       try {
         this.loading = true;
         this.error = null;
-        console.log('Starting toggleFavouriteProperty for:', propertyData.id);
-        const existingIndex = this.favouriteProperties.findIndex(property => property.id === propertyData.id);
-        if (existingIndex > -1) {
-          console.log('Removing property from favorites');
-          this.favouriteProperties.splice(existingIndex, 1);
-          await this.toggleFavoriteAPI(propertyData.id, 'local');
-          console.log('Successfully toggled favorite via API');
+        const index = this.favouriteProperties.findIndex(p => p.id === propertyData.id);
+        if (index > -1) {
+          this.favouriteProperties.splice(index, 1);
         } else {
-          console.log('Adding property to favorites');
-          const favoriteProperty = {
+          this.favouriteProperties.push({
             ...propertyData,
             favoritedAt: new Date().toISOString(),
             propertyType: 'local'
-          };
-          this.favouriteProperties.push(favoriteProperty);
-          await this.toggleFavoriteAPI(propertyData.id, 'local');
-          console.log('Successfully toggled favorite via API');
+          });
         }
         this.saveFavouriteProperties();
-        console.log('Saved to localStorage. Current favorites:', this.favouriteProperties.length);
       } catch (error) {
         this.error = error.message || 'Failed to toggle favorite';
-        console.error('Error toggling favorite:', error);
         throw error;
       } finally {
         this.loading = false;
       }
     },
 
-    async toggleFavouriteTrebProperty(trebPropertyData) {
+    toggleFavouriteTrebProperty(property) {
       try {
         this.loading = true;
         this.error = null;
-        console.log('Starting toggleFavouriteTrebProperty for:', trebPropertyData.ListingKey);
-        const existingIndex = this.favouriteTrebProperties.findIndex(property => property.ListingKey === trebPropertyData.ListingKey);
-        if (existingIndex > -1) {
-          console.log('Removing TREB property from favorites');
-          this.favouriteTrebProperties.splice(existingIndex, 1);
-          await this.toggleFavoriteAPI(trebPropertyData.ListingKey, 'treb');
-          console.log('Successfully toggled TREB favorite via API');
+        const index = this.favouriteTrebProperties.findIndex(p => p.ListingKey === property.ListingKey);
+        if (index > -1) {
+          this.favouriteTrebProperties.splice(index, 1);
         } else {
-          console.log('Adding TREB property to favorites');
-          const favoriteTrebProperty = {
-            ...trebPropertyData,
+          this.favouriteTrebProperties.push({
+            ListingKey: property.ListingKey,
+            UnparsedAddress: property.UnparsedAddress,
+            ListPrice: property.ListPrice,
+            BedroomsTotal: property.BedroomsTotal,
+            BathroomsFull: property.BathroomsFull,
+            LivingArea: property.LivingArea,
+            City: property.City,
+            StateOrProvince: property.StateOrProvince,
+            PropertyType: property.PropertyType || 'Residential',
+            image: property.image,
             favoritedAt: new Date().toISOString(),
             propertyType: 'treb'
-          };
-          this.favouriteTrebProperties.push(favoriteTrebProperty);
-          await this.toggleFavoriteAPI(trebPropertyData.ListingKey, 'treb');
-          console.log('Successfully toggled TREB favorite via API');
+          });
         }
         this.saveFavouriteTrebProperties();
-        console.log('Saved TREB properties to localStorage. Current favorites:', this.favouriteTrebProperties.length);
       } catch (error) {
         this.error = error.message || 'Failed to toggle TREB favorite';
-        console.error('Error toggling TREB favorite:', error);
         throw error;
       } finally {
         this.loading = false;
@@ -134,15 +102,11 @@ export const useFavouritesStore = defineStore('favourites', {
     },
 
     saveFavouriteProperties() {
-      console.log('Saving local properties to localStorage:', this.favouriteProperties.length, 'properties');
       localStorage.setItem('favourite-properties', JSON.stringify(this.favouriteProperties));
-      console.log('Local properties saved successfully');
     },
 
     saveFavouriteTrebProperties() {
-      console.log('Saving TREB properties to localStorage:', this.favouriteTrebProperties.length, 'properties');
       localStorage.setItem('favourite-treb-properties', JSON.stringify(this.favouriteTrebProperties));
-      console.log('TREB properties saved successfully');
     },
 
     clearAllFavourites() {
@@ -155,38 +119,10 @@ export const useFavouritesStore = defineStore('favourites', {
     },
 
     getPropertyById(propertyId) {
-      const localProperty = this.favouriteProperties.find(property => property.id === propertyId);
+      const localProperty = this.favouriteProperties.find(p => p.id === propertyId);
       if (localProperty) return localProperty;
-      const trebProperty = this.favouriteTrebProperties.find(property => property.ListingKey === propertyId);
+      const trebProperty = this.favouriteTrebProperties.find(p => p.ListingKey === propertyId);
       return trebProperty || null;
-    },
-
-    async toggleFavoriteAPI(propertyId, propertyType = 'local') {
-      try {
-        const authStore = useAuthStore();
-        const response = await fetch('/api/favorites', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authStore.token}`
-          },
-          body: JSON.stringify({
-            property_id: propertyId,
-            property_type: propertyType
-          })
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log('Successfully toggled favorite via API:', data);
-        return data;
-      } catch (error) {
-        console.error('Error toggling favorite via API:', error);
-        throw error;
-      }
     }
   }
 });

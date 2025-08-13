@@ -180,7 +180,7 @@
                   {{ property.PropertyType || 'Residential' }}
                 </span>
               </div>
-              <div class="treb-property-card__favorite" @click.stop="toggleTrebFavorite(property.ListingKey, property)">
+              <div class="treb-property-card__favorite" @click.stop="toggleTrebFavorite(property)">
                 <i v-if="favouritesStore.loading" class="fas fa-spinner fa-spin"></i>
                 <i v-else :class="isTrebFavorite(property.ListingKey) ? 'fas fa-heart' : 'far fa-heart'"></i>
               </div>
@@ -543,7 +543,6 @@ onMounted(async () => {
   try {
     await propertyStore.fetchProperties();
     await propertyStore.getTrebData();
-
   } catch (error) {
     console.error('Error fetching properties:', error);
   }
@@ -653,8 +652,6 @@ function toggleFaq(idx) {
 }
 
 // Scroll-to-reveal composable
-
-
 function useRevealOnScroll(selector = '.reveal') {
   let observer = null;
   onMounted(() => {
@@ -670,7 +667,7 @@ function useRevealOnScroll(selector = '.reveal') {
       observer.observe(el);
     });
   });
-onBeforeUnmount(() => {
+  onBeforeUnmount(() => {
     if (observer) observer.disconnect();
   });
 }
@@ -694,6 +691,7 @@ const formatArea = (area) => {
     maximumFractionDigits: 0
   }).format(area);
 };
+
 const featuredProperties = computed(() => {
   const properties = propertyStore.properties || [];
   return properties.map(property => ({
@@ -703,14 +701,11 @@ const featuredProperties = computed(() => {
   }));
 });
 
-
-
 // Add a reactive isMobile property for mobile detection
 const isMobile = ref(false);
 const showDropdown = ref(false);
 
 onMounted(() => {
-  // ... existing code ...
   // Mobile detection
   const checkMobile = () => {
     isMobile.value = window.innerWidth <= 600;
@@ -724,13 +719,11 @@ onMounted(() => {
     }
   });
 });
+
 onBeforeUnmount(() => {
   window.removeEventListener('resize', () => {});
   document.removeEventListener('click', () => {});
 });
-// ... existing code ...
-
-
 
 // Add this function to handle image loading errors
 function handleImageError(event) {
@@ -765,37 +758,30 @@ onMounted(() => {
 
 // Favorite functionality methods
 async function toggleLocalFavorite(propertyId) {
-  if (!authStore.isAuthenticated) {
-    // Redirect to login if not authenticated
+  if (!authStore.isAuthenticated()) {
     router.push('/login');
     return;
   }
-
   try {
-    // Find the full property data from the store
     const property = propertyStore.properties.find(p => p.id === propertyId);
     if (property) {
       await favouritesStore.toggleFavouriteProperty(property);
     }
   } catch (error) {
     console.error('Error toggling favorite:', error);
-    // You could show a toast notification here
   }
 }
 
-async function toggleTrebFavorite(listingKey, propertyData) {
-  if (!authStore.isAuthenticated) {
-    // Redirect to login if not authenticated
+async function toggleTrebFavorite(property) {
+  console.log('Auth state:', authStore.isAuthenticated(), 'Token:', authStore.token);
+  if (!authStore.isAuthenticated()) {
     router.push('/login');
     return;
   }
-
   try {
-    // Use the full TREB property data
-    await favouritesStore.toggleFavouriteTrebProperty(propertyData);
+    await favouritesStore.toggleFavouriteTrebProperty(property);
   } catch (error) {
-    console.error('Error toggling TREB favorite:', error);
-    // You could show a toast notification here
+    console.error('Error toggling favorite:', error);
   }
 }
 
@@ -806,96 +792,6 @@ function isLocalFavorite(propertyId) {
 function isTrebFavorite(listingKey) {
   return favouritesStore.isTrebPropertyFavourite(listingKey);
 }
-
-// Debug function to view stored favorites (you can call this in browser console)
-function viewStoredFavorites() {
-  console.log('=== STORED FAVORITES ===');
-  console.log('Local Properties:', favouritesStore.getAllFavouriteProperties());
-  console.log('TREB Properties:', favouritesStore.getAllFavouriteTrebProperties());
-  console.log('All Favorites:', favouritesStore.getAllFavourites());
-
-  // Show localStorage data
-  console.log('localStorage favourite-properties:', localStorage.getItem('favourite-properties'));
-  console.log('localStorage favourite-treb-properties:', localStorage.getItem('favourite-treb-properties'));
-}
-
-// Make it available globally for testing
-window.viewStoredFavorites = viewStoredFavorites;
-
-// Test function to add a sample favorite
-async function testAddFavorite() {
-  if (!authStore.isAuthenticated) {
-    console.log('Please login first');
-    return;
-  }
-
-  // Test with a sample local property
-  const sampleProperty = {
-    id: 'test-property-1',
-    name: 'Beautiful Test Property',
-    price: 500000,
-    bedrooms: 3,
-    bathrooms: 2,
-    area: 1500,
-    address: '123 Test Street',
-    city: 'Test City',
-    state: 'TS',
-    images: ['https://example.com/test-image.jpg'],
-    status: 'active',
-    type: 'Single Family'
-  };
-
-  try {
-    await favouritesStore.toggleFavouriteProperty(sampleProperty);
-    console.log('Added test property to favorites!');
-    viewStoredFavorites();
-  } catch (error) {
-    console.error('Error adding test favorite:', error);
-  }
-}
-
-// Test function to add a sample TREB favorite
-async function testAddTrebFavorite() {
-  if (!authStore.isAuthenticated) {
-    console.log('Please login first');
-    return;
-  }
-
-  // Test with a sample TREB property
-  const sampleTrebProperty = {
-    ListingKey: 'test-treb-1',
-    UnparsedAddress: '456 TREB Test Street',
-    ListPrice: 750000,
-    BedroomsTotal: 4,
-    BathroomsFull: 3,
-    LivingArea: 2000,
-    City: 'TREB City',
-    StateOrProvince: 'TS',
-    PropertyType: 'Residential',
-    image: 'https://example.com/treb-test-image.jpg'
-  };
-
-  try {
-    await favouritesStore.toggleFavouriteTrebProperty(sampleTrebProperty);
-    console.log('Added test TREB property to favorites!');
-    viewStoredFavorites();
-  } catch (error) {
-    console.error('Error adding test TREB favorite:', error);
-  }
-}
-
-// Make test functions available globally
-window.testAddFavorite = testAddFavorite;
-window.testAddTrebFavorite = testAddTrebFavorite;
-
-// Clear all favorites (for testing)
-function clearAllFavorites() {
-  favouritesStore.clearAllFavourites();
-  console.log('All favorites cleared!');
-  viewStoredFavorites();
-}
-
-window.clearAllFavorites = clearAllFavorites;
 </script>
 
 <style scoped>
