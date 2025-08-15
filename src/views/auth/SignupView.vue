@@ -218,13 +218,17 @@ async function onSignup() {
 async function onGoogleSignup() {
   try {
     isLoading.value = true;
-    await authService.googleLogin();
+    // Redirect the user to the backend Google redirect URL
+    window.location.href = "http://127.0.0.1:8000/auth/google/redirect";
+    // ^ This should be the Laravel route that triggers Socialite::driver('google')->redirect()
   } catch (err) {
-    console.error('Google signup error:', err);
+    console.error("Google signup error:", err);
     error.value = err.message;
     isLoading.value = false;
   }
 }
+
+
 </script>
 
 <style scoped>

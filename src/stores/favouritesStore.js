@@ -1,13 +1,13 @@
 import { defineStore } from 'pinia';
-// import { useAuthStore } from './authStore';
 import { useAuthStore } from './authStore';
+import axiosInstance from '../api/axios';
 
 export const useFavouritesStore = defineStore('favourites', {
   state: () => ({
     favouriteAgents: [],
     favouriteProperties: [],
     favouriteTrebProperties: [],
-    loading: false,
+    loadingProperties: [],
     error: null
   }),
 
@@ -18,20 +18,40 @@ export const useFavouritesStore = defineStore('favourites', {
     getAllFavouriteAgents: (state) => state.favouriteAgents,
     getAllFavouriteProperties: (state) => state.favouriteProperties,
     getAllFavouriteTrebProperties: (state) => state.favouriteTrebProperties,
-    getAllFavourites: (state) => ({ local: state.favouriteProperties, treb: state.favouriteTrebProperties })
+    getAllFavourites: (state) => ({ local: state.favouriteProperties, treb: state.favouriteTrebProperties }),
+    isLoading: (state) => (id) => state.loadingProperties.includes(id)
   },
 
   actions: {
-    initFavourites() {
+    async initFavourites() {
       try {
-        const storedAgents = localStorage.getItem('favourite-agents');
-        const storedProperties = localStorage.getItem('favourite-properties');
-        const storedTrebProperties = localStorage.getItem('favourite-treb-properties');
-        if (storedAgents) this.favouriteAgents = JSON.parse(storedAgents);
-        if (storedProperties) this.favouriteProperties = JSON.parse(storedProperties);
-        if (storedTrebProperties) this.favouriteTrebProperties = JSON.parse(storedTrebProperties);
+        const authStore = useAuthStore();
+        if (!authStore.isAuthenticated()) return;
+
+        const response = await axiosInstance.get('/favorites', {
+          headers: {
+            'Authorization': `Bearer ${authStore.token}`,
+          },
+        });
+        const { favorites } = response.data;
+        this.favouriteTrebProperties = favorites
+          .filter(f => f.property_type === 'treb')
+          .map(f => ({
+            ListingKey: f.property_id,
+            ...f.details,
+            propertyType: 'treb'
+          }));
+        this.favouriteProperties = favorites
+          .filter(f => f.property_type === 'local')
+          .map(f => ({
+            id: f.property_id,
+            ...f.details,
+            propertyType: 'local'
+          }));
+        this.favouriteAgents = JSON.parse(localStorage.getItem('favourite-agents') || '[]');
       } catch (error) {
         console.error('Error loading favorites:', error);
+        this.error = error.message || 'Failed to fetch favorites';
       }
     },
 
@@ -39,83 +59,107 @@ export const useFavouritesStore = defineStore('favourites', {
       const index = this.favouriteAgents.indexOf(agentId);
       if (index > -1) this.favouriteAgents.splice(index, 1);
       else this.favouriteAgents.push(agentId);
-      this.saveFavouriteAgents();
+      localStorage.setItem('favourite-agents', JSON.stringify(this.favouriteAgents));
     },
 
-    toggleFavouriteProperty(propertyData) {
+    async toggleFavouriteProperty(propertyData) {
       try {
-        this.loading = true;
+        this.loadingProperties.push(propertyData.id);
         this.error = null;
+        const authStore = useAuthStore();
+        if (!authStore.isAuthenticated()) return;
+
+        const response = await axiosInstance.post('/favorites', {
+          property_id: propertyData.id,
+          property_type: 'local',
+          details: {
+            ...propertyData,
+            favoritedAt: new Date().toISOString(),
+            propertyType: 'local'
+          }
+        }, {
+          headers: {
+            'Authorization': `Bearer ${authStore.token}`,
+          },
+        });
+        if (response.status !== 200) throw new Error('Failed to toggle favorite');
+
         const index = this.favouriteProperties.findIndex(p => p.id === propertyData.id);
         if (index > -1) {
           this.favouriteProperties.splice(index, 1);
         } else {
           this.favouriteProperties.push({
+            id: propertyData.id,
             ...propertyData,
             favoritedAt: new Date().toISOString(),
             propertyType: 'local'
           });
         }
-        this.saveFavouriteProperties();
       } catch (error) {
         this.error = error.message || 'Failed to toggle favorite';
         throw error;
       } finally {
-        this.loading = false;
+        this.loadingProperties = this.loadingProperties.filter(id => id !== propertyData.id);
       }
     },
 
-    toggleFavouriteTrebProperty(property) {
-      try {
-        this.loading = true;
-        this.error = null;
-        const index = this.favouriteTrebProperties.findIndex(p => p.ListingKey === property.ListingKey);
-        if (index > -1) {
-          this.favouriteTrebProperties.splice(index, 1);
-        } else {
-          this.favouriteTrebProperties.push({
-            ListingKey: property.ListingKey,
-            UnparsedAddress: property.UnparsedAddress,
-            ListPrice: property.ListPrice,
-            BedroomsTotal: property.BedroomsTotal,
-            BathroomsFull: property.BathroomsFull,
-            LivingArea: property.LivingArea,
-            City: property.City,
-            StateOrProvince: property.StateOrProvince,
-            PropertyType: property.PropertyType || 'Residential',
-            image: property.image,
-            favoritedAt: new Date().toISOString(),
-            propertyType: 'treb'
-          });
-        }
-        this.saveFavouriteTrebProperties();
-      } catch (error) {
-        this.error = error.message || 'Failed to toggle TREB favorite';
-        throw error;
-      } finally {
-        this.loading = false;
+ async toggleFavouriteTrebProperty(property) {
+  console.log('Toggle TREB property payload:', property);
+  try {
+    this.loadingProperties.push(property.ListingKey);
+    this.error = null;
+    const authStore = useAuthStore();
+    if (!authStore.isAuthenticated()) return;
+
+    const response = await axiosInstance.post('/favorites', {
+      property_id: String(property.ListingKey), // Ensure string
+      property_type: 'treb',
+      details: {
+        ListingKey: String(property.ListingKey),
+        UnparsedAddress: property.UnparsedAddress || '',
+        ListPrice: Number(property.ListPrice) || 0,
+        BedroomsTotal: Number(property.BedroomsTotal) || 0,
+        BathroomsFull: Number(property.BathroomsFull) || 0,
+        LivingArea: Number(property.LivingArea) || 0,
+        City: property.City || '',
+        StateOrProvince: property.StateOrProvince || '',
+        PropertyType: property.PropertyType || 'Residential',
+        image: property.image || null,
+        favoritedAt: new Date().toISOString(),
+        propertyType: 'treb'
       }
-    },
+    }, {
+      headers: {
+        'Authorization': `Bearer ${authStore.token}`,
+      },
+    });
+    if (response.status !== 200) throw new Error('Failed to toggle TREB favorite');
 
-    saveFavouriteAgents() {
-      localStorage.setItem('favourite-agents', JSON.stringify(this.favouriteAgents));
-    },
-
-    saveFavouriteProperties() {
-      localStorage.setItem('favourite-properties', JSON.stringify(this.favouriteProperties));
-    },
-
-    saveFavouriteTrebProperties() {
-      localStorage.setItem('favourite-treb-properties', JSON.stringify(this.favouriteTrebProperties));
-    },
+    const index = this.favouriteTrebProperties.findIndex(p => p.ListingKey === property.ListingKey);
+    if (index > -1) {
+      this.favouriteTrebProperties.splice(index, 1);
+    } else {
+      this.favouriteTrebProperties.push({
+        ListingKey: property.ListingKey,
+        ...property,
+        favoritedAt: new Date().toISOString(),
+        propertyType: 'treb'
+      });
+    }
+  } catch (error) {
+    console.error('Toggle TREB favorite error:', error.response?.data || error.message);
+    this.error = error.message || 'Failed to toggle TREB favorite';
+    throw error;
+  } finally {
+    this.loadingProperties = this.loadingProperties.filter(id => id !== property.ListingKey);
+  }
+},
 
     clearAllFavourites() {
       this.favouriteAgents = [];
       this.favouriteProperties = [];
       this.favouriteTrebProperties = [];
       localStorage.removeItem('favourite-agents');
-      localStorage.removeItem('favourite-properties');
-      localStorage.removeItem('favourite-treb-properties');
     },
 
     getPropertyById(propertyId) {
