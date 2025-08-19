@@ -9,12 +9,8 @@
     <div class="auth-split-right">
       <div class="auth-form-container">
         <div class="auth-title">Create your account</div>
-        <form class="auth-form" @submit.prevent="onSignup">
-          <!-- Error Alert -->
-          <div v-if="error" class="auth-error">
-            {{ error }}
-          </div>
-
+        <div v-if="error" class="auth-error">{{ error }}</div>
+        <form class="auth-form" @submit.prevent="handleSignUp">
           <!-- Name Field -->
           <div class="form-group">
             <input
@@ -57,8 +53,9 @@
             </div>
           </div>
 
-          <!-- Role Selection -->
-          <!-- <div class="form-group">
+          <!-- Role Selection (Commented Out) -->
+          <!--
+          <div class="form-group">
             <div class="role-selector">
               <label>
                 <input
@@ -80,7 +77,8 @@
               </label>
             </div>
             <span v-if="validationErrors.role" class="error-message">{{ validationErrors.role[0] }}</span>
-          </div> -->
+          </div>
+          -->
 
           <button type="submit" :disabled="isLoading">
             {{ isLoading ? 'Creating Account...' : 'Sign up' }}
@@ -89,11 +87,16 @@
 
         <div class="auth-divider">or</div>
 
-        <!-- Social Login Buttons -->
-        <button class="auth-social-btn" @click="onGoogleSignup" :disabled="isLoading">
+        <button class="auth-social-btn" @click="handleGoogleSignUp" :disabled="isLoading">
           <span class="icon-svg">
-            <!-- Google SVG icon -->
-            <svg width="22" height="22" viewBox="0 0 48 48"><g><path fill="#4285F4" d="M44.5 20H24v8.5h11.7C34.7 33.9 29.8 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21c10.5 0 20-7.7 20-21 0-1.3-.1-2.7-.3-4z"/></g></svg>
+            <svg width="22" height="22" viewBox="0 0 48 48">
+              <g>
+                <path
+                  fill="#4285F4"
+                  d="M44.5 20H24v8.5h11.7C34.7 33.9 29.8 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21c10.5 0 20-7.7 20-21 0-1.3-.1-2.7-.3-4z"
+                />
+              </g>
+            </svg>
           </span>
           Sign up with Google
         </button>
@@ -111,124 +114,67 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { generateDeviceName } from '@/utils/deviceFingerprint';
 import { useAuthStore } from '@/stores/authStore';
-import { useRoleStore } from '@/stores/roleStore';
-import validationService from '@/services/validationService';
 import authService from '@/services/authService';
 
 const router = useRouter();
 const authStore = useAuthStore();
-const roleStore = useRoleStore();
-const isLoading = ref(false);
-const error = ref(null);
-const validationErrors = ref({});
-
-const form = reactive({
+const form = ref({
   name: '',
   email: '',
   password: '',
   role: 'client',
-  device_name: ''
+  device_name: 'web'
 });
+const error = ref('');
+const validationErrors = ref({});
+const isLoading = ref(false);
 
-onMounted(() => {
-  // Generate device name
-  form.device_name = generateDeviceName();
-});
+async function handleSignUp() {
+  isLoading.value = true;
+  validationErrors.value = {};
+  error.value = '';
 
-function clearError(field) {
-  if (validationErrors.value[field]) {
-    delete validationErrors.value[field];
-  }
-  error.value = null;
-}
-
-function validateForm() {
-  const { isValid, errors } = validationService.validateSignupForm(form);
-
-  // Convert errors to array format to match the UI expectations
-  const formattedErrors = {};
-  for (const [key, value] of Object.entries(errors)) {
-    formattedErrors[key] = [value];
-  }
-
-  return {
-    isValid,
-    errors: formattedErrors
-  };
-}
-
-async function onSignup() {
   try {
-    error.value = null;
-    validationErrors.value = {};
-
-    // Client-side validation using validationService
-    const { isValid, errors } = validateForm();
-    if (!isValid) {
-      validationErrors.value = errors;
-      return;
-    }
-
-    isLoading.value = true;
-
-    // Initialize auth
-    await authService.initializeAuth();
-
-    const response = await authService.register({
-      name: form.name,
-      email: form.email,
-      password: form.password,
-      role: form.role
-    });
-
-    // Store the token
-    authStore.setToken(response.token);
-    authStore.setUser(response.user);
-    roleStore.setRole(response.user.role);
-
-    // Redirect based on role
-    switch (response.user.role) {
-      case 'agent':
-        router.push('/agent-dashboard');
-        break;
-      case 'client':
-        router.push('/client-dashboard');
-        break;
-      default:
-        router.push('/');
-    }
-
+    const response = await authService.register(form.value);
+    authStore.setToken(response.data.token);
+    authStore.setUser(response.data.user);
+    router.push(response.data.user.role === 'agent' ? '/agent-dashboard' : '/client-dashboard');
   } catch (err) {
-    console.error('Registration error:', err);
-
     if (err.status === 422) {
-      validationErrors.value = err.errors;
+      validationErrors.value = err.errors || {};
+      error.value = 'Please correct the form errors.';
     } else {
-      error.value = err.message;
+      error.value = err.message || 'An error occurred during sign-up.';
     }
+    console.error('Sign-up failed:', err);
   } finally {
     isLoading.value = false;
   }
 }
 
-async function onGoogleSignup() {
+async function handleGoogleSignUp() {
+  isLoading.value = true;
+  error.value = '';
+
   try {
-    isLoading.value = true;
-    // Redirect the user to the backend Google redirect URL
-    window.location.href = "http://127.0.0.1:8000/auth/google/redirect";
-    // ^ This should be the Laravel route that triggers Socialite::driver('google')->redirect()
+    await authService.googleLogin();
   } catch (err) {
-    console.error("Google signup error:", err);
-    error.value = err.message;
+    error.value = err.message || 'Failed to initiate Google sign-up.';
+    console.error('Google sign-up failed:', err);
+    router.push('/login?error=Failed to initiate Google sign-up');
+  } finally {
     isLoading.value = false;
   }
 }
 
-
+function clearError(field) {
+  if (validationErrors.value[field]) {
+    validationErrors.value[field] = null;
+  }
+}
 </script>
 
 <style scoped>

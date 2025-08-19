@@ -482,19 +482,20 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, nextTick, computed, onActivated } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, onMounted, onBeforeUnmount, computed, onActivated } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { useAgentStore } from '@/stores/agentStore';
 import { usePropertyStore } from '@/stores/propertyStore';
 import { useAuthStore } from '@/stores/authStore';
-import PublicFooter from '@/components/PublicFooter.vue';
 import { useFavouritesStore } from '@/stores/favouritesStore';
+import PublicFooter from '@/components/PublicFooter.vue';
 
 defineOptions({
   name: 'LandingPage'
 });
 
 const router = useRouter();
+const route = useRoute();
 const authStore = useAuthStore();
 const userRole = computed(() => authStore.userRole || 'all');
 const searchQuery = ref('');
@@ -527,12 +528,41 @@ const showMobileNav = ref(false);
 const agentStore = useAgentStore();
 const allAgents = ref([]);
 const visibleAgents = ref([]);
-const carouselSize = ref(4); // Show 3-5 at a time, default 4
+const carouselSize = ref(4);
 let carouselInterval = null;
 
-// Use Intersection Observer for sticky nav
-let observer = null;
+const propertyStore = usePropertyStore();
+const favouritesStore = useFavouritesStore();
+const isMobile = ref(false);
+const showDropdown = ref(false);
+
+const featuredProperties = computed(() => {
+  const properties = propertyStore.properties || [];
+  return properties.map(property => ({
+    ...property,
+    currentImageIndex: 0,
+    images: property.images || []
+  }));
+});
+
 onMounted(async () => {
+  // Handle OAuth token
+  if (route.query.token) {
+    authStore.setToken(route.query.token);
+    try {
+      const userData = await authStore.initialize();
+      if (userData) {
+        authStore.setUser(userData);
+        router.push(userData.role === 'agent' ? '/agent-dashboard' : '/client-dashboard');
+      } else {
+        router.push('/login?error=Failed to fetch user data');
+      }
+    } catch (error) {
+      console.error('Error initializing user:', error);
+      router.push('/login?error=Failed to initialize user');
+    }
+  }
+
   // Reset all reactive states
   openIdx.value = null;
   activeTab.value = 'Buy';
@@ -548,8 +578,8 @@ onMounted(async () => {
   }
 
   // Intersection Observer for sticky nav
-  await nextTick();
   const heroSection = document.getElementById('hero-section');
+  let observer = null;
   if (heroSection) {
     observer = new window.IntersectionObserver(
       ([entry]) => {
@@ -579,7 +609,8 @@ onMounted(async () => {
   }
   allAgents.value = agentStore.getAllAgents ? agentStore.getAllAgents() : (agentStore.agents || []);
   pickVisibleAgents();
-  // Start carousel after page is visible and idle
+
+  // Start carousel
   if ('requestIdleCallback' in window) {
     requestIdleCallback(() => startCarousel());
   } else {
@@ -592,6 +623,13 @@ onMounted(async () => {
   };
   checkMobile();
   window.addEventListener('resize', checkMobile);
+
+  // Close dropdown on outside click
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.pill-btn--dropdown')) {
+      showDropdown.value = false;
+    }
+  });
 
   // Initialize favorites
   favouritesStore.initFavourites();
@@ -606,11 +644,12 @@ onBeforeUnmount(() => {
   showMobileNav.value = false;
   stopCarousel();
   window.removeEventListener('resize', () => {});
+  document.removeEventListener('click', () => {});
   document.removeEventListener('keydown', () => {});
 });
 
 onActivated(async () => {
-  // Always refetch agents and properties when activated (e.g., after navigating back)
+  // Refetch agents and properties when activated
   if (typeof agentStore.fetchAgents === 'function') {
     await agentStore.fetchAgents();
   }
@@ -622,7 +661,6 @@ onActivated(async () => {
 });
 
 function shuffleAgents(agents) {
-  // Fisher-Yates shuffle
   const arr = agents.slice();
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -640,7 +678,7 @@ function pickVisibleAgents() {
 function startCarousel() {
   carouselInterval = setInterval(() => {
     pickVisibleAgents();
-  }, 5000); // 5 seconds for a more relaxed, world-class feel
+  }, 5000);
 }
 
 function stopCarousel() {
@@ -651,7 +689,6 @@ function toggleFaq(idx) {
   openIdx.value = openIdx.value === idx ? null : idx;
 }
 
-// Scroll-to-reveal composable
 function useRevealOnScroll(selector = '.reveal') {
   let observer = null;
   onMounted(() => {
@@ -672,60 +709,21 @@ function useRevealOnScroll(selector = '.reveal') {
   });
 }
 
-// Use for main sections and blog cards
 useRevealOnScroll('.reveal');
 
-const propertyStore = usePropertyStore();
-
-// Format price with commas
-const formatPrice = (price) => {
+function formatPrice(price) {
   return new Intl.NumberFormat('en-US').format(price);
-};
+}
 
-// Format area with commas and handle null values
-const formatArea = (area) => {
+function formatArea(area) {
   if (!area) return null;
   return new Intl.NumberFormat('en-US', {
     style: 'decimal',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
   }).format(area);
-};
+}
 
-const featuredProperties = computed(() => {
-  const properties = propertyStore.properties || [];
-  return properties.map(property => ({
-    ...property,
-    currentImageIndex: 0,
-    images: property.images || []
-  }));
-});
-
-// Add a reactive isMobile property for mobile detection
-const isMobile = ref(false);
-const showDropdown = ref(false);
-
-onMounted(() => {
-  // Mobile detection
-  const checkMobile = () => {
-    isMobile.value = window.innerWidth <= 600;
-  };
-  checkMobile();
-  window.addEventListener('resize', checkMobile);
-  // Close dropdown on outside click
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('.pill-btn--dropdown')) {
-      showDropdown.value = false;
-    }
-  });
-});
-
-onBeforeUnmount(() => {
-  window.removeEventListener('resize', () => {});
-  document.removeEventListener('click', () => {});
-});
-
-// Add this function to handle image loading errors
 function handleImageError(event) {
   event.target.src = 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1743087291/Designer_8_1_fjvyi0.png';
 }
@@ -733,13 +731,10 @@ function handleImageError(event) {
 function handleSearch() {
   router.push({
     path: '/search',
-    query: {
-      q: searchQuery.value
-    }
+    query: { q: searchQuery.value }
   });
 }
 
-// Add retry function for TREB data
 async function retryTrebFetch() {
   try {
     await propertyStore.getTrebData();
@@ -748,15 +743,6 @@ async function retryTrebFetch() {
   }
 }
 
-// Import favorites store
-const favouritesStore = useFavouritesStore();
-
-// Initialize favorites on component mount
-onMounted(() => {
-  favouritesStore.initFavourites();
-});
-
-// Favorite functionality methods
 async function toggleLocalFavorite(propertyId) {
   if (!authStore.isAuthenticated()) {
     router.push('/login');
@@ -773,7 +759,6 @@ async function toggleLocalFavorite(propertyId) {
 }
 
 async function toggleTrebFavorite(property) {
-  console.log('Auth state:', authStore.isAuthenticated(), 'Token:', authStore.token);
   if (!authStore.isAuthenticated()) {
     router.push('/login');
     return;

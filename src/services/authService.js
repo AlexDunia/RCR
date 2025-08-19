@@ -11,12 +11,10 @@ axios.defaults.withCredentials = true;
 
 // Request interceptor for API calls
 axios.interceptors.request.use(async (config) => {
-  // Add auth token if available
   const authToken = sessionStorage.getItem(TOKEN_KEY);
   if (authToken) {
     config.headers['Authorization'] = `Bearer ${authToken}`;
   }
-
   config.headers['Accept'] = 'application/json';
   config.headers['Content-Type'] = 'application/json';
   return config;
@@ -27,41 +25,35 @@ axios.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response?.status === 401) {
-      // Clear auth data and redirect to login
       authService.clearAuthData();
-      router.push('/login');
+      router.push('/login?error=Unauthorized');
     }
     return Promise.reject(error);
   }
 );
 
 const authService = {
-  /**
-   * Initialize authentication
-   */
   async initializeAuth() {
     try {
       await axios.get(`${API_URL}/init`);
+      if (sessionStorage.getItem(TOKEN_KEY)) {
+        return await this.getCurrentUser();
+      }
+      return null;
     } catch (error) {
       console.error('Failed to initialize auth:', error);
       throw error;
     }
   },
 
-  /**
-   * Login user
-   * @param {Object} credentials - User credentials
-   * @returns {Promise} - Response with user data and token
-   */
   async login({ email, password }) {
     try {
-      const userAgent = navigator.userAgent; // Get browser info
+      const userAgent = navigator.userAgent;
       const deviceName = `Vue - ${userAgent}`;
-
       const sanitizedData = {
         email: sanitizeInput(email.toLowerCase()),
         password,
-        device_name: deviceName, // Use user-agent string
+        device_name: deviceName,
       };
 
       const response = await axios.post(`${API_URL}/login`, sanitizedData);
@@ -69,9 +61,7 @@ const authService = {
       if (response.data.token) {
         sessionStorage.setItem(TOKEN_KEY, response.data.token);
         sessionStorage.setItem(USER_DATA_KEY, JSON.stringify(response.data.user));
-        sessionStorage.setItem("device_name", deviceName); // store device name for logout
-
-        // Set user role based on response data
+        sessionStorage.setItem('device_name', deviceName);
         if (response.data.user && response.data.user.role) {
           localStorage.setItem('userRole', response.data.user.role);
         }
@@ -83,11 +73,6 @@ const authService = {
     }
   },
 
-  /**
-   * Register new user
-   * @param {Object} userData - User registration data
-   * @returns {Promise} - Response with user data and token
-   */
   async register({ name, email, password, role }) {
     try {
       const sanitizedData = {
@@ -103,8 +88,6 @@ const authService = {
       if (response.data.token) {
         sessionStorage.setItem(TOKEN_KEY, response.data.token);
         sessionStorage.setItem(USER_DATA_KEY, JSON.stringify(response.data.user));
-
-        // Set user role based on response data
         if (response.data.user && response.data.user.role) {
           localStorage.setItem('userRole', response.data.user.role);
         }
@@ -116,12 +99,9 @@ const authService = {
     }
   },
 
-  /**
-   * Logout user
-   */
   async logout() {
     try {
-      const deviceName = sessionStorage.getItem("device_name");
+      const deviceName = sessionStorage.getItem('device_name') || 'web';
       const token = sessionStorage.getItem(TOKEN_KEY);
 
       if (token) {
@@ -134,47 +114,37 @@ const authService = {
       throw error;
     } finally {
       this.clearAuthData();
+      router.push('/login');
     }
   },
 
-  /**
-   * Clear all authentication data
-   */
   clearAuthData() {
     sessionStorage.removeItem(TOKEN_KEY);
     sessionStorage.removeItem(USER_DATA_KEY);
+    sessionStorage.removeItem('device_name');
+    localStorage.removeItem('userRole');
   },
 
-  /**
-   * Check if user is authenticated
-   */
   isAuthenticated() {
     return !!sessionStorage.getItem(TOKEN_KEY);
   },
 
-  /**
-   * Get stored user data
-   */
   getStoredUserData() {
     const userData = sessionStorage.getItem(USER_DATA_KEY);
     return userData ? JSON.parse(userData) : null;
   },
 
-  /**
-   * Get current authenticated user
-   */
   async getCurrentUser() {
     try {
       const response = await axios.get(`${API_URL}/user`);
-      return response.data;
+      sessionStorage.setItem(USER_DATA_KEY, JSON.stringify(response.data.user));
+      return response.data.user;
     } catch (error) {
+      console.error('Failed to fetch current user:', error);
       throw this.handleError(error);
     }
   },
 
-  /**
-   * Verify authentication token
-   */
   async verifyToken() {
     try {
       const response = await axios.get(`${API_URL}/verify`);
@@ -184,21 +154,16 @@ const authService = {
     }
   },
 
-  /**
-   * Initialize Google OAuth login
-   */
   async googleLogin() {
     try {
-      const response = await axios.get('/auth/google/url');
+      const response = await axios.get(`${API_URL}/google/redirect`);
       window.location.href = response.data.url;
     } catch (error) {
+      console.error('Google sign-up failed:', error);
       throw this.handleError(error);
     }
   },
 
-  /**
-   * Handle authentication errors
-   */
   handleError(error) {
     if (error.response) {
       switch (error.response.status) {
