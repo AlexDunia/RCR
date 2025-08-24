@@ -1,3 +1,4 @@
+// vite.config.js
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
@@ -8,24 +9,19 @@ import { dirname, resolve } from 'path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
-  base: '/', // Remove the /RCR/ prefix
-  plugins: [
-    vue(),
-    vueJsx(),
-    vueDevTools(),
-  ],
+  base: '/',
+  plugins: [vue(), vueJsx(), vueDevTools()],
   build: {
     outDir: 'dist',
     emptyOutDir: true,
-    assetsInlineLimit: 4096, // 4kb - smaller files will be inlined as base64
-    chunkSizeWarningLimit: 1000, // Increase the warning limit
-    cssCodeSplit: true, // Split CSS into multiple files
+    assetsInlineLimit: 4096,
+    chunkSizeWarningLimit: 1000,
+    cssCodeSplit: true,
     rollupOptions: {
       output: {
         manualChunks: {
-          'vendor': ['vue', 'vue-router', 'pinia'], // Group major libraries
+          'vendor': ['vue', 'vue-router', 'pinia'],
         },
-        // Ensure chunk filenames are predictable
         entryFileNames: 'assets/[name].[hash].js',
         chunkFileNames: 'assets/[name].[hash].js',
         assetFileNames: 'assets/[name].[hash].[ext]'
@@ -35,14 +31,20 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
-      'vue': 'vue/dist/vue.esm-bundler.js', // Ensure Vue is properly resolved
+      'vue': 'vue/dist/vue.esm-bundler.js',
     },
   },
   server: {
     historyApiFallback: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'https://127.0.0.1:8000',
+        changeOrigin: true,
+        secure: false, // Allow self-signed certificates
+        ws: true,
+      },
+      '/sanctum': {
+        target: 'https://127.0.0.1:8000',
         changeOrigin: true,
         secure: false,
       }

@@ -1,53 +1,45 @@
+// src/api/axios.js
 import axios from 'axios';
 
-const TOKEN_KEY = 'auth_token';
-
-const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
+const instance = axios.create({
+  baseURL: '/api', // Relative path for Vite proxy
   headers: {
-    'Content-Type': 'application/json',
     'Accept': 'application/json',
+    'Content-Type': 'application/json',
     'X-Requested-With': 'XMLHttpRequest'
   },
-  withCredentials: true
+  withCredentials: true // For Sanctum CSRF
 });
 
-// Request interceptor for API calls
-axiosInstance.interceptors.request.use(
+instance.interceptors.request.use(
   (config) => {
-    const token = sessionStorage.getItem(TOKEN_KEY);
+    const token = sessionStorage.getItem('auth_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Response interceptor for API calls
-axiosInstance.interceptors.response.use(
+instance.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response) {
-      // Handle specific error cases
       switch (error.response.status) {
-        case 419: // CSRF token mismatch
-          await axiosInstance.get('/sanctum/csrf-cookie');
-          return axiosInstance(error.config);
-        case 401: // Unauthorized
-          // Only remove token, let the auth store handle the redirect
-          sessionStorage.removeItem(TOKEN_KEY);
+        case 419:
+          await instance.get('/sanctum/csrf-cookie');
+          return instance(error.config);
+        case 401:
+          sessionStorage.removeItem('auth_token');
           break;
-        case 403: // Forbidden
+        case 403:
           console.error('Access forbidden');
           break;
       }
-      return Promise.reject(error);
     }
     return Promise.reject(error);
   }
 );
 
-export default axiosInstance;
+export default instance;
