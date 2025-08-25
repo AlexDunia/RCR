@@ -43,19 +43,19 @@
               type="password"
               v-model="form.password"
               placeholder="Enter your password"
-              :class="{ 'error': validationErrors.password }"
-              @input="clearError('password')"
+              :class="{ 'error': validationErrors.password || passwordError }"
+              @input="clearError('password'); validatePassword()"
               required
             />
             <span v-if="validationErrors.password" class="error-message">{{ validationErrors.password[0] }}</span>
+            <span v-else-if="passwordError" class="error-message">{{ passwordError }}</span>
             <div class="password-requirements">
               Password must be at least 8 characters, include uppercase, lowercase, and numbers
             </div>
           </div>
 
-          <!-- Role Selection (Commented Out) -->
-          <!--
-          <div class="form-group">
+          <!-- Role Selection (Uncommented) -->
+          <!-- <div class="form-group">
             <div class="role-selector">
               <label>
                 <input
@@ -77,10 +77,9 @@
               </label>
             </div>
             <span v-if="validationErrors.role" class="error-message">{{ validationErrors.role[0] }}</span>
-          </div>
-          -->
+          </div> -->
 
-          <button type="submit" :disabled="isLoading">
+          <button type="submit" :disabled="isLoading || passwordError">
             {{ isLoading ? 'Creating Account...' : 'Sign up' }}
           </button>
         </form>
@@ -98,7 +97,7 @@
               </g>
             </svg>
           </span>
-          Sign up with Google
+          {{ isLoading ? 'Connecting to Google...' : 'Sign up with Google' }}
         </button>
 
         <div class="auth-bottom-text">
@@ -131,11 +130,19 @@ const form = ref({
 const error = ref('');
 const validationErrors = ref({});
 const isLoading = ref(false);
+const passwordError = ref(''); // Added for client-side password validation
 
 async function handleSignUp() {
   isLoading.value = true;
   validationErrors.value = {};
   error.value = '';
+  passwordError.value = '';
+
+  // Validate password before submitting
+  if (!validatePassword()) {
+    isLoading.value = false;
+    return;
+  }
 
   try {
     const response = await authService.register(form.value);
@@ -164,9 +171,14 @@ async function handleGoogleSignUp() {
   } catch (err) {
     error.value = err.message || 'Failed to initiate Google sign-up.';
     console.error('Google sign-up failed:', err);
-    router.push('/login?error=Failed to initiate Google sign-up');
+    // Delay redirect to show error
+    setTimeout(() => {
+      router.push('/login?error=Failed to initiate Google sign-up');
+    }, 2000); // Wait 2 seconds
   } finally {
-    isLoading.value = false;
+    setTimeout(() => {
+      isLoading.value = false;
+    }, 2000); // Keep loading until redirect
   }
 }
 
@@ -174,6 +186,24 @@ function clearError(field) {
   if (validationErrors.value[field]) {
     validationErrors.value[field] = null;
   }
+  if (field === 'password') {
+    validatePassword();
+  }
+}
+
+function validatePassword() {
+  const password = form.value.password;
+  const minLength = password.length >= 8;
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasLowercase = /[a-z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
+
+  if (!minLength || !hasUppercase || !hasLowercase || !hasNumber) {
+    passwordError.value = 'Password must be at least 8 characters, include uppercase, lowercase, and numbers';
+    return false;
+  }
+  passwordError.value = '';
+  return true;
 }
 </script>
 
