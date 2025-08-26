@@ -100,6 +100,20 @@
           {{ isLoading ? 'Connecting to Google...' : 'Sign up with Google' }}
         </button>
 
+        <button class="auth-social-btn" @click="handleYahooSignUp" :disabled="isLoading">
+          <span class="icon-svg">
+            <svg width="22" height="22" viewBox="0 0 48 48">
+              <g>
+                <path
+                  fill="#4B0082"
+                  d="M24 4C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm2.73 28.5h-5.46v-2.73h5.46v2.73zm0-5.46h-5.46V12.73h5.46v14.54z"
+                />
+              </g>
+            </svg>
+          </span>
+          {{ isLoading ? 'Connecting to Yahoo...' : 'Sign up with Yahoo' }}
+        </button>
+
         <div class="auth-bottom-text">
           By continuing you indicate that you read and agreed to the Terms of Use
         </div>
@@ -130,7 +144,7 @@ const form = ref({
 const error = ref('');
 const validationErrors = ref({});
 const isLoading = ref(false);
-const passwordError = ref(''); // Added for client-side password validation
+const passwordError = ref('');
 
 async function handleSignUp() {
   isLoading.value = true;
@@ -138,7 +152,6 @@ async function handleSignUp() {
   error.value = '';
   passwordError.value = '';
 
-  // Validate password before submitting
   if (!validatePassword()) {
     isLoading.value = false;
     return;
@@ -171,14 +184,32 @@ async function handleGoogleSignUp() {
   } catch (err) {
     error.value = err.message || 'Failed to initiate Google sign-up.';
     console.error('Google sign-up failed:', err);
-    // Delay redirect to show error
     setTimeout(() => {
       router.push('/login?error=Failed to initiate Google sign-up');
-    }, 2000); // Wait 2 seconds
+    }, 2000);
   } finally {
     setTimeout(() => {
       isLoading.value = false;
-    }, 2000); // Keep loading until redirect
+    }, 2000);
+  }
+}
+
+async function handleYahooSignUp() {
+  isLoading.value = true;
+  error.value = '';
+
+  try {
+    await authService.yahooLogin();
+  } catch (err) {
+    error.value = err.message || 'Failed to initiate Yahoo sign-up.';
+    console.error('Yahoo sign-up failed:', err);
+    setTimeout(() => {
+      router.push('/login?error=Failed to initiate Yahoo sign-up');
+    }, 2000);
+  } finally {
+    setTimeout(() => {
+      isLoading.value = false;
+    }, 2000);
   }
 }
 
