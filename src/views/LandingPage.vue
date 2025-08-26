@@ -546,19 +546,32 @@ const featuredProperties = computed(() => {
 });
 
 onMounted(async () => {
-  // Handle OAuth token
+  // Handle OAuth callback
   if (route.query.token) {
     authStore.setToken(route.query.token);
     try {
-      const userData = await authStore.initialize();
+      // Parse user data from query param if available
+      const userData = route.query.user ? JSON.parse(decodeURIComponent(route.query.user)) : null;
       if (userData) {
         authStore.setUser(userData);
+        sessionStorage.setItem('user_data', JSON.stringify(userData));
+        if (userData.role) {
+          localStorage.setItem('userRole', userData.role);
+        }
         router.push(userData.role === 'agent' ? '/agent-dashboard' : '/client-dashboard');
       } else {
-        router.push('/login?error=Failed to fetch user data');
+        // Fallback to fetching user data
+        const fetchedUser = await authStore.initialize();
+        if (fetchedUser) {
+          authStore.setUser(fetchedUser);
+          router.push(fetchedUser.role === 'agent' ? '/agent-dashboard' : '/client-dashboard');
+        } else {
+          throw new Error('No user data returned');
+        }
       }
     } catch (error) {
       console.error('Error initializing user:', error);
+      authStore.clearAuthData();
       router.push('/login?error=Failed to initialize user');
     }
   }
@@ -778,7 +791,6 @@ function isTrebFavorite(listingKey) {
   return favouritesStore.isTrebPropertyFavourite(listingKey);
 }
 </script>
-
 <style scoped>
 .landing-page {
   min-height: 100vh;

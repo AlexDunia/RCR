@@ -154,20 +154,23 @@ const authService = {
     }
   },
 
-
   async googleLogin() {
-  try {
-    const response = await axios.get('https://127.0.0.1:8000/api/auth/google/redirect', {
-      headers: {
-        'Accept': 'application/json'
+    try {
+      const response = await axios.get('https://127.0.0.1:8000/api/auth/google/redirect', {
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+      if (response.data.url) {
+        window.location.href = response.data.url;
+      } else {
+        throw new Error('Failed to get Google auth URL');
       }
-    });
-    window.location.href = response.data.url;
-  } catch (error) {
-    console.error('Google sign-up failed:', error);
-    throw error;
-  }
-},
+    } catch (error) {
+      console.error('Google sign-up failed:', error);
+      throw this.handleError(error);
+    }
+  },
 
   handleError(error) {
     if (error.response) {
