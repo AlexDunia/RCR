@@ -1,8 +1,8 @@
-import axios from '@/utils/axios';
+import axios from '@/api/axios';
 import { sanitizeInput } from '@/utils/validators';
 import router from '@/router';
 
-const API_URL = '/api/auth';
+const API_URL = '/api/auth'; // Matches Laravel routes
 const TOKEN_KEY = 'auth_token';
 const USER_DATA_KEY = 'user_data';
 
@@ -55,9 +55,7 @@ const authService = {
         password,
         device_name: deviceName,
       };
-
       const response = await axios.post(`${API_URL}/login`, sanitizedData);
-
       if (response.data.token) {
         sessionStorage.setItem(TOKEN_KEY, response.data.token);
         sessionStorage.setItem(USER_DATA_KEY, JSON.stringify(response.data.user));
@@ -66,7 +64,6 @@ const authService = {
           localStorage.setItem('userRole', response.data.user.role);
         }
       }
-
       return response.data;
     } catch (error) {
       throw this.handleError(error);
@@ -82,9 +79,7 @@ const authService = {
         role,
         device_name: 'web'
       };
-
       const response = await axios.post(`${API_URL}/register`, sanitizedData);
-
       if (response.data.token) {
         sessionStorage.setItem(TOKEN_KEY, response.data.token);
         sessionStorage.setItem(USER_DATA_KEY, JSON.stringify(response.data.user));
@@ -92,7 +87,6 @@ const authService = {
           localStorage.setItem('userRole', response.data.user.role);
         }
       }
-
       return response.data;
     } catch (error) {
       throw this.handleError(error);
@@ -103,7 +97,6 @@ const authService = {
     try {
       const deviceName = sessionStorage.getItem('device_name') || 'web';
       const token = sessionStorage.getItem(TOKEN_KEY);
-
       if (token) {
         await axios.post(`${API_URL}/logout`, {
           device_name: deviceName
@@ -156,11 +149,7 @@ const authService = {
 
   async googleLogin() {
     try {
-      const response = await axios.get('https://127.0.0.1:8000/api/auth/google/redirect', {
-        headers: {
-          'Accept': 'application/json'
-        }
-      });
+      const response = await axios.get('/api/auth/google/redirect');
       if (response.data.url) {
         window.location.href = response.data.url;
       } else {
@@ -168,6 +157,20 @@ const authService = {
       }
     } catch (error) {
       console.error('Google sign-up failed:', error);
+      throw this.handleError(error);
+    }
+  },
+
+  async yahooLogin() {
+    try {
+      const response = await axios.get('/api/auth/yahoo/redirect');
+      if (response.data.url) {
+        window.location.href = response.data.url;
+      } else {
+        throw new Error('Failed to get Yahoo auth URL');
+      }
+    } catch (error) {
+      console.error('Yahoo sign-up failed:', error);
       throw this.handleError(error);
     }
   },
