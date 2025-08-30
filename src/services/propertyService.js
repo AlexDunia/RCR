@@ -4,9 +4,11 @@ import { useAuthStore } from '../stores/authStore';
 export const propertyService = {
   async getProperties(filters = {}) {
     try {
-      const response = await axiosInstance.get('/properties', {
+      console.log('Fetching properties with filters:', filters);
+      const response = await axiosInstance.get('/api/properties', {
         params: filters,
       });
+      console.log('Properties response:', response.data);
       return response.data;
     } catch (error) {
       console.error('Error fetching properties:', error);
@@ -15,8 +17,15 @@ export const propertyService = {
   },
 
   async getPropertyById(id) {
-    const response = await axiosInstance.get(`/properties/${id}`);
-    return response.data;
+    try {
+      console.log('Fetching property with ID:', id);
+      const response = await axiosInstance.get(`/api/properties/${id}`);
+      console.log('Property response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching property ${id}:`, error);
+      throw error;
+    }
   },
 
   async toggleFavorite(propertyType, propertyId, propertyData = null) {
@@ -29,56 +38,87 @@ export const propertyService = {
       payload.property_data = propertyData;
     }
     try {
-      const response = await axiosInstance.post('/favorites/toggle', payload, {
+      console.log('Toggling favorite:', { propertyType, propertyId, payload });
+      const response = await axiosInstance.post('/api/favorites/toggle', payload, {
         headers: {
           Authorization: `Bearer ${authStore.token}`,
         },
       });
+      console.log('Toggle favorite response:', response.data);
       return response.data;
     } catch (error) {
       console.error(`Error toggling favorite for ${propertyId}:`, error);
       throw error;
     }
   },
+
   async createProperty(propertyData) {
-    const authStore = useAuthStore()
-    const response = await axiosInstance.post('/properties', propertyData, {
-      headers: {
-        Authorization: `Bearer ${authStore.token}`,
-        'Content-Type': 'multipart/form-data'
-      }
-    })
-    return response.data
+    const authStore = useAuthStore();
+    try {
+      console.log('Creating property with data:', propertyData);
+      const response = await axiosInstance.post('/api/properties', propertyData, {
+        headers: {
+          Authorization: `Bearer ${authStore.token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      console.log('Create property response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating property:', error);
+      throw error;
+    }
   },
 
   async updateProperty(id, propertyData) {
-    const authStore = useAuthStore()
-    const response = await axiosInstance.put(`/properties/${id}`, propertyData, {
-      headers: {
-        Authorization: `Bearer ${authStore.token}`,
-        'Content-Type': 'multipart/form-data'
-      }
-    })
-    return response.data
+    const authStore = useAuthStore();
+    try {
+      console.log('Updating property:', { id, propertyData });
+      const response = await axiosInstance.put(`/api/properties/${id}`, propertyData, {
+        headers: {
+          Authorization: `Bearer ${authStore.token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      console.log('Update property response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error(`Error updating property ${id}:`, error);
+      throw error;
+    }
   },
 
   async deleteProperty(id) {
-    const authStore = useAuthStore()
-    const response = await axiosInstance.delete(`/properties/${id}`, {
-      headers: {
-        Authorization: `Bearer ${authStore.token}`
-      }
-    })
-    return response.data
+    const authStore = useAuthStore();
+    try {
+      console.log('Deleting property:', id);
+      const response = await axiosInstance.delete(`/api/properties/${id}`, {
+        headers: {
+          Authorization: `Bearer ${authStore.token}`,
+        },
+      });
+      console.log('Delete property response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error(`Error deleting property ${id}:`, error);
+      throw error;
+    }
   },
 
-  async toggleFavorite(id) {
-    const authStore = useAuthStore()
-    const response = await axiosInstance.post(`/properties/${id}/favorite`, {}, {
-      headers: {
-        Authorization: `Bearer ${authStore.token}`
-      }
-    })
-    return response.data
-  }
-}
+  async toggleFavoriteById(id) {
+    const authStore = useAuthStore();
+    try {
+      console.log('Toggling favorite for property:', id);
+      const response = await axiosInstance.post(`/api/properties/${id}/favorite`, {}, {
+        headers: {
+          Authorization: `Bearer ${authStore.token}`,
+        },
+      });
+      console.log('Toggle favorite response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error(`Error toggling favorite for property ${id}:`, error);
+      throw error;
+    }
+  },
+};

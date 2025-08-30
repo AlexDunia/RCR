@@ -230,38 +230,44 @@
     </section>
 
     <!-- Featured Properties Section -->
-    <section class="featured featured--figma reveal">
+    <section class="featured-properties">
       <div class="boxed-container">
-        <h2 class="featured__title--figma">Find the best place for you.</h2>
+        <h2 class="featured-properties__title">Find the best place for you.</h2>
         <div v-if="propertyStore.loading" class="loading-state">
-          Loading properties...
+          <div class="loading-spinner"></div>
+          <div class="loading-text">Loading properties...</div>
         </div>
         <div v-else-if="propertyStore.error" class="error-state">
-          {{ propertyStore.error }}
+          <div class="error-message">{{ propertyStore.error }}</div>
+          <button class="retry-button" @click="retryLocalFetch">Retry</button>
         </div>
         <div v-else-if="featuredProperties.length === 0" class="empty-state">
-          No properties available at the moment.
+          <div class="empty-message">No properties available at the moment.</div>
         </div>
-        <div v-else class="property-grid--figma">
-          <router-link
+        <div v-else class="featured-properties__grid">
+          <div
             v-for="property in featuredProperties"
             :key="property.id"
-            :to="`/property/${property.id}`"
-            class="property-card--figma">
-            <div class="property-card__image-carousel">
-              <img v-if="!property.images?.length"
-                   src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1743087291/Designer_8_1_fjvyi0.png"
-                   :alt="property.name"
-                   class="property-card__img--figma"
-                   loading="lazy">
-              <template v-else>
-                <img :src="property.images[0]"
-                     :alt="property.name"
-                     class="property-card__img--figma"
-                     loading="lazy"
-                     @error="handleImageError">
-              </template>
-              <div class="property-card__badges">
+            class="featured-property-card"
+          >
+            <div class="featured-property-card__image">
+              <img
+                v-if="property.images?.length"
+                :src="property.images[0]"
+                :alt="property.name || 'Property Image'"
+                class="featured-property-card__img"
+                loading="lazy"
+                @error="handleImageError"
+              />
+              <div v-else class="featured-property-card__no-image">
+                <img
+                  src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1743087291/Designer_8_1_fjvyi0.png"
+                  alt="No Image Available"
+                  class="featured-property-card__img"
+                  loading="lazy"
+                />
+              </div>
+              <div class="featured-property-card__badges">
                 <span
                   v-if="property.status === 'active'"
                   class="property-badge property-badge--active"
@@ -286,36 +292,41 @@
                   {{ property.type || 'Residential' }}
                 </span>
               </div>
-              <div class="property-card__favorite" @click.stop="toggleLocalFavorite(property.id)">
+              <div class="featured-property-card__favorite" @click.stop="toggleLocalFavorite(property.id)">
                 <i v-if="favouritesStore.loading" class="fas fa-spinner fa-spin"></i>
                 <i v-else :class="isLocalFavorite(property.id) ? 'fas fa-heart' : 'far fa-heart'"></i>
               </div>
             </div>
-            <div class="property-card__content--figma">
-              <div class="property-card__price--figma">${{ formatPrice(property.price) }}</div>
-              <h3 class="property-card__title--figma">{{ property.name || 'Beautiful Property' }}</h3>
-              <div class="property-card__details">
-                <span class="property-card__detail">
+            <div class="featured-property-card__content">
+              <div class="featured-property-card__price">${{ formatPrice(property.price) }}</div>
+              <router-link
+                :to="`/property/${property.id}`"
+                class="featured-property-card__title"
+              >
+                {{ property.name || 'Beautiful Property' }}
+              </router-link>
+              <div class="featured-property-card__details">
+                <span class="featured-property-card__detail">
                   <i class="fas fa-bed"></i>
                   {{ property.bedrooms || 'N/A' }} Beds
                 </span>
-                <span class="property-card__detail">
+                <span class="featured-property-card__detail">
                   <i class="fas fa-bath"></i>
                   {{ property.bathrooms || 'N/A' }} Baths
                 </span>
-                <span class="property-card__detail">
+                <span class="featured-property-card__detail">
                   <i class="fas fa-ruler-combined"></i>
                   {{ formatArea(property.area) || 'N/A' }} sqft
                 </span>
               </div>
-              <div class="property-card__address--figma">
+              <div class="featured-property-card__location">
                 <i class="fas fa-map-marker-alt"></i>
                 {{ property.address }}{{ property.city ? `, ${property.city}` : '' }}{{ property.state ? `, ${property.state}` : '' }}
               </div>
             </div>
-          </router-link>
+          </div>
         </div>
-        <router-link to="/allproperties" class="featured__view-more">
+        <router-link to="/allproperties" class="featured-properties__view-more">
           View More
           <svg style="margin-left: 8px;" width="20" height="20" fill="none" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" stroke="#0052a5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </router-link>
@@ -751,6 +762,14 @@ function handleSearch() {
 async function retryTrebFetch() {
   try {
     await propertyStore.getTrebData();
+  } catch (error) {
+    console.error('Retry failed:', error);
+  }
+}
+
+async function retryLocalFetch() {
+  try {
+    await propertyStore.fetchProperties();
   } catch (error) {
     console.error('Retry failed:', error);
   }
@@ -3787,6 +3806,191 @@ function isTrebFavorite(listingKey) {
   background: rgba(0, 102, 204, 0.9);
 }
 
+/* Featured Properties Section - Matching TREB Styles */
+.featured-properties {
+  padding: 80px 0;
+  background: linear-gradient(135deg, #f7f8fa 60%, #e3f0ff 100%);
+}
+
+.featured-properties__title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 3rem;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.featured-properties__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 32px;
+  margin: 0 auto;
+}
+
+.featured-property-card {
+  position: relative;
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.featured-property-card:hover {
+  transform: translateY(-8px) scale(1.01);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+}
+
+.featured-property-card__image {
+  position: relative;
+  width: 100%;
+  padding-top: 66.67%;
+  overflow: hidden;
+}
+
+.featured-property-card__img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.featured-property-card:hover .featured-property-card__img {
+  transform: scale(1.08);
+}
+
+.featured-property-card__no-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+}
+
+.featured-property-card__badges {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.featured-property-card__favorite {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+  z-index: 10;
+}
+
+.featured-property-card__favorite:hover {
+  transform: scale(1.1);
+  background: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.featured-property-card__favorite i {
+  color: #666;
+  transition: all 0.3s ease;
+}
+
+.featured-property-card__favorite:hover i {
+  color: #e74c3c;
+}
+
+.featured-property-card__favorite i.fas {
+  color: #e74c3c;
+  animation: heartBeat 0.3s ease-in-out;
+}
+
+.featured-property-card__content {
+  padding: 24px;
+  position: relative;
+}
+
+.featured-property-card__price {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0066cc;
+  margin-bottom: 8px;
+}
+
+.featured-property-card__title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 16px;
+  line-height: 1.4;
+  text-decoration: none;
+  display: block;
+  transition: color 0.2s ease;
+}
+
+.featured-property-card__title:hover {
+  color: #0066cc;
+}
+
+.featured-property-card__details {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 16px;
+}
+
+.featured-property-card__detail {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+.featured-property-card__location {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #64748b;
+  font-size: 0.875rem;
+  margin-top: 12px;
+}
+
+.featured-properties__view-more {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 24px;
+  font-weight: 700;
+  color: #0052a5;
+  font-size: 1.1rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.featured-properties__view-more:hover {
+  color: #003d7a;
+  text-decoration: underline;
+}
+
 .treb-property-card__content {
   padding: 24px;
   position: relative;
@@ -3953,6 +4157,40 @@ function isTrebFavorite(listingKey) {
   }
 
   .treb-property-card__price {
+    font-size: 1.25rem;
+  }
+}
+
+/* Featured Properties Responsive Styles */
+@media (max-width: 768px) {
+  .featured-properties {
+    padding: 3rem 1rem;
+  }
+
+  .featured-properties__title {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .featured-properties__grid {
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .featured-properties__title {
+    font-size: 1.75rem;
+  }
+
+  .featured-property-card {
+    border-radius: 12px;
+  }
+
+  .featured-property-card__content {
+    padding: 1.25rem;
+  }
+
+  .featured-property-card__price {
     font-size: 1.25rem;
   }
 }
