@@ -62,6 +62,12 @@ const routes = [
       next();
     }
   },
+
+  {
+    path: '/favorites',
+    name: 'Favorites',
+    component: () => import('@/views/Favorites.vue')
+  },
   // Public Agent Profile page - accessible to all
   {
     path: '/agent-profile/:id',

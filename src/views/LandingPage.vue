@@ -181,7 +181,7 @@
                 </span>
               </div>
               <div class="treb-property-card__favorite" @click.stop="toggleTrebFavorite(property)">
-                <i v-if="favouritesStore.loading" class="fas fa-spinner fa-spin"></i>
+                <i v-if="favouritesStore.isLoading(property.ListingKey)" class="fas fa-spinner fa-spin"></i>
                 <i v-else :class="isTrebFavorite(property.ListingKey) ? 'fas fa-heart' : 'far fa-heart'"></i>
               </div>
             </div>
@@ -221,10 +221,34 @@
     <section class="property-types-section">
       <div class="boxed-container">
         <div class="property-types-row">
-          <a href="#" class="property-type-item property-type-item--active">Single Family Homes</a>
-          <a href="#" class="property-type-item">Townhouses</a>
-          <a href="#" class="property-type-item">Condos</a>
-          <a href="#" class="property-type-item">Pre-Construction</a>
+          <div class="property-type-item property-type-item--active">
+            <span>Single Family Homes</span>
+            <div class="property-type-favorite" @click.stop="togglePropertyTypeFavorite('Single Family Homes')">
+              <i v-if="favouritesStore.isLoading('Single Family Homes')" class="fas fa-spinner fa-spin"></i>
+              <i v-else :class="isPropertyTypeFavorite('Single Family Homes') ? 'fas fa-heart' : 'far fa-heart'"></i>
+            </div>
+          </div>
+          <div class="property-type-item">
+            <span>Townhouses</span>
+            <div class="property-type-favorite" @click.stop="togglePropertyTypeFavorite('Townhouses')">
+              <i v-if="favouritesStore.isLoading('Townhouses')" class="fas fa-spinner fa-spin"></i>
+              <i v-else :class="isPropertyTypeFavorite('Townhouses') ? 'fas fa-heart' : 'far fa-heart'"></i>
+            </div>
+          </div>
+          <div class="property-type-item">
+            <span>Condos</span>
+            <div class="property-type-favorite" @click.stop="togglePropertyTypeFavorite('Condos')">
+              <i v-if="favouritesStore.isLoading('Condos')" class="fas fa-spinner fa-spin"></i>
+              <i v-else :class="isPropertyTypeFavorite('Condos') ? 'fas fa-heart' : 'far fa-heart'"></i>
+            </div>
+          </div>
+          <div class="property-type-item">
+            <span>Pre-Construction</span>
+            <div class="property-type-favorite" @click.stop="togglePropertyTypeFavorite('Pre-Construction')">
+              <i v-if="favouritesStore.isLoading('Pre-Construction')" class="fas fa-spinner fa-spin"></i>
+              <i v-else :class="isPropertyTypeFavorite('Pre-Construction') ? 'fas fa-heart' : 'far fa-heart'"></i>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -293,7 +317,7 @@
                 </span>
               </div>
               <div class="featured-property-card__favorite" @click.stop="toggleLocalFavorite(property.id)">
-                <i v-if="favouritesStore.loading" class="fas fa-spinner fa-spin"></i>
+                <i v-if="favouritesStore.isLoading(property.id)" class="fas fa-spinner fa-spin"></i>
                 <i v-else :class="isLocalFavorite(property.id) ? 'fas fa-heart' : 'far fa-heart'"></i>
               </div>
             </div>
@@ -561,7 +585,6 @@ onMounted(async () => {
   if (route.query.token) {
     authStore.setToken(route.query.token);
     try {
-      // Parse user data from query param if available
       const userData = route.query.user ? JSON.parse(decodeURIComponent(route.query.user)) : null;
       if (userData) {
         authStore.setUser(userData);
@@ -571,7 +594,6 @@ onMounted(async () => {
         }
         router.push(userData.role === 'agent' ? '/agent-dashboard' : '/client-dashboard');
       } else {
-        // Fallback to fetching user data
         const fetchedUser = await authStore.initialize();
         if (fetchedUser) {
           authStore.setUser(fetchedUser);
@@ -621,11 +643,7 @@ onMounted(async () => {
   isVisible.value = true;
 
   // Add event listener to close mobile nav on escape key
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      showMobileNav.value = false;
-    }
-  });
+  document.addEventListener('keydown', handleEscapeKey);
 
   // Load agents from store
   if (typeof agentStore.fetchAgents === 'function') {
@@ -649,14 +667,14 @@ onMounted(async () => {
   window.addEventListener('resize', checkMobile);
 
   // Close dropdown on outside click
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('.pill-btn--dropdown')) {
-      showDropdown.value = false;
-    }
-  });
+  document.addEventListener('click', handleOutsideClick);
 
   // Initialize favorites
-  favouritesStore.initFavourites();
+  try {
+    await favouritesStore.initFavourites();
+  } catch (error) {
+    console.error('Error initializing favorites:', error);
+  }
 });
 
 onBeforeUnmount(() => {
@@ -668,8 +686,8 @@ onBeforeUnmount(() => {
   showMobileNav.value = false;
   stopCarousel();
   window.removeEventListener('resize', () => {});
-  document.removeEventListener('click', () => {});
-  document.removeEventListener('keydown', () => {});
+  document.removeEventListener('click', handleOutsideClick);
+  document.removeEventListener('keydown', handleEscapeKey);
 });
 
 onActivated(async () => {
@@ -683,6 +701,18 @@ onActivated(async () => {
     await propertyStore.fetchProperties();
   }
 });
+
+function handleEscapeKey(e) {
+  if (e.key === 'Escape') {
+    showMobileNav.value = false;
+  }
+}
+
+function handleOutsideClick(e) {
+  if (!e.target.closest('.pill-btn--dropdown')) {
+    showDropdown.value = false;
+  }
+}
 
 function shuffleAgents(agents) {
   const arr = agents.slice();
@@ -786,7 +816,7 @@ async function toggleLocalFavorite(propertyId) {
       await favouritesStore.toggleFavouriteProperty(property);
     }
   } catch (error) {
-    console.error('Error toggling favorite:', error);
+    console.error('Error toggling local favorite:', error);
   }
 }
 
@@ -798,7 +828,19 @@ async function toggleTrebFavorite(property) {
   try {
     await favouritesStore.toggleFavouriteTrebProperty(property);
   } catch (error) {
-    console.error('Error toggling favorite:', error);
+    console.error('Error toggling TREB favorite:', error);
+  }
+}
+
+async function togglePropertyTypeFavorite(propertyType) {
+  if (!authStore.isAuthenticated()) {
+    router.push('/login');
+    return;
+  }
+  try {
+    await favouritesStore.toggleFavouritePropertyType(propertyType);
+  } catch (error) {
+    console.error('Error toggling property type favorite:', error);
   }
 }
 
@@ -809,7 +851,12 @@ function isLocalFavorite(propertyId) {
 function isTrebFavorite(listingKey) {
   return favouritesStore.isTrebPropertyFavourite(listingKey);
 }
+
+function isPropertyTypeFavorite(propertyType) {
+  return favouritesStore.isPropertyTypeFavourite(propertyType);
+}
 </script>
+
 <style scoped>
 .landing-page {
   min-height: 100vh;
@@ -1169,6 +1216,50 @@ function isTrebFavorite(listingKey) {
 .property-type-item:hover {
   background: #e0f2fe;
   color: #0052a5;
+}
+
+.property-type-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.property-type-favorite {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.property-type-favorite:hover {
+  transform: scale(1.1);
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.property-type-favorite i {
+  font-size: 12px;
+  color: #666;
+  transition: all 0.3s ease;
+}
+
+.property-type-favorite:hover i {
+  color: #e74c3c;
+}
+
+.property-type-favorite i.fas {
+  color: #e74c3c;
+  animation: heartBeat 0.3s ease-in-out;
+}
+
+.property-type-favorite i.fa-spinner {
+  color: #0066cc;
 }
 
 @media (max-width: 768px) {

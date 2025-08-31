@@ -32,14 +32,12 @@ export const propertyService = {
     const authStore = useAuthStore();
     const payload = {
       property_type: propertyType,
-      property_id: propertyId,
+      property_id: String(propertyId), // Force string
+      details: propertyData || null, // Ensure details is included
     };
-    if (propertyType === 'treb' && propertyData) {
-      payload.property_data = propertyData;
-    }
     try {
       console.log('Toggling favorite:', { propertyType, propertyId, payload });
-      const response = await axiosInstance.post('/api/favorites/toggle', payload, {
+      const response = await axiosInstance.post('/api/favorites', payload, {
         headers: {
           Authorization: `Bearer ${authStore.token}`,
         },
@@ -101,23 +99,6 @@ export const propertyService = {
       return response.data;
     } catch (error) {
       console.error(`Error deleting property ${id}:`, error);
-      throw error;
-    }
-  },
-
-  async toggleFavoriteById(id) {
-    const authStore = useAuthStore();
-    try {
-      console.log('Toggling favorite for property:', id);
-      const response = await axiosInstance.post(`/api/properties/${id}/favorite`, {}, {
-        headers: {
-          Authorization: `Bearer ${authStore.token}`,
-        },
-      });
-      console.log('Toggle favorite response:', response.data);
-      return response.data;
-    } catch (error) {
-      console.error(`Error toggling favorite for property ${id}:`, error);
       throw error;
     }
   },
