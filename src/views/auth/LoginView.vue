@@ -92,7 +92,18 @@
           <span class="icon-svg">
             <svg width="22" height="22" viewBox="0 0 48 48"><g><path fill="#4285F4" d="M44.5 20H24v8.5h11.7C34.7 33.9 29.8 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21c10.5 0 20-7.7 20-21 0-1.3-.1-2.7-.3-4z"/></g></svg>
           </span>
-          Login with Google
+          {{ isLoading ? 'Connecting to Google...' : 'Login with Google' }}
+        </button>
+
+        <button
+          class="auth-social-btn"
+          @click="onYahooLogin"
+          :disabled="isLoading"
+        >
+          <span class="icon-svg">
+            <svg width="22" height="22" viewBox="0 0 48 48"><g><path fill="#4B0082" d="M24 4C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm2.73 28.5h-5.46v-2.73h5.46v2.73zm0-5.46h-5.46V12.73h5.46v14.54z"/></g></svg>
+          </span>
+          {{ isLoading ? 'Connecting to Yahoo...' : 'Login with Yahoo' }}
         </button>
 
         <div class="auth-bottom-text">
@@ -131,14 +142,47 @@ const form = reactive({
   device_name: ''
 });
 
-// Generate device fingerprint on mount
+// Handle OAuth redirect on mount
 onMounted(async () => {
   try {
     form.device_name = await authService.generateFingerprint();
   } catch (err) {
     console.error('Failed to generate device fingerprint:', err);
-    // Fallback to a basic device name
     form.device_name = navigator.userAgent;
+  }
+
+  const query = router.currentRoute.value.query;
+  if (query.token && query.user) {
+    try {
+      isLoading.value = true;
+      const userData = JSON.parse(decodeURIComponent(query.user));
+      authStore.setToken(query.token);
+      authStore.setUser(userData);
+      roleStore.setRole(userData.role);
+      sessionStorage.setItem('user_data', JSON.stringify(userData));
+      if (userData.role) {
+        localStorage.setItem('userRole', userData.role);
+      }
+
+      // Redirect based on role
+      const redirectPath = query.redirect || (userData.role === 'admin' ? '/admin/dashboard' :
+                                             userData.role === 'agent' ? '/agent-dashboard' :
+                                             userData.role === 'client' ? '/client/dashboard' : '/');
+      await router.push(redirectPath);
+    } catch (err) {
+      console.error('Failed to process OAuth redirect:', err);
+      error.value = 'Failed to process login. Please try again.';
+      setTimeout(() => {
+        router.push('/login?error=Failed to process OAuth redirect');
+      }, 2000);
+    } finally {
+      isLoading.value = false;
+    }
+  } else if (query.error) {
+    error.value = decodeURIComponent(query.error);
+    setTimeout(() => {
+      error.value = null;
+    }, 5000);
   }
 });
 
@@ -156,14 +200,12 @@ function togglePassword() {
 function validateForm() {
   const errors = {};
 
-  // Email validation
   if (!form.email.trim()) {
     errors.email = ['Email is required'];
   } else if (!validateEmail(form.email)) {
     errors.email = ['Please enter a valid email address'];
   }
 
-  // Password validation
   if (!form.password) {
     errors.password = ['Password is required'];
   }
@@ -176,7 +218,6 @@ async function onLogin() {
     error.value = null;
     validationErrors.value = {};
 
-    // Client-side validation
     const errors = validateForm();
     if (Object.keys(errors).length > 0) {
       validationErrors.value = errors;
@@ -184,52 +225,29 @@ async function onLogin() {
     }
 
     isLoading.value = true;
-
-    // Initialize auth
     await authService.initializeAuth();
-
     const response = await authService.login({
       email: form.email,
-      password: form.password
+      password: form.password,
+      device_name: form.device_name
     });
 
-    // Store authentication data
     authStore.setToken(response.token);
     authStore.setUser(response.user);
     roleStore.setRole(response.user.role);
 
-    // Get the redirect URL from query params if it exists
-    const redirectPath = router.currentRoute.value.query.redirect;
-
-    // Redirect based on role or saved redirect path
-    if (redirectPath) {
-      await router.replace(redirectPath);
-    } else {
-      // Role-based redirect
-      switch (response.user.role) {
-        case 'admin':
-          await router.replace('/admin/dashboard');
-          break;
-        case 'agent':
-          await router.replace('/agent/dashboard');
-          break;
-        case 'client':
-          await router.replace('/client/dashboard');
-          break;
-        default:
-          await router.replace('/');
-      }
-    }
-
+    const redirectPath = router.currentRoute.value.query.redirect ||
+                        (response.user.role === 'admin' ? '/admin/dashboard' :
+                         response.user.role === 'agent' ? '/agent-dashboard' :
+                         response.user.role === 'client' ? '/client/dashboard' : '/');
+    await router.push(redirectPath);
   } catch (err) {
     console.error('Login error:', err);
-
     if (err.status === 422) {
       validationErrors.value = err.errors;
     } else {
-      error.value = err.message;
+      error.value = err.message || 'An error occurred during login.';
     }
-
     isLoading.value = false;
   }
 }
@@ -237,11 +255,34 @@ async function onLogin() {
 async function onGoogleLogin() {
   try {
     isLoading.value = true;
+    error.value = '';
     await authService.googleLogin();
   } catch (err) {
     console.error('Google login error:', err);
-    error.value = err.message;
-    isLoading.value = false;
+    error.value = err.message || 'Failed to initiate Google login.';
+    setTimeout(() => {
+      router.push('/login?error=Failed to initiate Google login');
+    }, 2000);
+    setTimeout(() => {
+      isLoading.value = false;
+    }, 2000);
+  }
+}
+
+async function onYahooLogin() {
+  try {
+    isLoading.value = true;
+    error.value = '';
+    await authService.yahooLogin();
+  } catch (err) {
+    console.error('Yahoo login error:', err);
+    error.value = err.message || 'Failed to initiate Yahoo login.';
+    setTimeout(() => {
+      router.push('/login?error=Failed to initiate Yahoo login');
+    }, 2000);
+    setTimeout(() => {
+      isLoading.value = false;
+    }, 2000);
   }
 }
 </script>
