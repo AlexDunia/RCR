@@ -1,3 +1,4 @@
+
 <template>
   <div class="auth-split-bg">
     <div class="auth-split-left">
@@ -127,28 +128,6 @@
 
 
 
-  <div class="auth-divider">Test Google AI</div>
-
-<div class="form-group">
-  <input
-    type="text"
-    v-model="testPrompt"
-    placeholder="Enter a prompt to test AI"
-  />
-  <button type="button" @click="testGoogleAI" :disabled="isLoadingAI">
-    {{ isLoadingAI ? 'Testing...' : 'Run AI Test' }}
-  </button>
-</div>
-
-<div v-if="aiResponse" class="ai-response">
-  <strong>AI Response:</strong> {{ aiResponse }}
-</div>
-<div v-if="aiError" class="ai-error">
-  {{ aiError }}
-</div>
-
-
-
 </template>
 
 <script setup>
@@ -158,58 +137,7 @@ import { useAuthStore } from '@/stores/authStore';
 import authService from '@/services/authService';
 
 
-// Ai add ons
 
-const testPrompt = ref('');
-const aiResponse = ref('');
-const aiError = ref('');
-const isLoadingAI = ref(false);
-
-// ⚠️ Replace with your actual Google AI API key
-const GEMINI_API_KEY = "AIzaSyCu96rDR1184ESM0Wr8dnXFA_eA_lps4ZA";
-
-async function testGoogleAI() {
-  if (!testPrompt.value) {
-    aiError.value = "Please enter a prompt.";
-    return;
-  }
-
-  isLoadingAI.value = true;
-  aiError.value = '';
-  aiResponse.value = '';
-
-  try {
-    const res = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + GEMINI_API_KEY,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [
-            { parts: [{ text: testPrompt.value }] }
-          ]
-        })
-      }
-    );
-
-    const data = await res.json();
-
-    if (data?.candidates?.[0]?.content?.parts?.[0]?.text) {
-      aiResponse.value = data.candidates[0].content.parts[0].text;
-    } else {
-      aiError.value = "No response from AI. Check console.";
-      console.error("AI Response:", data);
-    }
-  } catch (err) {
-    aiError.value = "Failed: " + err.message;
-    console.error(err);
-  } finally {
-    isLoadingAI.value = false;
-  }
-}
-
-
-// end AI add ons.
 
 const router = useRouter();
 const authStore = useAuthStore();
