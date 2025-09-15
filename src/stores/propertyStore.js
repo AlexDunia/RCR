@@ -1,3 +1,4 @@
+// stores/propertyStore.js
 import { defineStore } from 'pinia';
 import { propertyService } from '../services/propertyService';
 import axiosInstance from '../api/axios';
@@ -52,23 +53,34 @@ export const usePropertyStore = defineStore('propertyStore', {
   },
 
   actions: {
+    async hydrateStore() {
+      const storedTreb = localStorage.getItem('trebData');
+      const storedLocal = localStorage.getItem('localProperties');
+      if (storedTreb) this.trebData = JSON.parse(storedTreb);
+      if (storedLocal) this.properties = JSON.parse(storedLocal);
+    },
+
     async fetchProperties() {
       try {
         console.log('Fetching properties in store with filters:', this.filters);
         this.loading = true;
         this.error = null;
         const response = await propertyService.getProperties(this.filters);
-        console.log('Properties response in store:', response);
-        if (response && response.data) {
+        if (response && response.data && Array.isArray(response.data.data)) {
+          this.properties = response.data.data.map((property) => ({
+            ...property,
+            currentImageIndex: 0,
+          }));
+        } else if (response && Array.isArray(response.data)) {
           this.properties = response.data.map((property) => ({
             ...property,
             currentImageIndex: 0,
           }));
-          console.log('Properties set in store:', this.properties);
         } else {
-          console.log('No data in response');
+          console.log('No valid data in response');
           this.properties = [];
         }
+        localStorage.setItem('localProperties', JSON.stringify(this.properties));
       } catch (error) {
         console.error('Error fetching properties in store:', error);
         this.error = error.message || 'Failed to fetch properties';
@@ -161,6 +173,7 @@ export const usePropertyStore = defineStore('propertyStore', {
         const data = await propertyService.createProperty(propertyData);
         console.log('Created property in store:', data);
         this.properties.push(data);
+        localStorage.setItem('localProperties', JSON.stringify(this.properties));
         return data;
       } catch (error) {
         console.error('Error creating property in store:', error);
@@ -182,6 +195,7 @@ export const usePropertyStore = defineStore('propertyStore', {
         if (index !== -1) {
           this.properties[index] = data;
         }
+        localStorage.setItem('localProperties', JSON.stringify(this.properties));
         return data;
       } catch (error) {
         console.error('Error updating property in store:', error);
@@ -200,6 +214,7 @@ export const usePropertyStore = defineStore('propertyStore', {
         await propertyService.deleteProperty(id);
         console.log('Property deleted in store:', id);
         this.properties = this.properties.filter((p) => p.id !== id);
+        localStorage.setItem('localProperties', JSON.stringify(this.properties));
       } catch (error) {
         console.error('Error deleting property in store:', error);
         this.error = error.message || 'Failed to delete property';
@@ -218,6 +233,7 @@ export const usePropertyStore = defineStore('propertyStore', {
         if (property) {
           property.isFavorite = data.isFavorite;
         }
+        localStorage.setItem('localProperties', JSON.stringify(this.properties));
       } catch (error) {
         console.error('Error toggling favorite in store:', error);
         this.error = error.message || 'Failed to toggle favorite';
@@ -289,27 +305,25 @@ export const usePropertyStore = defineStore('propertyStore', {
       }
     },
 
-    async getTrebData() {
+    async getTrebData({ listingKey } = {}) {
       try {
-        console.log('Fetching TREB data');
+        console.log('Fetching TREB data with listingKey:', listingKey);
         this.trebLoading = true;
         this.trebError = null;
-        const response = await axiosInstance.get('/api/trebdata');
-        console.log('TREB data response:', response.data);
+        const response = await axiosInstance.get('/api/trebdata', {
+          params: { listingKey },
+        });
         this.trebData = response.data;
-
+        localStorage.setItem('trebData', JSON.stringify(this.trebData));
         if (this.trebData?.data?.value) {
           await Promise.all(
             this.trebData.data.value.map(async (property) => {
               try {
-                console.log('Fetching media for TREB property:', property.ListingKey);
-                const mediaResponse = await axiosInstance.get(`/api/trebmedia/${property.ListingKey}`);
-                if (mediaResponse.data.success && mediaResponse.data.data.value.length > 0) {
-                  property.image = mediaResponse.data.data.value[0].MediaURL;
-                  console.log('Media set for property:', property.ListingKey);
+                const mediaResponse = await this.getTrebPropertyMedia(property.ListingKey);
+                if (mediaResponse.length > 0) {
+                  property.image = mediaResponse[0].ProxyURL || mediaResponse[0].MediaURL;
                 } else {
                   property.image = null;
-                  console.log('No media for property:', property.ListingKey);
                 }
               } catch (error) {
                 console.error(`Failed to fetch media for ${property.ListingKey}:`, error);
@@ -331,8 +345,8 @@ export const usePropertyStore = defineStore('propertyStore', {
         console.log('Fetching TREB media for:', listingKey);
         this.loading = true;
         const response = await axiosInstance.get(`/api/trebmedia/${listingKey}`);
-        console.log('TREB media response:', response.data);
         this.media[listingKey] = response.data.data.value;
+        console.log('TREB media fetched:', this.media[listingKey]);
       } catch (error) {
         console.error('Error fetching TREB media:', error);
         this.error = error.message;
@@ -345,26 +359,19 @@ export const usePropertyStore = defineStore('propertyStore', {
       try {
         console.log('Fetching TREB property media for:', listingKey);
         if (this.mediaCache.has(listingKey)) {
-          console.log('Returning cached media for:', listingKey);
           return this.mediaCache.get(listingKey);
         }
-        const response = await axiosInstance.get('/api/media/property', {
-          params: {
-            mlsNumber: listingKey,
-          },
-          headers: {
-            'Cache-Control': 'public, max-age=31536000',
-          },
+        const response = await axiosInstance.get(`/api/trebmedia/${listingKey}`, {
+          headers: { 'Cache-Control': 'public, max-age=31536000' },
         });
-        console.log('TREB property media response:', response.data);
-        const mediaData = (response.data?.value || []).map((media) => ({
+        const mediaData = (response.data?.data?.value || []).map((media) => ({
           ...media,
           ProxyURL: `/api/media/proxy?url=${encodeURIComponent(media.MediaURL)}`,
         }));
         this.mediaCache.set(listingKey, mediaData);
         return mediaData;
       } catch (error) {
-        console.error(`Error fetching media for property ${listingKey}:`, error);
+        console.error(`Error fetching media for ${listingKey}:`, error);
         return [];
       }
     },

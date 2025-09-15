@@ -1,8 +1,6 @@
 <template>
   <div class="property-detail-page">
     <GlobalHeader />
-
-    <!-- Share Modal -->
     <transition name="fade">
       <div v-if="showShareModal" class="modal-overlay" @click="showShareModal = false">
         <div class="share-modal" @click.stop>
@@ -10,7 +8,6 @@
             <h3>Share this place</h3>
             <button class="close-button" @click="showShareModal = false">×</button>
           </div>
-
           <div class="share-modal-preview">
             <img
               :src="property?.image || 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1743087291/Designer_8_1_fjvyi0.png'"
@@ -24,216 +21,57 @@
               </p>
             </div>
           </div>
-
           <div class="share-options">
             <button class="share-option" @click="copyLink">
-              <i class="fas fa-link"></i>
-              <span>Copy Link</span>
+              <i class="fas fa-link"></i> <span>Copy Link</span>
             </button>
             <button class="share-option" @click="shareViaEmail">
-              <i class="fas fa-envelope"></i>
-              <span>Email</span>
+              <i class="fas fa-envelope"></i> <span>Email</span>
             </button>
             <button class="share-option" @click="shareViaWhatsApp">
-              <i class="fab fa-whatsapp"></i>
-              <span>WhatsApp</span>
+              <i class="fab fa-whatsapp"></i> <span>WhatsApp</span>
             </button>
             <button class="share-option" @click="shareViaFacebook">
-              <i class="fab fa-facebook"></i>
-              <span>Facebook</span>
+              <i class="fab fa-facebook"></i> <span>Facebook</span>
             </button>
             <button class="share-option" @click="shareViaTwitter">
-              <i class="fab fa-twitter"></i>
-              <span>Twitter</span>
+              <i class="fab fa-twitter"></i> <span>Twitter</span>
             </button>
           </div>
         </div>
       </div>
     </transition>
-
     <div class="content-wrapper">
       <div v-if="loading" class="skeleton-loader">
-        <!-- Main Content Skeleton -->
         <div class="main-content">
-          <!-- Property Gallery Skeleton -->
           <section class="gallery-section">
             <div class="main-image-skeleton">
-              <!-- Image placeholder -->
               <div class="image-placeholder animate-pulse"></div>
-              
-              <!-- Action Buttons Skeleton -->
               <div class="action-buttons-skeleton">
                 <div class="action-button-skeleton animate-pulse"></div>
                 <div class="action-button-skeleton animate-pulse"></div>
               </div>
-              
-              <!-- Status Badges Skeleton -->
               <div class="floating-badges-skeleton">
                 <div class="status-badge-skeleton animate-pulse"></div>
                 <div class="transaction-type-badge-skeleton animate-pulse"></div>
               </div>
-              
-              <!-- Gallery Button Skeleton -->
               <div class="gallery-button-skeleton animate-pulse"></div>
             </div>
           </section>
-
-          <!-- Essential Info Skeleton -->
           <section class="essential-info-skeleton">
             <div class="price-section-skeleton">
               <div class="price-skeleton animate-pulse"></div>
-              <div class="mls-info-skeleton">
-                <div class="mls-line-skeleton animate-pulse"></div>
-                <div class="mls-line-skeleton animate-pulse"></div>
-              </div>
             </div>
-
             <div class="address-section-skeleton">
               <div class="address-title-skeleton animate-pulse"></div>
-              <div class="address-subtitle-skeleton animate-pulse"></div>
-            </div>
-
-            <!-- Key Details Grid Skeleton -->
-            <div class="key-details-skeleton">
-              <div class="detail-grid-skeleton">
-                <div class="detail-item-skeleton animate-pulse">
-                  <div class="detail-icon-skeleton"></div>
-                  <div class="detail-value-skeleton"></div>
-                  <div class="detail-label-skeleton"></div>
-                </div>
-                <div class="detail-item-skeleton animate-pulse">
-                  <div class="detail-icon-skeleton"></div>
-                  <div class="detail-value-skeleton"></div>
-                  <div class="detail-label-skeleton"></div>
-                </div>
-                <div class="detail-item-skeleton animate-pulse">
-                  <div class="detail-icon-skeleton"></div>
-                  <div class="detail-value-skeleton"></div>
-                  <div class="detail-label-skeleton"></div>
-                </div>
-                <div class="detail-item-skeleton animate-pulse">
-                  <div class="detail-icon-skeleton"></div>
-                  <div class="detail-value-skeleton"></div>
-                  <div class="detail-label-skeleton"></div>
-                </div>
-              </div>
             </div>
           </section>
-
-          <!-- Property Details Grid Skeleton -->
-          <div class="details-grid-skeleton">
-            <!-- Left Column Skeleton -->
-            <div class="left-column-skeleton">
-              <!-- Property Description Skeleton -->
-              <section class="detail-section-skeleton">
-                <div class="section-title-skeleton animate-pulse"></div>
-                <div class="text-content-skeleton">
-                  <div class="text-line-skeleton animate-pulse"></div>
-                  <div class="text-line-skeleton animate-pulse"></div>
-                  <div class="text-line-skeleton animate-pulse"></div>
-                  <div class="text-line-skeleton animate-pulse"></div>
-                  <div class="text-line-skeleton animate-pulse"></div>
-                </div>
-              </section>
-
-              <!-- Property Features Skeleton -->
-              <section class="detail-section-skeleton">
-                <div class="section-title-skeleton animate-pulse"></div>
-                <div class="features-grid-skeleton">
-                  <div class="feature-group-skeleton">
-                    <div class="feature-title-skeleton animate-pulse"></div>
-                    <div class="feature-list-skeleton">
-                      <div class="feature-item-skeleton animate-pulse"></div>
-                      <div class="feature-item-skeleton animate-pulse"></div>
-                      <div class="feature-item-skeleton animate-pulse"></div>
-                      <div class="feature-item-skeleton animate-pulse"></div>
-                    </div>
-                  </div>
-                  <div class="feature-group-skeleton">
-                    <div class="feature-title-skeleton animate-pulse"></div>
-                    <div class="feature-list-skeleton">
-                      <div class="feature-item-skeleton animate-pulse"></div>
-                      <div class="feature-item-skeleton animate-pulse"></div>
-                      <div class="feature-item-skeleton animate-pulse"></div>
-                    </div>
-                  </div>
-                </div>
-              </section>
-            </div>
-
-            <!-- Right Column Skeleton -->
-            <div class="right-column-skeleton">
-              <!-- Building Details Skeleton -->
-              <section class="detail-section-skeleton">
-                <div class="section-title-skeleton animate-pulse"></div>
-                <div class="details-list-skeleton">
-                  <div class="detail-row-skeleton animate-pulse">
-                    <div class="detail-label-skeleton"></div>
-                    <div class="detail-value-skeleton"></div>
-                  </div>
-                  <div class="detail-row-skeleton animate-pulse">
-                    <div class="detail-label-skeleton"></div>
-                    <div class="detail-value-skeleton"></div>
-                  </div>
-                  <div class="detail-row-skeleton animate-pulse">
-                    <div class="detail-label-skeleton"></div>
-                    <div class="detail-value-skeleton"></div>
-                  </div>
-                  <div class="detail-row-skeleton animate-pulse">
-                    <div class="detail-label-skeleton"></div>
-                    <div class="detail-value-skeleton"></div>
-                  </div>
-                  <div class="detail-row-skeleton animate-pulse">
-                    <div class="detail-label-skeleton"></div>
-                    <div class="detail-value-skeleton"></div>
-                  </div>
-                </div>
-              </section>
-
-              <!-- Lot Details Skeleton -->
-              <section class="detail-section-skeleton">
-                <div class="section-title-skeleton animate-pulse"></div>
-                <div class="details-list-skeleton">
-                  <div class="detail-row-skeleton animate-pulse">
-                    <div class="detail-label-skeleton"></div>
-                    <div class="detail-value-skeleton"></div>
-                  </div>
-                  <div class="detail-row-skeleton animate-pulse">
-                    <div class="detail-label-skeleton"></div>
-                    <div class="detail-value-skeleton"></div>
-                  </div>
-                </div>
-              </section>
-
-              <!-- Financial Details Skeleton -->
-              <section class="detail-section-skeleton">
-                <div class="section-title-skeleton animate-pulse"></div>
-                <div class="details-list-skeleton">
-                  <div class="detail-row-skeleton animate-pulse">
-                    <div class="detail-label-skeleton"></div>
-                    <div class="detail-value-skeleton"></div>
-                  </div>
-                  <div class="detail-row-skeleton animate-pulse">
-                    <div class="detail-label-skeleton"></div>
-                    <div class="detail-value-skeleton"></div>
-                  </div>
-                  <div class="detail-row-skeleton animate-pulse">
-                    <div class="detail-label-skeleton"></div>
-                    <div class="detail-value-skeleton"></div>
-                  </div>
-                </div>
-              </section>
-            </div>
-          </div>
         </div>
       </div>
       <div v-else-if="error" class="error-state">{{ error }}</div>
       <div v-else-if="!property" class="not-found-state">Property not found</div>
-
       <template v-else>
-        <!-- Main Content -->
         <div class="main-content">
-          <!-- Property Gallery -->
           <section class="gallery-section">
             <div class="main-image">
               <img
@@ -241,18 +79,14 @@
                 :alt="property.UnparsedAddress"
                 @error="handleImageError"
               >
-              <!-- Action Buttons -->
               <div class="action-buttons">
                 <button class="action-button share-btn" @click="showShareModal = true">
-                  <i class="fas fa-share-alt"></i>
-                  Share
+                  <i class="fas fa-share-alt"></i> Share
                 </button>
                 <button class="action-button save-btn" @click="handleSave">
-                  <i class="fas fa-bookmark"></i>
-                  Save
+                  <i class="fas fa-bookmark"></i> Save
                 </button>
               </div>
-              <!-- Status Badges -->
               <div class="floating-badges">
                 <div class="status-badge" :class="property.StandardStatus.toLowerCase()">
                   <i class="fas" :class="property.StandardStatus === 'Active' ? 'fa-check-circle' : 'fa-clock'"></i>
@@ -263,38 +97,28 @@
                   {{ property.TransactionType }}
                 </div>
               </div>
-              <!-- Gallery Button -->
               <router-link
                 :to="`/property/${route.params.listingKey}/gallery`"
                 class="gallery-button"
               >
-                <i class="fas fa-images"></i>
-                View Full Property Gallery
+                <i class="fas fa-images"></i> View Full Property Gallery
               </router-link>
             </div>
           </section>
-
-          <!-- Essential Info -->
           <section class="essential-info">
             <div class="price-section">
-              <h1 class="price">
-                ${{ formatPrice(property.ListPrice) }}
-                <span v-if="property.ListPriceUnit">{{ property.ListPriceUnit }}</span>
-              </h1>
+              <h1 class="price">${{ formatPrice(property.ListPrice) }}</h1>
               <div class="mls-info">
                 <span>MLS® {{ property.ListingKey }}</span>
                 <span>{{ property.ListAOR }}</span>
               </div>
             </div>
-
             <div class="address-section">
               <h2>{{ property.UnparsedAddress }}</h2>
               <p>{{ property.City }}, {{ property.StateOrProvince }} {{ property.PostalCode }}</p>
             </div>
-
-            <!-- Key Details -->
             <div class="key-details">
-              <div v-if="isResidential" class="detail-grid">
+              <div class="detail-grid">
                 <div class="detail-item">
                   <span class="icon">🛏️</span>
                   <span class="value">{{ property.BedroomsTotal || 0 }}</span>
@@ -316,96 +140,16 @@
                   <span class="label">Parking</span>
                 </div>
               </div>
-
-              <div v-else-if="isCommercial" class="detail-grid">
-                <div class="detail-item">
-                  <span class="icon">🏢</span>
-                  <span class="value">{{ property.BuildingAreaTotal || 'N/A' }}</span>
-                  <span class="label">{{ property.BuildingAreaUnits }}</span>
-                </div>
-                <div class="detail-item">
-                  <span class="icon">💼</span>
-                  <span class="value">{{ property.PropertyUse || 'N/A' }}</span>
-                  <span class="label">Usage</span>
-                </div>
-              </div>
             </div>
           </section>
-
-          <!-- Property Details Grid -->
           <div class="details-grid">
-            <!-- Left Column -->
             <div class="left-column">
-              <!-- Property Description -->
               <section class="detail-section">
                 <h3>About This Property</h3>
                 <p>{{ property.PublicRemarks }}</p>
               </section>
-
-              <!-- Property Features -->
-              <section class="detail-section" v-if="hasFeatures">
-                <h3>Property Features</h3>
-                <div class="features-grid">
-                  <div v-if="property.PropertyFeatures?.length" class="feature-group">
-                    <h4>Amenities</h4>
-                    <ul>
-                      <li v-for="feature in property.PropertyFeatures" :key="feature">
-                        {{ feature }}
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div v-if="property.InteriorFeatures?.length" class="feature-group">
-                    <h4>Interior</h4>
-                    <ul>
-                      <li v-for="feature in property.InteriorFeatures" :key="feature">
-                        {{ feature }}
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div v-if="property.ExteriorFeatures?.length" class="feature-group">
-                    <h4>Exterior</h4>
-                    <ul>
-                      <li v-for="feature in property.ExteriorFeatures" :key="feature">
-                        {{ feature }}
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </section>
-
-              <!-- Waterfront Features -->
-              <section class="detail-section" v-if="property.WaterfrontYN">
-                <h3>Waterfront Details</h3>
-                <div class="waterfront-details">
-                  <div class="detail-row">
-                    <span class="label">Water Body:</span>
-                    <span class="value">{{ property.WaterBodyName }} ({{ property.WaterBodyType }})</span>
-                  </div>
-                  <div class="detail-row">
-                    <span class="label">Waterfront:</span>
-                    <span class="value">{{ property.Waterfront?.[0] }}</span>
-                  </div>
-                  <div class="detail-row" v-if="property.WaterFrontageFt">
-                    <span class="label">Frontage:</span>
-                    <span class="value">{{ property.WaterFrontageFt }} ft</span>
-                  </div>
-                  <div class="waterfront-features" v-if="property.WaterfrontFeatures?.length">
-                    <h4>Features:</h4>
-                    <ul>
-                      <li v-for="feature in property.WaterfrontFeatures" :key="feature">
-                        {{ feature }}
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </section>
             </div>
-
-            <!-- Right Column -->
             <div class="right-column">
-              <!-- Building Details -->
               <section class="detail-section">
                 <h3>Building Details</h3>
                 <div class="details-list">
@@ -413,59 +157,9 @@
                     <span class="label">Age:</span>
                     <span class="value">{{ property.ApproximateAge }}</span>
                   </div>
-                  <div class="detail-row" v-if="property.ArchitecturalStyle?.length">
-                    <span class="label">Style:</span>
-                    <span class="value">{{ property.ArchitecturalStyle.join(', ') }}</span>
-                  </div>
-                  <div class="detail-row" v-if="property.ConstructionMaterials?.length">
-                    <span class="label">Construction:</span>
-                    <span class="value">{{ property.ConstructionMaterials.join(', ') }}</span>
-                  </div>
-                  <div class="detail-row" v-if="property.Basement?.length">
-                    <span class="label">Basement:</span>
-                    <span class="value">{{ property.Basement.join(', ') }}</span>
-                  </div>
-                  <div class="detail-row">
+                  <div class="detail-row" v-if="property.HeatType">
                     <span class="label">Heating:</span>
-                    <span class="value">{{ property.HeatType }} ({{ property.HeatSource }})</span>
-                  </div>
-                  <div class="detail-row">
-                    <span class="label">Cooling:</span>
-                    <span class="value">{{ property.Cooling?.join(', ') || 'None' }}</span>
-                  </div>
-                </div>
-              </section>
-
-              <!-- Lot Details -->
-              <section class="detail-section" v-if="hasLotDetails">
-                <h3>Lot Details</h3>
-                <div class="details-list">
-                  <div class="detail-row">
-                    <span class="label">Dimensions:</span>
-                    <span class="value">{{ property.LotWidth }} x {{ property.LotDepth }} {{ property.LotSizeUnits }}</span>
-                  </div>
-                  <div class="detail-row" v-if="property.LotFeatures?.length">
-                    <span class="label">Features:</span>
-                    <span class="value">{{ property.LotFeatures.join(', ') }}</span>
-                  </div>
-                </div>
-              </section>
-
-              <!-- Financial Details -->
-              <section class="detail-section">
-                <h3>Financial Information</h3>
-                <div class="details-list">
-                  <div class="detail-row">
-                    <span class="label">List Price:</span>
-                    <span class="value">${{ formatPrice(property.ListPrice) }}</span>
-                  </div>
-                  <div class="detail-row" v-if="property.TaxAnnualAmount">
-                    <span class="label">Annual Taxes:</span>
-                    <span class="value">${{ formatPrice(property.TaxAnnualAmount) }} ({{ property.TaxYear }})</span>
-                  </div>
-                  <div class="detail-row" v-if="property.AssociationFee">
-                    <span class="label">Association Fee:</span>
-                    <span class="value">${{ property.AssociationFee }}/month</span>
+                    <span class="value">{{ property.HeatType }}</span>
                   </div>
                 </div>
               </section>
@@ -478,44 +172,22 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch, nextTick } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { ref, onMounted, computed } from 'vue';
+import { useRoute } from 'vue-router';
 import { usePropertyStore } from '@/stores/propertyStore';
-import { useAuthStore } from '@/stores/authStore';
 import GlobalHeader from '@/components/GlobalHeader.vue';
 
 const route = useRoute();
-const router = useRouter();
 const propertyStore = usePropertyStore();
-const authStore = useAuthStore();
-const loading = ref(false);
+const loading = ref(true);
 const error = ref(null);
 const showShareModal = ref(false);
-const propertyImage = ref(null); // Add reactive property for image URL
+const propertyImage = ref(null);
+
+const listingKey = computed(() => route.params.listingKey);
 
 const property = computed(() => {
-  const listingKey = route.params.listingKey;
-  // First check in search results, then in trebData
-  return propertyStore.searchResults?.find(p => p.ListingKey === listingKey) || 
-         propertyStore.trebData?.data?.value?.find(p => p.ListingKey === listingKey) || null;
-});
-
-const isResidential = computed(() => {
-  return property.value?.PropertyType?.includes('Residential');
-});
-
-const isCommercial = computed(() => {
-  return property.value?.PropertyType?.includes('Commercial');
-});
-
-const hasFeatures = computed(() => {
-  return property.value?.PropertyFeatures?.length ||
-         property.value?.InteriorFeatures?.length ||
-         property.value?.ExteriorFeatures?.length;
-});
-
-const hasLotDetails = computed(() => {
-  return property.value?.LotWidth && property.value?.LotDepth;
+  return propertyStore.trebData?.data?.value?.find(p => p.ListingKey === listingKey.value) || null;
 });
 
 const formatPrice = (price) => {
@@ -523,105 +195,25 @@ const formatPrice = (price) => {
 };
 
 const handleImageError = (event) => {
-  // Don't set a fallback image - just hide the image if it fails to load
   event.target.style.display = 'none';
 };
 
-// Share functionality
-const copyLink = async () => {
-  try {
-    await navigator.clipboard.writeText(window.location.href);
-    alert('Link copied to clipboard!');
+const copyLink = () => {
+  navigator.clipboard.writeText(window.location.href).then(() => {
+    alert('Link copied!');
     showShareModal.value = false;
-  } catch (err) {
-    console.error('Failed to copy link:', err);
-  }
+  }).catch(err => console.error('Copy failed:', err));
 };
 
 const shareViaEmail = () => {
-  if (!property.value) return;
-
-  const subject = `Check out this property: ${property.value.UnparsedAddress}`;
-  const price = property.value.ListPrice ? `$${formatPrice(property.value.ListPrice)}` : 'Price not available';
-  const body = `Check out this property I found on Real City!\n\n` +
-    `${property.value.UnparsedAddress}\n` +
-    `Price: ${price}\n\n` +
-    `View more details here: ${window.location.href}`;
-
-  // For Gmail
-  const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-
-  // For Outlook
-  const outlookUrl = `https://outlook.office.com/mail/deeplink/compose?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-
-  // Create a small popup menu for email client selection
-  const emailMenu = document.createElement('div');
-  emailMenu.className = 'email-client-menu';
-  emailMenu.innerHTML = `
-    <div class="email-client-options">
-      <button class="email-client-option" data-client="gmail">
-        <i class="fab fa-google"></i>
-        Gmail
-      </button>
-      <button class="email-client-option" data-client="outlook">
-        <i class="fab fa-microsoft"></i>
-        Outlook
-      </button>
-      <button class="email-client-option" data-client="default">
-        <i class="fas fa-envelope"></i>
-        Default Email
-      </button>
-    </div>
-  `;
-
-  // Style the menu
-  emailMenu.style.position = 'absolute';
-  emailMenu.style.zIndex = '1001';
-  emailMenu.style.background = 'white';
-  emailMenu.style.borderRadius = '12px';
-  emailMenu.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
-  emailMenu.style.padding = '8px';
-
-  // Get the email button position
-  const emailBtn = event.currentTarget;
-  const rect = emailBtn.getBoundingClientRect();
-  emailMenu.style.top = `${rect.bottom + window.scrollY + 5}px`;
-  emailMenu.style.left = `${rect.left + window.scrollX}px`;
-
-  // Add click handlers
-  emailMenu.addEventListener('click', (e) => {
-    const client = e.target.closest('.email-client-option')?.dataset.client;
-    if (client) {
-      switch (client) {
-        case 'gmail':
-          window.open(gmailUrl, '_blank');
-          break;
-        case 'outlook':
-          window.open(outlookUrl, '_blank');
-          break;
-        case 'default':
-          window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-          break;
-      }
-      document.body.removeChild(emailMenu);
-      showShareModal.value = false;
-    }
-  });
-
-  // Close menu when clicking outside
-  const closeMenu = (e) => {
-    if (!emailMenu.contains(e.target) && e.target !== emailBtn) {
-      document.body.removeChild(emailMenu);
-      document.removeEventListener('click', closeMenu);
-    }
-  };
-
-  document.addEventListener('click', closeMenu);
-  document.body.appendChild(emailMenu);
+  const subject = `Check out ${property.value?.UnparsedAddress}`;
+  const body = `Look at this property! ${window.location.href}`;
+  window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  showShareModal.value = false;
 };
 
 const shareViaWhatsApp = () => {
-  const text = `Check out this property on Real City: ${window.location.href}`;
+  const text = `Check this out: ${window.location.href}`;
   window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
   showShareModal.value = false;
 };
@@ -632,136 +224,36 @@ const shareViaFacebook = () => {
 };
 
 const shareViaTwitter = () => {
-  const text = `Check out this property on Real City: ${property.value?.UnparsedAddress}`;
-  window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`, '_blank');
+  const text = `Check out ${property.value?.UnparsedAddress}: ${window.location.href}`;
+  window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
   showShareModal.value = false;
 };
 
 const handleSave = () => {
-  if (!authStore.isAuthenticated) {
-    // Store the current URL to redirect back after login
-    localStorage.setItem('redirectAfterLogin', window.location.pathname);
-    router.push('/login');
-    return;
-  }
-  // Handle save functionality for authenticated users
-  // You'll need to implement this based on your requirements
-  console.log('Saving property...');
+  console.log('Save button clicked');
 };
 
 onMounted(async () => {
-  // Always start with loading state
-  loading.value = true;
-  error.value = null;
-  
   try {
-    // Always fetch TREB data on page load/refresh to ensure we have the data
-    if (!propertyStore.trebData) {
-      await propertyStore.getTrebData();
-    }
-    
-    // Wait a bit for the computed property to update after data is loaded
-    await nextTick();
-    
-    // Add a small delay to ensure data is fully processed
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
-    // Check if property exists after fetching data
-    if (!property.value) {
-      // Property not found even after fetching data
-      error.value = 'Property not found';
-      loading.value = false;
-      return;
-    }
-    
-    // Always fetch media for the property to get the actual image
+    loading.value = true;
+    propertyStore.trebData = null;
+    await propertyStore.getTrebData({ listingKey: listingKey.value });
     if (property.value) {
-      try {
-        await propertyStore.getTrebMedia(route.params.listingKey);
-        // Get the first image from media array
-        const media = propertyStore.getTrebMediaByListingKey(route.params.listingKey);
-        if (media && media.length > 0) {
-          propertyImage.value = media[0].MediaURL;
-        }
-      } catch (err) {
-        console.error('Failed to fetch property media:', err);
-      }
+      const media = await propertyStore.getTrebPropertyMedia(listingKey.value);
+      propertyImage.value = media?.[0]?.ProxyURL || media?.[0]?.MediaURL || property.value.image || 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1743087291/Designer_8_1_fjvyi0.png';
+      console.log('Main image URL:', propertyImage.value);
+      console.log('Full media response:', media);
+      console.log('Property image fallback:', property.value.image);
+    } else {
+      error.value = 'Property not found';
     }
   } catch (err) {
-    error.value = err.message || 'Failed to load property details';
+    error.value = 'Failed to load property details';
+    console.error('Fetch error:', err);
   } finally {
-    // Add a minimum loading time for better UX
-    setTimeout(() => {
-      loading.value = false;
-    }, 1000); // Show loader for at least 1 second
+    loading.value = false;
   }
 });
-
-// Watch for route changes to handle navigation from other pages
-watch(() => route.params.listingKey, async (newListingKey, oldListingKey) => {
-  if (newListingKey !== oldListingKey) {
-    // Reset state for new property
-    loading.value = true;
-    error.value = null;
-    propertyImage.value = null;
-    
-    try {
-      // If property is not found in either searchResults or trebData, try to fetch TREB data
-      if (!property.value && !propertyStore.trebData) {
-        await propertyStore.getTrebData();
-      }
-      
-      // Always fetch media for the property to get the actual image
-      if (property.value) {
-        try {
-          await propertyStore.getTrebMedia(route.params.listingKey);
-          // Get the first image from media array
-          const media = propertyStore.getTrebMediaByListingKey(route.params.listingKey);
-          if (media && media.length > 0) {
-            propertyImage.value = media[0].MediaURL;
-          }
-        } catch (err) {
-          console.error('Failed to fetch property media:', err);
-        }
-      }
-      
-      // If still no property found, show error
-      if (!property.value) {
-        error.value = 'Property not found';
-      }
-    } catch (err) {
-      error.value = err.message || 'Failed to load property details';
-    } finally {
-      // Add a minimum loading time for better UX
-      setTimeout(() => {
-        loading.value = false;
-      }, 1000); // Show loader for at least 1 second
-    }
-  }
-});
-
-// Watch for property changes to manage loading state
-watch(property, (newProperty) => {
-  if (newProperty && loading.value) {
-    // Property found, keep loading for minimum time then stop
-    setTimeout(() => {
-      loading.value = false;
-    }, 1000);
-  }
-}, { immediate: true });
-
-// Watch for TREB data changes to handle property finding after data loads
-watch(() => propertyStore.trebData, (newTrebData) => {
-  if (newTrebData && loading.value && !property.value) {
-    // TREB data loaded, check if property exists now
-    setTimeout(() => {
-      if (!property.value) {
-        error.value = 'Property not found';
-      }
-      loading.value = false;
-    }, 500);
-  }
-}, { immediate: true, deep: true });
 </script>
 
 <style scoped>
@@ -1729,7 +1221,7 @@ watch(() => propertyStore.trebData, (newTrebData) => {
   .detail-grid-skeleton {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .main-image-skeleton {
     height: 400px;
   }
@@ -1739,11 +1231,11 @@ watch(() => propertyStore.trebData, (newTrebData) => {
   .detail-grid-skeleton {
     grid-template-columns: 1fr;
   }
-  
+
   .main-image-skeleton {
     height: 250px;
   }
-  
+
   .main-content {
     padding: 1rem;
   }

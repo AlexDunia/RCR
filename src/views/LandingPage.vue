@@ -75,22 +75,20 @@
             </div>
             <div class="hero__search-form">
               <div class="search-input-group">
-                <div class="search-input-wrapper input-icon-wrapper">
-                  <span class="search-icon-inside">
-                    <i class="fas fa-home"></i>
-                  </span>
-                  <form @submit.prevent="handleSearch" class="search-form">
-                    <div class="search-input-wrapper input-icon-wrapper">
-                      <input
-                        v-model="searchQuery"
-                        type="text"
-                        class="search-input with-icon"
-                        placeholder="Search by property type, location, or ID…"
-                      >
-                    </div>
-                    <button class="search-btn">Search</button>
-                  </form>
-                </div>
+                <form @submit.prevent="handleSearch" class="search-form">
+                  <div class="search-input-wrapper input-icon-wrapper">
+                    <span class="search-icon-inside">
+                      <i class="fas fa-home"></i>
+                    </span>
+                    <input
+                      v-model="searchQuery"
+                      type="text"
+                      class="search-input with-icon"
+                      placeholder="Search by property type, location, or ID…"
+                    >
+                  </div>
+                  <button class="search-btn search-btn--floating">Search</button>
+                </form>
               </div>
             </div>
           </div>
@@ -129,24 +127,25 @@
           <div class="error-message">{{ propertyStore.trebError }}</div>
           <button class="retry-button" @click="retryTrebFetch">Retry</button>
         </div>
-        <div v-else-if="!propertyStore.trebData?.data?.value?.length" class="empty-state">
+        <div v-else-if="!propertyStore.trebData || !propertyStore.trebData.data || !propertyStore.trebData.data.value || propertyStore.trebData.data.value.length === 0" class="empty-state">
           <div class="empty-message">No properties available at the moment.</div>
         </div>
         <div v-else class="treb-properties__grid">
           <div
-            v-for="property in propertyStore.trebData?.data?.value"
+            v-for="property in propertyStore.trebData.data.value.slice(0, 4)"
             :key="property.ListingKey"
             class="treb-property-card"
           >
-            <div class="treb-property-card__image">
-              <img
-                v-if="property.image"
-                :src="property.image"
-                :alt="property.UnparsedAddress || 'Property Image'"
-                class="treb-property-card__img"
-                loading="lazy"
-                @error="handleImageError"
-              />
+            <div class="treb-property-card__image" v-if="property">
+              <div v-if="property.image" class="treb-property-card__image-content">
+                <img
+                  :src="property.image + '?w=300'"
+                  :alt="property.UnparsedAddress || 'Property Image'"
+                  class="treb-property-card__img"
+                  loading="lazy"
+                  @error="handleImageError"
+                />
+              </div>
               <div v-else class="treb-property-card__no-image">
                 <img
                   src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1743087291/Designer_8_1_fjvyi0.png"
@@ -156,60 +155,28 @@
                 />
               </div>
               <div class="treb-property-card__badges">
-                <span
-                  v-if="property.StandardStatus === 'Active'"
-                  class="property-badge property-badge--active"
-                >
-                  Active
-                </span>
-                <span
-                  v-else-if="property.StandardStatus === 'Sold'"
-                  class="property-badge property-badge--sold"
-                >
-                  Sold
-                </span>
-                <span
-                  v-else-if="property.StandardStatus === 'Pending'"
-                  class="property-badge property-badge--pending"
-                >
-                  Pending
-                </span>
-                <span
-                  class="property-badge property-badge--type"
-                >
-                  {{ property.PropertyType || 'Residential' }}
-                </span>
+                <span v-if="property.StandardStatus === 'Active'" class="property-badge property-badge--active">Active</span>
+                <span v-else-if="property.StandardStatus === 'Sold'" class="property-badge property-badge--sold">Sold</span>
+                <span v-else-if="property.StandardStatus === 'Pending'" class="property-badge property-badge--pending">Pending</span>
+                <span class="property-badge property-badge--type">{{ property.PropertyType || 'Residential' }}</span>
               </div>
               <div class="treb-property-card__favorite" @click.stop="toggleTrebFavorite(property)">
                 <i v-if="favouritesStore.isLoading(property.ListingKey)" class="fas fa-spinner fa-spin"></i>
                 <i v-else :class="isTrebFavorite(property.ListingKey) ? 'fas fa-heart' : 'far fa-heart'"></i>
               </div>
             </div>
-            <div class="treb-property-card__content">
+            <div class="treb-property-card__content" v-if="property">
               <div class="treb-property-card__price">${{ formatPrice(property.ListPrice) }}</div>
-              <router-link
-                :to="`/property/${property.ListingKey}`"
-                class="treb-property-card__title"
-              >
-                {{ property.UnparsedAddress }}
+              <router-link :to="`/property/${property.ListingKey}`" class="treb-property-card__title">
+                {{ property.UnparsedAddress || 'Unnamed Property' }}
               </router-link>
               <div class="treb-property-card__details">
-                <span class="treb-property-card__detail">
-                  <i class="fas fa-bed"></i>
-                  {{ property.BedroomsTotal || 'N/A' }} Beds
-                </span>
-                <span class="treb-property-card__detail">
-                  <i class="fas fa-bath"></i>
-                  {{ property.BathroomsFull || 'N/A' }} Baths
-                </span>
-                <span class="treb-property-card__detail">
-                  <i class="fas fa-ruler-combined"></i>
-                  {{ formatArea(property.LivingArea) || 'N/A' }} sqft
-                </span>
+                <span class="treb-property-card__detail"><i class="fas fa-bed"></i> {{ property.BedroomsTotal || 'N/A' }} Beds</span>
+                <span class="treb-property-card__detail"><i class="fas fa-bath"></i> {{ property.BathroomsFull || 'N/A' }} Baths</span>
+                <span class="treb-property-card__detail"><i class="fas fa-ruler-combined"></i> {{ formatArea(property.LivingArea) || 'N/A' }} sqft</span>
               </div>
               <div class="treb-property-card__location">
-                <i class="fas fa-map-marker-alt"></i>
-                {{ property.City }}, {{ property.StateOrProvince }}
+                <i class="fas fa-map-marker-alt"></i> {{ property.City }}, {{ property.StateOrProvince }}
               </div>
             </div>
           </div>
@@ -265,24 +232,25 @@
           <div class="error-message">{{ propertyStore.error }}</div>
           <button class="retry-button" @click="retryLocalFetch">Retry</button>
         </div>
-        <div v-else-if="featuredProperties.length === 0" class="empty-state">
+        <div v-else-if="!propertyStore.properties || propertyStore.properties.length === 0" class="empty-state">
           <div class="empty-message">No properties available at the moment.</div>
         </div>
         <div v-else class="featured-properties__grid">
           <div
-            v-for="property in featuredProperties"
+            v-for="property in featuredProperties.slice(0, 4)"
             :key="property.id"
             class="featured-property-card"
           >
-            <div class="featured-property-card__image">
-              <img
-                v-if="property.images?.length"
-                :src="property.images[0]"
-                :alt="property.name || 'Property Image'"
-                class="featured-property-card__img"
-                loading="lazy"
-                @error="handleImageError"
-              />
+            <div class="featured-property-card__image" v-if="property">
+              <div v-if="property.images?.length" class="featured-property-card__image-content">
+                <img
+                  :src="property.images[0] + '?w=300'"
+                  :alt="property.name || 'Property Image'"
+                  class="featured-property-card__img"
+                  loading="lazy"
+                  @error="handleImageError"
+                />
+              </div>
               <div v-else class="featured-property-card__no-image">
                 <img
                   src="https://res.cloudinary.com/dnuhjsckk/image/upload/v1743087291/Designer_8_1_fjvyi0.png"
@@ -292,60 +260,28 @@
                 />
               </div>
               <div class="featured-property-card__badges">
-                <span
-                  v-if="property.status === 'active'"
-                  class="property-badge property-badge--active"
-                >
-                  Active
-                </span>
-                <span
-                  v-else-if="property.status === 'sold'"
-                  class="property-badge property-badge--sold"
-                >
-                  Sold
-                </span>
-                <span
-                  v-else-if="property.status === 'pending'"
-                  class="property-badge property-badge--pending"
-                >
-                  Pending
-                </span>
-                <span
-                  class="property-badge property-badge--type"
-                >
-                  {{ property.type || 'Residential' }}
-                </span>
+                <span v-if="property.status === 'active'" class="property-badge property-badge--active">Active</span>
+                <span v-else-if="property.status === 'sold'" class="property-badge property-badge--sold">Sold</span>
+                <span v-else-if="property.status === 'pending'" class="property-badge property-badge--pending">Pending</span>
+                <span class="property-badge property-badge--type">{{ property.type || 'Residential' }}</span>
               </div>
               <div class="featured-property-card__favorite" @click.stop="toggleLocalFavorite(property.id)">
                 <i v-if="favouritesStore.isLoading(property.id)" class="fas fa-spinner fa-spin"></i>
                 <i v-else :class="isLocalFavorite(property.id) ? 'fas fa-heart' : 'far fa-heart'"></i>
               </div>
             </div>
-            <div class="featured-property-card__content">
+            <div class="featured-property-card__content" v-if="property">
               <div class="featured-property-card__price">${{ formatPrice(property.price) }}</div>
-              <router-link
-                :to="`/property/${property.id}`"
-                class="featured-property-card__title"
-              >
+              <router-link :to="`/property/${property.id}`" class="featured-property-card__title">
                 {{ property.name || 'Beautiful Property' }}
               </router-link>
               <div class="featured-property-card__details">
-                <span class="featured-property-card__detail">
-                  <i class="fas fa-bed"></i>
-                  {{ property.bedrooms || 'N/A' }} Beds
-                </span>
-                <span class="featured-property-card__detail">
-                  <i class="fas fa-bath"></i>
-                  {{ property.bathrooms || 'N/A' }} Baths
-                </span>
-                <span class="featured-property-card__detail">
-                  <i class="fas fa-ruler-combined"></i>
-                  {{ formatArea(property.area) || 'N/A' }} sqft
-                </span>
+                <span class="featured-property-card__detail"><i class="fas fa-bed"></i> {{ property.bedrooms || 'N/A' }} Beds</span>
+                <span class="featured-property-card__detail"><i class="fas fa-bath"></i> {{ property.bathrooms || 'N/A' }} Baths</span>
+                <span class="featured-property-card__detail"><i class="fas fa-ruler-combined"></i> {{ formatArea(property.size) || 'N/A' }} sqft</span>
               </div>
               <div class="featured-property-card__location">
-                <i class="fas fa-map-marker-alt"></i>
-                {{ property.address }}{{ property.city ? `, ${property.city}` : '' }}{{ property.state ? `, ${property.state}` : '' }}
+                <i class="fas fa-map-marker-alt"></i> {{ property.address }}{{ property.city ? `, ${property.city}` : '' }}{{ property.state ? `, ${property.state}` : '' }}
               </div>
             </div>
           </div>
@@ -362,8 +298,8 @@
       <div class="boxed-container">
         <div class="help-section__container">
           <div class="help-section__images">
-            <img src="https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&w=600&q=80" alt="Interior 1" class="help-section__image" />
-            <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80" alt="Interior 2" class="help-section__image" />
+            <img src="https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&w=600&q=80" alt="Interior 1" class="help-section__image" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80" alt="Interior 2" class="help-section__image" loading="lazy" />
           </div>
           <div class="help-section__content">
             <h2 class="help-section__title">Here's how we can help you</h2>
@@ -416,7 +352,7 @@
           <div class="agent-carousel__track">
             <div v-for="agent in visibleAgents" :key="agent.id" class="agent-card">
               <div class="agent-card__img-box">
-                <img :src="agent.avatar || agent.profilePicture || '/default-avatar.png'" :alt="agent.name || 'Agent'" class="agent-card__img" />
+                <img :src="agent.avatar || agent.profilePicture || '/default-avatar.png'" :alt="agent.name || 'Agent'" class="agent-card__img" loading="lazy" />
               </div>
               <div class="agent-card__name">{{ agent.name || 'Agent Name' }}</div>
             </div>
@@ -440,21 +376,18 @@
         <div class="benefits__right">
           <div class="benefit-card--figma">
             <div class="benefit-card__icon--figma">
-              <!-- Magnifying glass SVG -->
               <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><circle cx="22" cy="22" r="12" stroke="#8c8c8c" stroke-width="3"/><line x1="34.071" y1="34.485" x2="28.485" y2="28.899" stroke="#8c8c8c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </div>
             <div class="benefit-card__text--figma">Search for homes with ease</div>
           </div>
           <div class="benefit-card--figma">
             <div class="benefit-card__icon--figma">
-              <!-- Agent SVG -->
               <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="16" r="8" fill="#bdbdbd"/><rect x="10" y="30" width="28" height="12" rx="6" fill="#bdbdbd"/></svg>
             </div>
             <div class="benefit-card__text--figma">Get the best agents to aid you.</div>
           </div>
           <div class="benefit-card--figma">
             <div class="benefit-card__icon--figma">
-              <!-- Bell SVG -->
               <svg width="48" height="48" viewBox="0 0 48 48" fill="none"><path d="M24 40c2.21 0 4-1.79 4-4h-8c0 2.21 1.79 4 4 4zm12-8V22c0-6.08-4.93-11-11-11S14 15.92 14 22v10l-4 4v2h32v-2l-4-4z" fill="#bdbdbd"/></svg>
             </div>
             <div class="benefit-card__text--figma">Get alerts on new pre-construction projects</div>
@@ -536,22 +469,10 @@ const userRole = computed(() => authStore.userRole || 'all');
 const searchQuery = ref('');
 
 const faqList = [
-  {
-    q: 'What services do we offer?',
-    a: 'We offer property buying, selling, and rental services, as well as expert agent guidance and market insights.'
-  },
-  {
-    q: 'How can I register as an agent?',
-    a: 'Click the Sign Up button, select Agent, and fill out your details. Our team will review and approve your registration.'
-  },
-  {
-    q: 'How can I register as a client?',
-    a: 'Click the Sign Up button, choose Client, and complete the registration form to get started.'
-  },
-  {
-    q: 'What are the features that could help speed track my search?',
-    a: 'Use our advanced filters, instant alerts, and agent recommendations to quickly find the best properties for you.'
-  }
+  { q: 'What services do we offer?', a: 'We offer property buying, selling, and rental services, as well as expert agent guidance and market insights.' },
+  { q: 'How can I register as an agent?', a: 'Click the Sign Up button, select Agent, and fill out your details. Our team will review and approve your registration.' },
+  { q: 'How can I register as a client?', a: 'Click the Sign Up button, choose Client, and complete the registration form to get started.' },
+  { q: 'What are the features that could help speed track my search?', a: 'Use our advanced filters, instant alerts, and agent recommendations to quickly find the best properties for you.' }
 ];
 
 const isVisible = ref(false);
@@ -570,10 +491,10 @@ const propertyStore = usePropertyStore();
 const favouritesStore = useFavouritesStore();
 const isMobile = ref(false);
 const showDropdown = ref(false);
+let stickyObserver = null;
 
 const featuredProperties = computed(() => {
-  const properties = propertyStore.properties || [];
-  return properties.map(property => ({
+  return propertyStore.properties.map(property => ({
     ...property,
     currentImageIndex: 0,
     images: property.images || []
@@ -581,7 +502,6 @@ const featuredProperties = computed(() => {
 });
 
 onMounted(async () => {
-  // Handle OAuth callback
   if (route.query.token) {
     authStore.setToken(route.query.token);
     try {
@@ -589,18 +509,14 @@ onMounted(async () => {
       if (userData) {
         authStore.setUser(userData);
         sessionStorage.setItem('user_data', JSON.stringify(userData));
-        if (userData.role) {
-          localStorage.setItem('userRole', userData.role);
-        }
+        if (userData.role) localStorage.setItem('userRole', userData.role);
         router.push(userData.role === 'agent' ? '/agent-dashboard' : '/client-dashboard');
       } else {
         const fetchedUser = await authStore.initialize();
         if (fetchedUser) {
           authStore.setUser(fetchedUser);
           router.push(fetchedUser.role === 'agent' ? '/agent-dashboard' : '/client-dashboard');
-        } else {
-          throw new Error('No user data returned');
-        }
+        } else throw new Error('No user data returned');
       }
     } catch (error) {
       console.error('Error initializing user:', error);
@@ -609,77 +525,55 @@ onMounted(async () => {
     }
   }
 
-  // Reset all reactive states
   openIdx.value = null;
   activeTab.value = 'Buy';
   showFixedNav.value = false;
   showMobileNav.value = false;
 
-  // Fetch properties
   try {
-    await propertyStore.fetchProperties();
-    await propertyStore.getTrebData();
+    console.log('Fetching local properties...');
+    await propertyStore.fetchProperties({ per_page: 4 });
+    console.log('Local properties fetched:', propertyStore.properties);
   } catch (error) {
-    console.error('Error fetching properties:', error);
+    console.error('Fetch error:', error.response?.data || error.message);
   }
 
-  // Intersection Observer for sticky nav
+  try {
+    console.log('Fetching TREB properties...');
+    await propertyStore.getTrebData();
+    console.log('TREB properties fetched:', propertyStore.trebData);
+  } catch (error) {
+    console.error('TREB fetch error:', error.response?.data || error.message);
+  }
+
   const heroSection = document.getElementById('hero-section');
-  let observer = null;
   if (heroSection) {
-    observer = new window.IntersectionObserver(
-      ([entry]) => {
-        showFixedNav.value = !entry.isIntersecting;
-      },
-      { threshold: 0, rootMargin: '-80px 0px 0px 0px' }
-    );
-    observer.observe(heroSection);
+    stickyObserver = new IntersectionObserver(([entry]) => {
+      showFixedNav.value = !entry.isIntersecting;
+    }, { threshold: 0, rootMargin: '-80px 0px 0px 0px' });
+    stickyObserver.observe(heroSection);
   }
 
-  // Force scroll to top
   window.scrollTo(0, 0);
-
-  // Ensure component is visible after mount
   isVisible.value = true;
-
-  // Add event listener to close mobile nav on escape key
   document.addEventListener('keydown', handleEscapeKey);
-
-  // Load agents from store
-  if (typeof agentStore.fetchAgents === 'function') {
-    await agentStore.fetchAgents();
-  }
+  if (typeof agentStore.fetchAgents === 'function') await agentStore.fetchAgents();
   allAgents.value = agentStore.getAllAgents ? agentStore.getAllAgents() : (agentStore.agents || []);
   pickVisibleAgents();
+  if ('requestIdleCallback' in window) requestIdleCallback(() => startCarousel());
+  else setTimeout(() => startCarousel(), 200);
 
-  // Start carousel
-  if ('requestIdleCallback' in window) {
-    requestIdleCallback(() => startCarousel());
-  } else {
-    setTimeout(() => startCarousel(), 200);
-  }
-
-  // Mobile detection
-  const checkMobile = () => {
-    isMobile.value = window.innerWidth <= 600;
-  };
+  const checkMobile = () => isMobile.value = window.innerWidth <= 600;
   checkMobile();
   window.addEventListener('resize', checkMobile);
-
-  // Close dropdown on outside click
   document.addEventListener('click', handleOutsideClick);
-
-  // Initialize favorites
-  try {
-    await favouritesStore.initFavourites();
-  } catch (error) {
+  try { await favouritesStore.initFavourites(); } catch (error) {
     console.error('Error initializing favorites:', error);
   }
 });
 
 onBeforeUnmount(() => {
-  // Clean up component state and event listeners
-  if (observer) observer.disconnect();
+  if (stickyObserver) stickyObserver.disconnect();
   isVisible.value = false;
   openIdx.value = null;
   showFixedNav.value = false;
@@ -691,170 +585,42 @@ onBeforeUnmount(() => {
 });
 
 onActivated(async () => {
-  // Refetch agents and properties when activated
-  if (typeof agentStore.fetchAgents === 'function') {
-    await agentStore.fetchAgents();
-  }
+  if (typeof agentStore.fetchAgents === 'function') await agentStore.fetchAgents();
   allAgents.value = agentStore.getAllAgents ? agentStore.getAllAgents() : (agentStore.agents || []);
   pickVisibleAgents();
   if (typeof propertyStore.fetchProperties === 'function') {
-    await propertyStore.fetchProperties();
+    console.log('Refetching local properties on activation...');
+    await propertyStore.fetchProperties({ per_page: 4 });
+    console.log('Refetched local properties:', propertyStore.properties);
+  }
+  if (typeof propertyStore.getTrebData === 'function') {
+    console.log('Refetching TREB properties on activation...');
+    await propertyStore.getTrebData();
+    console.log('Refetched TREB properties:', propertyStore.trebData);
   }
 });
 
-function handleEscapeKey(e) {
-  if (e.key === 'Escape') {
-    showMobileNav.value = false;
-  }
-}
-
-function handleOutsideClick(e) {
-  if (!e.target.closest('.pill-btn--dropdown')) {
-    showDropdown.value = false;
-  }
-}
-
-function shuffleAgents(agents) {
-  const arr = agents.slice();
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
-
-function pickVisibleAgents() {
-  if (!allAgents.value.length) return;
-  const shuffled = shuffleAgents(allAgents.value);
-  visibleAgents.value = shuffled.slice(0, carouselSize.value);
-}
-
-function startCarousel() {
-  carouselInterval = setInterval(() => {
-    pickVisibleAgents();
-  }, 5000);
-}
-
-function stopCarousel() {
-  if (carouselInterval) clearInterval(carouselInterval);
-}
-
-function toggleFaq(idx) {
-  openIdx.value = openIdx.value === idx ? null : idx;
-}
-
-function useRevealOnScroll(selector = '.reveal') {
-  let observer = null;
-  onMounted(() => {
-    observer = new window.IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('revealed');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.12 });
-    document.querySelectorAll(selector).forEach(el => {
-      observer.observe(el);
-    });
-  });
-  onBeforeUnmount(() => {
-    if (observer) observer.disconnect();
-  });
-}
-
+function handleEscapeKey(e) { if (e.key === 'Escape') showMobileNav.value = false; }
+function handleOutsideClick(e) { if (!e.target.closest('.pill-btn--dropdown')) showDropdown.value = false; }
+function shuffleAgents(agents) { const arr = agents.slice(); for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } return arr; }
+function pickVisibleAgents() { if (!allAgents.value.length) return; visibleAgents.value = shuffleAgents(allAgents.value).slice(0, carouselSize.value); }
+function startCarousel() { carouselInterval = setInterval(() => pickVisibleAgents(), 5000); }
+function stopCarousel() { if (carouselInterval) clearInterval(carouselInterval); }
+function toggleFaq(idx) { openIdx.value = openIdx.value === idx ? null : idx; }
+function useRevealOnScroll(selector = '.reveal') { let observer = null; onMounted(() => { observer = new IntersectionObserver((entries) => entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('revealed'); observer.unobserve(entry.target); } }), { threshold: 0.12 }); document.querySelectorAll(selector).forEach(el => observer.observe(el)); }); onBeforeUnmount(() => { if (observer) observer.disconnect(); }); }
 useRevealOnScroll('.reveal');
-
-function formatPrice(price) {
-  return new Intl.NumberFormat('en-US').format(price);
-}
-
-function formatArea(area) {
-  if (!area) return null;
-  return new Intl.NumberFormat('en-US', {
-    style: 'decimal',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(area);
-}
-
-function handleImageError(event) {
-  event.target.src = 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1743087291/Designer_8_1_fjvyi0.png';
-}
-
-function handleSearch() {
-  router.push({
-    path: '/search',
-    query: { q: searchQuery.value }
-  });
-}
-
-async function retryTrebFetch() {
-  try {
-    await propertyStore.getTrebData();
-  } catch (error) {
-    console.error('Retry failed:', error);
-  }
-}
-
-async function retryLocalFetch() {
-  try {
-    await propertyStore.fetchProperties();
-  } catch (error) {
-    console.error('Retry failed:', error);
-  }
-}
-
-async function toggleLocalFavorite(propertyId) {
-  if (!authStore.isAuthenticated()) {
-    router.push('/login');
-    return;
-  }
-  try {
-    const property = propertyStore.properties.find(p => p.id === propertyId);
-    if (property) {
-      await favouritesStore.toggleFavouriteProperty(property);
-    }
-  } catch (error) {
-    console.error('Error toggling local favorite:', error);
-  }
-}
-
-async function toggleTrebFavorite(property) {
-  if (!authStore.isAuthenticated()) {
-    router.push('/login');
-    return;
-  }
-  try {
-    await favouritesStore.toggleFavouriteTrebProperty(property);
-  } catch (error) {
-    console.error('Error toggling TREB favorite:', error);
-  }
-}
-
-async function togglePropertyTypeFavorite(propertyType) {
-  if (!authStore.isAuthenticated()) {
-    router.push('/login');
-    return;
-  }
-  try {
-    await favouritesStore.toggleFavouritePropertyType(propertyType);
-  } catch (error) {
-    console.error('Error toggling property type favorite:', error);
-  }
-}
-
-function isLocalFavorite(propertyId) {
-  return favouritesStore.isPropertyFavourite(propertyId);
-}
-
-function isTrebFavorite(listingKey) {
-  return favouritesStore.isTrebPropertyFavourite(listingKey);
-}
-
-function isPropertyTypeFavorite(propertyType) {
-  return favouritesStore.isPropertyTypeFavourite(propertyType);
-}
+function formatPrice(price) { return new Intl.NumberFormat('en-US').format(price); }
+function formatArea(area) { return area ? new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(area) : null; }
+function handleImageError(event) { event.target.src = 'https://res.cloudinary.com/dnuhjsckk/image/upload/v1743087291/Designer_8_1_fjvyi0.png'; }
+function handleSearch() { router.push({ path: '/search', query: { q: searchQuery.value } }); }
+async function retryTrebFetch() { try { await propertyStore.getTrebData({ per_page: 4, fields: ['ListingKey', 'UnparsedAddress', 'ListPrice', 'StandardStatus', 'PropertyType', 'City', 'StateOrProvince', 'BedroomsTotal', 'BathroomsFull', 'LivingArea', 'image'] }); console.log('TREB retry result:', propertyStore.trebData); } catch (error) { console.error('Retry failed:', error); } }
+async function retryLocalFetch() { try { await propertyStore.fetchProperties({ per_page: 4 }); console.log('Local retry result:', propertyStore.properties); } catch (error) { console.error('Retry failed:', error); } }
+async function toggleLocalFavorite(propertyId) { if (!authStore.isAuthenticated()) { router.push('/login'); return; } try { const property = propertyStore.properties.find(p => p.id === propertyId); if (property) await favouritesStore.toggleFavouriteProperty(property); } catch (error) { console.error('Error toggling local favorite:', error); } }
+async function toggleTrebFavorite(property) { if (!authStore.isAuthenticated()) { router.push('/login'); return; } try { await favouritesStore.toggleFavouriteTrebProperty(property); } catch (error) { console.error('Error toggling TREB favorite:', error); } }
+async function togglePropertyTypeFavorite(propertyType) { if (!authStore.isAuthenticated()) { router.push('/login'); return; } try { await favouritesStore.toggleFavouritePropertyType(propertyType); } catch (error) { console.error('Error toggling property type favorite:', error); } }
+function isLocalFavorite(propertyId) { return favouritesStore.isPropertyFavourite(propertyId); }
+function isTrebFavorite(listingKey) { return favouritesStore.isTrebPropertyFavourite(listingKey); }
+function isPropertyTypeFavorite(propertyType) { return favouritesStore.isPropertyTypeFavourite(propertyType); }
 </script>
 
 <style scoped>
@@ -1080,6 +846,7 @@ function isPropertyTypeFavorite(propertyType) {
   height: 48px;
   display: flex;
   align-items: center;
+  padding-right: 16px;
 }
 
 .search-btn {
@@ -1098,6 +865,15 @@ function isPropertyTypeFavorite(propertyType) {
   flex-shrink: 0;
   align-self: stretch;
   margin-left: auto;
+}
+
+.search-btn--floating {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 44px;
+  min-width: 120px;
 }
 
 .search-input {

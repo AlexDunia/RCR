@@ -2,16 +2,19 @@ import axiosInstance from '../api/axios';
 import { useAuthStore } from '../stores/authStore';
 
 export const propertyService = {
-  async getProperties(filters = {}) {
+  async getProperties(filters = {}, page = 1) {
     try {
-      console.log('Fetching properties with filters:', filters);
+      const cleanFilters = Object.fromEntries(
+        Object.entries(filters).filter(([, value]) => value !== null && value !== '')
+      );
+      console.log('Fetching properties with filters:', { ...cleanFilters, page });
       const response = await axiosInstance.get('/api/properties', {
-        params: filters,
+        params: { ...cleanFilters, page, per_page: 8 }, // Changed from 4 to 8
       });
       console.log('Properties response:', response.data);
       return response.data;
     } catch (error) {
-      console.error('Error fetching properties:', error);
+      console.error('Error fetching properties:', error.response?.data || error.message);
       throw error;
     }
   },
@@ -32,8 +35,8 @@ export const propertyService = {
     const authStore = useAuthStore();
     const payload = {
       property_type: propertyType,
-      property_id: String(propertyId), // Force string
-      details: propertyData || null, // Ensure details is included
+      property_id: String(propertyId),
+      details: propertyData || null,
     };
     try {
       console.log('Toggling favorite:', { propertyType, propertyId, payload });

@@ -45,6 +45,19 @@ const routes = [
       allowedRoles: ['all', 'admin', 'agent', 'client']
     }
   },
+    {
+    path: '/docs',
+    name: 'GoogleDocs',
+    component: () => import('@/views/auth/Googledocs.vue'),
+    meta: {
+      hideHeader: true,
+      hideSidebar: true,
+      layout: 'public',
+      title: 'Buy Properties',
+      publicAccess: true,
+      allowedRoles: ['all', 'admin', 'agent', 'client']
+    }
+  },
   // All Agents page - accessible to all
   {
     path: '/allagents',
@@ -53,6 +66,25 @@ const routes = [
     meta: {
       hideHeader: true,
       hideSidebar: true,
+      publicAccess: true,
+      layout: 'public',
+      title: 'Find Your Perfect Agent',
+      allowedRoles: ['all', 'admin', 'agent', 'client']
+    },
+    beforeEnter: (to, from, next) => {
+      // Allow access regardless of role
+      next();
+    }
+  },
+
+    {
+    path: '/ca',
+    name: 'CreateAgent',
+    component: () => import('@/views/CreateAgent.vue'),
+    meta: {
+      hideHeader: true,
+      hideSidebar: true,
+      publicAccess: true,
       layout: 'public',
       title: 'Find Your Perfect Agent',
       allowedRoles: ['all', 'admin', 'agent', 'client']
